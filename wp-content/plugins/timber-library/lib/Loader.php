@@ -54,6 +54,10 @@ class Loader {
 			}
 		}
 
+		if ( $expires === 0 ) {
+			$expires = false;
+		}
+
 		$key = null;
 		$output = false;
 		if ( false !== $expires ) {
@@ -71,7 +75,8 @@ class Loader {
 			}
 			$data = apply_filters('timber_loader_render_data', $data);
 			$data = apply_filters('timber/loader/render_data', $data, $file);
-			$output = $twig->render($file, $data);
+			$template = $twig->load($file);
+			$output = $template->render($data);
 		}
 
 		if ( false !== $output && false !== $expires && null !== $key ) {
@@ -152,7 +157,7 @@ class Loader {
 	 */
 	public function get_twig() {
 		$loader = $this->get_loader();
-		$params = array('debug' => WP_DEBUG, 'autoescape' => false);
+		$params = array('debug' => WP_DEBUG,'autoescape' => false);
 		if ( isset(Timber::$autoescape) ) {
 			$params['autoescape'] = Timber::$autoescape === true ? 'html' : Timber::$autoescape;
 		}
@@ -169,6 +174,10 @@ class Loader {
 		$twig = new \Twig\Environment($loader, $params);
 		if ( WP_DEBUG ) {
 			$twig->addExtension(new \Twig\Extension\DebugExtension());
+		} else {
+			$twig->addFunction(new Twig_Function('dump', function() {
+				return null;
+			}));
 		}
 		$twig->addExtension($this->_get_cache_extension());
 
@@ -177,6 +186,14 @@ class Loader {
 		$twig = apply_filters('timber/twig/functions', $twig);
 		$twig = apply_filters('timber/twig/escapers', $twig);
 		$twig = apply_filters('timber/loader/twig', $twig);
+
+		$twig = apply_filters('timber/twig', $twig);
+
+		/**
+		 * get_twig is deprecated, use timber/twig
+		 */
+		$twig = apply_filters('get_twig', $twig);
+
 		return $twig;
 	}
 
@@ -197,7 +214,10 @@ class Loader {
 
 	protected static function clear_cache_timber_database() {
 		global $wpdb;
-		$query = $wpdb->prepare("DELETE FROM $wpdb->options WHERE option_name LIKE '%s'", '_transient_timberloader_%');
+		$query = $wpdb->prepare(
+			"DELETE FROM $wpdb->options WHERE option_name LIKE '%s'",
+			'_transient%timberloader_%'
+		);
 		return $wpdb->query($query);
 	}
 
@@ -229,6 +249,8 @@ class Loader {
 	}
 
 	/**
+	 * Remove a directory and everything inside
+	 *
 	 * @param string|false $dirPath
 	 */
 	public static function rrmdir( $dirPath ) {

@@ -1,35 +1,45 @@
+/* global smush_vars */
+/* global _ */
+
 /**
  * Adds a Smush Now button and displays stats in Media Attachment Details Screen
  */
-(function ( $, _ ) {
+(function ($, _) {
 	'use strict';
 
 	// Local reference to the WordPress media namespace.
-	const smush_media  = wp.media,
-		sharedTemplate = "<label class='setting smush-stats' data-setting='description'><span class='name'><%= label %></span><span class='value'><%= value %></span></label>",
-		template       = _.template( sharedTemplate );
+	const smushMedia = wp.media,
+		sharedTemplate =
+			"<span class='setting smush-stats' data-setting='smush'>" +
+			"<span class='name'><%= label %></span>" +
+			"<span class='value'><%= value %></span>" +
+			'</span>',
+		template = _.template(sharedTemplate);
 
 	/**
 	 * Create the template.
 	 *
 	 * @param {string} smushHTML
-	 * @returns {Object}
+	 * @return {Object} Template object
 	 */
-	const prepareTemplate = function ( smushHTML ) {
+	const prepareTemplate = function (smushHTML) {
 		/**
-		 * @var {array}  smush_vars.strings  Localization strings.
-		 * @var {object} smush_vars          Object from wp_localize_script()
+		 * @param {Array}  smush_vars.strings  Localization strings.
+		 * @param {Object} smush_vars          Object from wp_localize_script()
 		 */
-		return template( {
-			label: smush_vars.strings['stats_label'],
-			value: smushHTML
-		} );
+		return template({
+			label: smush_vars.strings.stats_label,
+			value: smushHTML,
+		});
 	};
 
-	if ( 'undefined' !== typeof smush_media.view &&
-		'undefined' !== typeof smush_media.view.Attachment.Details.TwoColumn ) {
+	if (
+		'undefined' !== typeof smushMedia.view &&
+		'undefined' !== typeof smushMedia.view.Attachment.Details.TwoColumn
+	) {
 		// Local instance of the Attachment Details TwoColumn used in the edit attachment modal view
-		let smushMediaTwoColumn = smush_media.view.Attachment.Details.TwoColumn;
+		const smushMediaTwoColumn =
+			smushMedia.view.Attachment.Details.TwoColumn;
 
 		/**
 		 * Add Smush details to attachment.
@@ -39,53 +49,61 @@
 		 *
 		 * @see wp-includes/js/media-grid.js
 		 */
-		smush_media.view.Attachment.Details.TwoColumn = smushMediaTwoColumn.extend( {
-			initialize: function () {
-				this.listenTo( this.model, 'change:smush', this.render );
-			},
+		smushMedia.view.Attachment.Details.TwoColumn = smushMediaTwoColumn.extend(
+			{
+				initialize() {
+					smushMediaTwoColumn.prototype.initialize.apply(this, arguments);
+					this.listenTo(this.model, 'change:smush', this.render);
+				},
 
-			render: function () {
-				// Ensure that the main attachment fields are rendered.
-				smush_media.view.Attachment.prototype.render.apply( this, arguments );
+				render() {
+					// Ensure that the main attachment fields are rendered.
+					smushMedia.view.Attachment.prototype.render.apply(
+						this,
+						arguments
+					);
 
-				const smushHTML = this.model.get( 'smush' );
-				if ( typeof smushHTML === 'undefined' ) {
+					const smushHTML = this.model.get('smush');
+					if (typeof smushHTML === 'undefined') {
+						return this;
+					}
+
+					this.model.fetch();
+
+					/**
+					 * Detach the views, append our custom fields, make sure that our data is fully updated
+					 * and re-render the updated view.
+					 */
+					this.views.detach();
+					this.$el
+						.find('.settings')
+						.append(prepareTemplate(smushHTML));
+					this.views.render();
+
 					return this;
-				}
-
-				this.model.fetch();
-
-				/**
-				 * Detach the views, append our custom fields, make sure that our data is fully updated
-				 * and re-render the updated view.
-				 */
-				this.views.detach();
-				this.$el.find( '.settings' ).append( prepareTemplate( smushHTML ) );
-				this.views.render();
-
-				return this;
+				},
 			}
-		} );
+		);
 	}
 
 	// Local instance of the Attachment Details TwoColumn used in the edit attachment modal view
-	let smushAttachmentDetails = smush_media.view.Attachment.Details;
+	const smushAttachmentDetails = smushMedia.view.Attachment.Details;
 
 	/**
 	 * Add Smush details to attachment.
 	 */
-	smush_media.view.Attachment.Details = smushAttachmentDetails.extend( {
-		initialize: function () {
-			smushAttachmentDetails.prototype.initialize.apply( this, arguments );
-			this.listenTo( this.model, 'change:smush', this.render );
+	smushMedia.view.Attachment.Details = smushAttachmentDetails.extend({
+		initialize() {
+			smushAttachmentDetails.prototype.initialize.apply(this, arguments);
+			this.listenTo(this.model, 'change:smush', this.render);
 		},
 
-		render: function () {
+		render() {
 			// Ensure that the main attachment fields are rendered.
-			smush_media.view.Attachment.prototype.render.apply( this, arguments );
+			smushMedia.view.Attachment.prototype.render.apply(this, arguments);
 
-			const smushHTML = this.model.get( 'smush' );
-			if ( typeof smushHTML === 'undefined' ) {
+			const smushHTML = this.model.get('smush');
+			if (typeof smushHTML === 'undefined') {
 				return this;
 			}
 
@@ -96,11 +114,11 @@
 			 * and re-render the updated view.
 			 */
 			this.views.detach();
-			this.$el.append( prepareTemplate( smushHTML ) );
+			this.$el.append(prepareTemplate(smushHTML));
 
 			return this;
-		}
-	} );
+		},
+	});
 
 	/**
 	 * Create a new MediaLibraryTaxonomyFilter we later will instantiate
@@ -110,21 +128,27 @@
 	const MediaLibraryTaxonomyFilter = wp.media.view.AttachmentFilters.extend({
 		id: 'media-attachment-smush-filter',
 
-		createFilters: function() {
+		createFilters() {
 			this.filters = {
 				all: {
-					text: smush_vars.strings['filter_all'],
+					text: smush_vars.strings.filter_all,
 					props: { stats: 'all' },
-					priority: 10
+					priority: 10,
+				},
+
+				unsmushed: {
+					text: smush_vars.strings.filter_not_processed,
+					props: { stats: 'unsmushed' },
+					priority: 20,
 				},
 
 				excluded: {
-					text: smush_vars.strings['filter_excl'],
-					props: { stats: 'null' },
-					priority: 20
-				}
+					text: smush_vars.strings.filter_excl,
+					props: { stats: 'excluded' },
+					priority: 30,
+				},
 			};
-		}
+		},
 	});
 
 	/**
@@ -132,17 +156,19 @@
 	 *
 	 * @since 3.0
 	 */
-	let AttachmentsBrowser = wp.media.view.AttachmentsBrowser;
+	const AttachmentsBrowser = wp.media.view.AttachmentsBrowser;
 	wp.media.view.AttachmentsBrowser = wp.media.view.AttachmentsBrowser.extend({
-		createToolbar: function() {
+		createToolbar() {
 			// Make sure to load the original toolbar
-			AttachmentsBrowser.prototype.createToolbar.call( this );
-			this.toolbar.set( 'MediaLibraryTaxonomyFilter', new MediaLibraryTaxonomyFilter({
-				controller: this.controller,
-				model:      this.collection.props,
-				priority: -75
-			}).render() );
-		}
+			AttachmentsBrowser.prototype.createToolbar.call(this);
+			this.toolbar.set(
+				'MediaLibraryTaxonomyFilter',
+				new MediaLibraryTaxonomyFilter({
+					controller: this.controller,
+					model: this.collection.props,
+					priority: -75,
+				}).render()
+			);
+		},
 	});
-
-})( jQuery, _ );
+})(jQuery, _);

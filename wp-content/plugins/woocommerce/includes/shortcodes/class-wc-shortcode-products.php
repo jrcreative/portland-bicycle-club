@@ -2,7 +2,7 @@
 /**
  * Products shortcode
  *
- * @package  WooCommerce/Shortcodes
+ * @package  WooCommerce\Shortcodes
  * @version  3.2.4
  */
 
@@ -115,8 +115,8 @@ class WC_Shortcode_Products {
 				'limit'          => '-1',      // Results limit.
 				'columns'        => '',        // Number of columns.
 				'rows'           => '',        // Number of rows. If defined, limit will be ignored.
-				'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
-				'order'          => 'ASC',     // ASC or DESC.
+				'orderby'        => '',        // menu_order, title, date, rand, price, popularity, rating, or id.
+				'order'          => '',        // ASC or DESC.
 				'ids'            => '',        // Comma separated IDs.
 				'skus'           => '',        // Comma separated SKUs.
 				'category'       => '',        // Comma separated category slugs or ids.
@@ -125,6 +125,7 @@ class WC_Shortcode_Products {
 				'terms'          => '',        // Comma separated term slugs or ids.
 				'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
 				'tag'            => '',        // Comma separated tag slugs.
+				'tag_operator'   => 'IN',      // Operator to compare tags. Possible values are 'IN', 'NOT IN', 'AND'.
 				'visibility'     => 'visible', // Product visibility setting. Possible values are 'visible', 'catalog', 'search', 'hidden'.
 				'class'          => '',        // HTML class.
 				'page'           => 1,         // Page for pagination.
@@ -178,7 +179,7 @@ class WC_Shortcode_Products {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => false === wc_string_to_bool( $this->attributes['paginate'] ),
-			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 
 		$orderby_value         = explode( '-', $query_args['orderby'] );
@@ -188,7 +189,7 @@ class WC_Shortcode_Products {
 		$query_args['order']   = $order;
 
 		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
-			$this->attributes['page'] = absint( empty( $_GET['product-page'] ) ? 1 : $_GET['product-page'] ); // WPCS: input var ok, CSRF ok.
+			$this->attributes['page'] = absint( empty( $_GET['product-page'] ) ? 1 : $_GET['product-page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		if ( ! empty( $this->attributes['rows'] ) ) {
@@ -369,7 +370,7 @@ class WC_Shortcode_Products {
 				'taxonomy' => 'product_tag',
 				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['tag'] ) ),
 				'field'    => 'slug',
-				'operator' => 'IN',
+				'operator' => $this->attributes['tag_operator'],
 			);
 		}
 	}
@@ -506,7 +507,7 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Set product as visible when quering for hidden products.
+	 * Set product as visible when querying for hidden products.
 	 *
 	 * @since  3.2.0
 	 * @param  bool $visibility Product visibility.
@@ -520,7 +521,7 @@ class WC_Shortcode_Products {
 	 * Get wrapper classes.
 	 *
 	 * @since  3.2.0
-	 * @param  array $columns Number of columns.
+	 * @param  int $columns Number of columns.
 	 * @return array
 	 */
 	protected function get_wrapper_classes( $columns ) {
@@ -592,7 +593,14 @@ class WC_Shortcode_Products {
 		// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
 		WC()->query->remove_ordering_args();
 
-		return $results;
+		/**
+		 * Filter shortcode products query results.
+		 *
+		 * @since 4.0.0
+		 * @param stdClass $results Query results.
+		 * @param WC_Shortcode_Products $this WC_Shortcode_Products instance.
+		 */
+		return apply_filters( 'woocommerce_shortcode_products_query_results', $results, $this );
 	}
 
 	/**
@@ -642,7 +650,7 @@ class WC_Shortcode_Products {
 
 			if ( wc_get_loop_prop( 'total' ) ) {
 				foreach ( $products->ids as $product_id ) {
-					$GLOBALS['post'] = get_post( $product_id ); // WPCS: override ok.
+					$GLOBALS['post'] = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					setup_postdata( $GLOBALS['post'] );
 
 					// Set custom product visibility when quering hidden products.
@@ -656,7 +664,7 @@ class WC_Shortcode_Products {
 				}
 			}
 
-			$GLOBALS['post'] = $original_post; // WPCS: override ok.
+			$GLOBALS['post'] = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			woocommerce_product_loop_end();
 
 			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.

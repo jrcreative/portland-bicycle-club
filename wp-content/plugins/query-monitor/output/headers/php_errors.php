@@ -6,6 +6,13 @@
  */
 class QM_Output_Headers_PHP_Errors extends QM_Output_Headers {
 
+	/**
+	 * Collector instance.
+	 *
+	 * @var QM_Collector_PHP_Errors Collector.
+	 */
+	protected $collector;
+
 	public function get_output() {
 
 		$data    = $this->collector->get_data();
@@ -19,20 +26,28 @@ class QM_Output_Headers_PHP_Errors extends QM_Output_Headers {
 
 		foreach ( $data['errors'] as $type => $errors ) {
 
-			foreach ( $errors as $key => $error ) {
+			foreach ( $errors as $error_key => $error ) {
 
 				$count++;
 
 				# @TODO we should calculate the component during process() so we don't need to do it
 				# separately in each output.
-				$component    = $error['trace']->get_component();
+				if ( $error['trace'] ) {
+					$component = $error['trace']->get_component()->name;
+					$stack     = $error['trace']->get_stack();
+				} else {
+					$component = __( 'Unknown', 'query-monitor' );
+					$stack     = array();
+				}
+
 				$output_error = array(
+					'key'       => $error_key,
 					'type'      => $error['type'],
 					'message'   => $error['message'],
 					'file'      => QM_Util::standard_dir( $error['file'], '' ),
 					'line'      => $error['line'],
-					'stack'     => $error['trace']->get_stack(),
-					'component' => $component->name,
+					'stack'     => $stack,
+					'component' => $component,
 				);
 
 				$key             = sprintf( 'error-%d', $count );
@@ -42,12 +57,11 @@ class QM_Output_Headers_PHP_Errors extends QM_Output_Headers {
 		}
 
 		return array_merge(
-			 array(
-				 'error-count' => $count,
-			 ),
+			array(
+				'error-count' => $count,
+			),
 			$headers
-			);
-
+		);
 	}
 
 }

@@ -42,7 +42,32 @@ class GF_Field_Number extends GF_Field {
 	public function get_value_submission( $field_values, $get_from_post_global_var = true ) {
 
 		$value = $this->get_input_value_submission( 'input_' . $this->id, $this->inputName, $field_values, $get_from_post_global_var );
-		$value = trim( $value );
+
+		if ( is_array( $value ) ) {
+			$value = array_map( 'trim', $value );
+			foreach ( $value  as &$v ) {
+				$v = trim( $v );
+				$v = $this->clean_value( $v );
+			}
+		} else {
+			$value = trim( $value );
+			$value = $this->clean_value( $value );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Ensures the POST value is in the correct number format.
+	 *
+	 * @since 2.4
+	 *
+	 * @param $value
+	 *
+	 * @return bool|float|string
+	 */
+	public function clean_value( $value ) {
+
 		if ( $this->numberFormat == 'currency' ) {
 			$currency = new RGCurrency( GFCommon::get_currency() );
 			$value    = $currency->to_number( $value );
@@ -61,7 +86,8 @@ class GF_Field_Number extends GF_Field {
 		$value = GFCommon::maybe_add_leading_zero( $value );
 
 		// Raw value will be tested against the is_numeric() function to make sure it is in the right format.
-		$raw_value = GFCommon::maybe_add_leading_zero( rgpost( 'input_' . $this->id ) );
+		// If the POST value is an array then the field is inside a repeater so use $value.
+		$raw_value = isset( $_POST[ 'input_' . $this->id ] ) && ! is_array( $_POST[ 'input_' . $this->id ] ) ? GFCommon::maybe_add_leading_zero( rgpost( 'input_' . $this->id ) ) : $value;
 
 		$requires_valid_number = ! rgblank( $raw_value ) && ! $this->has_calculation();
 		$is_valid_number       = $this->validate_range( $value ) && GFCommon::is_numeric( $raw_value, $this->numberFormat );
@@ -121,11 +147,11 @@ class GF_Field_Number extends GF_Field {
 		$message = '';
 
 		if ( is_numeric( $numeric_min ) && is_numeric( $numeric_max ) ) {
-			$message = sprintf( esc_html__( 'Please enter a value between %s and %s.', 'gravityforms' ), "<strong>$min</strong>", "<strong>$max</strong>" );
+			$message = sprintf( esc_html__( 'Please enter a number from %s to %s.', 'gravityforms' ), "<strong>$min</strong>", "<strong>$max</strong>" );
 		} elseif ( is_numeric( $numeric_min ) ) {
-			$message = sprintf( esc_html__( 'Please enter a value greater than or equal to %s.', 'gravityforms' ), "<strong>$min</strong>" );
+			$message = sprintf( esc_html__( 'Please enter a number greater than or equal to %s.', 'gravityforms' ), "<strong>$min</strong>" );
 		} elseif ( is_numeric( $numeric_max ) ) {
-			$message = sprintf( esc_html__( 'Please enter a value less than or equal to %s.', 'gravityforms' ), "<strong>$max</strong>" );
+			$message = sprintf( esc_html__( 'Please enter a number less than or equal to %s.', 'gravityforms' ), "<strong>$max</strong>" );
 		} elseif ( $this->failed_validation ) {
 			$message = esc_html__( 'Please enter a valid number', 'gravityforms' );
 		}
@@ -145,6 +171,7 @@ class GF_Field_Number extends GF_Field {
 		$disabled_text = $is_form_editor ? "disabled='disabled'" : '';
 		$class_suffix  = $is_entry_detail ? '_admin' : '';
 		$class         = $size . $class_suffix;
+		$class         = esc_attr( $class );
 
 		$instruction = '';
 		$read_only   = '';
@@ -179,18 +206,17 @@ class GF_Field_Number extends GF_Field {
 		$min_attr = $is_html5 && is_numeric( $min ) ? "min='{$min}'" : '';
 		$max_attr = $is_html5 && is_numeric( $max ) ? "max='{$max}'" : '';
 
-		$logic_event = $this->get_conditional_logic_event( 'keyup' );
-
 		$include_thousands_sep = apply_filters( 'gform_include_thousands_sep_pre_format_number', $html_input_type == 'text', $this );
 		$value                 = GFCommon::format_number( $value, $this->numberFormat, rgar( $entry, 'currency' ), $include_thousands_sep );
 
 		$placeholder_attribute = $this->get_field_placeholder_attribute();
 		$required_attribute    = $this->isRequired ? 'aria-required="true"' : '';
 		$invalid_attribute     = $this->failed_validation ? 'aria-invalid="true"' : 'aria-invalid="false"';
+		$aria_describedby      = $this->get_aria_describedby();
 
 		$tabindex = $this->get_tabindex();
 
-		$input = sprintf( "<div class='ginput_container ginput_container_number'><input name='input_%d' id='%s' type='{$html_input_type}' {$step_attr} {$min_attr} {$max_attr} value='%s' class='%s' {$tabindex} {$logic_event} {$read_only} %s %s %s %s/>%s</div>", $id, $field_id, esc_attr( $value ), esc_attr( $class ), $disabled_text, $placeholder_attribute, $required_attribute, $invalid_attribute, $instruction );
+		$input = sprintf( "<div class='ginput_container ginput_container_number'><input name='input_%d' id='%s' type='{$html_input_type}' {$step_attr} {$min_attr} {$max_attr} value='%s' class='%s' {$tabindex} {$read_only} %s %s %s %s %s/>%s</div>", $id, $field_id, esc_attr( $value ), esc_attr( $class ), $disabled_text, $placeholder_attribute, $required_attribute, $invalid_attribute, $aria_describedby, $instruction );
 		return $input;
 	}
 
@@ -228,34 +254,44 @@ class GF_Field_Number extends GF_Field {
 	 * @return string The processed merge tag.
 	 */
 	public function get_value_merge_tag( $value, $input_id, $entry, $form, $modifier, $raw_value, $url_encode, $esc_html, $format, $nl2br ) {
+		$include_thousands_sep = ! in_array( 'value', $this->get_modifiers() );
+
 		/**
-		 * Filters is the thousands separator should be used when displaying the a number field result.
+		 * Filters if the thousands separator should be used when displaying the a number field result.
 		 *
-		 * @since Unknown
+		 * @since 1.9.5
 		 *
-		 * @param bool   $modifier != 'value' If the modifier passed in the merge tag is not 'value', false. Otherwise, true.
-		 * @param object GF_Field_Number      An instance of this class.
+		 * @param bool            $include_thousands_sep If the modifier passed in the merge tag is not 'value', false. Otherwise, true.
+		 * @param GF_Field_Number $this                  An instance of this class.
 		 */
-		$include_thousands_sep = apply_filters( 'gform_include_thousands_sep_pre_format_number', $modifier != 'value', $this );
-		$formatted_value       = GFCommon::format_number( $value, $this->numberFormat, rgar( $entry, 'currency' ), $include_thousands_sep );
+		$include_thousands_sep = apply_filters( 'gform_include_thousands_sep_pre_format_number', $include_thousands_sep, $this );
+
+		$formatted_value = GFCommon::format_number( $value, $this->numberFormat, rgar( $entry, 'currency' ), $include_thousands_sep );
 
 		return $url_encode ? urlencode( $formatted_value ) : $formatted_value;
 	}
 
 	public function get_value_save_entry( $value, $form, $input_name, $lead_id, $lead ) {
+		if ( $this->has_calculation() ) {
+			if ( empty( $lead ) ) {
+				$lead = GFFormsModel::get_lead( $lead_id );
+			}
 
-		$value = GFCommon::maybe_add_leading_zero( $value );
+			$value = GFCommon::calculate( $this, $form, $lead );
 
-		$lead  = empty( $lead ) ? RGFormsModel::get_lead( $lead_id ) : $lead;
-		$value = $this->has_calculation() ? GFCommon::round_number( GFCommon::calculate( $this, $form, $lead ), $this->calculationRounding ) : $this->clean_number( $value );
-		//return the value as a string when it is zero and a calc so that the "==" comparison done when checking if the field has changed isn't treated as false
-		if ( $this->has_calculation() && $value == 0 ) {
-			$value = '0';
+			if ( $this->numberFormat !== 'currency' ) {
+				$value = GFCommon::round_number( $value, $this->calculationRounding );
+			}
+
+			// Return the value as a string when it is zero and a calc so that the "==" comparison done when checking if the field has changed isn't treated as false.
+			if ( $value == 0 ) {
+				$value = '0';
+			}
+		} else {
+			$value = $this->clean_number( GFCommon::maybe_add_leading_zero( $value ) );
 		}
 
-		$value_safe = $this->sanitize_entry_value( $value, $form['id'] );
-
-		return $value_safe;
+		return $this->sanitize_entry_value( $value, $form['id'] );
 	}
 
 	public function sanitize_settings() {

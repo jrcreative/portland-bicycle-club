@@ -1,8 +1,6 @@
 /**
-* This file is part of the TinyMCE Advanced WordPress plugin and is released under the same license.
- * For more information please see tinymce-advanced.php.
- *
- * Copyright (c) 2007-2019 Andrew Ozz. All rights reserved.
+ * Styles for the settings screen.
+ * @package advanced-editor-tools
  */
 
 body.settings_page_tinymce-advanced {
@@ -10,7 +8,7 @@ body.settings_page_tinymce-advanced {
 	color: #000;
 }
 
-.tinymce-advanced h4 {
+.advanced-editor-tools h4 {
 	font-size: 1.1em;
 }
 
@@ -54,12 +52,12 @@ body.settings_page_tinymce-advanced {
 	display: none;
 }
 
-.wrap.tinymce-advanced {
+.wrap.advanced-editor-tools {
 	max-width: 760px;
 	margin: 16px 24px 0 16px;
 }
 
-.rtl .wrap.tinymce-advanced {
+.rtl .wrap.advanced-editor-tools {
 	margin: 16px 16px 0 24px;
 }
 
@@ -154,7 +152,7 @@ span.tma-down-addow::after {
 	border-right-color: transparent;
 	border-top: none;
 	margin-left: -10px;
-	
+
 	left: 235px;
 }
 
@@ -167,11 +165,10 @@ span.tma-down-addow::after {
 .tma-block-dropdown-toolbar-inner-wrap {
 	height: 100%;
 	width: 100%;
-	padding: 9px;
 }
 
 ul.toolbar-block-dropdown {
-	padding: 0;
+	padding: 7px 0;
 	margin: 0;
 	height: 100%;
 	width: 100%;
@@ -180,10 +177,18 @@ ul.toolbar-block-dropdown {
 
 ul.toolbar-block-dropdown > li {
 	display: block;
-	margin: 0;
+	margin: 0 0 4px;
 	width: auto;
 	height: 40px;
 	cursor: move;
+	outline: none;
+}
+
+ul.toolbar-block-dropdown > li:hover {
+	color: #191e23;
+	border: none;
+	box-shadow: none;
+	background: #f3f4f5;
 }
 
 ul.toolbar-block-dropdown .tma-components-icon-button {
@@ -265,10 +270,6 @@ ul.toolbar-block-dropdown span {
 
 .toolbar-block-dropdown .tma-components-icon-button:hover > span {
 	box-shadow: none;
-}
-
-.toolbar-block-dropdown .tma-components-icon-button:hover {
-	box-shadow: inset 0 0 0 1px #e2e4e7, inset 0 0 0 2px #fff, 0 1px 1px rgba(25, 30, 35, 0.2);
 }
 
 .toolbar-side-wrap,
@@ -380,11 +381,11 @@ form#tadvadmin {
 	font-weight: 600;
 }
 
-.tinymce-advanced label {
+.advanced-editor-tools label {
 	vertical-align: baseline;
 }
 
-.tinymce-advanced input[type="checkbox"] {
+.advanced-editor-tools input[type="checkbox"] {
 	vertical-align: text-bottom;
 }
 
@@ -461,7 +462,7 @@ ul.container,
 	height: 20px;
 	line-height: 20px;
 	text-align: center;
-	vertical-align: text-top;
+	vertical-align: middle;
 	margin: 0;
 	padding: 0;
 	color: #555;
@@ -512,11 +513,26 @@ ul.container,
 
 .tadv-mce-menu.mce-menubar .mce-menubtn:hover {
 	background: transparent;
+	border-color: transparent;
+}
+
+/* Menubar fix... */
+.mce-menubar .mce-menubtn button span {
+	font-size: 13px;
+}
+
+.tadv-mce-menu.mce-menubar .mce-menubtn:hover button span {
+	color: #000;
 }
 
 .tadv-mce-menu .mce-btn .mce-caret {
-	margin-top: 9px;
 	margin-left: 1px;
+	margin-top: 6px;
+	border-top-color: #555;
+}
+
+#tadvadmin .mce-menubar .mce-menubtn:hover .mce-caret {
+	border-top-color: #000;
 }
 
 .tadv-mce-menu * {
@@ -582,7 +598,7 @@ ul.container,
 }
 
 .tadvdropzone.mce-toolbar .mce-btn .the-button {
-	padding: 0 3px;
+	padding: 2px 3px 0;
 }
 
 .tadvdropzone .tadvmodule .tadvitem:hover {
@@ -708,7 +724,7 @@ div.tadv-error {
 }
 
 .tadv-block-editor .mce-menubtn {
-	margin: 6px 0;
+	margin: 7px 0 6px;
 }
 
 .tadv-block-editor.tadvdropzone {
@@ -769,7 +785,6 @@ div.tadv-error {
 	vertical-align: middle;
 }
 
-
 /* Block toolbar */
 .tma-block-toolbar-wrap.editor-block-toolbar {
 	white-space: nowrap;
@@ -778,10 +793,10 @@ div.tadv-error {
 	font-size: 16px;
 	line-height: 1.8;
 	color: #191e23;
-	
+
 	display: flex;
 	flex-grow: 1;
-	
+
 	width: auto;
 	overflow: inherit;
 	border-right: none;
@@ -796,7 +811,7 @@ div.tadv-error {
 	border-top: 1px solid #b5bcc2;
 	border-bottom: 1px solid #b5bcc2;
 	border-right: 1px solid #b5bcc2;
-	
+
 	margin: 0;
 	background-color: #fff;
 	display: flex;
@@ -868,7 +883,7 @@ div.tadv-error {
 	border: 1px solid transparent;
 	display: flex;
 	flex-direction: row;
-	
+
 	/* Always hover... */
 	color: #555d66;
 	box-shadow: inset 0 0 0 1px #555d66, inset 0 0 0 2px #fff;
@@ -974,4 +989,17 @@ div.tadv-error {
 
 .tadvmodule .the-button {
 	margin: 0;
+}
+
+/* Fixes for inadequate css changes in 5.3 :( */
+#tadvadmin .button,
+#tadvadmin .button-primary {
+	font-size: 14px;
+	line-height: 1.7;
+	padding: 2px 10px 3px;
+}
+
+span.small-info {
+	font-weight: 400;
+	font-size: 13px;
 }

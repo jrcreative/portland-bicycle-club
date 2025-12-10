@@ -4,7 +4,7 @@
  *
  * Standardises certain post data on save.
  *
- * @package WooCommerce/Classes/Data
+ * @package WooCommerce\Classes\Data
  * @version 2.2.0
  */
 
@@ -30,6 +30,7 @@ class WC_Post_Data {
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 		add_action( 'set_object_terms', array( __CLASS__, 'delete_product_query_transients' ) );
+		add_action( 'deleted_term_relationships', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_type_changed', array( __CLASS__, 'product_type_changed' ), 10, 3 );
@@ -129,7 +130,7 @@ class WC_Post_Data {
 		if ( 'variable' === $from && 'variable' !== $to ) {
 			// If the product is no longer variable, we should ensure all variations are removed.
 			$data_store = WC_Data_Store::load( 'product-variable' );
-			$data_store->delete_variations( $product->get_id() );
+			$data_store->delete_variations( $product->get_id(), true );
 		}
 	}
 
@@ -254,6 +255,9 @@ class WC_Post_Data {
 			}
 		} elseif ( 'product' === $data['post_type'] && 'auto-draft' === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
+		} elseif ( 'shop_coupon' === $data['post_type'] ) {
+			// Coupons should never allow unfiltered HTML.
+			$data['post_title'] = wp_filter_kses( $data['post_title'] );
 		}
 
 		return $data;
@@ -402,8 +406,9 @@ class WC_Post_Data {
 					$customer->save();
 				}
 
-				// Delete order count meta.
+				// Delete order count and last order meta.
 				delete_user_meta( $customer_id, '_order_count' );
+				delete_user_meta( $customer_id, '_last_order' );
 			}
 
 			// Clean up items.
@@ -461,7 +466,7 @@ class WC_Post_Data {
 	 * @param  string $meta_value Meta value.
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
-		WC_Cache_Helper::incr_cache_prefix( 'object_' . $object_id );
+		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );
 	}
 
 	/**

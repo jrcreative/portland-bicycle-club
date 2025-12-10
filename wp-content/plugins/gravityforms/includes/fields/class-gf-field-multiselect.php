@@ -66,6 +66,17 @@ class GF_Field_MultiSelect extends GF_Field {
 	}
 
 	/**
+	 * Whether this field expects an array during submission.
+	 *
+	 * @since 2.4
+	 *
+	 * @return bool
+	 */
+	public function is_value_submission_array() {
+		return true;
+	}
+
+	/**
 	 * Returns the field inner markup.
 	 *
 	 * @since  Unknown
@@ -90,11 +101,11 @@ class GF_Field_MultiSelect extends GF_Field {
 		$id       = $this->id;
 		$field_id = $is_entry_detail || $is_form_editor || $form_id == 0 ? "input_$id" : 'input_' . $form_id . "_$id";
 
-		$logic_event   = $this->get_conditional_logic_event( 'keyup' );
 		$size          = $this->size;
 		$class_suffix  = $is_entry_detail ? '_admin' : '';
 		$class         = $size . $class_suffix;
-		$css_class     = trim( esc_attr( $class ) . ' gfield_select' );
+		$class         = esc_attr( $class );
+		$css_class     = trim( $class . ' gfield_select' );
 		$tabindex      = $this->get_tabindex();
 		$disabled_text = $is_form_editor ? 'disabled="disabled"' : '';
 
@@ -119,8 +130,9 @@ class GF_Field_MultiSelect extends GF_Field {
 		if ( empty( $size ) ) {
 			$size = 7;
 		}
+		$size = esc_attr( $size );
 
-		return sprintf( "<div class='ginput_container ginput_container_multiselect'><select multiple='multiple' {$placeholder} size='{$size}' name='input_%d[]' id='%s' {$logic_event} class='%s' $tabindex %s>%s</select></div>", $id, esc_attr( $field_id ), $css_class, $disabled_text, $this->get_choices( $value ) );
+		return sprintf( "<div class='ginput_container ginput_container_multiselect'><select multiple='multiple' {$placeholder} size='{$size}' name='input_%d[]' id='%s' class='%s' $tabindex %s>%s</select></div>", $id, esc_attr( $field_id ), $css_class, $disabled_text, $this->get_choices( $value ) );
 	}
 
 	/**
@@ -181,19 +193,21 @@ class GF_Field_MultiSelect extends GF_Field {
 	 */
 	public function get_value_entry_detail( $value, $currency = '', $use_text = false, $format = 'html', $media = 'screen' ) {
 
-		if ( empty( $value ) || $format == 'text' ) {
+		if ( empty( $value ) || ( $format == 'text' && $this->storageType !== 'json' ) ) {
 			return $value;
 		}
 
-		$value = $this->to_array( $value );
+		$items = $this->to_array( $value );
 
-		$items = '';
-		foreach ( $value as $item ) {
-			$item_value = GFCommon::selection_display( $item, $this, $currency, $use_text );
-			$items .= '<li>' . esc_html( $item_value ) . '</li>';
+		foreach ( $items as &$item ) {
+			$item = esc_html( GFCommon::selection_display( $item, $this, $currency, $use_text ) );
 		}
 
-		return "<ul class='bulleted'>{$items}</ul>";
+		if ( $format === 'text' ) {
+			return GFCommon::implode_non_blank( ', ', $items );
+		}
+
+		return "<ul class='bulleted'><li>" . GFCommon::implode_non_blank( '</li><li>', $items ) . '</li></ul>';
 	}
 
 	/**
@@ -252,16 +266,18 @@ class GF_Field_MultiSelect extends GF_Field {
 	public function get_value_merge_tag( $value, $input_id, $entry, $form, $modifier, $raw_value, $url_encode, $esc_html, $format, $nl2br ) {
 		$items = $this->to_array( $raw_value );
 
-		if ( $this->type == 'post_category' ) {
-			$use_id = $modifier == 'id';
+		$modifiers = $this->get_modifiers();
 
+		if ( $this->type == 'post_category' ) {
 			if ( is_array( $items ) ) {
+				$use_id = in_array( 'id', $modifiers );
+
 				foreach ( $items as &$item ) {
 					$cat  = GFCommon::format_post_category( $item, $use_id );
 					$item = GFCommon::format_variable_value( $cat, $url_encode, $esc_html, $format );
 				}
 			}
-		} elseif ( $modifier != 'value' ) {
+		} elseif ( ! in_array( 'value', $modifiers ) ) {
 
 			foreach ( $items as &$item ) {
 				$item = GFCommon::selection_display( $item, $this, rgar( $entry, 'currency' ), true );
@@ -389,6 +405,20 @@ class GF_Field_MultiSelect extends GF_Field {
 			$this->displayAllCategories = (bool) $this->displayAllCategories;
 		}
 	}
+
+	// # FIELD FILTER UI HELPERS ---------------------------------------------------------------------------------------
+
+	/**
+	 * Returns the filter operators for the current field.
+	 *
+	 * @since 2.4
+	 *
+	 * @return array
+	 */
+	public function get_filter_operators() {
+		return array( 'contains' );
+	}
+
 }
 
 // Register the new field type.

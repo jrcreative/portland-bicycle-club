@@ -282,8 +282,6 @@ class acf_field_gallery extends acf_field {
 	}
 	
 	/**
-	 * render_attachment
-	 *
 	 * Renders the sidebar HTML shown when selecting an attachmemnt.
 	 *
 	 * @date	13/12/2013
@@ -293,8 +291,7 @@ class acf_field_gallery extends acf_field {
 	 * @param	array $field The field array.
 	 * @return	void
 	 */	
-	function render_attachment( $id = 0, $field ) {
-		
+	function render_attachment( $id, $field ) {
 		// Load attachmenet data.
 		$attachment = wp_prepare_attachment_for_js( $id );
 		$compat = get_compat_media_markup( $id );
@@ -316,14 +313,15 @@ class acf_field_gallery extends acf_field {
 			$thumb = wp_mime_type_icon( $id );	
 		}
 		
-		// Get attachment dimentions / time / size.
+		// Get attachment dimensions / time / size.
+		$dimensions = '';
 		if( $attachment['type'] === 'audio' ) {
-			$dimentions = __('Length', 'acf') . ': ' . $attachment['fileLength'];	
+			$dimensions = __('Length', 'acf') . ': ' . $attachment['fileLength'];	
 		} elseif( !empty($attachment['width']) ) {
-			$dimentions = $attachment['width'] . ' x ' . $attachment['height'];
+			$dimensions = $attachment['width'] . ' x ' . $attachment['height'];
 		}
 		if( !empty($attachment['filesizeHumanReadable']) ) {
-			$dimentions .=  ' (' . $attachment['filesizeHumanReadable'] . ')';
+			$dimensions .=  ' (' . $attachment['filesizeHumanReadable'] . ')';
 		}
 		
 		?>
@@ -331,7 +329,7 @@ class acf_field_gallery extends acf_field {
 			<img src="<?php echo esc_attr($thumb); ?>" alt="<?php echo esc_attr($attachment['alt']); ?>" />
 			<p class="filename"><strong><?php echo esc_html($attachment['filename']); ?></strong></p>
 			<p class="uploaded"><?php echo esc_html($attachment['dateFormatted']); ?></p>
-			<p class="dimensions"><?php echo esc_html($dimentions); ?></p>
+			<p class="dimensions"><?php echo esc_html($dimensions); ?></p>
 			<p class="actions">
 				<a href="#" class="acf-gallery-edit" data-id="<?php echo esc_attr($id); ?>"><?php _e('Edit', 'acf'); ?></a>
 				<a href="#" class="acf-gallery-remove" data-id="<?php echo esc_attr($id); ?>"><?php _e('Remove', 'acf'); ?></a>

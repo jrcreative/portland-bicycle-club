@@ -10,25 +10,18 @@ use Timber\Term;
 use Timber\Image;
 use Timber\User;
 
-
 class Twig {
-
 	public static $dir_name;
 
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public static function init() {
-		new self();
-	}
+		$self = new self();
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function __construct() {
-		add_action('timber/twig/filters', array($this, 'add_timber_filters'));
-		add_action('timber/twig/functions', array($this, 'add_timber_functions'));
-		add_action('timber/twig/escapers', array($this, 'add_timber_escapers'));
+		add_action( 'timber/twig/filters', array( $self, 'add_timber_filters' ) );
+		add_action( 'timber/twig/functions', array( $self, 'add_timber_functions' ) );
+		add_action( 'timber/twig/escapers', array( $self, 'add_timber_escapers' ) );
 	}
 
 	/**
@@ -207,7 +200,14 @@ class Twig {
 		$twig->addFilter(new Twig_Filter('list', array($this, 'add_list_separators')));
 
 		$twig->addFilter(new Twig_Filter('pluck', array('Timber\Helper', 'pluck')));
+
+		/**
+		 * @deprecated since 1.13 (to be removed in 2.0). Use Twig's native filter filter instead
+		 * @todo remove this in 2.x so that filter merely passes to Twig's filter without any modification
+		 * @ticket #1594 #2120
+		 */
 		$twig->addFilter(new Twig_Filter('filter', array('Timber\Helper', 'filter_array')));
+		$twig->addFilter(new Twig_Filter('wp_list_filter', array('Timber\Helper', 'wp_list_filter')));
 
 		$twig->addFilter(new Twig_Filter('relative', function( $link ) {
 					return URLHelper::get_rel_url($link, true);
@@ -227,12 +227,6 @@ class Twig {
 					return apply_filters_ref_array($tag, $args);
 				} ));
 
-
-		$twig = apply_filters('timber/twig', $twig);
-		/**
-		 * get_twig is deprecated, use timber/twig
-		 */
-		$twig = apply_filters('get_twig', $twig);
 		return $twig;
 	}
 
@@ -243,24 +237,34 @@ class Twig {
 	 * @return \Twig\Environment
 	 */
 	public function add_timber_escapers( $twig ) {
-
-		$twig->getExtension('Twig\Extension\CoreExtension')->setEscaper('esc_url', function( \Twig\Environment $env, $string ) {
-			return esc_url($string);
-		});
-		$twig->getExtension('Twig\Extension\CoreExtension')->setEscaper('wp_kses_post', function( \Twig\Environment $env, $string ) {
-			return wp_kses_post($string);
-		});
-
-		$twig->getExtension('Twig\Extension\CoreExtension')->setEscaper('esc_html', function( \Twig\Environment $env, $string ) {
-			return esc_html($string);
-		});
-
-		$twig->getExtension('Twig\Extension\CoreExtension')->setEscaper('esc_js', function( \Twig\Environment $env, $string ) {
-			return esc_js($string);
-		});
-
+		$esc_url = function( \Twig\Environment $env, $string ) {
+			return esc_url( $string );
+		};
+		$wp_kses_post = function( \Twig\Environment $env, $string ) {
+			return wp_kses_post( $string );
+		};
+		$esc_html = function( \Twig\Environment $env, $string ) {
+			return esc_html( $string );
+		};
+		$esc_js = function( \Twig\Environment $env, $string ) {
+			return esc_js( $string );
+		};
+		if ( class_exists( 'Twig\Extension\EscaperExtension' ) ) {
+			$escaper_extension = $twig->getExtension('Twig\Extension\EscaperExtension');
+			if ( method_exists($escaper_extension, 'setEscaper') ) {
+				$escaper_extension->setEscaper('esc_url', $esc_url);
+				$escaper_extension->setEscaper('wp_kses_post', $wp_kses_post);
+				$escaper_extension->setEscaper('esc_html', $esc_html);
+				$escaper_extension->setEscaper('esc_js', $esc_js);
+				return $twig;
+			}
+		}
+		$escaper_extension = $twig->getExtension('Twig\Extension\CoreExtension');
+		$escaper_extension->setEscaper('esc_url', $esc_url);
+		$escaper_extension->setEscaper('wp_kses_post', $wp_kses_post);
+		$escaper_extension->setEscaper('esc_html', $esc_html);
+		$escaper_extension->setEscaper('esc_js', $esc_js);
 		return $twig;
-
 	}
 
 	/**
@@ -336,13 +340,33 @@ class Twig {
 	}
 
 	/**
-	 * @param int|string $from
-	 * @param int|string $to
-	 * @param string $format_past
-	 * @param string $format_future
+	 * Returns the difference between two times in a human readable format.
+	 *
+	 * Differentiates between past and future dates.
+	 *
+	 * @see \human_time_diff()
+	 *
+	 * @param int|string $from          Base date as a timestamp or a date string.
+	 * @param int|string $to            Optional. Date to calculate difference to as a timestamp or
+	 *                                  a date string. Default to current time.
+	 * @param string     $format_past   Optional. String to use for past dates. To be used with
+	 *                                  `sprintf()`. Default `%s ago`.
+	 * @param string     $format_future Optional. String to use for future dates. To be used with
+	 *                                  `sprintf()`. Default `%s from now`.
+	 *
 	 * @return string
 	 */
-	public static function time_ago( $from, $to = null, $format_past = '%s ago', $format_future = '%s from now' ) {
+	public static function time_ago( $from, $to = null, $format_past = null, $format_future = null ) {
+		if ( null === $format_past ) {
+			/* translators: %s: Human-readable time difference. */
+			$format_past = __( '%s ago' );
+		}
+
+		if ( null === $format_future ) {
+			/* translators: %s: Human-readable time difference. */
+			$format_future = __( '%s from now' );
+		}
+
 		$to = $to === null ? time() : $to;
 		$to = is_int($to) ? $to : strtotime($to);
 		$from = is_int($from) ? $from : strtotime($from);

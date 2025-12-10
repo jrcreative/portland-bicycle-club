@@ -40,23 +40,22 @@ class User_Role_Editor {
     
     
     /**
-     * Private clone method to prevent cloning of the instance of the *Singleton* 
+     * Prevent cloning of a *Singleton* instance 
      *
      * @return void
      */
-    private function __clone() {
-        
+    public function __clone() {
+        throw new \Exception('Do not clone a singleton instance.');
     }
     // end of __clone()
     
     /**
-     * Private unserialize method to prevent unserializing of the *Singleton*
-     * instance.
+     * Prevent unserializing of a *Singleton* instance.
      *
      * @return void
      */
-    private function __wakeup() {
-        
+    public function __wakeup() {
+        throw new \Exception('Do not unserialize a singleton instance.');
     }
     // end of __wakeup()
 
@@ -81,12 +80,12 @@ class User_Role_Editor {
         }
         $this->ure_hook_suffixes = array($this->settings_hook_suffix, $this->main_page_hook_suffix);
         
-        // activation action
-        register_activation_hook(URE_PLUGIN_FULL_PATH, array($this, 'setup'));
+        // Activation action
+        register_activation_hook( URE_PLUGIN_FULL_PATH, array($this, 'setup') );
 
-        // deactivation action
-        register_deactivation_hook(URE_PLUGIN_FULL_PATH, array($this, 'cleanup'));
-        		
+        // Deactivation action
+        register_deactivation_hook( URE_PLUGIN_FULL_PATH, array($this, 'cleanup') );
+                        		
         // Who can use this plugin
         $this->key_capability = URE_Own_Capabilities::get_key_capability();
                 
@@ -115,7 +114,7 @@ class User_Role_Editor {
             return;
         }
         
-        add_action('admin_init', array($this, 'plugin_init'), 1);
+        add_action( 'admin_init', array($this, 'plugin_init'), 1 );
 
         // Add the translation function after the plugins loaded hook.
         add_action('plugins_loaded', array($this, 'load_translation'));
@@ -123,9 +122,9 @@ class User_Role_Editor {
         // add own submenu 
         add_action('admin_menu', array($this, 'plugin_menu'));
       		
-        if ($multisite) {
+        if ( $multisite ) {
             // add own submenu 
-            add_action('network_admin_menu', array($this, 'network_plugin_menu'));
+            add_action( 'network_admin_menu', array($this, 'network_plugin_menu') );
         }
 
 
@@ -181,14 +180,22 @@ class User_Role_Editor {
         if ($multisite) {
             $allow_edit_users_to_not_super_admin = $this->lib->get_option('allow_edit_users_to_not_super_admin', 0);
             if ($allow_edit_users_to_not_super_admin) {
-                add_filter('map_meta_cap', array($this, 'restore_users_edit_caps'), 1, 4);
+                // Make this as late as possible, to overwrite settings made by other plugins, like WooCommerce
+                add_filter('map_meta_cap', array($this, 'restore_users_edit_caps'), 99, 4);
                 remove_all_filters('enable_edit_any_user_configuration');
                 add_filter('enable_edit_any_user_configuration', '__return_true');
+                // make this as early as you can, to not provide superadmin privilege when it's not needed
                 add_action('admin_head', array($this, 'edit_user_permission_check'), 1);
                 if ($pagenow == 'user-new.php') {
                     add_filter('site_option_site_admins', array($this, 'allow_add_user_as_superadmin'));
                 }
             }
+            
+            if ( $pagenow=='site-users.php' ) {
+                // Try to execute before any other function linked to this filter
+                add_filter( 'editable_roles', array($this, 'fix_network_admin_roles_dropdown'), 9 );
+            }
+            
         } else {
             $count_users_without_role = $this->lib->get_option('count_users_without_role', 0);
             if ($count_users_without_role) {
@@ -209,7 +216,7 @@ class User_Role_Editor {
         }
     }
     // end of plugin_init()
-    
+
 
     /**
    * Allow non-superadmin user to add/create users to the site as superadmin does.
@@ -273,7 +280,7 @@ class User_Role_Editor {
   public function add_js_to_users_page() {
               
       wp_enqueue_script('jquery-ui-dialog', '', array('jquery-ui-core','jquery-ui-button', 'jquery') );
-      wp_register_script( 'ure-users', plugins_url( '/js/users.js', URE_PLUGIN_FULL_PATH ) );
+      wp_register_script( 'ure-users', plugins_url( '/js/users.js', URE_PLUGIN_FULL_PATH ), array(), URE_VERSION );
       wp_enqueue_script ( 'ure-users' );      
       wp_localize_script( 'ure-users', 'ure_users_data', array(
         'wp_nonce' => wp_create_nonce('user-role-editor'),
@@ -717,7 +724,7 @@ class User_Role_Editor {
         
         wp_enqueue_script('jquery-ui-dialog', '', array('jquery-ui-core', 'jquery-ui-button', 'jquery'));
         wp_enqueue_script('jquery-ui-selectable', '', array('jquery-ui-core', 'jquery'));
-        wp_register_script('ure', plugins_url('/js/ure.js', URE_PLUGIN_FULL_PATH));
+        wp_register_script('ure', plugins_url('/js/ure.js', URE_PLUGIN_FULL_PATH ), array(), URE_VERSION );
         wp_enqueue_script('ure');
         wp_localize_script('ure', 'ure_data', array(
             'wp_nonce' => wp_create_nonce('user-role-editor'),
@@ -765,10 +772,10 @@ class User_Role_Editor {
         wp_enqueue_script('jquery-ui-tabs', '', array('jquery-ui-core', 'jquery'));
         wp_enqueue_script('jquery-ui-dialog', '', array('jquery-ui-core', 'jquery'));
         wp_enqueue_script('jquery-ui-button', '', array('jquery-ui-core', 'jquery'));
-        wp_register_script('ure-js', plugins_url('/js/settings.js', URE_PLUGIN_FULL_PATH));
-        wp_enqueue_script('ure-js');
+        wp_register_script('ure-settings', plugins_url('/js/settings.js', URE_PLUGIN_FULL_PATH ), array(), URE_VERSION );
+        wp_enqueue_script('ure-settings');
         
-        wp_localize_script('ure-js', 'ure_data', array(
+        wp_localize_script('ure-settings', 'ure_data', array(
             'wp_nonce' => wp_create_nonce('user-role-editor'),
             'network_admin' => is_network_admin() ? 1 : 0,
             'page_url' => $page_url,
@@ -844,14 +851,56 @@ class User_Role_Editor {
         return $roles;
     }
     // end of sort_wp_roles_list()
+
+
+    /** Currently WordPress (tested up to version 5.2.3) shows "Change role to..." drop-down list at Network admin->Sites->selected site->Users with roles filled from the main site,
+    /*  but should use roles list from the selected site. This function replaces roles list with roles from the selected site and 
+     *  excludes error messsage "Sorry, you are not allowed to give users that role.", when you try to grant to a user a role which does not exist at the selected site.
+     * 
+     * @param array $roles
+     * @return array
+     */
+    public function fix_network_admin_roles_dropdown( $roles ) {
+                        
+        // get selected site ID
+        $selected_blog_id = isset( $_REQUEST['id'] ) ? intval( $_REQUEST['id'] ) : 0;
+        if ( !$selected_blog_id ) {
+            return $roles;
+        }
+        
+        $current_blog_id = get_current_blog_id();        
+        if ( $current_blog_id!==$selected_blog_id ) {
+            switch_to_blog( $selected_blog_id );
+        }
+        
+        remove_filter( 'editable_roles', array($this, 'fix_network_admin_roles_dropdown'), 9 );
+        $roles1 = get_editable_roles();
+        add_filter( 'editable_roles', array($this, 'fix_network_admin_roles_dropdown'), 9 );
+        
+        if ( $current_blog_id!==$selected_blog_id ) {
+            restore_current_blog();
+        }
+                
+        return $roles1;
+    }
+    // end of fix_network_admin_roles_dropdown()
     
     
     // execute on plugin deactivation
-    function cleanup() {
+    public function cleanup() {
 		
     }
     // end of setup()
+   
+    
+    // excute on plugin uninstall via WordPress->Plugins->Delete
+    public static function uninstall() {
+
+        $uninstall = new URE_Uninstall;
+        $uninstall->act();
         
+    }
+    // end of uninstall()
  
 }
 // end of User_Role_Editor

@@ -3,22 +3,24 @@
  * Remove plugin settings data.
  *
  * @since 1.7
- * @package WP_Smush
+ * @package Smush
  */
+
+use Smush\Core\Settings;
 
 // If uninstall not called from WordPress exit.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit();
 }
 
-if ( ! class_exists( 'WP_Smush_Settings' ) ) {
+if ( ! class_exists( '\\Smush\\Core\\Settings' ) ) {
 	if ( ! defined( 'WP_SMUSH_PREFIX' ) ) {
 		define( 'WP_SMUSH_PREFIX', 'wp-smush-' );
 	}
 	/* @noinspection PhpIncludeInspection */
-	include_once plugin_dir_path( __FILE__ ) . '/core/class-wp-smush-settings.php';
+	include_once plugin_dir_path( __FILE__ ) . '/core/class-settings.php';
 }
-$keep_data = WP_Smush_Settings::get_instance()->get( 'keep_data' );
+$keep_data = Settings::get_instance()->get( 'keep_data' );
 
 // Check if someone want to keep the stats and settings.
 if ( ( defined( 'WP_SMUSH_PRESERVE_STATS' ) && WP_SMUSH_PRESERVE_STATS ) || true === $keep_data ) {
@@ -28,12 +30,11 @@ if ( ( defined( 'WP_SMUSH_PRESERVE_STATS' ) && WP_SMUSH_PRESERVE_STATS ) || true
 global $wpdb;
 
 $smushit_keys = array(
-	'resize-sizes',
 	'resmush-list',
+	'nextgen-resmush-list',
 	'resize_sizes',
 	'transparent_png',
 	'image_sizes',
-	'nextgen-resmush-list',
 	'super_smushed',
 	'super_smushed_nextgen',
 	'settings_updated',
@@ -48,12 +49,16 @@ $smushit_keys = array(
 	'lazy_load',
 	'last_run_sync',
 	'networkwide',
+	'cron_update_running',
+	'hide-conflict-notice',
+	'show_upgrade_modal',
+	// This could have been set in 3.7.1. The UI that set this was removed in 3.7.2.
+	'hide_tutorials_from_bulk_smush',
 );
 
 $db_keys = array(
 	'skip-smush-setup',
 	'smush_global_stats',
-	'smush-directory-path-hash-updated',
 );
 
 // Cache Keys.
@@ -166,6 +171,20 @@ $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}smush_dir_images" );
 
 // Delete directory scan data.
 delete_option( 'wp-smush-scan-step' );
+
+// Delete all WebP images.
+global $wp_filesystem;
+if ( is_null( $wp_filesystem ) ) {
+	WP_Filesystem();
+}
+
+$upload_dir = wp_get_upload_dir();
+$webp_dir   = dirname( $upload_dir['basedir'] ) . '/smush-webp';
+$wp_filesystem->delete( $webp_dir, true );
+
+// Delete WebP test image.
+$webp_img = $upload_dir['basedir'] . '/smush-webp-test.png';
+$wp_filesystem->delete( $webp_img );
 
 // TODO: Add procedure to delete backup files
 // TODO: Update NextGen Metadata to remove Smush stats on plugin deletion.

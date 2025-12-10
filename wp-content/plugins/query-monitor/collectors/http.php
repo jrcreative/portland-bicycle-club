@@ -11,10 +11,6 @@ class QM_Collector_HTTP extends QM_Collector {
 	private $transport = null;
 	private $info      = null;
 
-	public function name() {
-		return __( 'HTTP API Calls', 'query-monitor' );
-	}
-
 	public function __construct() {
 
 		parent::__construct();
@@ -236,6 +232,8 @@ class QM_Collector_HTTP extends QM_Collector {
 			'airplane_mode_enabled',
 		) );
 
+		$home_host = (string) parse_url( home_url(), PHP_URL_HOST );
+
 		foreach ( $this->data['http'] as $key => & $http ) {
 
 			if ( ! isset( $http['response'] ) ) {
@@ -248,10 +246,9 @@ class QM_Collector_HTTP extends QM_Collector {
 				if ( ! in_array( $http['response']->get_error_code(), $silent, true ) ) {
 					$this->data['errors']['alert'][] = $key;
 				}
-				$http['type'] = __( 'Error', 'query-monitor' );
+				$http['type'] = -1;
 			} elseif ( ! $http['args']['blocking'] ) {
-				/* translators: A non-blocking HTTP API request */
-				$http['type'] = __( 'Non-blocking', 'query-monitor' );
+				$http['type'] = -2;
 			} else {
 				$http['type'] = intval( wp_remote_retrieve_response_code( $http['response'] ) );
 				if ( $http['type'] >= 400 ) {
@@ -276,6 +273,10 @@ class QM_Collector_HTTP extends QM_Collector {
 			$this->data['ltime'] += $http['ltime'];
 
 			$http['component'] = $http['trace']->get_component();
+
+			$host = (string) parse_url( $http['url'], PHP_URL_HOST );
+
+			$http['local'] = ( $host === $home_host );
 
 			$this->log_type( $http['type'] );
 			$this->log_component( $http['component'], $http['ltime'], $http['type'] );

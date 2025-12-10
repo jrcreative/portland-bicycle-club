@@ -46,9 +46,21 @@ class MWP_Action_DownloadFile extends MWP_Action_Abstract
             fclose($indexPHP);
         }
 
+        $randomString = mwp_generate_uuid4();
+
+        $zipName = $filePath.$randomString.".zip";
+        if (!class_exists('ZipArchive')) {
+            $escapedFiles = array();
+            foreach ($files as $file) {
+                $escapedFiles[] = escapeshellarg($file);
+            }
+
+            exec('zip -r ' . $zipName . ' ' . join(' ', $escapedFiles), $output, $exitCode);
+            return $zipName;
+        }
+
         /** @handled class */
         $zip     = new ZipArchive();
-        $zipName = $filePath.time().".zip";
 
         /** @handled static */
         $zip->open($zipName, ZipArchive::CREATE);
