@@ -1,0 +1,35 @@
+{
+    "name": "portlandbicycleclub/pbc",
+    "description": "Portland Bicycle Club theme with Timber 2.0",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Robert M. Parker",
+            "email": "rparker@kodama.design.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "PBC\\": "app/classes"
+        }
+    },
+    "require": {
+        "php": ">=8.0",
+        "symfony/yaml": "^5.4",
+        "symfony/config": "^5.4",
+        "symfony/filesystem": "^5.4",
+        "symfony/cache": "^5.4",
+        "symfony/dependency-injection": "^5.4",
+        "timber/timber": "^2.0",
+        "stoutlogic/acf-builder": "^1.8"
+    },
+    "require-dev": {},
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true
+        },
+        "platform": {
+            "php": "8.0.30"
+        }
+    }
+}
