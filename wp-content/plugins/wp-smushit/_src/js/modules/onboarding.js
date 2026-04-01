@@ -1,5 +1,7 @@
 /* global WP_Smush */
 /* global ajaxurl */
+import tracker from "../utils/tracker";
+import GlobalTracking from '../global-tracking';
 
 /**
  * Modals JavaScript code.
@@ -7,6 +9,10 @@
 ( function() {
 	'use strict';
 
+	// Keep loading onboarding script for other dependencies.
+	if ( document.getElementById( 'smush-onboarding-free' ) ) {
+		return;
+	}
 	/**
 	 * Onboarding modal.
 	 *
@@ -15,34 +21,36 @@
 	WP_Smush.onboarding = {
 		membership: 'free', // Assume free by default.
 		onboardingModal: document.getElementById( 'smush-onboarding-dialog' ),
-		scanFilesModal: document.getElementById( 'checking-files-dialog' ),
+		first_slide: 'usage',
 		settings: {
 			first: true,
 			last: false,
-			slide: 'start',
+			slide: 'usage',
 			value: false,
 		},
 		selection: {
+			usage: false,
 			auto: true,
 			lossy: true,
 			strip_exif: true,
-			original: false,
+			original: true,
+			preload_images: true,
 			lazy_load: true,
-			usage: false,
 		},
 		contentContainer: document.getElementById( 'smush-onboarding-content' ),
 		onboardingSlides: [
-			'start',
+			'usage',
 			'auto',
 			'lossy',
 			'strip_exif',
 			'original',
+			'preload_images',
 			'lazy_load',
-			'usage',
 		],
 		touchX: null,
 		touchY: null,
-
+		recheckImagesLink: '',
+		proFeaturesClicked: [],
 		/**
 		 * Init module.
 		 */
@@ -54,16 +62,18 @@
 			const dialog = document.getElementById( 'smush-onboarding' );
 
 			this.membership = dialog.dataset.type;
+			this.recheckImagesLink = dialog.dataset.ctaUrl;
 
 			if ( 'pro' !== this.membership ) {
 				this.onboardingSlides = [
-					'start',
-					'auto',
-					'strip_exif',
-					'lazy_load',
 					'usage',
+					'auto',
+					'lossy',
+					'strip_exif',
+					'original',
+					'lazy_load',
+					'pro_upsell',
 				];
-				this.selection.lossy = false;
 			}
 
 			if ( 'false' === dialog.dataset.tracking ) {
@@ -73,17 +83,17 @@
 			this.renderTemplate();
 
 			// Skip setup.
-			const skipButton = this.onboardingModal.querySelector(
+			this.skipButton = this.onboardingModal.querySelector(
 				'.smush-onboarding-skip-link'
 			);
-			if ( skipButton ) {
-				skipButton.addEventListener( 'click', this.skipSetup );
+			if ( this.skipButton ) {
+				this.skipButton.addEventListener( 'click', this.skipSetup.bind( this ) );
 			}
 
 			// Show the modal.
 			window.SUI.openModal(
 				'smush-onboarding-dialog',
-				'checking-files-dialog',
+				'wpcontent',
 				undefined,
 				false
 			);
@@ -132,16 +142,10 @@
 		/**
 		 * Update the template, register new listeners.
 		 *
-		 * @param {string} directionClass  Accepts: fadeInRight, fadeInLeft, none.
+		 * @param {string} directionClass Accepts: fadeInRight, fadeInLeft, none.
 		 */
 		renderTemplate( directionClass = 'none' ) {
-			// Grab the selected value.
-			const input = this.onboardingModal.querySelector(
-				'input[type="checkbox"]'
-			);
-			if ( input ) {
-				this.selection[ input.id ] = input.checked;
-			}
+			this.updateCheckboxStates();
 
 			const template = WP_Smush.onboarding.template( 'smush-onboarding' );
 			const content = template( this.settings );
@@ -175,6 +179,30 @@
 			);
 
 			this.bindSubmit();
+			this.toggleSkipButton();
+			this.maybeHandleProFeatureClick();
+		},
+
+		updateCheckboxStates() {
+			// Grab the selected value.
+			const input = this.onboardingModal.querySelector(
+				'input[type="checkbox"]'
+			);
+			if ( input ) {
+				this.selection[ input.id ] = input.checked;
+			}
+		},
+
+		toggleSkipButton() {
+			if ( ! this.skipButton ) {
+				return;
+			}
+
+			if ( this.settings.last ) {
+				this.skipButton.classList.add( 'sui-hidden' );
+			} else {
+				this.skipButton.classList.remove( 'sui-hidden' );
+			}
 		},
 
 		/**
@@ -187,15 +215,18 @@
 			const self = this;
 
 			if ( submitButton ) {
-				submitButton.addEventListener( 'click', function( e ) {
+				submitButton.addEventListener( 'click', async function( e ) {
 					e.preventDefault();
 
+					submitButton.classList.add( 'sui-button-onload-text' );
+
 					// Because we are not rendering the template, we need to update the last element value.
-					const input = self.onboardingModal.querySelector(
-						'input[type="checkbox"]'
-					);
-					if ( input ) {
-						self.selection[ input.id ] = input.checked;
+					self.updateCheckboxStates();
+
+					try {
+						await self.trackFinishSetupWizard();
+					} catch ( err ) {
+						// Do nothing..
 					}
 
 					const _nonce = document.getElementById(
@@ -210,7 +241,7 @@
 					);
 					xhr.onload = () => {
 						if ( 200 === xhr.status ) {
-							WP_Smush.onboarding.showScanDialog();
+							self.onFinishingSetup();
 						} else {
 							window.console.log(
 								'Request failed.  Returned status of ' +
@@ -228,10 +259,26 @@
 			}
 		},
 
+		onFinishingSetup() {
+			this.onFinish();
+			this.startRecheckImages();
+		},
+
+		onFinish() {
+			window.SUI.closeModal();
+		},
+
+		startRecheckImages() {
+			if ( ! this.recheckImagesLink ) {
+				return;
+			}
+			window.location.href = this.recheckImagesLink;
+		},
+
 		/**
 		 * Handle navigation.
 		 *
-		 * @param {Object} e
+		 * @param {Object}      e
 		 * @param {null|string} whereTo
 		 */
 		next( e, whereTo = null ) {
@@ -283,8 +330,16 @@
 		/**
 		 * Skip onboarding experience.
 		 */
-		skipSetup: () => {
+		async skipSetup() {
 			const _nonce = document.getElementById( 'smush_quick_setup_nonce' );
+			this.updateCheckboxStates();
+
+			// Track skip setup wizard.
+			try {
+				await this.trackSkipSetupWizard();
+			} catch ( err ) {
+				// Do nothing..
+			}
 
 			const xhr = new XMLHttpRequest();
 			xhr.open(
@@ -293,7 +348,7 @@
 			);
 			xhr.onload = () => {
 				if ( 200 === xhr.status ) {
-					WP_Smush.onboarding.showScanDialog();
+					this.onSkipSetup();
 				} else {
 					window.console.log(
 						'Request failed.  Returned status of ' + xhr.status
@@ -303,61 +358,160 @@
 			xhr.send();
 		},
 
-		/**
-		 * Show checking files dialog.
-		 */
-		showScanDialog() {
-			window.SUI.closeModal();
-			window.SUI.openModal(
-				'checking-files-dialog',
-				'wpbody-content',
-				undefined,
-				false
-			);
-
-			const nonce = document.getElementById( 'wp_smush_options_nonce' );
-
-			setTimeout( () => {
-				const xhr = new XMLHttpRequest();
-				xhr.open( 'POST', ajaxurl + '?action=scan_for_resmush', true );
-				xhr.setRequestHeader(
-					'Content-type',
-					'application/x-www-form-urlencoded'
-				);
-				xhr.onload = () => {
-					const elem = document.querySelector(
-						'#smush-onboarding-dialog'
-					);
-					elem.parentNode.removeChild( elem );
-					window.SUI.closeModal();
-
-					if ( 200 === xhr.status ) {
-						setTimeout( function() {
-							location.reload();
-						}, 1000 );
-					} else {
-						window.console.log(
-							'Request failed.  Returned status of ' + xhr.status
-						);
-					}
-				};
-				xhr.send(
-					'type=media&get_ui=false&process_settings=false&wp_smush_options_nonce=' +
-						nonce.value
-				);
-			}, 3000 );
+		onSkipSetup() {
+			this.onFinish();
 		},
 
 		/**
 		 * Hide new features modal.
-		 *
 		 * @since 3.7.0
+		 * @since 3.12.2 Add a new parameter redirectUrl
 		 */
-		hideUpgradeModal: () => {
+		hideUpgradeModal: ( e, button ) => {
+			const isRedirectRequired = '_blank' !== button?.target;
+			if ( isRedirectRequired ) {
+				e.preventDefault();
+			}
+
+			button.classList.add( 'wp-smush-link-in-progress' );
+			const redirectUrl = button?.href;
 			const xhr = new XMLHttpRequest();
-			xhr.open('POST', ajaxurl + '?action=hide_new_features');
+			xhr.open( 'POST', ajaxurl + '?action=hide_new_features&_ajax_nonce=' + window.wp_smush_msgs.nonce );
+			xhr.onload = () => {
+				window.SUI.closeModal();
+				button.classList.remove( 'wp-smush-link-in-progress' );
+
+				const actionName = redirectUrl ? 'cta_clicked' : 'closed';
+				tracker.track( 'update_modal_displayed', {
+					Action: actionName,
+				} );
+
+				if ( 200 === xhr.status ) {
+					if ( redirectUrl && isRedirectRequired ) {
+						window.location.href = redirectUrl;
+					}
+				} else {
+					window.console.log(
+						'Request failed.  Returned status of ' + xhr.status
+					);
+				}
+			};
 			xhr.send();
 		},
+		maybeHandleProFeatureClick() {
+			const isProUpsellSlide = 'pro_upsell' === this.settings?.slide;
+			if ( ! isProUpsellSlide ) {
+				return;
+			}
+
+			this.upsellButton = this.onboardingModal.querySelector( '.smush-btn-pro-upsell' );
+			const proFeatureToggleContainer = this.onboardingModal.querySelector( '.sui-field-list' );
+
+			if ( proFeatureToggleContainer ) {
+				proFeatureToggleContainer.addEventListener( 'click', ( event ) => {
+					const proFeatureClicked = event.target.matches( 'label' ) || event.target.closest( '.sui-toggle' );
+					if ( proFeatureClicked ) {
+						const featureName = event.target.closest( '.sui-field-list-item' ).querySelector( 'input[type="checkbox"]' )?.name;
+						this.handleProFeatureClicked( featureName );
+					}
+				});
+			}
+
+			this.maybeTrackProUpsell();
+		},
+		handleProFeatureClicked( featureName ) {
+			this.cacheProFeatureClick( featureName );
+			this.highlightUpsellButton();
+		},
+		highlightUpsellButton() {
+			if ( ! this.upsellButton ) {
+				return;
+			}
+			this.upsellButton.classList.remove( 'smush-btn-ripple' );
+			void this.upsellButton.offsetWidth; // Trigger a reflow.
+			this.upsellButton.classList.add( 'smush-btn-ripple' );
+		},
+		cacheProFeatureClick( proFeature ) {
+			if ( ! this.proFeaturesClicked.includes( proFeature ) ) {
+				this.proFeaturesClicked.push( proFeature );
+			}
+		},
+		trackFinishSetupWizard() {
+			return this.trackSetupWizard( 'finish' );
+		},
+		trackSkipSetupWizard() {
+			return this.trackSetupWizard( 'quit' );
+		},
+		trackSetupWizard( action ) {
+			const quitWizard = 'quit' === action;
+			const properties = {
+				Action: quitWizard ? 'quit' : 'finish',
+				'Quit Step': this.getQuitStep( quitWizard ),
+				'Settings Enabled': this.getEnabledSettings( quitWizard ),
+				'Pro Interests': this.getProInterests(),
+			};
+
+			const allowToTrack = this.selection?.usage;
+
+			return tracker.setAllowToTrack( allowToTrack ).track( 'Setup Wizard', properties );
+		},
+		getQuitStep( quitWizard ) {
+			if ( ! quitWizard ) {
+				return 'na';
+			}
+
+			const fieldMapsForTracking = this.getFieldMapsForTracking();
+			const setting = this.settings.slide;
+
+			return setting in fieldMapsForTracking ? fieldMapsForTracking[ setting ] : 'na';
+		},
+		getEnabledSettings( quitWizard ) {
+			if ( quitWizard ) {
+				return 'na';
+			}
+
+			const fieldMapsForTracking = this.getFieldMapsForTracking();
+			const enabledSettings = [];
+
+			Object.entries( this.selection ).forEach( ( [ setting, enabled ] ) => {
+				if ( enabled ) {
+					const featureName = setting in fieldMapsForTracking ? fieldMapsForTracking[ setting ] : setting;
+					enabledSettings.push( featureName );
+				}
+			} );
+
+			return enabledSettings;
+		},
+		getProInterests() {
+			if ( 'pro' === this.membership || ! this.proFeaturesClicked.length ) {
+				return 'na';
+			}
+
+			return this.proFeaturesClicked;
+		},
+		getFieldMapsForTracking() {
+			return {
+				usage: 'tracking',
+				auto: 'auto_smush',
+				lossy: 'free' === this.membership ? 'super_smush' : 'ultra_smush',
+				strip_exif: 'strip_exif',
+				original: 'full_size',
+				lazy_load: 'lazy_load',
+				pro_upsell: 'upgrade',
+				preload_images: 'preload_images',
+			};
+		},
+		maybeTrackProUpsell() {
+			if ( ! this.upsellButton ) {
+				return;
+			}
+
+			this.upsellButton.addEventListener( 'click', ( event ) => {
+				const allowToTrack = this.selection?.usage;
+				tracker.setAllowToTrack( allowToTrack );
+				( new GlobalTracking() ).trackSetupWizardProUpsell( event?.target?.href, this.getProInterests() );
+			} );
+		}
 	};
 
 	/**
@@ -379,9 +533,10 @@
 			compiled =
 				compiled ||
 				_.template( document.getElementById( id ).innerHTML );
+			data.first_slide = WP_Smush.onboarding.first_slide;
 			return compiled( data );
 		};
 	} );
 
 	window.addEventListener( 'load', () => WP_Smush.onboarding.init() );
-} )();
+}() );

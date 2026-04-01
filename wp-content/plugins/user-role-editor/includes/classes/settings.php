@@ -19,11 +19,11 @@ class URE_Settings {
             'ure_settings_ms_update', 
             'ure_default_roles_update',
             'ure_settings_tools_exec');
-        foreach($update_buttons as $update_button) {
-            if (!isset($_POST[$update_button])) {
+        foreach( $update_buttons as $update_button ) {
+            if ( !isset( $_POST[$update_button] ) ) {
                 continue;
             }
-            if (!wp_verify_nonce($_POST['_wpnonce'], 'user-role-editor')) {
+            if ( !wp_verify_nonce($_POST['_wpnonce'], 'user-role-editor') ) {
                 wp_die('Security check failed');
             }
             $action = $update_button;
@@ -189,8 +189,7 @@ class URE_Settings {
         
         $lib = URE_Lib::get_instance();
         $other_default_roles = $lib->get_option('other_default_roles', array());
-        $roles = $lib->get_user_roles();
-        ksort( $roles );
+        $roles = $lib->get_editable_user_roles();
         $wp_default_role = get_option('default_role');
         foreach ($roles as $role_id => $role) {
             if ( $role_id=='administrator' || $role_id==$wp_default_role ) {
@@ -203,7 +202,7 @@ class URE_Settings {
             }
             echo '<label for="wp_role_' . $role_id .'"><input type="checkbox"	id="wp_role_' . $role_id . 
                 '" name="wp_role_' . $role_id . '" value="' . $role_id . '"' . $checked .' />&nbsp;' . 
-                esc_html__( $role['name'], 'user-role-editor' ) . '</label><br />';
+                esc_html( $role['name'] ) . '</label><br />';
           }		
            
     }

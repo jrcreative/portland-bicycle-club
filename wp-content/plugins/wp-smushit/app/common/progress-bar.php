@@ -4,10 +4,9 @@
  *
  * @package WP_Smush
  *
- * @var integer $count Total number of images to smush.
+ * @var integer $count          Total number of images to smush.
+ * @var string  $in_processing_notice
  */
-
-use Smush\Core\Core;
 
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -18,30 +17,13 @@ if ( ! defined( 'WPINC' ) ) {
 <div class="wp-smush-bulk-progress-bar-wrapper sui-hidden">
 	<div class="sui-notice sui-notice-warning sui-hidden"></div>
 
-	<div class="sui-notice sui-notice-warning sui-hidden" id="bulk_smush_warning">
+	<div id="wp-smush-running-notice" class="sui-notice">
 		<div class="sui-notice-content">
 			<div class="sui-notice-message">
 				<i class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></i>
 				<p>
 					<?php
-					$upgrade_url = add_query_arg(
-						array(
-							'coupon'       => 'SMUSH30OFF',
-							'checkout'     => 0,
-							'utm_source'   => 'smush',
-							'utm_medium'   => 'plugin',
-							'utm_campaign' => 'smush_bulksmush_limit_reached_upgradetopro',
-						),
-						$this->upgrade_url
-					);
-
-					printf(
-					/* translators: %s1$d - bulk smush limit, %2$s - upgrade link, %3$s - </a>, %4$s - <strong>, $5$s - </strong> */
-						esc_html__( 'The free version of Smush allows you to compress %1$d images at a time. %2$sUpgrade to Pro for FREE%3$s to compress unlimited images at once or click Resume to compress another %1$d images.', 'wp-smushit' ),
-						absint( Core::$max_free_bulk ),
-						'<a href="' . esc_url( $upgrade_url ) . '" target="_blank" style="color: #8D00B1;">',
-						'</a>'
-					)
+					echo wp_kses_post( $in_processing_notice );
 					?>
 				</p>
 			</div>
@@ -60,35 +42,52 @@ if ( ! defined( 'WPINC' ) ) {
 				<span class="wp-smush-progress-inner" style="width: 0%"></span>
 			</div>
 		</div>
-		<button class="sui-progress-close wp-smush-cancel-bulk" type="button">
+		<?php
+			$cancel_btn_class = 'wp-smush-cancel-btn';
+		?>
+		<button class="sui-progress-close <?php echo esc_attr( $cancel_btn_class ); ?>" type="button">
 			<?php esc_html_e( 'Cancel', 'wp-smushit' ); ?>
 		</button>
 		<button class="sui-progress-close sui-button-icon sui-tooltip wp-smush-all sui-hidden" type="button" data-tooltip="<?php esc_html_e( 'Resume scan.', 'wp-smushit' ); ?>">
 			<i class="sui-icon-play"></i>
 		</button>
 	</div>
-
-	<div class="sui-progress-state">
-		<span class="sui-progress-state-text">
-			<span>0</span>/<span class="wp-smush-total-count"><?php echo absint( $count ); ?></span> <?php esc_html_e( 'images smushed', 'wp-smushit' ); ?>
-		</span>
-	</div>
-
-	<div id="bulk-smush-resume-button" class="sui-hidden">
-		<div style="display: flex; flex-flow: row-reverse;">
-			<a class="wp-smush-all sui-button wp-smush-started">
-				<i class="sui-icon-play" aria-hidden="true"></i>
-				<?php esc_html_e( 'Resume', 'wp-smushit' ); ?>
-			</a>
+	
+	<div class="sui-box-footer" style="border-top:none;margin:10px 0 0;padding:0;">
+		<div class="sui-actions-left" style="margin:0">
+			<div class="wp-smush-bulk-hold-on-notice sui-hidden">
+				<p class="sui-p-small" style="color:#333">
+					<?php
+					printf(
+						/* translators: 1: Open <strong> tag, 2: Close </strong> tag */
+						esc_html__( '%1$sNote:%2$s The process is taking longer than expected, please hold on while we try to resolve this for you.', 'wp-smushit' ),
+						'<strong>',
+						'</strong>'
+					);
+					?>
+				</p>
+			</div>
 		</div>
-	</div>
 
-	<div id="wp-smush-running-notice" class="sui-notice" style="margin-top: 30px">
-		<div class="sui-notice-content">
-			<div class="sui-notice-message">
-				<i class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></i>
-				<p><?php esc_html_e( 'Bulk smush is currently running. You need to keep this page open for the process to complete.', 'wp-smushit' ); ?></p>
+		<!-- Elements aligned to right -->
+		<div class="sui-actions-right">
+			<div class="sui-progress-state">
+				<span class="sui-progress-state-text"><span>0</span>/<span class="wp-smush-total-count"><?php echo absint( $count ); ?></span> </span>
+				<span class="sui-progress-state-unit"><?php esc_html_e( 'images optimized', 'wp-smushit' ); ?></span>
 			</div>
 		</div>
 	</div>
+
+	<div id="bulk-smush-resume-button" class="sui-hidden">
+		<a class="sui-button wp-smush-started wp-smush-resume-bulk-smush">
+			<i class="sui-icon-play" aria-hidden="true"></i>
+			<?php esc_html_e( 'Resume', 'wp-smushit' ); ?>
+		</a>
+	</div>
 </div>
+<?php
+$this->view(
+	'stop-bulk-smush',
+	array(),
+	'modals'
+);

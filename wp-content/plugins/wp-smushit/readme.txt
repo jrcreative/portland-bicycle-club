@@ -1,347 +1,590 @@
-=== Smush - Lazy Load Images, Optimize & Compress Images ===
-Plugin Name: Smush - Lazy Load Images, Optimize & Compress Images
-Version: 3.8.2
+=== Smush – Image Optimization, Compression, Lazy Load, WebP & CDN===
+Plugin Name: Smush – Image Optimization, Compression, Lazy Load, WebP & CDN
+Version: 3.24.0
 Author: WPMU DEV
-Author URI: https://premium.wpmudev.org/
+Author URI: https://wpmudev.com/
 Contributors: WPMUDEV, alexdunae
-Tags: optimize images, convert webp, lazy load, resize images, compress images, webp, performance, optimization, photography, optimizer, image optimizer, image compress, image optimize, webp format
-Requires at least: 5.2
-Tested up to: 5.6
-Stable tag: 3.8.2
-Requires PHP: 5.6.20
+Tags: optimize images, convert webp, webp, image optimization, compress images
+Requires at least: 6.4
+Tested up to: 6.9
+Stable tag: 3.24.0
+Requires PHP: 7.4
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Compress images & optimize images with lazy load, WebP conversion, and resize detection to make your site load amazingly fast.
+Compress and optimize images, enable lazy load, serve WebP & AVIF, and speed up your site with a global image CDN.
 
 == Description ==
+**Compress images, optimize images, and enable image lazy load automatically to keep your WordPress site fast, without losing quality.**
+  
+Smush makes it easy to optimize images, compress images, and deliver images faster across your entire WordPress site. Automatically reduce image file sizes, enable image lazy load, and serve modern formats like WebP and AVIF, all without breaking image quality or adding extra work.  
+  
+Whether you’re running a blog, store, or portfolio, Smush helps you optimize images at scale and keep your site fast.  
+  
+Trusted by over 1 million WordPress sites.  
+  
+With a 4.8/5 rating.  
+  
+Everything you need to optimize images and speed up your site.  
+  
+Works out of the box with no complicated setup.  
 
-**Optimize images, turn on lazy load, resize, compress & improve your Google Page Speed with the incredibly powerful and 100% free WordPress image smusher, brought to you by the superteam at WPMU DEV!**
+### Compress images without losing quality ###
 
-And whether you spell it 'optimise' or 'optimize', Smush will compress images without a visible drop in quality.
+Reduce image file sizes automatically while keeping your images sharp and clear. Smush lets you compress images using both lossless and lossy compression, so you get the best balance of quality and performance without extra work.  
 
-Image optimization is the easiest way to make your site load super fast!
+You can also compress images outside the media library using Directory Smush, making it easy to optimize images stored in theme folders, plugins, or other directories on your server.
 
-### Award Winning Image Optimizer
-Smush has been benchmarked and tested number one for speed and quality. It is also the [award-winning](https://torquemag.io/2018/04/smush-image-compression-wins-2018-plugin-madness/), back-to-back proven crowd favorite image optimization & image compression plugin for WordPress.
+### Lazy load images for faster pages ###
 
-- Lossless Compression – Strip unused data and compress images without affecting image quality.
-- Lazy Load - Defer offscreen images with the flip of a switch.
-- Bulk Smush – Optimize & compress up to 50 images with one click.
-- Image Resizing – Set a max width and height and large images will scale down as they are being compressed.
-- Incorrect Size Image Detection – Quickly locate images that are slowing down your site.
-- Directory Smush – Optimize images even if they are not located in the media library.
-- Automated Optimization – Asynchronously auto-smush your attachments for super fast compression on upload.
-- Without Monthly Limits – Optimize all of your images up to 5MB in size, free forever (no daily, monthly, or annual caps).
-- Gutenberg Block Integration – View all Smush stats directly in image blocks.
-- Multisite Compatible – Offers both global and individual Multisite settings.
-- Process All Your Files – Smush will process PNG, JPEG, and GIF files for optimum results.
-- Super Servers - Smush images with no slowdown using WPMU DEV's fast, reliable Smush API.
-- Convert to WebP (Pro Only) - Upgrade and automatically serve images in Next-Gen WebP format.
-- And many, many, more!
+Enable image lazy load across your site so images load only when needed. This improves initial page speed and creates a smoother experience for visitors without extra configuration.  
 
-### Learn The Ropes With These Hands-On Smush Tutorials
+### Serve WebP and AVIF images automatically (PRO) ###
 
-- [How to Get the Most Out of Smush Image Optimization](https://premium.wpmudev.org/blog/how-to-get-the-most-out-of-smush/)
-- [How To Ace Google’s Image Page Speed Recommendations With Smush](https://premium.wpmudev.org/blog/smush-pagespeed-image-compression/)
-- [How To Bulk Optimize Images With Smush](https://premium.wpmudev.org/blog/smush-bulk-optimize-images/)
+Convert images to WebP and AVIF and serve them automatically to supported browsers. Smush helps you optimize images using next-gen formats to reduce file size and improve load times across your WordPress site.  
 
-### Compress Image While Preserving Image Quality
+### Deliver images faster with an Image CDN (PRO) ###
 
-Some image compression tools destroy images with as much as a 30% loss in quality. Our servers strip hidden bulky information from your images and reduce file size without affecting the appearance.
+Serve images through a global image CDN to reduce latency and improve load times for visitors around the world.  
 
-[youtube https://www.youtube.com/watch?v=Z1kTcyLFE2g&feature=youtu.be]
+*   119 global CDN servers
+*   Up to 500 GB of bandwidth
+*   Faster image delivery based on visitor location
+*   Improved performance for image-heavy and high-traffic sites
 
-Smush meticulously scans every image you upload – or have already added to your site – cuts all the unnecessary data and scales it for you before adding it to your media library. And it can serve images in the WebP format.
+### Automatically resize and fix image dimensions (PRO) ### 
 
-### Compress any Image in any Directory
+Eliminate common PageSpeed warnings and improve layout stability with automatic image sizing. Smush dynamically resizes images to perfectly fit their containers, regardless of original size, helping fix the “Properly size images” warning in Google PageSpeed Insights.
 
-In addition to smushing your media uploads, you may want to compress the images stored in other folders. Smush now lets you compress any image in any directory so that you can optimize all the images on your site – including [NextGEN](https://wordpress.org/plugins/nextgen-gallery/) images, images stored on Amazon S3 using [WP Offload Media](https://wordpress.org/plugins/amazon-s3-and-cloudfront/) and images in EVERY WordPress plugin and theme package!
+It also automatically adds missing width and height attributes to your images, improving rendering speed and reducing layout shifts. This helps you meet the “Ensure images have explicit width and height” recommendation without any manual work.
 
-### Compatible with Your Favorite Themes, Page Builders and Media Library Plugins
+### Optimize your entire site, automatically ###
 
-No matter what theme or plugins you use to better manage your WordPress media library, Smush has you covered. Check out just a few of the popular products Smush is working with to help make your site faster and more efficient:
+Smush works across your whole site to optimize images as you upload them and maintain performance over time without manual work.  
 
-- [WP All Import](https://wordpress.org/plugins/wp-all-import/)
-- [WP Offload Media](https://wordpress.org/plugins/amazon-s3-and-cloudfront/)
-- [WP Media Folder](https://www.joomunited.com/wordpress-products/wp-media-folder)
-- [WP Retina 2x](https://wordpress.org/plugins/wp-retina-2x/)
-- [NextGen Gallery](https://wordpress.org/plugins/nextgen-gallery/)
-- [WPML](https://wpml.org/)
-- [Envira Gallery](https://enviragallery.com/)
-- [Avada Fusion Builder](https://theme-fusion.com/products/fusion-builder/)
-- [Styles](https://wordpress.org/plugins/styles/)
-- And many, many, more!
+*   Optimize images automatically on upload
+*   Compress images in bulk or individually
+*   Works with your existing media library
+*   No need to re-upload images
+*   Enable image lazy load across your site
+*   Convert images to WebP and AVIF
+*   Deliver images with an integrated image CDN
+*   Automatically resize and serve correctly sized images
+*   Optimize images outside the media library with Directory Smush
 
-### Incorrect Size Image Detection
-Smush includes a wrong size image finder. Activate and your images will be highlighted with smart tips for scaling your images. Quickly locate the images that are keeping you from getting that perfect 100 on your Google PageSpeed test.
+### Built for performance ###
 
-### Defer Offscreen Images
-Smush has lazy load built-in. If your page has a bunch of images below the fold, lazy loading will drastically speed up your page by serving only the images being viewed and delaying others further down the page.
+Smush improves page speed and overall performance by reducing image weight and improving how images are delivered.  
 
-★★★★★
-> “I had no idea that my page load time was being dragged down by the images. The plugin nearly halved the time it took.” - [karlcw](http://profiles.wordpress.org/karlcw)
+*   Reduce page load times
+*   Improve user experience
+*   Better performance for image-heavy pages
+*   Supports image lazy load and preload images (PRO) for faster perceived performance
 
-★★★★★
-> “I optimise my photos in Photoshop, but Smush makes it so easy – it does it automatically. I can just sit back and enjoy the speed.” - [helen432](https://profiles.wordpress.org/helen432)
+### Works with your existing setup ###
 
-★★★★★
-> “Smush helped reduce the total files size on my site and increased browsing speed. Well done guys!” - [pdci](https://wordpress.org/support/users/pdci/)
+Smush is built to work with your current WordPress setup, including popular themes, page builders, and plugins.  
 
-★★★★★
-> “It’s very discrete and does not bother me with an API key or other additional installation steps. The main dashboard of the plugin gives me nice insight. Overall it really fits my needs and I’ll be willing to upgrade to pro if my needs change. I’d recommend it to clients/friends without hesitation. Keep it up!” - [tarkan_](https://wordpress.org/support/users/tarkan_/)
+*   Compatible with Gutenberg, Elementor, WPBakery, and more
+*   Works with WooCommerce stores
+*   No need to change your workflow
+*   Easy to enable and configure
 
-### What about Multisite?
+### Designed to be simple ###
 
-Smush can be used to optimize all the images across your entire network! Use global settings or configure each site individually.
+You don’t need to be a performance expert to optimize images with Smush.  
 
-Smush is super easy to use – no confusing compression software settings. Smush images in your library one at a time or bulk smush up to 50 images at a time.  Plus, configure auto-smush to asynchronously scale and compress some or all of your images as they are being uploaded – it's incredibly fast.
+*   Works out of the box
+*   Simple settings when you need them
+*   No technical knowledge required
+*   Safe to use on any site
 
-The faster your site loads, the more Google, Bing, Yahoo, and other search engines will like it. Your site will load faster and rank higher.
+### Why choose Smush? ###
 
-### Shameless Plug(ins)
+There are plenty of image optimization plugins, but Smush focuses on making it easy to optimize images, compress images, and improve performance without complexity.  
 
-- [Hummingbird](https://wordpress.org/plugins/search/Hummingbird/) - Page Speed Optimization
-- [Hustle](https://wordpress.org/plugins/wordpress-popup/) - Pop-ups, Slide-ins and Email Opt-ins
-- [SmartCrawl](https://wordpress.org/plugins/smartcrawl-seo/) - SEO Optimizer
-- [Defender](https://wordpress.org/plugins/defender-security/) - Security, Monitoring, and Hack Protection
-- [Forminator](https://wordpress.org/plugins/forminator/) - Form, Poll, and Quiz Builder
-- [Beehive](https://wordpress.org/plugins/beehive-analytics/) - Customizable Google Analytics Dashboards
+*   Trusted by over 1 million WordPress users
+*   Built specifically for WordPress
+*   Regular updates and improvements
+*   Backed by the WPMU DEV team
 
-Smush can take care of all your image compression needs, for free!
+### Get started in minutes ###
 
-However, if you’d like Super Smush lossy compression, fast CDN image delivery, WebP conversion, automatic resizing, the ability to optimize (or optimise) images up to 32MB, bulk smush optimization for all your images in just one-click, auto-convert PNG to JPEG, the ability to Smush and make a copy of your full-sized images (to restore them at any point), you can always take the next step with [WP Smush Pro](https://premium.wpmudev.org/project/wp-smush-pro/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=smush-readme&utm_content=wp_smush_pro#trial). And get even more with her whole team of WordPress optimization hero friends (security, SEO, performance, support, and maintenance automation) – trusted by thousands of agencies and freelancers offering site maintenance services.
-
-### Privacy
-
-Smush does not interact with end users on your website. The only input option Smush has is to a newsletter subscription for site admins only.
-
-Smush uses a third-party email service (Mailchimp) to send informational emails (Opt-in) to the site administrator. The administrator's email address is sent to Mailchimp and a cookie is set by the service. Only administrator information is collected by Mailchimp.
-
-Smush sends images to the WPMU DEV servers to optimize them for web use. This includes the transfer of EXIF data. The EXIF data will either be stripped or returned as it is. It is not stored on the WPMU DEV servers.
+Install Smush, activate it, and start to compress images, optimize images, and enable image lazy load right away. Most sites see improvements immediately without changing how they upload or manage images.  
 
 == Frequently Asked Questions ==
 
-= I just finished running Smush and Google PageSpeed still says my images need compressing and resizing. How do I fix it? =
+= How do I optimize images in WordPress with Smush? =
 
-This means your images were not properly scaled for where they are being displayed. Scaling images before uploading them can be time-consuming but can save space and speedup load time. First, determine what size your image needs to be. You can use the built-in images size detector included in the free version of Smush to find what height and width your image should be. Once you know how large the image should be, scale your images to the right size.
+Smush makes it easy to optimize images in WordPress automatically.
 
-= PageSpeed Insights is telling me to defer offscreen images. Can Smush fix that?
+Once installed, Smush will optimize images and compress images as you upload them. You can also bulk optimize images already on your site with one click.
 
-Lazy Load will defer your offscreen images from loading until they are needed. From the Smush Dashboard, select Lazy Load and click Activate. Smush Lazy Load works out of the box or can be customized based on your needs.
+= How do I compress images without losing quality? =
 
-*Tip:* If you're having any issues or want to save a ton of time, the Smush Pro CDN includes auto-resizing.
+Smush lets you compress images using both lossless and lossy compression.
 
-= Does Smush delete or replace my original full-size images? =
+This means you can reduce file sizes and improve performance without noticeable quality loss.
 
-Nope. WordPress crops and resizes every image you upload for embedding on your site. By default, Smush only compresses these cropped and resized images, not your original full-size images. To compress your original full-sized images, use [Smush Pro](https://premium.wpmudev.org/project/wp-smush-pro/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=smush-readme&utm_content=smush_pro#trial).
+= Can Smush serve images through an image CDN? =
 
-= What type of file should I use for my images (GIF, PNG, JPG)? =
+Yes. Smush Pro includes a global image CDN.
 
-GIF files are large and can’t be optimized much. They should only be used if the image is animated.
+*   119 global CDN servers
+*   Up to 500 GB of bandwidth
+*   Faster delivery based on visitor location
 
+This helps improve load times for users around the world.
 
-PNG is best for computer generated graphics (vectors, logos, fonts, etc.), images with few colors or images with transparency.
+= How do I fix “properly size images” in PageSpeed Insights? =
 
+This warning means images are larger than the space they are displayed in.
 
-JPG should be used for photography or images with a lot of color variation.
+Smush includes automatic image resizing, which dynamically resizes images to fit their containers. This helps eliminate the “Properly size images” warning without manual work.
 
-*Tip:* The Smush Pro CDN includes WebP compression - sharper images that are 25 to 30 percent smaller than JPEG and PNG files.
+= How do I fix “images missing width and height” warnings? =
 
-= I’m a photographer. Can I keep all my EXIF data? =
+Smush can automatically add missing width and height attributes to your images.
 
-Yes! EXIF data stores camera settings, focal length, date, time, and location information in image files. EXIF data makes image files larger but if you are a photographer, you may want to preserve this information. We have included the option to preserve EXIF image data in Smush.
+This improves rendering speed, reduces layout shifts, and helps you pass Core Web Vitals checks like CLS.
 
-= I just ran Bulk Smush and some of my images didn't get compressed. Why would this happen? =
+= Can Smush convert images to WebP and AVIF? =
 
-First, check to see if you're receiving any server errors. If your images seem to be processing correctly, check the file size of the images being skipped. Images over 5mb will be skipped. To compress images up to 32mb, get [Smush Pro](https://premium.wpmudev.org/project/wp-smush-pro/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=smush-readme&utm_content=wp_smush_pro#trial).
+Yes. Smush can convert images to WebP and AVIF formats to reduce file size and improve performance.
 
-= I activated Smush and I don’t see any difference in image quality. How am I supposed to know if Smush is working? =
+These next-gen formats help you optimize images and meet modern PageSpeed recommendations.
 
-Great question! It is important to understand Smush is an optimization tool that uses lossless image compression to save disk storage space and speed up your site. Smush squeezes data from your image files that will save space, resize huge images, and improve speed without changing quality.
+= Why does PageSpeed say “serve images in next-gen formats”? =
 
-You can track file size changes in your media library, individual image savings, directory savings, and Smush total savings with Smush stats. If you want to see some additional magic, run before-and-after page-speed tests with WP Checkup or Google PageSpeed Insights. Every little bit of resource savings is important when it comes to page-speed!
+This means your images are not using WebP or AVIF.
 
-= Can't I just use Photoshop or another image editing application to optimize my images? =
+Smush helps you convert images to these formats so they load faster and improve your PageSpeed score.
 
-Optimizing all the image sizes generated by WordPress, images being imported from plugins and themes, and images from other web sites is a painful and time-consuming process.
+= Does Smush delete or replace my original images? =
 
-Smush automatically handles optimizing all your images no matter where they come from and can be used as a standalone tool or alongside Photoshop.
+No. Smush does not delete your original images.
 
-= My Google PageSpeed test is telling me to serve images in Next-Gen formats. Can Smush do that? =
+It compresses and optimizes resized versions by default. Full-size image compression is available in Smush Pro.
 
-WebP and other Next-Gen formats are not supported on all browsers and require fallback images. For that reason, WebP conversion is only available in Smush Pro. Smush Pro converts images to WebP for a 25-30% savings over JPEG and PNG and serves fallback images on unsupported browsers.
+= Why aren’t some images being compressed? =
 
-= Is it optimize or optimise? =
-It depends what side of the pond you live on...but whether you say optimize, optimise, optimizer, or Smush goddess of speed, this plugin will make sure your images are loading lightning fast.
+In the free version, images over 5MB are skipped.
+
+Smush Pro supports compressing images up to 256MB.
+
+= Do I still need Photoshop to optimize images? =
+
+No. Smush automatically optimizes images across your entire site, including images added by plugins and themes.
+
+= What is the difference between optimize images and compress images? =
+
+Compressing images reduces file size. Optimizing images includes compression plus resizing, format conversion, and delivery improvements.
+
+Smush handles both automatically.
+
+= How can I report security issues or bugs? =
+
+We take plugin security incredibly seriously; if you have a bug or vulnerability to report, you can do so through the Patchstack Vulnerability Disclosure Program. It’s fast, easy, and you will be notified when the issue is fixed. [Report a vulnerability](https://patchstack.com/database/vdp/wp-smushit).
 
 == Screenshots ==
 
-1. Simple to get started with the Smush setup wizard.
-2. Watch as your image library is processed – up to 50 images at a time.
-3. Set automatic smush to resize and optimize every image as it is uploaded.
-4. Smush will find and optimize images for you.
+1. Bulk Image Compression.
+2. Smush detects images that need compression.
+3. Compress unlimited images in the background.
+4. Compress images like a pro with single Smush settings.
+5. Make your page load faster with lazy loading.
 
 == Changelog ==
 
-= 3.8.2 ( 2020-12-09 ) =
+= 3.24.0 ( 2026-02-23 ) =
+- Improvement: Stability improvements
 
-- Enhance: Compatibility with PHP 8.0
-- Enhance: Compatibility with WP 5.6
-- Enhance: Compatibility with Hub
-- Fix: API validation on new installs
+= 3.23.4 ( 2026-02-05 ) =
+- Fix: PHP error fixed
 
-= 3.8.1 ( 2020-12-03 ) =
+= 3.23.3 ( 2026-02-03 ) =
+- Improvement: Stability improvements
+- Fix: Minor bug fixes
 
-- Fix: Error when querying stats from Hub
+= 3.23.2 ( 2026-01-19 ) =
+- Improvement: Dependency updates and minor code improvements
 
-= 3.8.0 ( 2020-12-03 ) =
+= 3.23.1 ( 2025-12-17 ) =
+- Improvement: Code improvements and minor bug fixes
 
-- New: Local WebP support
-- Enhance: Plugin performance
-- Enhance: Lazy load module will properly distinguish between single/double quotes
-- Enhance: srcset generation speed
-- Fix: Image resize detection flagging images that have been auto resized by CDN
-- Fix: Lazy Load conflicting with Maintenance plugin
-- Fix: PHP warning when saving lazy load settings
-- Fix: Copy URL functionality in media library
-- Fix: Whitelabel branding
-- Fix: Tools link in network admin Settings page
-- Fix: Upsell notice breaking after re-checking images
-- Fix: smush_check_for_conflicts cron running on every page load
-- Fix: Compatibility with SupportCandy plugin
-- Fix: Minor UI issues in Tutorials module
-- Fix: Minor UI issues in NextGen Smush page
-- Fix: CDN image paths on sub-directory installs
+= 3.23.0 ( 2025-12-03 ) =
+- New: Restore multiple images at once with the new Bulk Restore option on the Media Library page
+- Improvement: Restore All Images feature now shows exact reason for restoration failure
+- Improvement: Backup original images and Optimize original images enabled by default for new users
+- Fix: Smush Directory keeps showing images that need to be optimized
+- Fix: LCP preload tag not added for relative image URLs
+- Fix: Elementor background images not converted to Next-Gen formats
+- Fix: Lazy-loaded video thumbnails not working in Elementor
 
-= 3.7.3 ( 2020-11-23 ) =
+= 3.22.1 ( 2025-10-01 ) =
+- Fix: Memory issues caused by Elementor integration
 
-- Enhance: Minor UI/UX details
+= 3.22.0 ( 2025-10-01 ) =
+- Improvement: More accurate use of fetchpriority=high based on LCP data
+- Improvement: General UI enhancements
+- Fix: LCP image not lazy-loaded after disabling preload
+- Fix: Incorrect Preload Critical Images status shown in summary box
+- Fix: Wrong retina image size applied by the auto-resize module
+- Fix: Incorrect LCP image detected on mobile in certain cases
 
-= 3.7.2 ( 2020-11-10 ) =
+= 3.21.1 ( 2025-09-02 ) =
+- Fix: Auto-resize module using incorrect aspect ratio for cropped images
+- Fix: Auto-resize module using lower quality version in certain situations
+- Fix: Images using width or height attributes with percentage values resized incorrectly
+- Fix: Images in Divi shrinking on page scroll in mobile devices
 
-- Enhance: Plugin UI/UX
-- Enhance: Compatibility with NextGen
-- Fix: CDN parsing of background images
-- Fix: Image counter when re-checking images
-- Fix: Bulk Smush counter going over total number of images
-- Fix: Bulk Smush counter on network admin
+= 3.21.0 ( 2025-08-18 ) =
+- New: Automatic image resizing option in Lazy Loading to make sure every image fits its container size
+- New: Add Missing Dimensions option in Lazy Loading to resolve Pagespeed audit of "Ensure images have explicit height and width"
+- Improvement: Changed "Automatic Resizing" feature name in CDN to "Dynamic Image Sizing"
+- Improvement: Added an Advanced section on the Bulk Smush page to streamline the experience
+- Improvement: Added an Advanced section on the Lazy Load page to streamline the experience
+- Fix: Minor code improvements
 
-= 3.7.1 ( 2020-09-24 ) =
+= 3.20.0 ( 2025-06-17 ) =
+- New: Lazy load YouTube and Vimeo videos to improve page load speed
+- Fix: Resize Detection feature sometimes doesn't work correctly with Lazy Load
+- Fix: Layout shift with lazy loading
+- Fix: Timeout error is returned for some transparent PNGs when Smush Mode is set to Basic
+- Fix: Not all options are deleted from the database after uninstalling
+- Fix: All-In-One Security incorrectly reporting issue due to Smush loopback check
 
-- New: Tutorials sections
-- Enhance: Update the modal that displays the highlights of this release
-- Enhance: Compatibility with NextGen
-- Enhance: Compatibility with SVG images
-- Fix: Image resize detection styles
-- Fix: Tracking option on network subsites
-- Fix: Lazy load placeholder background colors
-- Fix: Lazy load custom placeholders on network installs
-- Fix: Jetpack CDN compatibility
-- Fix: Notice on CDN page
+= 3.19.1 ( 2025-05-29 ) =
+- Improvement: Only detect LCP element above the fold
+- Improvement: Add fetchpriority high to LCP element
+- Improvement: Ensure compatibility of LCP feature with popular caching plugins
+- Improvement: Ability to exclude pages from LCP preloading
+- Improvement: Ability to clear LCP cache
+- Fix: LCP element not located in certain scenarios
 
-= 3.7.0 ( 2020-09-03 ) =
+= 3.19.0 ( 2025-05-12 ) =
+- New: Preload critical images to improve page load speed and resolve LCP (Largest Contentful Paint) warnings
+- Fix: Filenames with Chinese characters were automatically converted to Unicode, causing display issues
+- Fix: Lazyload module removes the background size attribute from inline CSS
+- Fix: Picture tags are lazy loaded even in excluded areas
 
-- New: Option to disable noscript in lazy load
-- New: WordPress 5.5 lazy load compatibility
-- New: Integration with Translate Press
-- New: WP_SMUSH_CDN_DELAY_SRCSET constant to delay wp_calculate_image_srcset filter
-- New: WP_SMUSH_ASYNC_LAZY constant to utilize async loading for lazy load scripts
-- Enhance: Compatibility with S3-Uploads plugin
-- Enhance: Disable CDN and lazy load modules on customizer pages
-- Enhance: CDN parsing of background images
-- Enhance: Allow directory Smush in site directories
-- Enhance: Improve wording in directory Smush notices
-- Enhance: Async load lazy load scripts
-- Fix: Image resize detection styles
-- Fix: Fix errors detecting mime type of remote streams
-- Fix: Lazy loading integration with fusion galleries (Avada)
-- Fix: Lazy loading not working with images that have GET parameters
-- Fix: Lazy loading placeholders not visible on some themes
-- Fix: CDN background images not working with images that have GET parameters
-- Fix: CDN usage of content_width global
-- Fix: Skip iframes with invalid URLs from lazy loading
-- Fix: W3C validation warnings with CDN
-- Fix: Compatibility with Vimeography plugin
-- Fix: Soliloquy slider images' incorrect source
-- Fix: Soliloquy navigation misalignment when lazy loading
-- Fix: Smush page in NextGen Gallery plugin looking unstyled
+= 3.18.1 ( 2025-04-24 ) =
+- Improvement: WP 6.8 compatibility
 
-= 3.6.3 ( 2020-05-06 ) =
+= 3.18.0 ( 2025-03-11 ) =
+- New: Reduced image filesize at better visual quality with new AVIF conversion!
+- Improvement: White label improvements
+- Improvement: Better stats for WebP conversion
+- Improvement: Compatibility check and minor fixes for PHP 8.4
+- Fix: Some images listed as not optimized after Local WebP conversion
+- Fix: CDN forcing browsers to load full-sized images for smaller container size
 
-- Fix: CDN auto resize option causing issues with images
+= 3.17.1 ( 2025-02-06 ) =
+- Improvement: Security hardening
+- Improvement: Minor code improvements
 
-= 3.6.2 ( 2020-05-04 ) =
+= 3.17.0 ( 2025-01-29 ) =
+- Improvement: Use streams to send full image to the Smush API
+- Fix: Number of optimized images inaccurate
+- Fix: When Local WebP Direct Method and Lazy Load are enabled, images inside picture tags not being served as WebP
+- Fix: Error "Server configurations haven't been applied yet" shown unnecessarily sometimes
+- Fix: CDN slowing down page load due to unnecessary DB queries
+- Fix: Divi breaking Smush CDN image resizing
+- Fix: Auto-resize feature not adding new sizes when srcset is already present in img tag
 
-- New: CDN and lazy load integration with Soliloquy slider
-- Enhance: Native lazy loading disabled by default, added option to enable it
-- Enhance: Lazy load and CDN page parsing
-- Enhance: Summary module layout
-- Enhance: Image resize detection highlighting
-- Fix: Images with relative paths not processing by CDN
-- Fix: Object cache not clearing out stats during Re-Check Images action
-- Fix: Pages with lazy loading showing errors during W3C validation
-- Fix: Multiple noscript tags when lazy loading duplicate images
-- Fix: NextGen Re-Smush UI
-- Fix: Image resize settings not respecting the largest dimension
+= 3.16.12 ( 2025-01-08 ) =
+- Fix: Conflict with Formidable Forms
+- Fix: Avoid image fetch errors
 
-= 3.6.1 ( 2020-03-06 ) =
+= 3.16.11 ( 2024-12-10 ) =
+- Fix: CDN exclusions conflict with auto resizing
 
-- Enhance: Directory Smush image processing
-- Enhance: CDN background image processing performance
-- Fix: Lazy loading breaking visual editors (Oxygen, Thrive Architect, Tatsu)
-- Fix: WooCommerce breaking Smush onboarding dialog
-- Fix: CDN processing of background images with spaces
-- Fix: REST API errors
+= 3.16.10 ( 2024-12-04 ) =
+- New: Added a UI option to exclude specific images from Smush CDN.
+- Improvement: Disabled Noscript tags by default to prevent broken images and potential performance regressions.
+- Improvement: Enhanced the Bulk Smush process for a smoother user experience.
+- Improvement: Improved WPML compatibility for seamless multilingual support.
+- Fix: Excluded lazy loading placeholders from the CDN to resolve conflicts and prevent broken images.
+- Fix: Added WP 6.7 compatibility fixes.
 
-= 3.6.0 ( 2020-02-25 ) =
+= 3.16.9 ( 2024-11-13 ) =
+- Improvement: Smush API upgrades and improvements for better memory management
+- Fix: Prevent broken images on Smush CDN when using relative links
+- Fix: Hummingbird Performance Test conflicts
+- Fix: Missing thumbnails when using PNG to JPG conversions
 
-- New: CDN support for images in REST API responses
-- New: Media library filter to show uncompressed images
-- New: Native lazy loading support
-- Enhance: Image resize detection functionality
-- Enhance: Allow excluding images from lazy loading with data-skip-lazy attribute
-- Enhance: Improve restore backup UI
-- Enhance: Bulk smush UI
-- Fix: NextGEN Gallery integration
-- Fix: Error detecting language error on Settings page
-- Fix: "Choose directory" button disabled state after first click
-- Fix: Some notices not being dismissible
-- Fix: Image restore
+= 3.16.8 ( 2024-09-19 ) =
+- Fix: Smush API handing improvements
 
-= 3.5.1 ( 2020-02-10 ) =
+= 3.16.7 ( 2024-09-11 ) =
+- Improvement: Reduced memory consumption during the Smush process
+- Improvement: Better directory Smush compatibility with Flywheel
+- Fix: Unicode characters in image URLs causing issues
+- Fix: Improved compatibility with native lazy loading
+- Fix: PHP errors and warnings
 
-- Fix: Browser console errors on pages without Backbone js scripts
-- Fix: Lazy load compatibility with Beaver Builder
-- Fix: Lazy load breaking videos
+= 3.16.6 ( 2024-07-30 ) =
+- Fix: PHP warnings
+- Improvement: Compatibility with WP 6.6
 
-= 3.5.0 ( 2020-02-03 ) =
+= 3.16.5 ( 2024-06-20 ) =
+- Improvement: Security improvements
+- Fix: Compatibility issue with Divi
 
-- New: Add custom post types to include/exclude filters in the lazy load module
-- New: CDN support for source in the picture element
-- New: Lazy loading for WebP images
-- New: Lazy loading support for picture element
-- Enhance: Page parsing performance
-- Enhance: Media library UI
-- Enhance: CDN compatibility with empty srcset and sizes image attributes
-- Enhance: CDN support for background images
-- Enhance: Lazy load compatibility with Envira Gallery plugin
-- Enhance: Plugins page links
-- Fix: CDN not detecting background images surrounded by HTML entities
-- Fix: CDN not replacing srcset in some cases
-- Fix: Lazy load Gravatars
-- Fix: WPBakery Page Builder integration
-- Fix: Typos in the lazy load module
+= 3.16.4 ( 2024-05-22 ) =
+- Fix: Loopback error shown unnecessarily for some sites
+- Improvement: Better UI for the loopback error
 
-[Changelog for previous versions](https://premium.wpmudev.org/project/wp-smush-pro/#view-changelog).
+= 3.16.3 ( 2024-05-15 ) =
+- Improvement: Better handling of rotated images
+- Improvement: Better pre-flight checks before bulk Smush is started
+- Fix: Performance issues in CDN and webp link replacement functionality
+- Fix: Bulk Smush performance issues
+- Fix: Compatibility issue with wp.com
+
+= 3.16.2 ( 2024-04-09 ) =
+- Fix: LazyLoad module not working correctly for picture elements in certain situations
+- Fix: LazyLoad module not working correctly for some CSS variables
+- Fix: Better handling of !important CSS rules by the LazyLoad module
+- Fix: Performance issues on some WooCommerce pages
+
+= 3.16.1 ( 2024-03-27 ) =
+- Improvement: Better compatibility with page builders
+- Improvement: General code improvements
+- Fix: WP Offload integration preventing some formats from getting offloaded
+
+= 3.16.0 ( 2024-03-06 ) =
+- New: Directly serve Local Webp images, no rewrite rules required!
+- New: Support for inline style tags in CDN and Local WebP modules
+- New: Support for multiple background images in CDN and Local WebP modules
+- New: Better support for relative links in CDN and Local WebP modules
+- New: Better REST API support in CDN and Local WebP modules
+- New: CDN and Local WebP images served in WooCommerce REST API responses
+- New: Local WebP compatibility with Windows IIS servers
+- New: Local WebP compatibility with bedrock
+- New: Local WebP compatibility with Litespeed
+- New: Local WebP compatibility with Cloudways
+- New: Lazy loading of background images
+- Fix: Local WebP redirection doesn't work for images with special characters
+- Fix: Free version of Smush creating smush-webp folder when activated
+- Fix: Extra slash added to image URLs during optimization
+- Fix: WP 6.3 compatibility - Skip lazyload for high priority images
+
+= 3.15.5 ( 2024-02-06 ) =
+- Improvement: Update the number of CDN locations
+- Improvement: Minor copy and UI adjustments
+
+= 3.15.4 ( 2024-01-23 ) =
+- Fix: Media library scan gets stuck on some websites
+- Improvement: Minor copy and UI changes
+
+= 3.15.3 ( 2023-12-20 ) =
+- Improvement: Code stability improvements
+
+= 3.15.2 ( 2023-12-06 ) =
+- Fix: Compatibility issues with WP Offload Media integration
+- Fix: Resize module deletes thumbnail when there is a naming conflict
+
+= 3.15.1 ( 2023-11-15 ) =
+- Improvement: Code stability improvements
+
+= 3.15.0 ( 2023-10-11 ) =
+- Improvement: Image size limit increased for pro version
+- Fix: Query running frequently and causing performance issues on some sites
+
+= 3.14.2 ( 2023-08-23 ) =
+- Fix: Media library scanner not identifying some MariaDB versions correctly
+- Improvement: Code improvements
+
+= 3.14.1 ( 2023-07-24 ) =
+- Improvement: Minor code improvements and fixes
+
+= 3.14.0 ( 2023-07-17 ) =
+- New: Ultra Smush - Level up your image compression, while preserving remarkable image quality
+- Fix: Resolved issue with image resize in WP versions < 6.0
+- Fix: Resolved PHP 8.x error on GoDaddy Managed WP Hosting
+- Fix: Other minor bug fixes and UI improvements
+
+= 3.13.2 ( 2023-07-05 ) =
+- Improvement: Small code and text improvements
+
+= 3.13.1 ( 2023-06-13 ) =
+- Improvement: Better memory management during scans
+- Fix: Dot added to file path when year and month directories disabled
+- Fix: Compatibility issue with WP.com
+- Fix: Rename config functionality not working
+- Fix: Compatibility issue with WP Offload Media
+- Fix: PHP warnings
+- Fix: Duplicate query
+
+= 3.13.0 ( 2023-05-30 ) =
+- New: Scan for detecting changes in the media library
+- Improvement: Performance improvements on large sites
+- Improvement: Code refactoring
+- Fix: PHP warnings and notices
+- Fix: Missing comments for translation strings that have placeholders in them
+- Fix: Compatibility issues with WP Offload Media
+- Fix: Timeout on Smush pages when there are more than 200k images
+- Fix: Images incorrectly marked as requiring resmush
+- Fix: Ignore link stuck in Grid Layout mode in the media library
+
+= 3.12.6 ( 2023-03-09 ) =
+- Enhance: Compatibility with WordPress 6.2.
+- Fix: Upgrade modal reappears after closing
+
+= 3.12.5 ( 2023-01-18 ) =
+- Fix: CDN notice issue
+- Fix: PHP 8.2 compatibility warnings
+- Fix: Smush acting as free on staging
+
+= 3.12.4 ( 2022-11-17 ) =
+- Improvement: Code and compatibility improvements
+
+= 3.12.3 ( 2022-10-24 ) =
+- Fix: Free to pro upgrade issue
+
+= 3.12.2 ( 2022-10-19 ) =
+- Improvement: Security hardening
+- Fix: Issues on older PHP versions
+
+= 3.12.1 ( 2022-10-11 ) =
+- Fix: PHP error on non-English language sites
+
+= 3.12.0 ( 2022-10-11 ) =
+- New: Bulk smush images in the background!
+- New: Revised limits on bulk image optimization
+- New: Better GDPR compliance by replacing Google fonts with Bunny fonts
+- New: Filter on media library page to view media items with errors
+- New: Option to receive an email once bulk smush is complete
+- Fix: Some images incorrectly selected for resmush
+- Fix: Database error while converting PNG to JPG on WordPress 6.1 Beta
+
+= 3.11.1 ( 2022-08-19 ) =
+- Fix: Fallback to sequential processing when parallel processing not possible
+
+= 3.11.0 ( 2022-08-11 ) =
+- New: Smush all image sizes in parallel for improved performance
+- Improvement: Code improvements
+
+= 3.10.3 ( 2022-07-14 ) =
+
+- Enhance: CDN activation process
+- Enhance: Improve media library image filters
+- Enhance: CDN compatibility with Avada theme
+- Enhance: Add notice about disabled folders in directory Smush module
+- Fix: Errors table UI on bulk smush page
+- Fix: Bulk smush UI when images have been removed when page was already loaded
+- Fix: Cron job of logger library not running properly
+- Fix: Remove tools meta box from dashboard page
+- Fix: Recover image from NextGen Gallery button does not reset Smush data
+- Fix: Image dimensions meta does not reset after restoring a resized image in NextGen Gallery
+- Fix: Incorrect percent of total savings on Dashboard page
+- Fix: Pro feature enable/disable toggles are clickable in free version
+
+= 3.10.2 ( 2022-06-16 ) =
+
+- Enhance: Data processing
+- Enhance: Database calls
+- Fix: Loading images from remote location
+
+= 3.10.1 ( 2022-06-09 ) =
+
+- Fix: PHP error on dash page
+
+= 3.10.0 ( 2022-06-09 ) =
+
+- New: Lossy compression is now free for all users
+- New: Summary meta box
+- Enhance: Move out image restore to bulk smush module
+- Enhance: Move out image resize detection to settings module
+- Enhance: Update opt-in notice design
+- Fix: Upsell notice logic
+- Fix: Skip image sizes not in WordPress format
+- Fix: Skip onboarding wizard if a config has been applied
+- Fix: Image sizes selector
+- Fix: Rename "Basic" config to "Default"
+- Fix: Do not show WebP notice in case of error
+- Fix: Auto compression does not work for NextGen Gallery
+- Fix: Settings link on Plugins page
+- Fix: Welcome modal does not close when we go to the Bulk Smush page
+
+= 3.9.11 ( 2022-05-23 ) =
+
+- Enhance: Code quality
+- Fix: Minor code quality issues
+- Fix: Update internal libraries
+
+= 3.9.10 ( 2022-05-17 ) =
+
+- New: Gravity Forms integration
+- New: `smush_background_images_regex` and `smush_images_from_content_regex` filters to adjust regex rules for finding images on the page
+- New: `smush_cdn_before_process_background_src` filter to adjust background image src
+- New: Add additional parameters to `smush_skip_adding_srcset` filter to allow disabling auto-resize for selected images
+- Enhance: Compatibility with WPBakery page builder
+- Enhance: Compatibility with Offload Media plugin
+- Enhance: Handling images via REST API endpoints
+- Fix: Directory Smush savings cached and not updated
+- Fix: "What's new" modal not hiding if white label is enabled
+- Fix: Missing primary key on smush_dir_images table
+- Fix: Scaled images not being resized on resize settings change
+- Fix: Bulk Smush will now show all errors, instead of just the first 5
+- Fix: Animated GIF images not being excluded from bulk Smush
+- Fix: Only allow network wide activation of Smush
+
+= 3.9.9 ( 2022-05-03 ) =
+
+- Enhance: Code quality
+- Enhance: Handling user input
+- Enhance: Update React modules to latest versions
+- Fix: XSS vulnerability when uploading modified configs
+
+= 3.9.8 ( 2022-03-22 ) =
+
+- New: Add expiry header to Nginx template for WebP
+- New: Add `wp_smush_webp_dir` filter to customize WebP directory
+- Fix: XSS vulnerability
+- Fix: Disable submit button on Integrations page when no integrations available
+- Fix: CDN bandwidth limit status message
+- Fix: Text alignment issue on Bulk Smush page
+- Fix: Highlighting selected lazy load spinner with color accessibility
+- Fix: Compatibility issue with WP Offload Media 2.6.0
+- Fix: Undefined offset notice with certain WooCommerce themes
+
+= 3.9.7 ( 2022-03-01 ) =
+
+- Fix: Local WebP is not activated on applying config after reset settings
+- Fix: Missing WebP file for WP scaled images
+- Fix: Fatal error on PHP 5.6
+- Fix: Compatibility issue with WP Offload Media
+
+= 3.9.6 ( 2022-02-09 ) =
+
+- Enhance: Do not close the Directory Smush modal in case of error
+- Enhance: Tooltips in CDN module
+- Fix: Compatibility issue with PHP 8.1
+- Fix: "Choose Directory" button loading state in case of error
+- Fix: PNG to JPG conversion leaves behind some thumbnails after deleting the image
+- Fix: PNG images that need resizing don't get converted to JPG
+- Fix: Issue creating the WebP test files
+- Fix: Incorrect unique file names during PNG to JPG conversion
+- Fix: Duplicate thumbnails while converting PNG to JPG
+- Fix: Auto refresh API status when updating to Pro version
+
+= 3.9.5 ( 2022-01-25 ) =
+
+- Fix: Translation strings
+- Fix: Remove upsells
+- Enhance: Update admin menu icon
+
+[Changelog for previous versions](https://wpmudev.com/project/wp-smush-pro/#view-changelog).
 
 == About Us ==
 WPMU DEV is a premium supplier of quality WordPress plugins, services and support. Learn more here:
-[https://premium.wpmudev.org/](https://premium.wpmudev.org/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=smush-readme&utm_content=wpmu_dev_link)
+[https://wpmudev.com/](https://wpmudev.com/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=smush-readme&utm_content=wpmu_dev_link)
 
 Don't forget to stay up to date on everything WordPress from the Internet's number one resource:
-[WPMU DEV Blog](https://premium.wpmudev.org/blog/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=smush-readme&utm_content=wpmu_dev_blog_link)
+[WPMU DEV Blog](https://wpmudev.com/blog/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=smush-readme&utm_content=wpmu_dev_blog_link)
 
-Hey, one more thing... we hope you [enjoy our free offerings](http://profiles.wordpress.org/WPMUDEV/) as much as we've loved making them for you!
+Hey, one more thing... we hope you [enjoy our free offerings](https://profiles.wordpress.org/wpmudev/#content-plugins) as much as we've loved making them for you!
 
 == Contact and Credits ==
 

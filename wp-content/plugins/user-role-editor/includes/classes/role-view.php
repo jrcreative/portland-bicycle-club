@@ -5,7 +5,7 @@
  * @package    User-Role-Editor
  * @subpackage Admin
  * @author     Vladimir Garagulya <support@role-editor.com>
- * @copyright  Copyright (c) 2010 - 2016, Vladimir Garagulya
+ * @copyright  Copyright (c) 2010 - 2024, Vladimir Garagulya
  **/
 class URE_Role_View extends URE_View {
  
@@ -13,6 +13,8 @@ class URE_Role_View extends URE_View {
     private $role_to_copy_html = '';
     private $role_select_html = '';
     private $role_delete_html = '';
+    private $caps_to_remove = null;
+    
     
     
     public function __construct() {        
@@ -27,14 +29,8 @@ class URE_Role_View extends URE_View {
     
     
     public function role_default_prepare_html($select_width=200) {
-                        
-        $roles = $this->editor->get('roles');
-        if (!isset($roles) || !$roles) {
-            // get roles data from database
-            $roles = $this->lib->get_user_roles();
-        }        
-        ksort( $roles );
-        
+                                
+        $roles = $this->lib->get_editable_user_roles();        
         $caps_access_restrict_for_simple_admin = $this->lib->get_option('caps_access_restrict_for_simple_admin', 0);
         $show_admin_role = $this->lib->show_admin_role_allowed();
         if ($select_width>0) {
@@ -48,12 +44,7 @@ class URE_Role_View extends URE_View {
             $selected = selected($key, $wp_default_role, false);
             $disabled = ($key==='administrator' && $caps_access_restrict_for_simple_admin && !$this->lib->is_super_admin()) ? 'disabled' : '';
             if ($show_admin_role || $key != 'administrator') {
-                $translated_name = esc_html__($value['name'], 'user-role-editor');  // get translation from URE language file, if exists
-                if ($translated_name === $value['name']) { // get WordPress internal translation
-                    $translated_name = translate_user_role($translated_name);
-                }
-                $translated_name .= ' (' . $key . ')';                
-                $this->role_default_html .= '<option value="' . $key . '" ' . $selected .' '. $disabled .'>' . $translated_name . '</option>';
+                $this->role_default_html .= '<option value="' . $key . '" ' . $selected .' '. $disabled .'>'. esc_html( $value['name'] ) .' (' . $key . ')</option>';
             }
         }
         $this->role_default_html .= '</select>';
@@ -75,9 +66,8 @@ class URE_Role_View extends URE_View {
             <option value="none" selected="selected">' . esc_html__('None', 'user-role-editor') . '</option>';
         $this->role_select_html = '<select id="user_role" name="user_role" onchange="ure_main.role_change( this.value );">';        
         $current_role = $this->editor->get( 'current_role' );
-        $all_roles = $this->editor->get( 'roles' );
+        $all_roles = $this->editor->get( 'roles' );        
         $roles = $this->lib->get_editable_user_roles( $all_roles );
-        ksort( $roles );
         foreach ($roles as $key => $value) {
             if ( $key===$role_to_skip ) { //  skip role of current user if he does not have full access to URE
                 continue;
@@ -85,13 +75,9 @@ class URE_Role_View extends URE_View {
             $selected1 = selected( $key, $current_role, false );
             $disabled = ( $key==='administrator' && $caps_access_restrict_for_simple_admin && !$this->lib->is_super_admin()) ? 'disabled' : '';
             if ( $show_admin_role || $key != 'administrator' ) {
-                $translated_name = esc_html__( $value['name'], 'user-role-editor' );  // get translation from URE language file, if exists
-                if ( $translated_name === $value['name'] ) { // get WordPress internal translation
-                    $translated_name = translate_user_role( $translated_name );
-                }
-                $translated_name .= ' (' . $key . ')';                
-                $this->role_select_html .= '<option value="' . $key . '" ' . $selected1 .' '. $disabled .'>' . $translated_name . '</option>';
-                $this->role_to_copy_html .= '<option value="' . $key .'" '. $disabled .'>' . $translated_name . '</option>';
+                $role_name = esc_html( $value['name'] ) .' (' . $key . ')';
+                $this->role_select_html .= '<option value="' . $key . '" ' . $selected1 .' '. $disabled .'>' . $role_name . '</option>';
+                $this->role_to_copy_html .= '<option value="' . $key .'" '. $disabled .'>' . $role_name . '</option>';
             }
         }
         $this->role_select_html .= '</select>';
@@ -107,7 +93,7 @@ class URE_Role_View extends URE_View {
             ksort( $roles_can_delete );
             $this->role_delete_html = '<select id="del_user_role" name="del_user_role" width="250" style="width: 250px">';
             foreach ($roles_can_delete as $key => $value) {
-                $this->role_delete_html .= '<option value="' . $key . '">' . esc_html__($value, 'user-role-editor') . '</option>';
+                $this->role_delete_html .= '<option value="' . $key . '">' . esc_html( $value ) . '</option>';
             }
             $this->role_delete_html .= '<option value="-1" style="color: red;">' . esc_html__('Delete All Unused Roles', 'user-role-editor') . '</option>';
             $this->role_delete_html .= '</select>';
@@ -136,14 +122,14 @@ class URE_Role_View extends URE_View {
         $caps = array_keys($caps_to_remove);
         asort($caps);
         $network_admin = filter_input(INPUT_POST, 'network_admin', FILTER_SANITIZE_NUMBER_INT);
-        $current_role = filter_input(INPUT_POST, 'current_role', FILTER_SANITIZE_STRING);
+        $current_role = isset( $_POST['current_role'] ) ? URE_Base_Lib::filter_string_var( $_POST['current_role'] ) : '';
         if (!isset($wp_roles->roles[$current_role])) {
             $current_role = '';
         }
         ob_start();
 ?>        
     <form name="ure_remove_caps_form" id="ure_remove_caps_form" method="POST"
-      action="<?php echo URE_WP_ADMIN_URL . ($network_admin ? 'network/':'') . URE_PARENT .'?page=users-'.URE_PLUGIN_FILE;?>" >
+      action="<?php echo admin_url() . ($network_admin ? 'network/':'') . URE_PARENT .'?page=users-'.URE_PLUGIN_FILE;?>" >
         <table id="ure_remove_caps_table">    
             <tr>
                 <th>
@@ -365,7 +351,7 @@ if ($multisite && !is_network_admin()) {
         $caps_access_restrict_for_simple_admin = $this->lib->get_option('caps_access_restrict_for_simple_admin', 0);
         if ($this->lib->is_super_admin() || !$multisite || !$this->lib->is_pro() || !$caps_access_restrict_for_simple_admin) {
 ?>              
-            <input type="checkbox" name="ure_caps_readable" id="ure_caps_readable" value="1" <?php echo $checked; ?> onclick="ure_turn_caps_readable(0);"/>
+            <input type="checkbox" name="ure_caps_readable" id="ure_caps_readable" value="1" <?php echo $checked; ?> onclick="ure_main.turn_caps_readable();"/>
             <label for="ure_caps_readable"><?php esc_html_e('Show capabilities in human readable form', 'user-role-editor'); ?></label>&nbsp;&nbsp;
 <?php
             $show_deprecated_caps = $this->editor->get('show_deprecated_caps');
@@ -380,7 +366,7 @@ if ($multisite && !is_network_admin()) {
 <?php
         }
         if ($multisite && $active_for_network && !is_network_admin() && is_main_site(get_current_blog_id()) && $this->lib->is_super_admin()) {
-            $hint = esc_html__('If checked, then apply action to ALL sites of this Network');
+            $hint = esc_html__( 'If checked, then apply action to ALL sites of this Network', 'user-role-editor' );
             $apply_to_all = $this->editor->get('apply_to_all');
             if ($apply_to_all) {
                 $checked = 'checked="checked"';

@@ -1,11 +1,10 @@
 === User Role Editor ===
 Contributors: shinephp
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=vladimir%40shinephp%2ecom&lc=RU&item_name=ShinePHP%2ecom&item_number=User%20Role%20Editor%20WordPress%20plugin&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: user, role, editor, security, access, permission, capability
-Requires at least: 4.0
-Tested up to: 5.6
-Stable tag: 4.58.2
-Requires PHP: 5.6
+Tags: user, role, editor, security, access
+Requires at least: 4.4
+Tested up to: 6.9
+Stable tag: 4.64.6
+Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +20,8 @@ Role assigned every new created user by default may be changed too.
 Capabilities could be assigned on per user basis. Multiple roles could be assigned to user simultaneously.
 You can add new capabilities and remove unnecessary capabilities which could be left from uninstalled plugins.
 Multi-site support is provided.
+
+Try it out on your free TasteWP [test site](https://demo.tastewp.com/user-role-editor).
 
 To read more about 'User Role Editor' visit [this page](http://www.shinephp.com/user-role-editor-wordpress-plugin/) at [shinephp.com](http://shinephp.com)
 
@@ -80,31 +81,16 @@ https://translate.wordpress.org/projects/wp-plugins/user-role-editor/
 
 
 == Changelog =
-= [4.58.2] 15.01.2021 =
-* Fix: Additional options turned ON for a role was not saved during role update.
-* Update: All JavaScript files are loaded with URE plugin version number as a query string for cache busting purpose.
 
-= [4.58.1] 11.01.2021 =
-* Fix: User lost assigned role(s) after click "Update" at the user permissions page, opened via "Selected user->Capabilities" or "User Profile->Capabilities->Edit" link.
+= [4.64.6] 01.12.2025 =
+* Update: Marked as compatible with WordPress 6.9
+* Update: Minor code enhancements according to the "Plugin Check" tool recommendations.
+* Update: "Users->Grant Roles" HTML code download optimization to exclude cases when URE's "Grant Roles" data flickers or stays visible while Users page is opening.
 
-= [4.58] 11.01.2021 =
-* Update: Users->User Role Editor: Update button saves changes via AJAX without full page reload.
-* Fix: New user registered via frontend (wp-login.php?action=register) automatically receives additional (other) default role(s) according to selection made at User Role Editor settings "Other default roles" tab.
-* Fix: "PHP Deprecated: Required parameter $max_ind follows optional parameter $used in ..\wp-content\plugins\user-role-editor\includes\classes\advertisement.php on line 31" PHP 8.0 notice was fixed.
-* Fix: "JQMIGRATE: jquery.fn.resize() event shorthand is deprecated" notice was fixed.
-* Fix: "JQMIGRATE: jQuery.fn.click() event shorthand is deprecated" notice was fixed.
-* Fix: "JQMIGRATE: Number-typed values are deprecated for jQuery.fn.css( (property name), value )" notice was fixed.
-
-= [4.57.1] 10.12.2020 =
-* Fix: Nextgen Gallery's user capabilities were not shown as granted after current role change via roles selection dropdown list.
-* Fix: PHP Warning:  The magic method __wakeup() must have public visibility. __wakeup() method was defined as private as a part of the Singleton design partern. Method was redefined as public but with exception inside to prevent its usage.
-* Update: jQuery [MultiSelect](http://multiple-select.wenzhixin.net.cn/) plugin  was updated to version 1.5.2
-
-= [4.57] 09.11.2020 =
-* Update: Marked as compatible with WordPress 5.6.
-* Update: " jQuery( document ).ready( handler ) " was replaced globally with " jQuery( handler ) " for compatibility with [jQuery 3.0](https://api.jquery.com/ready/) and WordPress 5.6.
-* Update: jQuery UI CSS was updated to version 1.12.1
-* Fix: "Grant Roles" button produced JavaScript error, if single user without any role granted (None) was selected.
+= [4.64.5] 16.04.2025 =
+* Update: Marked as compatible with WordPress 6.8
+* Update: Minor changes were applied to the CSS/JS loading code to minimize "Plugin Check" tool warnings.
+* Plugin headers were extended at role-editor.php and readme.txt files according to wordpress.org recommendations.
 
 File changelog.txt contains the full list of changes.
 
@@ -115,7 +101,8 @@ You can find more information about "User Role Editor" plugin at [this page](htt
 I am ready to answer on your questions about plugin usage. Use [plugin page comments](http://www.shinephp.com/user-role-editor-wordpress-plugin/) for that.
 
 == Upgrade Notice ==
-= [4.56.1] 05.09.2020 =
-* New: WordPress multisite: Main site: Users->User Role Editor->Apply to All->Update: 'ure_after_network_roles_update' action hook was added. It is executed after all roles were replicated from the main site to the all other subsites of the network.
-* Fix: "Granted Only" filter did not work.
-* Fix: Warning was fixed: wp-content/plugins/user-role-editor/js/ure.js: jQuery.fn.attr('checked') might use property instead of attribute.
+
+= [4.64.6] 01.12.2025 =
+* Update: Marked as compatible with WordPress 6.9
+* Update: Minor code enhancements according to the "Plugin Check" tool recommendations.
+* Update: "Users->Grant Roles" HTML code download optimization to exclude cases when URE's "Grant Roles" data flickers or stays visible while Users page is opening.

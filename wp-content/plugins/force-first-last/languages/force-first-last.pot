@@ -1,0 +1,54 @@
+# Copyright (C) 2024 Contributors
+# This file is distributed under the same license as the Force First and Last Name as Display Name plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Force First and Last Name as Display Name 1.2.2\n"
+"Report-Msgid-Bugs-To: TBD\n"
+"Last-Translator: TBD\n"
+"Language-Team: TBD\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2024-11-13T18:48:08+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: force-first-last\n"
+
+#. Plugin Name of the plugin
+#: force-first-last.php
+msgid "Force First and Last Name as Display Name"
+msgstr ""
+
+#. Description of the plugin
+#: force-first-last.php
+msgid "Force the user field display_name to be set as the user's first and last name."
+msgstr ""
+
+#. Author of the plugin
+#: force-first-last.php
+msgid "Contributors"
+msgstr ""
+
+#: force-first-last.php:129
+msgid "Force First Last"
+msgstr ""
+
+#: force-first-last.php:146
+msgid "Force First and Last Name"
+msgstr ""
+
+#: force-first-last.php:158
+msgid "%s users updated"
+msgstr ""
+
+#: force-first-last.php:170
+msgid "The <em>Force First and Last Name as Display Name</em> plugin will only fix display names at registration or when a profile is updated. If you just activated this plugin, please click on the button below to update the display names of your existing users."
+msgstr ""
+
+#: force-first-last.php:175
+msgid "Update Existing Users"
+msgstr ""
+
+#: force-first-last.php:177
+msgid "<strong>WARNING:</strong> This process may take a long time for sites with many users or hosted on a slow server. <strong>Running this script may hang up or cause other issues with your site.</strong> Use at your own risk."
+msgstr ""

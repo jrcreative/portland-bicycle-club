@@ -1,5 +1,112 @@
 CHANGES LOG (full version).
 ===========================
+
+= [4.64.5] 16.04.2025 =
+* Update: Marked as compatible with WordPress 6.8
+* Update: Minor changes were applied to the CSS/JS loading code to minimize "Plugin Check" tool warnings.
+* Plugin headers were extended at role-editor.php and readme.txt files according to wordpress.org recommendations.
+
+= [4.64.4] 15.12.2024 =
+* Security Fix: Users - "Add Role", "Revoke Role" buttons: Cross-Site request forgery to privilege escalation was possible due to missed nonce validation. This issue was discovered and responsibly reported by vgo0.
+
+= [4.64.3] 03.12.2024 =
+* Update: Marked as compatible with WordPress 6.7.1
+* Fix: PHP Notice:  "Function _load_textdomain_just_in_time was called incorrectly. Translation loading for the <code>user-role-editor</code> domain was triggered too early." was fixed (shown only for those who used own .mo translation file installed).
+* Fix: Miscellaneous translation functionality (l18n) usage enhancements were applied.
+
+= [4.64.2] 19.02.2024 =
+* Update: Marked as compatible with WordPress 6.4.3
+* Update: URE_Advertisement: rand() is replaced with wp_rand().
+* Update: URE_Ajax_Proccessor: json_encode() is replaced with wp_json_encode().
+* Update: User_Role_Editor::load_translation(): load_plugin_textdomain() is called with the 2nd parameter value false, instead of deprecated ''.
+* Update: URE_Lib::is_right_admin_path(): parse_url() is replaced with wp_parse_url().
+* Update: URE_Lib::user_is_admin() does not call WP_User::has_cap() to enhance performance.
+* Update: Plugin version was added to CSS loaded to the "Users", "Users->User Role Editor", "Settings->User Role Editor" pages.
+* Update: All JavaScript files are loaded in footer now.
+* Fix: "Users->Add New Users". Unneeded extra '<table></table>' HTML tags was removed (thanks to Alejandro A. for this bug report). 
+
+= [4.64.1] 24.10.2023 =
+* Update: Marked as compatible with WordPress 6.4
+* Fix: Notice shown by PHP 8.3 is removed: PHP Deprecated: Creation of dynamic property URE_Editor::$hide_pro_banner is deprecated in /wp-content/plugins/user-role-editor/includes/classes/editor.php on line 166
+* Fix: Notice shown by PHP 8.3 is removed: PHP Deprecated: Creation of dynamic property URE_Role_View::$caps_to_remove is deprecated in /wp-content/plugins/user-role-editor/includes/classes/role-view.php on line 23
+* Fix: Notice shown by PHP 8.3 is removed: PHP Deprecated: Function utf8_decode() is deprecated in /wp-content/plugins/user-role-editor-pro/includes/classes/editor.php on line 984
+
+= [4.64] 08.08.2023 =
+* Update: "Show capabilities in human readable form" checkbox switches between capability 2 text forms without full page reloading using JavaScript.
+* Fix: Missed 'message' parameter was added  to a response for AJAX request. It fixed the PHP Warning:  Undefined array key "message" in expressions like "strpos( $data['message'], ...
+
+= [4.63.3] 12.03.2023 =
+* Fix: PHP version 8.2 showed warning: Creation of dynamic property User_Role_Editor::$settings_page_hook is deprecated : wp-content/plugins/user-role-editor/includes/classes/user-role-editor.php:603
+* Fix: PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, int given in wp-content/plugins/user-role-editor/includes/classes/view.php:81
+* Fix: PHP Parse error: syntax error, unexpected ‘:’, expecting ‘;’ or ‘{‘: wp-content/plugins/user-role-editor/includes/classes/base-lib.php on line 119, type declarations were removed for compatibility with older PHP versions. 
+
+= [4.63.2] 16.12.2022 =
+* Update: symbols '{}$' are removed from capability name before use it for internal purpose, to exclude cases like when one of plugins broke URE work adding capability like 'edit_{$type}s'.
+* Update: array_merge() function is replaced with wrapper ure_array_merge(), to exclude fatal error: Argument #2 must be of type array.
+
+= [4.63.1] 20.09.2022 =
+* Marked as compatible with WordPress version 6.0.2
+* Fix: PHP Warning: Attempt to read property “ID” on null in /wp-content/plugins/user-role-editor/includes/classes/user-role-editor.php on line 369
+* Fix: Deprecated: Automatic conversion of false to array is deprecated in ./includes/classes/base-lib.php on line 212
+
+= [4.63] 11.07.2022 =
+* Update: Marked as compatible with WordPress 6.1
+* Update: Few notices (e.g. "Constant FILTER_SANITIZE_STRING is deprecated") was fixed for better compatibility with PHP 8.1.
+* Update: URE does not try to deactivate itself in case another instance is active, just shows notice and stops execution. 
+
+= [4.62] 05.05.2022 =
+* Update: Marked as compatible with WordPress 6.0
+* New: It's possible to translate custom role names using [PolyLang](https://wordpress.org/plugins/polylang/) plugin.
+* Update: URE does not sort roles in WordPress dropdown lists. In order to sort roles by name return 'name' from 'ure_sort_wp_roles_list' filter.
+* Update: User capabilities view page minor CSS enhancements.
+* Update: Settings->About: "Donate" link was removed.
+
+= [4.61.2] 01.03.2022 =
+* Fix: "Users->Add New" page - other selected roles were not saved.
+* Update: URE uses WordPress notification styles for own operation result output.
+
+= [4.61.1] 25.01.2022 =
+* Update: Marked as compatible with WordPress 5.9.
+* Update: PHP 7.3 is marked as required.
+* Update: If installed PHP/WordPress version is lower than required one, script termination ( wp_die() ) was replaced with notice-warning admin notice output.
+ 
+= [4.61] 28.12.2021 =
+* Update: WordPress 4.4 is marked as required.
+* Update: PHP 7.4 is marked as required.
+* Update: "Settings->User Role Editor->Tools->Reset" button is additionally protected from the unintended/accidental usage by text input field. Manual input of "Permanently delete all custom user roles and capabilities" text is required to enable the "Reset" button.
+* Update: Partial code review and refactoring according with WordPress & PHP coding standards.
+* Fix: "Users->selected user->Capabilities" page: 'select all' checkbox did not work.
+
+= [4.60.2] 20.09.2021 =
+* Update: Marked as compatible with WordPress 5.8.1
+* Fix: Multisite: URE_Editor::is_full_network_sync() returned FALSE, instead TRUE for the AJAX call, while call was made from the Network Admin (wp-admin/network/).
+
+= [4.60.1] 21.07.2021 =
+* Update: Marked as compatible with WordPress 5.8.
+* Fix: PHP Notice: Undefined property: URE_User_View::$multisite in /wp-content/plugins/user-role-editor/includes/classes/user-view.php on line 145
+
+= [4.60] 24.06.2021 =
+* New: Notification box was replaced with one based on the [jpillora/nofifyjs](https://notifyjs.jpillora.com/) jQuery plugin. It does not move down page content. It disappears automatically after 5 seconds. Click on it to remove it manually.
+* Fix: "Add capability" shows warning styled notification when needed (invalid characters, etc.) instead of a successful one.
+* Fix: Capabilities group uncheck and revert selection is blocked for the administrator role to exclude accident deletion of permissions from it.
+
+= [4.59.1] 11.05.2021 =
+* New: Multisite: When update role at the main site with "Apply to all sites" option and PHP constant URE_MULTISITE_DIRECT_UPDATE === 1 (update roles directly in database, not via WordPress API), 
+*   URE overwrites all subsite roles with roles from the main site. It's possible now to leave selected role(s) for selected subsite(s) unchanged: add filter 'ure_network_update_leave_roles' and  
+*   return from it the array like this one - array( (int) blog_id => array('role_id1', 'role_id2', ... );
+* Update: "Other roles" section at user profile is available now only for users with 'promote_users' capability.
+* Update: Notice at the top of URE page about action result is not removed automatically after 7 seconds as earlier.
+* Update: 'ure_sort_wp_roles_list' filter accepts these values for the single input parameter: false - leave roles list as it is; true, 'id' - sort roles list by role ID; 'name' - sort roles by role name.
+
+= [4.59] 02.04.2021 =
+* Update: PHP constant URE_WP_ADMIN_URL was replaced with direct 'admin_url()' call to respect the 'admin_url' filter applied by the get_admin_url() WordPress API function.
+* Update: Editing roles and capabilities granted to selected user ("Capabilities" link under user row at the "Users" list) executes 'add_user_role' or 'remove_user_role' actions only in case it really grants or revokes roles and/or capabilities.
+  Previous versions fully revoked and granted again all roles during user permissions update even in case roles list was not changed. It was leaded to the false execution of the mentioned add/remove role actions.
+
+= [4.58.3] 26.02.2021 =
+* Update: URE automatically adds custom taxonomies user capabilities to administrator role before opening "Users->User Role Editor" page.
+* Fix: Role changes were not saved with option "Confirm role update" switched off.
+
 = [4.58.2] 15.01.2021 =
 * Fix: Additional options turned ON for a role was not saved during role update.
 * Update: All JavaScript files are loaded with URE plugin version number as a query string for cache busting purpose.

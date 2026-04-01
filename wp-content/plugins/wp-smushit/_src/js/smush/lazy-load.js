@@ -16,7 +16,7 @@
 		lazyloadDisableButton: document.getElementById(
 			'smush-cancel-lazyload'
 		),
-
+		lazyloadIframeCheckbox: document.getElementById( 'format-iframe' ),
 		init() {
 			const self = this;
 
@@ -25,6 +25,7 @@
 			 */
 			if ( this.lazyloadEnableButton ) {
 				this.lazyloadEnableButton.addEventListener( 'click', ( e ) => {
+					e.preventDefault();
 					e.currentTarget.classList.add( 'sui-button-onload' );
 
 					this.toggle_lazy_load( true );
@@ -91,6 +92,26 @@
 			}
 
 			this.handlePredefinedPlaceholders();
+			this.handleEmbedVideosBoxVisibility();
+		},
+
+		handleEmbedVideosBoxVisibility() {
+			if ( ! this.lazyloadIframeCheckbox ) {
+				return;
+			}
+
+			const embedVideosBox = document.querySelector( '.lazyload-embed-videos' );
+			if ( ! embedVideosBox ) {
+				return;
+			}
+
+			this.lazyloadIframeCheckbox.addEventListener( 'click', function() {
+				if ( true === this.checked ) {
+					embedVideosBox.classList.remove( 'sui-hidden' );
+				} else {
+					embedVideosBox.classList.add( 'sui-hidden' );
+				}
+			});
 		},
 
 		/**
@@ -148,7 +169,7 @@
 				if ( 200 === xhr.status ) {
 					const res = JSON.parse( xhr.response );
 					if ( 'undefined' !== typeof res.success && res.success ) {
-						location.reload();
+						WP_Smush.helpers.redirectToPage( 'lazy-preload' );
 					} else if ( 'undefined' !== typeof res.data.message ) {
 						WP_Smush.helpers.showErrorNotice( res.data.message );
 						document.querySelector( '.sui-button-onload' ).classList.remove( 'sui-button-onload' );

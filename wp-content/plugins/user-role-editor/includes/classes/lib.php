@@ -25,6 +25,9 @@ class URE_Lib extends URE_Base_Lib {
     // when we raise single site admin permissions up to the superadmin for the 'Add new user' new-user.php page
     // User_Role_Editor::allow_add_user_as_superadmin()
     protected $raised_permissions = false; 
+    
+    // roles sorting order: false - do not sort, 'id' - by role ID, 'name' - by role name
+    protected $roles_sorting_order = false;
  
     protected $debug = false;
  
@@ -183,12 +186,17 @@ class URE_Lib extends URE_Base_Lib {
      * @return boolean true 
      */
     public function user_is_admin($user_id = false) {
-
-        $ure_key_capability = URE_Own_Capabilities::get_key_capability();
+        
         if (empty($user_id)) {                    
             $user_id = get_current_user_id();
         }
-        $result = user_can($user_id, $ure_key_capability);
+        if ( $this->is_super_admin( $user_id ) ) {
+            return true;
+        }
+        
+        $ure_key_capability = URE_Own_Capabilities::get_key_capability();
+        $user = get_userdata( $user_id );
+        $result = !empty( $user->allcaps[ $ure_key_capability ] );
         
         return $result;
     }
@@ -221,20 +229,20 @@ class URE_Lib extends URE_Base_Lib {
      * Respect 'editable_roles' filter, when needed
      * @return array
      */
-    public function get_editable_user_roles( $roles ) {
+    public function get_editable_user_roles( $roles = array() ) {
                 
-        if (empty($roles)) {
+        if ( empty( $roles ) ) {
             $roles = $this->get_user_roles();
         }
         $bbpress = $this->get_bbpress();
         if ($bbpress->is_active()) {
             remove_filter('editable_roles', 'bbp_filter_blog_editable_roles');
         }
-        $roles = apply_filters('editable_roles', $roles);
-        if ($bbpress->is_active()) {
+        $roles = apply_filters('editable_roles', $roles );
+        if ( $bbpress->is_active() ) {
             add_filter('editable_roles', 'bbp_filter_blog_editable_roles');
         }
-                
+        
         return $roles;
     }
     // end of get_editable_user_roles()                 
@@ -378,21 +386,11 @@ class URE_Lib extends URE_Base_Lib {
             <h2>User Role Editor</h2>         
             
             <strong><?php esc_html_e('Version:', 'user-role-editor');?></strong> <?php echo URE_VERSION; ?><br/><br/>
-            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/vladimir.png'; ?>);" target="_blank" href="http://www.shinephp.com/"><?php _e("Author's website", 'user-role-editor'); ?></a><br/>
-            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/user-role-editor-icon.png'; ?>);" target="_blank" href="https://www.role-editor.com"><?php _e('Plugin webpage', 'user-role-editor'); ?></a><br/>
-            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/user-role-editor-icon.png'; ?>);" target="_blank" href="https://www.role-editor.com/download-plugin"><?php _e('Plugin download', 'user-role-editor'); ?></a><br/>
-            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/changelog-icon.png'; ?>);" target="_blank" href="https://www.role-editor.com/changelog"><?php _e('Changelog', 'user-role-editor'); ?></a><br/>
-            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/faq-icon.png'; ?>);" target="_blank" href="http://www.shinephp.com/user-role-editor-wordpress-plugin/#faq"><?php _e('FAQ', 'user-role-editor'); ?></a><br/>
-            <hr />
-                <div style="text-align: center;">
-                    <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                        <input type="hidden" name="cmd" value="_s-xclick">
-                        <input type="hidden" name="encrypted" 
-                               value="-----BEGIN PKCS7-----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-----END PKCS7-----">
-                        <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-                        <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">                        
-                    </form>                        
-                </div>
+            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/vladimir.png'; ?>);" target="_blank" href="http://www.shinephp.com/"><?php esc_html_e("Author's website", 'user-role-editor'); ?></a><br/>
+            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/user-role-editor-icon.png'; ?>);" target="_blank" href="https://www.role-editor.com"><?php esc_html_e('Plugin webpage', 'user-role-editor'); ?></a><br/>
+            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/user-role-editor-icon.png'; ?>);" target="_blank" href="https://www.role-editor.com/download-plugin"><?php esc_html_e('Plugin download', 'user-role-editor'); ?></a><br/>
+            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/changelog-icon.png'; ?>);" target="_blank" href="https://www.role-editor.com/changelog"><?php esc_html_e('Changelog', 'user-role-editor'); ?></a><br/>
+            <a class="ure_rsb_link" style="background-image:url(<?php echo URE_PLUGIN_URL . 'images/faq-icon.png'; ?>);" target="_blank" href="http://www.shinephp.com/user-role-editor-wordpress-plugin/#faq"><?php esc_html_e('FAQ', 'user-role-editor'); ?></a><br/>            
 <?php         
     }
     // end of about()
@@ -417,7 +415,7 @@ class URE_Lib extends URE_Base_Lib {
      * @param int $user_id
      * @return boolean
      */
-    public function is_super_admin($user_id = false) {
+    public function is_super_admin( $user_id = false ) {
                 
         if (empty($user_id)) {
             $user = wp_get_current_user();
@@ -513,12 +511,12 @@ class URE_Lib extends URE_Base_Lib {
      * @param string $path
      * @return boolean
      */
-    public function is_right_admin_path($path='') {
+    public function is_right_admin_path( $path='' ) {
         $result = true;
-        $admin_url = admin_url($path);   
-        $parsed = parse_url($admin_url);
+        $admin_url = admin_url( $path );   
+        $parsed = wp_parse_url( $admin_url );
         $full_path = $parsed['path'];
-        if ( stripos($_SERVER['REQUEST_URI'], $full_path)===false ) {
+        if ( stripos( $_SERVER['REQUEST_URI'], $full_path )===false ) {
             $result = false;
         }
         
@@ -526,6 +524,23 @@ class URE_Lib extends URE_Base_Lib {
     }
     // end of is_right_admin_path()
 
+    
+    public function is_wp_built_in_role( $role ) {
+    
+        $wp_built_in_roles = array(
+            'administrator', 
+            'editor',
+            'author',
+            'contributor',
+            'subscriber');
+        
+        $result = in_array( $role, $wp_built_in_roles );
+        
+        return $result;
+    }
+    // end of is_wp_built_in_role()
+    
+    
     /*
      * It's overriden in Pro version to add bbPress roles
      */    
@@ -541,5 +556,20 @@ class URE_Lib extends URE_Base_Lib {
     }
     // end of get_all_roles()
             
+    /*
+     * Wrapper to get_taxonomies() to get the custom taxonomies list
+     */
+    public function get_custom_taxonomies( $output='names' ) {
+        $args = array(
+            'show_ui'=>true,
+            'public'=>true,
+            '_builtin'=>false
+        );
+        $taxonomies = get_taxonomies( $args, $output );
+        
+        return $taxonomies;
+    }
+    // end of get_custom_taxonomies()        
+    
 }
 // end of URE_Lib class

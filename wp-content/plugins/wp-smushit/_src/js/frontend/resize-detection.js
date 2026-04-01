@@ -1,3 +1,5 @@
+import '../../scss/resize-detection.scss';
+
 /**
  * Image resize detection (IRD).
  *
@@ -43,6 +45,8 @@
 				'click',
 				this.handleToggleClick.bind( this )
 			);
+
+			this.initImageVisibilityObserver();
 		},
 
 		/**
@@ -89,36 +93,39 @@
 		 * @return {boolean}  Should skip image or not.
 		 */
 		shouldSkipImage( image ) {
+			if ( this.isIgnoredImage( image ) ) {
+				return true;
+			}
+
+			// Skip 1x1px and 0x0px images.
+			if (
+				image.clientWidth === image.clientHeight &&
+				( 1 === image.clientWidth || 0 === image.clientWidth )
+			) {
+				return true;
+			}
+
+			// Skip 1x1px and 0x0px placeholders.
+			if ( this.isPlaceholder( image ) ) {
+				return true;
+			}
+
+			// If width attribute is not set, do not continue.
+			return null === image.clientWidth || null === image.clientHeight;
+		},
+
+		isIgnoredImage( image ) {
 			// Skip avatars.
 			if ( image.classList.contains( 'avatar' ) ) {
 				return true;
 			}
 
 			// Skip images from Smush CDN with auto-resize feature.
-			if (
-				'string' === typeof image.getAttribute( 'no-resize-detection' )
-			) {
-				return true;
-			}
+			return 'string' === typeof image.getAttribute( 'no-resize-detection' );
+		},
 
-			// Skip 1x1px images.
-			if (
-				image.clientWidth === image.clientHeight &&
-				1 === image.clientWidth
-			) {
-				return true;
-			}
-
-			// Skip 1x1px placeholders.
-			if (
-				image.naturalWidth === image.naturalHeight &&
-				1 === image.naturalWidth
-			) {
-				return true;
-			}
-
-			// If width attribute is not set, do not continue.
-			return null === image.clientWidth || null === image.clientHeight;
+		isPlaceholder( image ) {
+			return image.naturalWidth === image.naturalHeight && image.naturalWidth < 32;
 		},
 
 		/**
@@ -146,7 +153,7 @@
 		/**
 		 * Generate markup.
 		 *
-		 * @param {string} type  Accepts: 'bigger' or 'smaller'.
+		 * @param {string} type Accepts: 'bigger' or 'smaller'.
 		 */
 		generateMarkup( type ) {
 			this.images[ type ].forEach( ( image, index ) => {
@@ -166,13 +173,9 @@
 				item.innerHTML = `
 					<div class="smush-image-info">
 						<span>${ index + 1 }</span>
-						<span class="smush-tag">${ image.props.computed_width } x ${
-					image.props.computed_height
-				}px</span>
+						<span class="smush-tag">${ image.props.computed_width } x ${ image.props.computed_height }px</span>
 						<i class="smush-front-icons smush-front-icon-arrows-in" aria-hidden="true">&nbsp;</i>
-						<span class="smush-tag smush-tag-success">${ image.props.real_width } × ${
-					image.props.real_height
-				}px</span>					
+						<span class="smush-tag smush-tag-success">${ image.props.real_width } × ${ image.props.real_height }px</span>					
 					</div>
 					<div class="smush-image-description">${ tooltip }</div>
 				`;
@@ -289,8 +292,8 @@
 						props.bigger_width || props.bigger_height
 							? 'bigger'
 							: 'smaller',
-					imageClass =
-						'smush-image-' + ( this.images[ imgType ].length + 1 );
+				    imageClass =
+					    `smush-image-${ imgType }-${ this.images[ imgType ].length + 1 }`;
 
 				// Fill the images arrays.
 				this.images[ imgType ].push( {
@@ -322,7 +325,7 @@
 						'smush-detected-img'
 					);
 					this.images.bigger[ id ].src.classList.remove(
-						'smush-image-' + ++id
+						'smush-image-bigger-' + ( ++id )
 					);
 				}
 			}
@@ -333,7 +336,7 @@
 						'smush-detected-img'
 					);
 					this.images.smaller[ id ].src.classList.remove(
-						'smush-image-' + ++id
+						'smush-image-smaller-' + ( ++id )
 					);
 				}
 			}
@@ -354,11 +357,81 @@
 
 			this.process();
 		},
+
+		/**
+		 * This will monitor all images on the page and detect their sizes once they’ve loaded.
+		 *
+		 * @since 3.18.0
+		 */
+		initImageVisibilityObserver() {
+			let imagesSelector = 'img:not(.smush-detected-img)';
+			const smushLazyloadEnabled = typeof window.lazySizes !== 'undefined';
+			if ( smushLazyloadEnabled ) {
+				const lazyLoadClassName = window.lazySizes?.cfg?.lazyClass || 'lazyload';
+				imagesSelector += `:not(.${ lazyLoadClassName } )`;
+			}
+			const lazyImages = document.querySelectorAll( imagesSelector );
+
+			if ( ! lazyImages.length ) {
+				return;
+			}
+
+			const config = {
+				threshold: 0.1
+			};
+
+			let refreshTimeout = null;
+
+			const debouncedRefresh = () => {
+				if ( refreshTimeout ) {
+					clearTimeout( refreshTimeout );
+				}
+				refreshTimeout = setTimeout( () => {
+					this.refresh();
+					refreshTimeout = null;
+				}, 500 );
+			};
+
+			const imageObserver = new IntersectionObserver( ( entries ) => {
+				entries.forEach( ( entry ) => {
+					if ( entry.isIntersecting ) {
+						const img = entry.target;
+
+						if ( ! img.classList.contains( 'smush-detected-img' ) ) {
+							if ( img.complete && ! this.isPlaceholder( img ) ) {
+								debouncedRefresh();
+							} else {
+								img.addEventListener( 'load', () => {
+									debouncedRefresh();
+								}, { once: true } );
+							}
+
+							imageObserver.unobserve( img );
+						}
+					}
+				} );
+			}, config );
+
+			lazyImages.forEach( ( img ) => {
+				if ( this.isIgnoredImage( img ) ) {
+					return;
+				}
+
+				imageObserver.observe( img );
+			} );
+		},
+
 	}; // End WP_Smush_IRS
 
 	/**
 	 * After page load, initialize toggle event.
 	 */
 	window.addEventListener( 'DOMContentLoaded', () => SmushIRS.init() );
-	window.addEventListener( 'lazyloaded', () => SmushIRS.refresh() );
-} )();
+	window.addEventListener( 'lazyloaded', ( event ) => {
+		if ( 'IMG' !== event?.target?.tagName ) {
+			return;
+		}
+
+		SmushIRS.refresh();
+	} );
+}() );

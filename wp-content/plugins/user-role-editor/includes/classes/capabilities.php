@@ -5,7 +5,7 @@
  * @package    User-Role-Editor
  * @subpackage Admin
  * @author     Vladimir Garagulia <support@role-editor.com>
- * @copyright  Copyright (c) 2010 - 2019, Vladimir Garagulia
+ * @copyright  Copyright (c) 2010 - 2021, Vladimir Garagulia
  **/
 class URE_Capabilities {
 
@@ -16,7 +16,7 @@ class URE_Capabilities {
         
     public static function get_instance() {
         
-        if (self::$instance === null) {            
+        if ( self::$instance === null ) {            
             // new static() will work too
             self::$instance = new URE_Capabilities();
         }
@@ -46,13 +46,14 @@ class URE_Capabilities {
 
     
     protected function add_capability_to_full_caps_list( $cap_id, &$full_list ) {
-        if ( isset( $full_list[$cap_id] ) ) {    // if capability was not added yet
+        
+        if ( isset( $full_list[$cap_id] ) ) {    // if capability was added already
             return;
         }
         
         $cap = array();
         $cap['inner'] = $cap_id;
-        $cap['human'] = esc_html__( $this->convert_cap_to_readable( $cap_id ) , 'user-role-editor' );
+        $cap['human'] = $this->convert_cap_to_readable( $cap_id );
         if ( isset( $this->built_in_wp_caps[$cap_id] ) ) {
             $cap['wp_core'] = true;
         } else {
@@ -71,9 +72,9 @@ class URE_Capabilities {
     protected function add_roles_caps( &$full_list ) {
         
         $roles = $this->lib->get_user_roles();
-        foreach ($roles as $role) {
+        foreach ( $roles as $role ) {
             // validate if capabilities is an array
-            if (!isset($role['capabilities']) || !is_array($role['capabilities'])) {
+            if ( !isset( $role['capabilities'] ) || !is_array( $role['capabilities'] ) ) {
                 continue;
             }
             foreach ( array_keys( $role['capabilities'] ) as $cap ) {
@@ -110,7 +111,7 @@ class URE_Capabilities {
     protected function add_bbpress_caps( &$full_list ) {
     
         $bbpress = $this->lib->get_bbpress();
-        if (!$bbpress->is_active()) {
+        if ( !$bbpress->is_active() ) {
             return;
         }
                 
@@ -160,7 +161,7 @@ class URE_Capabilities {
 
 
     /**
-     * Add built-in WordPress caps in case some were not included to the roles for some reason
+     * Add built-in WordPress caps in case some of them were not included to the roles for some reason
      * 
      */
     protected function add_wordpress_caps( &$full_list ) {
@@ -247,6 +248,30 @@ class URE_Capabilities {
     }
     // end of add_custom_post_type_caps()
     
+            
+    protected function add_custom_taxonomies_caps( &$full_list ) {
+        
+        $taxonomies = $this->lib->get_custom_taxonomies( 'objects' );
+        if ( empty( $taxonomies ) ) {
+            return;
+        }
+        
+        $multisite = $this->lib->get( 'multisite' );
+        // admin should be capable to edit any taxonomy
+        $cpt_editor_roles0 = !$multisite ? array('administrator') : array();
+        $caps_to_check = array('manage_terms', 'edit_terms', 'delete_terms', 'assign_terms');
+        foreach( $taxonomies as $taxonomy ) {
+            $cpt_editor_roles = apply_filters( 'ure_cpt_editor_roles', $cpt_editor_roles0, $taxonomy->name );
+            foreach( $caps_to_check as $capability ) {
+                $cap_to_check = $taxonomy->cap->$capability;
+                $this->add_capability_to_full_caps_list( $cap_to_check, $full_list );                
+                self::add_cap_to_roles( $cpt_editor_roles, $cap_to_check );
+            }
+        }
+                
+    }
+    // end of add_custom_taxonomies_caps()
+    
     
     /**
      * Add capabilities for URE permissions system in case some were excluded from Administrator role
@@ -318,9 +343,10 @@ class URE_Capabilities {
         }        
         $this->add_wordpress_caps( $full_list );
         $this->add_custom_post_type_caps( $full_list );
+        $this->add_custom_taxonomies_caps( $full_list );
         $this->add_ure_caps( $full_list );        
         asort( $full_list );        
-        $full_list = apply_filters('ure_full_capabilites', $full_list);
+        $full_list = apply_filters('ure_full_capabilites', $full_list );
         $this->grant_all_caps_to_admin( $full_list );        
         
         return $full_list;
@@ -338,7 +364,7 @@ class URE_Capabilities {
         foreach ( $wp_roles->roles as $role ) {
             // validate if capabilities is an array
             if ( isset( $role['capabilities'] ) && is_array( $role['capabilities'] ) ) {
-                foreach ($role['capabilities'] as $capability => $value) {
+                foreach ( $role['capabilities'] as $capability => $value ) {
                     if ( !isset( $full_caps_list[$capability] ) ) {
                         $full_caps_list[$capability] = true;
                     }
@@ -357,8 +383,8 @@ class URE_Capabilities {
      */
     protected function get_visual_composer_caps($full_caps_list) {
         $caps = array();
-        foreach(array_keys($full_caps_list) as $cap) {
-            if (strpos($cap, 'vc_access_rules_')!==false) {
+        foreach( array_keys( $full_caps_list ) as $cap ) {
+            if ( strpos( $cap, 'vc_access_rules_')!==false ) {
                 $caps[$cap] = 1;
             }
         }
@@ -381,7 +407,7 @@ class URE_Capabilities {
         $caps_to_exclude = $this->built_in_wp_caps;
         $ure_caps = URE_Own_Capabilities::get_caps();
         $visual_composer_caps = $this->get_visual_composer_caps($full_caps_list);
-        $caps_to_exclude = array_merge($caps_to_exclude, $ure_caps, $visual_composer_caps);
+        $caps_to_exclude = ure_array_merge($caps_to_exclude, $ure_caps, $visual_composer_caps);
 
         $caps_to_remove = array();
         $caps = array_keys( $full_caps_list );
