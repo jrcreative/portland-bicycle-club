@@ -23,12 +23,6 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: wp-content/themes/pbc/yarn.lock
 
-      - name: Setup Python 2
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python2 python2-dev
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -38,10 +32,14 @@ jobs:
       - name: Install and build pbc theme
         run: |
           cd wp-content/themes/pbc
-          yarn install --frozen-lockfile --ignore-scripts
-          yarn add node-sass@4.14.1 --ignore-scripts
-          npm rebuild node-sass
+          
+          # Install dependencies and force download prebuilt node-sass binary
+          SASS_BINARY_SITE=https://github.com/sass/node-sass/releases/download yarn install --frozen-lockfile
+          
+          # Build the theme
           yarn build:production
+          
+          # Install PHP dependencies
           composer install --no-dev --optimize-autoloader
 
       - name: Clean up build artifacts and dev files
