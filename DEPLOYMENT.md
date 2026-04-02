@@ -21,10 +21,11 @@ git push origin staging
 ```
 
 This will automatically:
-1. Build the pbc theme assets
-2. Install production dependencies
-3. Deploy to staging server via rsync
-4. Clear WordPress cache
+1. Build the pbc theme assets on GitHub Actions runner
+2. Install production PHP dependencies (Composer)
+3. Remove development files and node_modules
+4. Deploy only production-ready files to staging server via rsync
+5. Clear WordPress cache
 
 ### Production Deployment (Manual)
 
@@ -46,11 +47,12 @@ This will automatically:
 
 This will:
 1. Create a backup on production server
-2. Build the pbc theme assets
-3. Install production dependencies
-4. Deploy to production server via rsync
-5. Clear WordPress cache
-6. Verify deployment
+2. Build the pbc theme assets on GitHub Actions runner
+3. Install production PHP dependencies (Composer)
+4. Remove development files and node_modules
+5. Deploy only production-ready files to production server via rsync
+6. Clear WordPress cache
+7. Verify deployment
 
 ## GitHub Secrets Configuration
 
@@ -100,21 +102,55 @@ cat ~/.ssh/github_deploy_key
 
 Copy the entire output (including `-----BEGIN` and `-----END` lines) and add it to GitHub Secrets.
 
-## What Gets Deployed
+## How Deployment Works
 
-### Included:
+### Build Process (GitHub Actions Runner)
+1. **Checkout code** from repository
+2. **Install Node.js dependencies** (`npm ci`)
+3. **Build theme assets** (`npm run build:production`)
+4. **Install PHP dependencies** (`composer install --no-dev`)
+5. **Clean up development files**:
+   - Remove all `node_modules/`
+   - Remove source asset files (`resources/assets/`)
+   - Remove build config files (`webpack.*.js`, `package.json`, etc.)
+   - Remove test files and configs
+6. **Keep only production files**:
+   - Built CSS/JS in `dist/`
+   - PHP vendor dependencies
+   - Theme templates and functions
+
+### What Gets Deployed
+
+**Included:**
 - WordPress core files
-- Themes (with built assets)
+- Themes with built assets (dist/ folder)
+- PHP vendor dependencies (composer)
 - Plugins
-- Custom configurations
+- Theme templates and PHP files
 
-### Excluded:
-- `.git/` and `.github/`
-- `node_modules/`
-- `wp-content/uploads/`
-- `wp-content/cache/`
-- `wp-config.php`
-- Log files
+**Excluded:**
+- `.git/` and `.github/` (version control)
+- `node_modules/` (all JS dependencies)
+- `resources/assets/` (source files)
+- `package.json`, `webpack.*.js` (build config)
+- `composer.json`, `composer.lock` (dependency config)
+- `.eslintrc`, `.babelrc`, etc. (dev configs)
+- `wp-content/uploads/` (user content)
+- `wp-content/cache/` (temporary files)
+- `wp-config.php` (server-specific config)
+- `.env` (environment variables)
+- `*.log` (log files)
+
+### Why Build on GitHub Actions?
+
+**Benefits:**
+- ✅ Server doesn't need Node.js or npm installed
+- ✅ Server doesn't need build tools (webpack, etc.)
+- ✅ Faster deployment (only upload built files)
+- ✅ Smaller file transfer (no node_modules)
+- ✅ Consistent build environment
+- ✅ Server CPU not used for builds
+- ✅ More secure (no build dependencies on server)
 
 ## Troubleshooting
 

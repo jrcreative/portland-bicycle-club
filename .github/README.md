@@ -10,10 +10,17 @@ This directory contains GitHub Actions workflows for automating deployments and 
 Deploys code to the staging server automatically when changes are pushed to the staging branch.
 
 **What it does:**
-- Builds pbc theme assets (npm run build:production)
-- Installs PHP dependencies (composer)
-- Deploys via rsync to staging server
+- Builds pbc theme assets on GitHub runner (npm run build:production)
+- Installs PHP dependencies (composer install --no-dev)
+- Removes development files (node_modules, source files, build configs)
+- Deploys only production-ready files via rsync to staging server
 - Clears WordPress cache
+
+**Server requirements:**
+- ✅ SSH access with key authentication
+- ✅ rsync installed
+- ❌ Node.js NOT required (builds happen on GitHub)
+- ❌ npm NOT required (builds happen on GitHub)
 
 ### 🚀 deploy-production.yml
 **Trigger:** Manual workflow dispatch from `main` branch
@@ -22,9 +29,10 @@ Deploys code to production server with manual confirmation required.
 
 **What it does:**
 - Creates backup on production server
-- Builds pbc theme assets
-- Installs PHP dependencies
-- Deploys via rsync to production server
+- Builds pbc theme assets on GitHub runner (npm run build:production)
+- Installs PHP dependencies (composer install --no-dev)
+- Removes development files (node_modules, source files, build configs)
+- Deploys only production-ready files via rsync to production server
 - Clears WordPress cache
 - Verifies deployment
 
