@@ -2,17 +2,18 @@
 
 ## Changes Made
 
-All GitHub Actions workflows have been updated to address the Node.js 20 deprecation warning.
+All GitHub Actions workflows have been updated to use Node.js 24 directly.
 
 ## What Changed
 
 ### Node.js Version
-- **Before:** Node.js 18 (for builds)
-- **After:** Node.js 20 (LTS, recommended)
+- **Before:** Node.js 18 (deprecated)
+- **After:** Node.js 24 (latest, future-proof)
 
 ### GitHub Actions Runtime
+- Using Node.js 24 directly for builds
 - Added `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` environment variable
-- This ensures Actions run on Node.js 24 runtime (future-proof)
+- This ensures both builds and Actions runtime use Node.js 24
 
 ## Updated Files
 
@@ -25,7 +26,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'  # ← Changed from '18'
+          node-version: '24'  # ← Changed to '24'
 ```
 
 ### 2. `.github/workflows/deploy-production.yml`
@@ -37,7 +38,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'  # ← Changed from '18'
+          node-version: '24'  # ← Changed to '24'
 ```
 
 ### 3. `.github/workflows/test-build.yml`
@@ -49,7 +50,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'  # ← Changed from '18'
+          node-version: '24'  # ← Changed to '24'
 ```
 
 ## Why These Changes?
@@ -60,9 +61,9 @@ GitHub announced that Node.js 20 will be deprecated:
 - **Node.js 20 removed from runners:** September 16, 2026
 
 ### Our Solution
-1. **Upgraded to Node.js 20** for builds (LTS, stable)
-2. **Opted into Node.js 24** for GitHub Actions runtime
-3. **Future-proofed** workflows until at least 2027
+1. **Upgraded to Node.js 24** directly (latest stable)
+2. **Enabled Node.js 24** for GitHub Actions runtime
+3. **Future-proofed** workflows for years to come
 
 ## Benefits
 
@@ -79,18 +80,18 @@ are running on Node.js 20 and may not work as expected...
 - No breaking changes expected
 
 ### ✅ Better Performance
-Node.js 20 includes:
-- Better performance
-- Improved security
-- Modern JavaScript features
-- Better npm performance
+Node.js 24 includes:
+- Best performance
+- Latest security updates
+- Newest JavaScript features
+- Optimized package manager support
 
 ## Compatibility
 
 ### Your Theme Build
-Your pbc theme is compatible with Node.js 20:
+Your pbc theme is compatible with Node.js 24:
 - ✅ Webpack works fine
-- ✅ npm packages compatible
+- ✅ Yarn packages compatible
 - ✅ Build scripts unchanged
 - ✅ No breaking changes
 
