@@ -1,0 +1,91 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    name: Deploy to Staging Server
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: wp-content/themes/pbc/package.json
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+
+      - name: Install and build pbc theme
+        run: |
+          cd wp-content/themes/pbc
+          npm ci --legacy-peer-deps
+          npm run build:production
+          composer install --no-dev --optimize-autoloader
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.STAGING_SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to staging via rsync
+        env:
+          STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
+          STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
+          STAGING_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
+        run: |
+          rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='wp-content/themes/*/node_modules/' \
+            --exclude='wp-content/uploads/' \
+            --exclude='wp-content/cache/' \
+            --exclude='wp-content/backups/' \
+            --exclude='wp-content/backup-db/' \
+            --exclude='wp-content/wflogs/' \
+            --exclude='wp-config.php' \
+            --exclude='.env' \
+            --exclude='*.log' \
+            --exclude='.DS_Store' \
+            --exclude='Local Sites/' \
+            ./ ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}
+
+      - name: Clear WordPress cache on staging
+        env:
+          STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
+          STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
+          STAGING_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
+        run: |
+          ssh -p 2222 ${STAGING_USER}@${STAGING_HOST} "cd ${STAGING_PATH} && [ -f wp-cli.phar ] && php wp-cli.phar cache flush || echo 'WP-CLI not found, skipping cache flush'"
+
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ **Staging deployment successful!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Deployed to: \`${{ secrets.STAGING_SERVER_HOST }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Staging deployment failed!**" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,49 @@
+name: Test Build
+
+on:
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  test:
+    name: Test Theme Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: wp-content/themes/pbc/package.json
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: |
+          cd wp-content/themes/pbc
+          npm ci --legacy-peer-deps
+          composer install
+
+      - name: Test build
+        run: |
+          cd wp-content/themes/pbc
+          npm run build:production
+
+      - name: Build Summary
+        run: |
+          echo "## Build Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Build successful!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- PR: #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.head_ref }}\`" >> $GITHUB_STEP_SUMMARY

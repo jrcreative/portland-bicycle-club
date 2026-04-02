@@ -1,9 +1,29 @@
-*.log
+# WordPress core files
+/readme.html
+/license.txt
+wp-config.php
 .htaccess
-.idea/
+
+# WordPress generated files
 sitemap.xml
 sitemap.xml.gz
-wp-config.php
+
+# Dependencies
+node_modules/
+vendor/
+
+# Logs
+*.log
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# WordPress cache and temporary files
 wp-content/advanced-cache.php
 wp-content/backup-db/
 wp-content/backups/
@@ -12,8 +32,22 @@ wp-content/cache/
 wp-content/upgrade/
 wp-content/uploads/
 wp-content/wflogs/
-wp-content/plugins/files/civicrm/templates_c/
 wp-content/wp-cache-config.php
+
+# Plugin specific
 wp-content/plugins/hello.php
-/readme.html
-/license.txt
+wp-content/plugins/files/civicrm/templates_c/
+
+# Package manager files (optional - uncomment if needed)
+# package-lock.json
+# yarn.lock
+# composer.lock
+
+# Auth files
+auth.json
+
+# GitHub Actions
+.github/workflows/*.log
+
+# Local development
+Local Sites/
