@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '16'
           cache: 'yarn'
           cache-dependency-path: wp-content/themes/pbc/yarn.lock
 
@@ -34,17 +34,9 @@ jobs:
         run: |
           cd wp-content/themes/pbc
           
-          # Install dependencies without running build scripts
-          yarn install --frozen-lockfile --ignore-scripts
-          
-          # Node.js 20 uses module version 115, but node-sass 4.12.0 doesn't have that binary
-          # We need to upgrade to a compatible version
-          yarn add node-sass@7.0.3 --ignore-scripts
-          
-          # Download the prebuilt binary for node-sass 7.0.3 + Node.js 20 (binding 115)
-          mkdir -p node_modules/node-sass/vendor/linux-x64-115
-          curl -L https://github.com/sass/node-sass/releases/download/v7.0.3/linux-x64-115_binding.node \
-            -o node_modules/node-sass/vendor/linux-x64-115/binding.node
+          # Node.js 16 has full support for node-sass 4.12.0
+          # Install dependencies (node-sass will download correct binary automatically)
+          yarn install --frozen-lockfile
           
           composer install
 
