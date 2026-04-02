@@ -32,6 +32,17 @@ The deployment workflows have been updated to:
 
 See `NODE-VERSION-UPDATE.md` for full details.
 
+### ✅ Fixed Package Manager (npm → Yarn)
+
+**Package Manager Corrected:**
+- Theme uses Yarn, not npm (has `yarn.lock` file)
+- Changed `npm ci` → `yarn install --frozen-lockfile`
+- Changed `npm run` → `yarn`
+- Updated cache from npm → yarn
+- Fixes "npm ci requires package-lock.json" error
+
+See `YARN-FIX.md` for full details.
+
 ### ✅ Added Cleanup Step
 
 New step in both workflows:
