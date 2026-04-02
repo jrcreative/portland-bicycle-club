@@ -57,8 +57,13 @@ jobs:
         run: |
           cd wp-content/themes/pbc
           
-          # Install dependencies and force download prebuilt node-sass binary
-          SASS_BINARY_SITE=https://github.com/sass/node-sass/releases/download yarn install --frozen-lockfile
+          # Install dependencies without running build scripts
+          yarn install --frozen-lockfile --ignore-scripts
+          
+          # Manually download prebuilt node-sass binary for Node.js 20 (binding 72)
+          mkdir -p node_modules/node-sass/vendor/linux-x64-72
+          curl -L https://github.com/sass/node-sass/releases/download/v4.12.0/linux-x64-72_binding.node \
+            -o node_modules/node-sass/vendor/linux-x64-72/binding.node
           
           # Build the theme
           yarn build:production
