@@ -40,7 +40,7 @@ jobs:
       - name: Test build
         run: |
           cd wp-content/themes/pbc
-          yarn build:production
+          yarn build
 
       - name: Build Summary
         run: |

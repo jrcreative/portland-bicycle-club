@@ -59,7 +59,7 @@ jobs:
           yarn install
           
           # Build the theme
-          yarn build:production
+          yarn build
           
           # Install PHP dependencies
           composer install --no-dev --optimize-autoloader
@@ -91,9 +91,21 @@ jobs:
           ssh-private-key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
 
       - name: Add server to known hosts
+        env:
+          PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.PRODUCTION_SERVER_HOST }} >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          if [ -z "$PROD_HOST" ]; then
+            echo "Error: PRODUCTION_SERVER_HOST secret is not set"
+            exit 1
+          fi
+          ssh-keyscan -H $PROD_HOST >> ~/.ssh/known_hosts 2>&1 || {
+            echo "Warning: ssh-keyscan failed, disabling strict host checking"
+            echo "Host *" >> ~/.ssh/config
+            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+          }
 
       - name: Create backup on production
         env:

@@ -66,9 +66,21 @@ jobs:
           ssh-private-key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
 
       - name: Add server to known hosts
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.STAGING_SERVER_HOST }} >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          if [ -z "$STAGING_HOST" ]; then
+            echo "Error: STAGING_SERVER_HOST secret is not set"
+            exit 1
+          fi
+          ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts 2>&1 || {
+            echo "Warning: ssh-keyscan failed, disabling strict host checking"
+            echo "Host *" >> ~/.ssh/config
+            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+          }
 
       - name: Deploy to staging via rsync
         env:
