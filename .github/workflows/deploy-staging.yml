@@ -126,7 +126,7 @@ jobs:
           STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
           STAGING_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
         run: |
-          ssh ${STAGING_USER}@${STAGING_HOST} "cd ${STAGING_PATH} && [ -f wp-cli.phar ] && php wp-cli.phar cache flush || echo 'WP-CLI not found, skipping cache flush'"
+          ssh -p 2222 ${STAGING_USER}@${STAGING_HOST} "cd ${STAGING_PATH} && [ -f wp-cli.phar ] && php wp-cli.phar cache flush || echo 'WP-CLI not found, skipping cache flush'"
 
       - name: Deployment Summary
         if: always()
