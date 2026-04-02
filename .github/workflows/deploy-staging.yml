@@ -75,11 +75,12 @@ jobs:
             echo "Error: STAGING_SERVER_HOST secret is not set"
             exit 1
           fi
-          ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts 2>&1 || {
+          ssh-keyscan -p 2222 -H $STAGING_HOST >> ~/.ssh/known_hosts 2>&1 || {
             echo "Warning: ssh-keyscan failed, disabling strict host checking"
             echo "Host *" >> ~/.ssh/config
             echo "  StrictHostKeyChecking no" >> ~/.ssh/config
             echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+            echo "  Port 2222" >> ~/.ssh/config
           }
 
       - name: Deploy to staging via rsync
@@ -88,7 +89,7 @@ jobs:
           STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
           STAGING_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
         run: |
-          rsync -avz --delete \
+          rsync -avz --delete -e "ssh -p 2222" \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='node_modules/' \
@@ -118,7 +119,7 @@ jobs:
             --exclude='.babelrc*' \
             --exclude='phpunit.xml*' \
             --exclude='.travis.yml' \
-            ./ -p 2222 ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}
+            ./ ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}
 
       - name: Clear WordPress cache on staging
         env:

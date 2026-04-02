@@ -100,11 +100,12 @@ jobs:
             echo "Error: PRODUCTION_SERVER_HOST secret is not set"
             exit 1
           fi
-          ssh-keyscan -H $PROD_HOST >> ~/.ssh/known_hosts 2>&1 || {
+          ssh-keyscan -p 2222 -H $PROD_HOST >> ~/.ssh/known_hosts 2>&1 || {
             echo "Warning: ssh-keyscan failed, disabling strict host checking"
             echo "Host *" >> ~/.ssh/config
             echo "  StrictHostKeyChecking no" >> ~/.ssh/config
             echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+            echo "  Port 2222" >> ~/.ssh/config
           }
 
       - name: Create backup on production
@@ -114,7 +115,7 @@ jobs:
           PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
         run: |
           BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S).tar.gz"
-          ssh ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc wp-content/plugins --exclude='node_modules' --exclude='*.log' || mkdir -p ../backups && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc"
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc wp-content/plugins --exclude='node_modules' --exclude='*.log' || mkdir -p ../backups && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc"
           echo "Backup created: ${BACKUP_NAME}"
 
       - name: Deploy to production via rsync
@@ -123,7 +124,7 @@ jobs:
           PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
           PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
         run: |
-          rsync -avz --delete \
+          rsync -avz --delete -e "ssh -p 2222" \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='node_modules/' \
@@ -161,7 +162,7 @@ jobs:
           PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
           PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
         run: |
-          ssh ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && [ -f wp-cli.phar ] && php wp-cli.phar cache flush || echo 'WP-CLI not found, skipping cache flush'"
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && [ -f wp-cli.phar ] && php wp-cli.phar cache flush || echo 'WP-CLI not found, skipping cache flush'"
 
       - name: Verify deployment
         env:
@@ -169,7 +170,7 @@ jobs:
           PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
           PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
         run: |
-          ssh ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH}/wp-content/themes/pbc && ls -la"
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH}/wp-content/themes/pbc && ls -la"
 
       - name: Deployment Summary
         if: always()
