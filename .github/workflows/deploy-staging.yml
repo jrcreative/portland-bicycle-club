@@ -36,10 +36,14 @@ jobs:
           # Install dependencies without running build scripts
           yarn install --frozen-lockfile --ignore-scripts
           
-          # Manually download prebuilt node-sass binary for Node.js 20 (binding 72)
-          mkdir -p node_modules/node-sass/vendor/linux-x64-72
-          curl -L https://github.com/sass/node-sass/releases/download/v4.12.0/linux-x64-72_binding.node \
-            -o node_modules/node-sass/vendor/linux-x64-72/binding.node
+          # Node.js 20 uses module version 115, but node-sass 4.12.0 doesn't have that binary
+          # We need to upgrade to a compatible version
+          yarn add node-sass@7.0.3 --ignore-scripts
+          
+          # Download the prebuilt binary for node-sass 7.0.3 + Node.js 20 (binding 115)
+          mkdir -p node_modules/node-sass/vendor/linux-x64-115
+          curl -L https://github.com/sass/node-sass/releases/download/v7.0.3/linux-x64-115_binding.node \
+            -o node_modules/node-sass/vendor/linux-x64-115/binding.node
           
           # Build the theme
           yarn build:production
