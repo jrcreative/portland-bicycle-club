@@ -16,6 +16,45 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify secrets are set
+        env:
+          STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
+          STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
+          STAGING_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
+        run: |
+          echo "Checking required secrets..."
+          
+          if [ -z "$STAGING_USER" ]; then
+            echo "❌ STAGING_SSH_USER is not set"
+            exit 1
+          else
+            echo "✓ STAGING_SSH_USER is set"
+          fi
+          
+          if [ -z "$STAGING_HOST" ]; then
+            echo "❌ STAGING_SERVER_HOST is not set"
+            exit 1
+          else
+            echo "✓ STAGING_SERVER_HOST is set"
+          fi
+          
+          if [ -z "$STAGING_PATH" ]; then
+            echo "❌ STAGING_DEPLOY_PATH is not set"
+            exit 1
+          else
+            echo "✓ STAGING_DEPLOY_PATH is set"
+          fi
+          
+          if [ -z "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" ]; then
+            echo "❌ STAGING_SSH_PRIVATE_KEY is not set"
+            exit 1
+          else
+            echo "✓ STAGING_SSH_PRIVATE_KEY is set"
+          fi
+          
+          echo ""
+          echo "All required secrets are configured!"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -64,6 +103,22 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+
+      - name: Test SSH connection
+        env:
+          STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
+          STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
+        run: |
+          echo "Testing SSH connection..."
+          ssh -p 2222 -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${STAGING_USER}@${STAGING_HOST} "echo 'SSH connection successful'; pwd" || {
+            echo "❌ SSH connection failed!"
+            echo "Troubleshooting steps:"
+            echo "1. Verify STAGING_SSH_PRIVATE_KEY secret is set in GitHub"
+            echo "2. Verify public key is in ~/.ssh/authorized_keys on server"
+            echo "3. Test locally: ssh -p 2222 -i ~/.ssh/your_key ${STAGING_USER}@${STAGING_HOST}"
+            echo "4. Check server firewall allows port 2222"
+            exit 1
+          }
 
       - name: Add server to known hosts
         env:
