@@ -72,11 +72,11 @@ class WP_User_Avatar_Functions {
 
 		}
 
-		
+	
 
-		add_action( 'bp_before_profile_avatar_upload_content', create_function( '', 'ob_start();') );
+	add_action( 'bp_before_profile_avatar_upload_content', array( $this, 'bp_before_profile_avatar_upload_content') );
 
-		add_action( 'bp_after_profile_avatar_upload_content', array( $this, 'bp_after_profile_avatar_upload_content'));
+	add_action( 'bp_after_profile_avatar_upload_content', array( $this, 'bp_after_profile_avatar_upload_content'));
 
 		$uid = isset($_GET['user_id']) ? $_GET['user_id'] : get_current_user_id();
 		$this->set_default_avatar( $uid );		
@@ -104,6 +104,20 @@ class WP_User_Avatar_Functions {
 			: get_option( 'avatar_default_wp_user_avatar' );
 	}
 
+	/**
+	 * Start output buffering before profile avatar upload content
+	 *
+	 * @since 4.0.0
+	 */
+	public function bp_before_profile_avatar_upload_content(){
+		ob_start();
+	}
+
+	/**
+	 * Clean output buffer and display avatar upload shortcode
+	 *
+	 * @since 4.0.0
+	 */
 	public function bp_after_profile_avatar_upload_content(){
 
 	  ob_end_clean();	

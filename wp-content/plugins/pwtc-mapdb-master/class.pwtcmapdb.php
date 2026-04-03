@@ -2,99 +2,99 @@
 
 class PwtcMapdb {
 
-	const MAP_POST_TYPE = 'ride_maps';
-	const START_LOCATION_FIELD = 'start_location';
-	const TERRAIN_FIELD_KEY = 'field_57bb6243726b8';
-	const TERRAIN_FIELD = 'terrain';
-	const LENGTH_FIELD_KEY = 'field_57bb613bff50c';
-	const LENGTH_FIELD = 'length';
-	const DESCRIPTION_FIELD_KEY = 'field_58050980e4d2e';
-	const DESCRIPTION_FIELD = 'description';
-	const MAX_LENGTH_FIELD_KEY = 'field_57bb61c9ff50d';
-	const MAX_LENGTH_FIELD = 'max_length';
-	const MAP_FIELD_KEY = 'field_57bb66366797b';
-	const MAP_FIELD = 'maps';
-	const MAP_TYPE_FIELD_KEY = 'field_57bb665f6797c';
-	const MAP_TYPE_FIELD = 'type';
-	const MAP_LINK_FIELD_KEY = 'field_57bb667e6797d';
-	const MAP_LINK_FIELD = 'link';
-	const MAP_FILE_FIELD_KEY = 'field_57bb668c6797e';
-	const MAP_FILE_FIELD = 'file';
-	const MAP_TYPE_QUERY = 'maps_0_type';
-	const COPY_ANCHOR_LABEL = '<i class="fa fa-clipboard"></i>';
+	private const MAP_POST_TYPE = 'ride_maps';
+	private const START_LOCATION_FIELD  = "start_location";
+	private const TERRAIN_FIELD_KEY = 'field_57bb6243726b8';
+	private const TERRAIN_FIELD = 'terrain';
+	private const LENGTH_FIELD_KEY = 'field_57bb613bff50c';
+	private const LENGTH_FIELD = 'length';
+	private const DESCRIPTION_FIELD_KEY = 'field_58050980e4d2e';
+	private const DESCRIPTION_FIELD = 'description';
+	private const MAX_LENGTH_FIELD_KEY = 'field_57bb61c9ff50d';
+	private const MAX_LENGTH_FIELD = 'max_length';
+	private const MAP_FIELD_KEY = 'field_57bb66366797b';
+	private const MAP_FIELD = 'maps';
+	private const MAP_TYPE_FIELD_KEY = 'field_57bb665f6797c';
+	private const MAP_TYPE_FIELD = 'type';
+	private const MAP_LINK_FIELD_KEY = 'field_57bb667e6797d';
+	private const MAP_LINK_FIELD = 'link';
+	private const MAP_FILE_FIELD_KEY = 'field_57bb668c6797e';
+	private const MAP_FILE_FIELD = 'file';
+	private const MAP_TYPE_QUERY = 'maps_0_type';
+	private const COPY_ANCHOR_LABEL = '<i class="fa fa-clipboard"></i>';
 	//const FILE_ANCHOR_LABEL = '<i class="fa fa-download"></i>';
 	//const LINK_ANCHOR_LABEL = '<i class="fa fa-link"></i>';
-	const EDIT_ANCHOR_LABEL = '<i class="fa fa-pencil-square"></i>';
-	const EDIT_CAPABILITY = 'edit_others_rides';
+	private const EDIT_ANCHOR_LABEL = '<i class="fa fa-pencil-square"></i>';
+	private const EDIT_CAPABILITY = 'edit_others_rides';
 
-	const RIDE_CANCELED = 'is_canceled';
-	const RIDE_CANCELED_KEY = 'field_canceled';
-	const RIDE_LEADERS = 'ride_leaders';
-	const RIDE_LEADERS_KEY = 'field_57bc9992f40cc';
-	const RIDE_DATE = 'date';
-	const RIDE_DATE_KEY = 'field_57bc992c2f7f5';
-	const RIDE_ATTACH_MAP = 'attach_map';
-	const RIDE_ATTACH_MAP_KEY = 'field_582aedf005158';
-	const RIDE_MAPS = 'maps';
-	const RIDE_MAPS_KEY = 'field_582aee3e19e75';
-	const RIDE_TYPE = 'type';
-	const RIDE_TYPE_KEY = 'field_57bc95890afc7';
-	const RIDE_PACE = 'pace';
-	const RIDE_PACE_KEY = 'field_57bc95bf0afc8';
-	const RIDE_TERRAIN = 'terrain';
-	const RIDE_TERRAIN_KEY = 'field_57bc97180afca';
-	const RIDE_LENGTH = 'length';
-	const RIDE_LENGTH_KEY = 'field_57bc978e0afcb';
-	const RIDE_MAX_LENGTH = 'max_length';
-	const RIDE_MAX_LENGTH_KEY = 'field_57bc97a40afcc';
-	const RIDE_START_LOCATION = 'start_location';
-	const RIDE_START_LOCATION_KEY = 'field_57bc95fb0afc9';
-	const RIDE_START_LOC_COMMENT = 'start_location_comment';
-	const RIDE_START_LOC_COMMENT_KEY = 'field_start_location_comment';
-	const RIDE_DESCRIPTION = 'description';
-	const RIDE_DESCRIPTION_KEY = 'field_57bc9553246a2';
-	const RIDE_SIGNUP_LOCKED = '_signup_locked';
-	const RIDE_SIGNUP_USERID = '_signup_user_id';
-	const RIDE_SIGNUP_NONMEMBER = '_signup_nonmember_id';
-	const RIDE_SIGNUP_MODE = '_signup_mode';
-	const RIDE_SIGNUP_CUTOFF = '_signup_cutoff';
-	const RIDE_SIGNUP_LIMIT = '_signup_limit';
-	const RIDE_SIGNUP_MEMBERS_ONLY = '_signup_members_only';
+	private const RIDE_CANCELED = 'is_canceled';
+	private const RIDE_CANCELED_KEY = 'field_canceled';
+	private const RIDE_LEADERS = 'ride_leaders';
+	private const RIDE_LEADERS_KEY = 'field_57bc9992f40cc';
+	private const RIDE_DATE = 'date';
+	private const RIDE_DATE_KEY = 'field_57bc992c2f7f5';
+	private const RIDE_ATTACH_MAP = 'attach_map';
+	private const RIDE_ATTACH_MAP_KEY = 'field_582aedf005158';
+	private const RIDE_MAPS = 'maps';
+	private const RIDE_MAPS_KEY = 'field_582aee3e19e75';
+	private const RIDE_TYPE = 'type';
+	private const RIDE_TYPE_KEY = 'field_57bc95890afc7';
+	private const RIDE_PACE = 'pace';
+	private const RIDE_PACE_KEY = 'field_57bc95bf0afc8';
+	private const RIDE_TERRAIN = 'terrain';
+	private const RIDE_TERRAIN_KEY = 'field_57bc97180afca';
+	private const RIDE_LENGTH = 'length';
+	private const RIDE_LENGTH_KEY = 'field_57bc978e0afcb';
+	private const RIDE_MAX_LENGTH = 'max_length';
+	private const RIDE_MAX_LENGTH_KEY = 'field_57bc97a40afcc';
+	private const RIDE_START_LOCATION = 'start_location';
+	private const RIDE_START_LOCATION_KEY = 'field_57bc95fb0afc9';
+	private const RIDE_START_LOC_COMMENT = 'start_location_comment';
+	private const RIDE_START_LOC_COMMENT_KEY = 'field_start_location_comment';
+	private const RIDE_DESCRIPTION = 'description';
+	private const RIDE_DESCRIPTION_KEY = 'field_57bc9553246a2';
+	public const RIDE_SIGNUP_LOCKED = '_signup_locked';
+	public const RIDE_SIGNUP_USERID = '_signup_user_id';
+	public const RIDE_SIGNUP_NONMEMBER = '_signup_nonmember_id';
+	public const RIDE_SIGNUP_MODE = '_signup_mode';
+	public const RIDE_SIGNUP_CUTOFF = '_signup_cutoff';
+	public const RIDE_SIGNUP_LIMIT = '_signup_limit';
+	public const RIDE_SIGNUP_MEMBERS_ONLY = '_signup_members_only';
 	
-	const TEMPLATE_LEADERS_KEY = 'field_57bcbeb986cb6';
-	const TEMPLATE_ATTACH_MAP_KEY = 'field_57d1f61d65188';
-	const TEMPLATE_MAPS_KEY = 'field_57bcc10b7286c';
-	const TEMPLATE_TYPE_KEY = 'field_57bcbefd86cb7';
-	const TEMPLATE_PACE_KEY = 'field_57bcbf4686cb8';
-	const TEMPLATE_TERRAIN_KEY = 'field_57d1f901c850f';
-	const TEMPLATE_LENGTH_KEY = 'field_57d1f948c8510';
-	const TEMPLATE_MAX_LENGTH_KEY = 'field_57d1f96dc8511';
-	const TEMPLATE_START_LOCATION_KEY = 'field_57d1fd23c8517';
-	const TEMPLATE_START_LOC_COMMENT_KEY = 'field_start_location_comment2';
-	const TEMPLATE_DESCRIPTION_KEY = 'field_57bcbf7086cb9';
+	private const TEMPLATE_LEADERS_KEY = 'field_57bcbeb986cb6';
+	private const TEMPLATE_ATTACH_MAP_KEY = 'field_57d1f61d65188';
+	private const TEMPLATE_MAPS_KEY = 'field_57bcc10b7286c';
+	private const TEMPLATE_TYPE_KEY = 'field_57bcbefd86cb7';
+	private const TEMPLATE_PACE_KEY = 'field_57bcbf4686cb8';
+	private const TEMPLATE_TERRAIN_KEY = 'field_57d1f901c850f';
+	private const TEMPLATE_LENGTH_KEY = 'field_57d1f948c8510';
+	private const TEMPLATE_MAX_LENGTH_KEY = 'field_57d1f96dc8511';
+	private const TEMPLATE_START_LOCATION_KEY = 'field_57d1fd23c8517';
+	private const TEMPLATE_START_LOC_COMMENT_KEY = 'field_start_location_comment2';
+	private const TEMPLATE_DESCRIPTION_KEY = 'field_57bcbf7086cb9';
 
-	const USER_EMER_PHONE = 'emergency_contact_phone';
-	const USER_EMER_NAME = 'emergency_contact_name';
-	const USER_USE_EMAIL = 'use_contact_email';
-	const USER_CONTACT_EMAIL = 'contact_email';
-	const USER_CELL_PHONE = 'cell_phone';
-	const USER_HOME_PHONE = 'home_phone';
-	const USER_RIDER_ID = 'rider_id';
-	const USER_RELEASE_ACCEPTED = 'release_accepted';
+	private const USER_EMER_PHONE = 'emergency_contact_phone';
+	private const USER_EMER_NAME = 'emergency_contact_name';
+	private const USER_USE_EMAIL = 'use_contact_email';
+	private const USER_CONTACT_EMAIL = 'contact_email';
+	private const USER_CELL_PHONE = 'cell_phone';
+	private const USER_HOME_PHONE = 'home_phone';
+	private const USER_RIDER_ID = 'rider_id';
+	private const USER_RELEASE_ACCEPTED = 'release_accepted';
 
-	const ROLE_CURRENT_MEMBER = 'current_member';
-	const ROLE_EXPIRED_MEMBER = 'expired_member';
-	const ROLE_RIDE_LEADER = 'ride_leader';
+	private const ROLE_CURRENT_MEMBER = 'current_member';
+	private const ROLE_EXPIRED_MEMBER = 'expired_member';
+	private const ROLE_RIDE_LEADER = 'ride_leader';
 	//const ROLE_ROAD_CAPTAIN = 'ride_captain';
-	const ROLE_ROAD_CAPTAIN = 'road_captain';
-	const ROLE_STATISTICIAN = 'statistician';
+	private const ROLE_ROAD_CAPTAIN = 'road_captain';
+	private const ROLE_STATISTICIAN = 'statistician';
 
-	const POST_TYPE_RIDE = 'scheduled_rides';
-	const POST_TYPE_TEMPLATE = 'ride_template';
+	private const POST_TYPE_RIDE = 'scheduled_rides';
+	private const POST_TYPE_TEMPLATE = 'ride_template';
 	
-	const ROAD_CAPTAIN_EMAIL = 'roadcaptain@portlandbicyclingclub.com';
+	private const ROAD_CAPTAIN_EMAIL = 'roadcaptain@portlandbicyclingclub.com';
 	
-	const ROAD_CAPTAIN_CAPS = [
+	private const ROAD_CAPTAIN_CAPS = [
         	'delete_others_rides',
         	'delete_private_rides',
         	'delete_published_rides',
@@ -106,6 +106,7 @@ class PwtcMapdb {
         	'publish_rides',
         	'read_private_rides',
 		'edit_rides_from_view',
+		'edit_ride_templates'
     	];
 		
     	private static $initiated = false;
@@ -444,20 +445,20 @@ class PwtcMapdb {
 		$timezone = new DateTimeZone(pwtc_get_timezone_string());
 		$ride_date = DateTime::createFromFormat('Y-m-d H:i:s', get_field(self::RIDE_DATE, $postid), $timezone);
 		if ($ride_date === false) {
-			$ride_date = new DateTime(null, $timezone);
+			$ride_date = new DateTime('now', $timezone);
 		}
 		return $ride_date;
 	}
 
 	public static function get_current_time() {
 		$timezone = new DateTimeZone(pwtc_get_timezone_string());
-		$now_date = new DateTime(null, $timezone);
+		$now_date = new DateTime('now', $timezone);
 		return $now_date;
 	}
 
 	public static function get_current_date() {
 		$timezone = new DateTimeZone(pwtc_get_timezone_string());
-		$now_time = new DateTime(null, $timezone);
+		$now_time = new DateTime('now', $timezone);
 		$now_date = DateTime::createFromFormat('Y-m-d H:i:s', $now_time->format('Y-m-d 00:00:00'), $timezone);
 		return $now_date;
 	}

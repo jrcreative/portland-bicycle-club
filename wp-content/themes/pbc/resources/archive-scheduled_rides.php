@@ -12,7 +12,7 @@ $context = Timber::context();
 // get timezone
 $timezone = new \DateTimeZone(pwtc_get_timezone_string());
 
-$today = new DateTime(null, $timezone);
+$today = new DateTime('now', $timezone);
 $context['today'] = $today->format('n/d/Y g:i A');
 
 // time for a little magic
@@ -119,7 +119,7 @@ if ($daily_view) {
     }
 
     // get current time
-    $now_datetime = new DateTime(null, $timezone);
+    $now_datetime = new DateTime('now', $timezone);
 
     // get the first and last days of the selected month so we can get the previous/next month by adding or subtracting one day
     // using months would add/suntract 31 days which would cause issues for february
