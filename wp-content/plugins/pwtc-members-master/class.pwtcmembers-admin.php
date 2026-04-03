@@ -34,6 +34,9 @@ class PwtcMembers_Admin {
 		add_action( 'wp_ajax_pwtc_members_adjust_family_members', 
 			array( 'PwtcMembers_Admin', 'adjust_family_members_callback') );
 
+		add_action( 'wp_ajax_pwtc_members_adjust_member_since_date', 
+			array( 'PwtcMembers_Admin', 'adjust_member_since_date_callback') );
+
 		add_action( 'wp_ajax_pwtc_members_fix_missing_members', 
 			array( 'PwtcMembers_Admin', 'fix_missing_members_callback') );
 
@@ -111,9 +114,9 @@ class PwtcMembers_Admin {
     	$function = array( 'PwtcMembers_Admin', 'page_missing_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-		$page_title = $plugin_options['plugin_menu_label'] . ' - Adjust Family Memberships';
+		$page_title = $plugin_options['plugin_menu_label'] . ' - Adjust Member Dates';
 		$menu_title = '
-		Adjust Families';
+		Adjust Dates';
     	$menu_slug = 'pwtc_members_adjust_families';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMembers_Admin', 'page_adjust_families');
@@ -499,6 +502,26 @@ class PwtcMembers_Admin {
 		$users = $user_query->get_results();
 		return $users;
 	}
+	
+	public static function fetch_current_member_role_users() {
+		$query_args = [
+			'fields' => 'ID',
+			'role__in' => ['current_member']
+		];
+		$user_query = new WP_User_Query( $query_args );
+		$users = $user_query->get_results();
+		return $users;
+	}
+
+	public static function fetch_expired_member_role_users() {
+		$query_args = [
+			'fields' => 'ID',
+			'role__in' => ['expired_member']
+		];
+		$user_query = new WP_User_Query( $query_args );
+		$users = $user_query->get_results();
+		return $users;
+	}	
 
 	public static function fetch_nonmember_role_users() {
 		$query_args = [
@@ -681,11 +704,241 @@ class PwtcMembers_Admin {
 						}	
 					}
 				}
-				$msg = 'Fix successful - ' . $count . ' user accounts corrected.';
+				$msg = 'Fix successful - ' . $count . ' memberships corrected.';
 				if ($multicount > 0) {
-					$msg .= ' ' . $multicount . ' user accounts with multiple memberships which were NOT corrected.';
+					$msg .= ' ' . $multicount . ' users with multiple memberships detected.';
 				}
 				$response = array(
+					'status' => $msg
+				);
+			}		
+		}
+		echo wp_json_encode($response);
+        wp_die();
+	}
+	
+	public static function detect_invalid_members($fix_accounts=false) {
+		$invalid_members = array();
+		$test_users = self::fetch_member_role_users();
+		$results = PwtcMembers::fetch_users_with_no_memberships();
+		foreach ($results as $item) {
+			$userid = $item[0];
+			if (in_array($userid, $test_users)) {
+				if ($fix_accounts) {
+					$user_info = get_userdata( $userid ); 
+					if ($user_info) {
+						if (in_array('expired_member', $user_info->roles)) {
+							$user_info->remove_role('expired_member');
+						}
+						if (in_array('current_member', $user_info->roles)) {
+							$user_info->remove_role('current_member');
+						}				
+					}	
+				}
+				else {
+					$invalid_members[] = $userid;
+				}
+			}
+		}
+		return $invalid_members;
+	}
+	
+	public static function detect_missing_members($fix_accounts=false) {
+		$missing_members = array();
+		$test_users = self::fetch_nonmember_role_users();
+		$results = PwtcMembers::fetch_users_with_memberships();
+		foreach ($results as $item) {
+			$userid = $item[0];
+			if (in_array($userid, $test_users)) {
+				if ($fix_accounts) {
+					$user_info = get_userdata( $userid ); 
+					if ($user_info) {
+						$memberships = wc_memberships_get_user_memberships($user_info->ID);
+						if (count($memberships) == 1) {
+							$membership = $memberships[0];
+							if (!in_array('customer', $user_info->roles)) {
+								$user_info->add_role('customer');
+							}
+							if (pwtc_members_is_expired($membership)) {
+								if (!in_array('expired_member', $user_info->roles)) {
+									$user_info->add_role('expired_member');
+								}
+								if (in_array('current_member', $user_info->roles)) {
+									$user_info->remove_role('current_member');
+								}
+							}
+							else {
+								if (!in_array('current_member', $user_info->roles)) {
+									$user_info->add_role('current_member');
+								}
+								if (in_array('expired_member', $user_info->roles)) {
+									$user_info->remove_role('expired_member');
+								}
+							}						
+						}
+					}	
+				}
+				else {
+					$missing_members[] = $userid;
+				}
+			}
+		}
+		return $missing_members;
+	}
+
+	public static function detect_invalid_current_members($fix_accounts=false) {
+		$invalid_current_members = array();
+		$current_members = self::fetch_current_member_role_users();
+		foreach ($current_members as $userid) {
+			$memberships = wc_memberships_get_user_memberships($userid);
+			if (count($memberships) == 1) {
+				$membership = $memberships[0];
+				if (pwtc_members_is_expired($membership)) {
+					if ($fix_accounts) {
+						$user_info = get_userdata($userid); 
+						if ($user_info) {
+							if (!in_array('customer', $user_info->roles)) {
+								$user_info->add_role('customer');
+							}
+							if (!in_array('expired_member', $user_info->roles)) {
+								$user_info->add_role('expired_member');
+							}
+							if (in_array('current_member', $user_info->roles)) {
+								$user_info->remove_role('current_member');
+							}
+						}
+					}
+					else {
+						$invalid_current_members[] = $userid;
+					}
+				}
+			}
+		}
+		return $invalid_current_members;		
+	}
+
+	public static function detect_invalid_expired_members($fix_accounts=false) {
+		$invalid_expired_members = array();
+		$expired_members = self::fetch_expired_member_role_users();
+		foreach ($expired_members as $userid) {
+			$memberships = wc_memberships_get_user_memberships($userid);
+			if (count($memberships) == 1) {
+				$membership = $memberships[0];
+				if (!pwtc_members_is_expired($membership)) {
+					if ($fix_accounts) {
+						$user_info = get_userdata($userid); 
+						if ($user_info) {
+							if (!in_array('customer', $user_info->roles)) {
+								$user_info->add_role('customer');
+							}
+							if (!in_array('current_member', $user_info->roles)) {
+								$user_info->add_role('current_member');
+							}
+							if (in_array('expired_member', $user_info->roles)) {
+								$user_info->remove_role('expired_member');
+							}
+						}
+					}
+					else {
+						$invalid_expired_members[] = $userid;
+					}
+				}
+			}
+		}
+		return $invalid_expired_members;
+	}
+
+	public static function adjust_member_since_date_callback() {
+		if (!current_user_can('manage_options')) {
+			$response = array(
+				'status' => 'Adjust failed - user access denied.'
+			);		
+		}
+		else if (!isset($_POST['nonce']) or !isset($_POST['detect_only'])) {
+			$response = array(
+				'status' => 'Adjust failed - AJAX arguments missing.'
+			);
+		}
+		else {
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_members_adjust_member_since_date')) {
+				$response = array(
+					'status' => 'Adjust failed - nonce security check failed.'
+				);
+			}
+			else {
+				$detect_only = $_POST['detect_only'] == 'true' ? true : false;
+				$count1 = 0;
+				$count2 = 0;
+				$unchanged = 0;
+				$multicount = 0;
+				$results = PwtcMembers::fetch_users_with_memberships();
+				$users = array();
+				foreach ($results as $item) {
+					$userid = $item[0];
+					$rider_id = get_field('rider_id', 'user_'.$userid);
+					if (!$rider_id) {
+						$rider_id = '';
+					}
+					if (preg_match('/^\d{5}$/', $rider_id) === 1) {
+						$memberships = wc_memberships_get_user_memberships($userid);
+						if (count($memberships) == 1) {
+							$membership = $memberships[0];
+							$y = intval(substr($rider_id, 0, 2));
+							$c = intval(substr(date('Y', current_time('timestamp')), 0, 2));
+							if ($y > 50) {
+								$year = strval((($c - 1) * 100) + $y);
+							}
+							else {
+								$year = strval(($c * 100) + $y);
+							}
+							$start = $membership->get_start_date();
+							if (!$start or strncmp($start, $year, 4) !== 0) {
+								if ($detect_only) {
+									$member = get_userdata($userid);
+									$item = array(
+										'userid' => $userid,
+										'first_name' => $member->first_name,
+										'last_name' => $member->last_name,
+										'user_email' => $member->user_email,
+										'startdate' => $start,
+										'riderid' => $rider_id
+									);
+									$users[] = $item;
+								}
+								else {
+									$membership->set_start_date($year . '-07-01 00:00:00');
+								}
+								if ($y > 50) {
+									$count1++;
+								}
+								else {
+									$count2++;
+								}
+							}
+							else {
+								$unchanged++;
+							}
+						}
+						else if (count($memberships) > 1) {
+							$multicount++;
+						}
+					}
+				}
+				if ($detect_only) {
+					$action_str = 'detected';
+				}
+				else {
+					$action_str = 'adjusted';
+				}
+				$msg = '' . $count1 . ' member mismatches from last century ' . $action_str . 
+					'. ' . $count2 . ' member mismatches from this century ' . $action_str .
+					'. ' . $unchanged . ' members already match and will not be changed.';
+				if ($multicount > 0) {
+					$msg .= ' ' . $multicount . ' users with multiple memberships detected.';
+				}
+				$response = array(
+					'users' => $users,
 					'status' => $msg
 				);
 			}		
@@ -700,7 +953,7 @@ class PwtcMembers_Admin {
 				'status' => 'Adjust failed - user access denied.'
 			);		
 		}
-		else if (!isset($_POST['nonce'])) {
+		else if (!isset($_POST['nonce']) or !isset($_POST['detect_only'])) {
 			$response = array(
 				'status' => 'Adjust failed - AJAX arguments missing.'
 			);
@@ -713,6 +966,10 @@ class PwtcMembers_Admin {
 				);
 			}
 			else {
+				$detect_only = $_POST['detect_only'] == 'true' ? true : false;
+				$users = array();
+				$count = 0;
+				$unchanged = 0;
 				$query_args = [
 					'nopaging'    => true,
 					'post_status' => 'any',
@@ -720,28 +977,67 @@ class PwtcMembers_Admin {
 				];			
 				$the_query = new WP_Query($query_args);
 				if ( $the_query->have_posts() ) {
-					$count = 0;
 					while ( $the_query->have_posts() ) {
 						$the_query->the_post();
 						$team = wc_memberships_for_teams_get_team( get_the_ID() );
 						if ($team) {
+							$team_end_date = $team->get_membership_end_date('timestamp');
 							$user_memberships = $team->get_user_memberships();
 							foreach ( $user_memberships as $user_membership ) {
-								PwtcMembers::adjust_team_member_data_callback(false, $team, $user_membership);
+								$user_end_date = $user_membership->get_end_date('timestamp');
+								if ($team_end_date and $user_end_date) {
+									$diff = abs($user_end_date - $team_end_date);
+								}
+								else if (!$team_end_date and $user_end_date) {
+									$diff = 99999;
+								}
+								else if ($team_end_date and !$user_end_date) {
+									$diff = 99999;
+								}
+								else {
+									$diff = 0;
+								}
+								if ($diff > 86400) {
+									if ($detect_only) {
+										$userid = $user_membership->get_user_id();
+										$member = get_userdata($userid);
+										$enddate = $user_membership->get_local_end_date('mysql', false);
+										$teamend = $team->get_local_membership_end_date('mysql');
+										$item = array(
+											'userid' => $userid,
+											'first_name' => $member->first_name,
+											'last_name' => $member->last_name,
+											'user_email' => $member->user_email,
+											'end_date' => $enddate,
+											'team_end' => $teamend 
+										);
+										$users[] = $item;
+									}
+									else {
+										PwtcMembers::adjust_team_member_data_callback(false, $team, $user_membership);
+									}
+									$count++;
+								}
+								else {
+									$unchanged++;
+								}
 							}
-							$count++;	
 						}
 					}
 					wp_reset_postdata();
-					$response = array(
-						'status' => 'Adjusted ' . $count . ' family memberships.'
-					);	
+				}
+				if ($detect_only) {
+					$action_str = 'detected';
 				}
 				else {
-					$response = array(
-						'status' => 'No family memberships found.'
-					);
+					$action_str = 'adjusted';
 				}
+				$msg = '' . $count . ' family member mismatches ' . $action_str . 
+					'. ' . $unchanged . ' family members already match and will not be changed.';
+				$response = array(
+					'users' => $users,
+					'status' => $msg
+				);	
 			}
 		}
 		echo wp_json_encode($response);

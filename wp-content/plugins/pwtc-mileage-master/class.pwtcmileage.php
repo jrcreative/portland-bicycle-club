@@ -60,7 +60,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 		add_shortcode('pwtc_riderid_download', 
 			array( 'PwtcMileage', 'shortcode_riderid_download'));
-
+		add_shortcode('pwtc_mileage_download_membership_cards', 
+			array( 'PwtcMileage', 'shortcode_download_membership_cards'));
 		// Register background action task callbacks 
 		add_action( 'pwtc_mileage_consolidation', 
 			array( 'PwtcMileage', 'consolidation_callback') );  
@@ -283,11 +284,13 @@ class PwtcMileage {
 	}
 
 	public static function add_card_download_callback() {
+	    echo '<p>Make sure your emergency contact information is up to date; <a href="/rider-emergency-contact">edit your emergency contact information.</a></p>';
 		echo '<p>Click the button below to download your rider ID card.';
 		echo do_shortcode('[pwtc_riderid_download]');
 		echo '</p>';
 	}
 
+/*
 	public static function download_riderid() {
 		if (isset($_POST['pwtc_mileage_download_riderid']) and isset($_POST['rider_id']) and isset($_POST['user_id'])) {
 			$current_user = wp_get_current_user();
@@ -310,59 +313,143 @@ class PwtcMileage {
 					require('fpdf.php');	
 					$pdf = new FPDF();
 					$pdf->AddPage();
-					$x_off = 0;
-					$y_off = 0;
-					$w_card = 95;
-					$h_card = 60;
-					$pdf->Rect($x_off, $y_off, $w_card, $h_card);
-					$w_sub = (int)($w_card * 0.3);
-					$pdf->Rect($x_off, $y_off, $w_sub, $h_card);
-					$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pbc_logo.png', $x_off + 1, $y_off + 10, $w_sub - 2, $w_sub - 2);
-					$pdf->SetXY($x_off, $y_off + 38);
-					$pdf->SetFont('Arial', '', 12);
-					$pdf->MultiCell($w_sub, 5, 'Portland Bicycling Club', 0, 'C');
-					$pdf->SetXY($x_off + $w_sub, $y_off + 8);
-					$pdf->SetFont('Arial', 'I', 18);
-					$pdf->MultiCell($w_card - $w_sub, 10, $name, 0,'C');
-					$pdf->SetFont('Arial', '', 14);
-					$pdf->Text($x_off + $w_sub + 25, $y_off + 34, $_POST['rider_id']);
-					$pdf->Text($x_off + $w_sub + 40, $y_off + 50, $fmtdate);
-					$pdf->SetFont('Arial', '', 5);
-					$pdf->Text($x_off + $w_sub + 25, $y_off + 38, 'RIDER ID');
-					$pdf->Text($x_off + $w_sub + 40, $y_off + 54, 'EXPIRES');
-					if (!empty($family_id)) {
-						$pdf->Text($x_off + $w_sub + 5, $y_off + 50, $family_id);
-						$pdf->Text($x_off + $w_sub + 5, $y_off + 54, 'FAMILY ID');
-					}
-					$pdf->Rect($x_off, $y_off + $h_card, $w_card, $h_card);
-					$pdf->SetXY($x_off, $y_off + $h_card + 5);
-					$pdf->SetFont('Arial', 'I', 12);
-					$pdf->SetTextColor(255, 0, 0);
-					$pdf->Cell($w_card, 6, 'Portland Bicycling Club', 0, 2,'C');
-					$pdf->SetFont('Arial', 'U', 12);
-					$pdf->SetTextColor(0, 0, 255);
-					$pdf->Cell($w_card, 6, 'PortlandBicyclingClub.com', 0, 2,'C');
-					$pdf->SetFont('Arial', '', 12);
-					$pdf->SetTextColor(0, 0, 0);
-					$pdf->Cell($w_card, 6, 'Information Hotline: 503.666.5796', 0, 2,'C');
-					$pdf->SetXY($x_off, $y_off + $h_card + 27);
-					$pdf->SetFont('Arial', '', 8);
-					$pdf->Cell($w_card, 4, 'Daily and multi-day rides', 0, 2,'C');
-					$pdf->Cell($w_card, 4, 'Cycling friendships', 0, 2,'C');
-					$pdf->Cell($w_card, 4, 'Volunteer opportunities', 0, 2,'C');
-					$pdf->Cell($w_card, 4, 'Bike shop discounts', 0, 2,'C');
-					$pdf->SetXY($x_off, $y_off + $h_card + 50);
-					$pdf->SetFont('Arial', 'I', 12);
-					$pdf->SetTextColor(255, 0, 0);
-					$pdf->Cell($w_card, 6, 'Take Life By The Handlebars! ' . chr(174), 0, 0,'C');
-					$pdf->SetFont('Arial', 'I', 10);
-					$pdf->SetTextColor(0, 0, 0);
-					$pdf->SetXY($x_off, $y_off + $h_card*2);
-					$pdf->Cell($w_card, 10, 'To assemble card, cut out and fold', 0, 0,'C');
+					self::generate_riderid_card($pdf, $_POST['rider_id'], $name, $exp_date, $family_id);
 					$pdf->Output('F', 'php://output');
 					die;
 				}
 			}
+		}
+	}
+*/
+
+	public static function download_riderid() {
+		if (isset($_POST['pwtc_mileage_download_riderid']) and isset($_POST['user_id'])) {
+			$current_user = wp_get_current_user();
+			if ( 0 == $current_user->ID ) {
+			}
+			else {	
+				if (isset($_POST['rider_id'])) {
+					$result = pwtc_mileage_get_rider_card_info(intval($_POST['user_id']), $_POST['rider_id']);
+					if ($result === false) {
+					}
+					else {
+						$lastname = $result['last_name'];
+						$firstname = $result['first_name'];
+						$name = $firstname . ' ' . $lastname;
+						$exp_date = $result['expir_date'];
+						$family_id = $result['family_id'];
+						$fmtdate = date('M Y', strtotime($exp_date));
+						header('Content-Description: File Transfer');
+						header("Content-type: application/pdf");
+						header("Content-Disposition: attachment; filename=rider_card.pdf");
+						require('fpdf.php');	
+						$pdf = new FPDF();
+						$pdf->AddPage();
+						self::generate_riderid_card($pdf, $_POST['rider_id'], $name, $exp_date, $family_id);
+						$pdf->Output('F', 'php://output');
+						die;
+					}
+				}
+				else {
+					$user_ids = json_decode($_POST['user_id']);
+					header('Content-Description: File Transfer');
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=rider_card.pdf");
+					require('fpdf.php');	
+					$pdf = new FPDF();
+					$pdf->AddPage();
+					$card_count = 0;
+					foreach ($user_ids as $user_id) {
+						$result = pwtc_mileage_get_rider_card_info($user_id);
+						if ($result === false) {
+						}
+						else {
+							$rider_id = $result['rider_id'];
+							$lastname = $result['last_name'];
+							$firstname = $result['first_name'];
+							$name = $firstname . ' ' . $lastname;
+							$exp_date = $result['expir_date'];
+							$family_id = $result['family_id'];
+							if ($card_count > 3) {
+								$card_count = 0;
+								$pdf->AddPage();
+							}
+							if ($card_count == 0) {
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0+10, 0+10, false);
+							}
+							else if ($card_count == 1) {
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 95+10, 0+10, false);
+							}
+							else if ($card_count == 2) {
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0+10, 120+10, false);
+							}
+							else if ($card_count == 3) {
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 95+10, 120+10, false);
+							}
+							$card_count++;
+						}
+					}
+					$pdf->Output('F', 'php://output');
+					die;
+				}
+			}
+		}
+	}
+	
+	public static function generate_riderid_card($pdf, $riderid, $name, $expdate, $familyid, $x_off=10, $y_off=10, $instructions=true) {
+		$fmtdate = date('M Y', strtotime($expdate));
+		$w_card = 95;
+		$h_card = 60;
+		$pdf->Rect($x_off, $y_off, $w_card, $h_card);
+		$w_sub = (int)($w_card * 0.3);
+		$pdf->Rect($x_off, $y_off, $w_sub, $h_card);
+		$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pbc_logo.png', $x_off + 1, $y_off + 10, $w_sub - 2, $w_sub - 2);
+		$pdf->SetXY($x_off, $y_off + 38);
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->SetFont('Arial', '', 12);
+		$pdf->MultiCell($w_sub, 5, 'Portland Bicycling Club', 0, 'C');
+		$pdf->SetXY($x_off + $w_sub, $y_off + 8);
+		$pdf->SetFont('Arial', 'I', 18);
+		$pdf->MultiCell($w_card - $w_sub, 10, $name, 0,'C');
+		$pdf->SetFont('Arial', '', 14);
+		$pdf->Text($x_off + $w_sub + 25, $y_off + 34, $riderid);
+		$pdf->Text($x_off + $w_sub + 40, $y_off + 50, $fmtdate);
+		$pdf->SetFont('Arial', '', 5);
+		$pdf->Text($x_off + $w_sub + 25, $y_off + 38, 'RIDER ID');
+		$pdf->Text($x_off + $w_sub + 40, $y_off + 54, 'EXPIRES');
+		if (!empty($familyid)) {
+			$pdf->Text($x_off + $w_sub + 5, $y_off + 50, $familyid);
+			$pdf->Text($x_off + $w_sub + 5, $y_off + 54, 'FAMILY ID');
+		}
+		$pdf->Rect($x_off, $y_off + $h_card, $w_card, $h_card);
+		$pdf->SetXY($x_off, $y_off + $h_card + 5);
+		$pdf->SetFont('Arial', 'I', 12);
+		$pdf->SetTextColor(255, 0, 0);
+		$pdf->Cell($w_card, 6, 'Portland Bicycling Club', 0, 2,'C');
+		$pdf->SetFont('Arial', 'U', 12);
+		$pdf->SetTextColor(0, 0, 255);
+		$pdf->Cell($w_card, 6, 'PortlandBicyclingClub.com', 0, 2,'C');
+		$pdf->SetFont('Arial', '', 12);
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->Cell($w_card, 6, 'Information Hotline: 503.666.5796', 0, 2,'C');
+		$pdf->SetXY($x_off, $y_off + $h_card + 27);
+		$pdf->SetFont('Arial', '', 8);
+		//$pdf->Cell($w_card, 4, 'Daily and multi-day rides', 0, 2,'C');
+		//$pdf->Cell($w_card, 4, 'Cycling friendships', 0, 2,'C');
+		//$pdf->Cell($w_card, 4, 'Volunteer opportunities', 0, 2,'C');
+		//$pdf->Cell($w_card, 4, 'Bike shop discounts', 0, 2,'C');
+		$pdf->Cell($w_card, 4, 'Supplemental medical insurance:', 0, 2,'C');
+		$pdf->Cell($w_card, 4, 'Health Special Risk, Inc.', 0, 2,'C');
+		$pdf->Cell($w_card, 4, 'policy number SR2014DCP050467', 0, 2,'C');
+		$pdf->SetXY($x_off, $y_off + $h_card + 50);
+		$pdf->SetFont('Arial', 'I', 12);
+		$pdf->SetTextColor(255, 0, 0);
+		$pdf->Cell($w_card, 6, 'Take Life By The Handlebars! ' . chr(174), 0, 0,'C');
+		if ($instructions) {
+			$pdf->SetFont('Arial', 'I', 10);
+			$pdf->SetTextColor(0, 0, 0);
+			$pdf->SetXY($x_off, $y_off + $h_card*2);
+			$pdf->Cell($w_card, 10, 'To assemble card, cut out and fold', 0, 0,'C');
 		}
 	}
 
@@ -1436,6 +1523,22 @@ class PwtcMileage {
 			}
 		}
 		return $out;
+	}
+	
+	// Generates the [pwtc_mileage_download_membership_cards] shortcode.
+	public static function shortcode_download_membership_cards($atts, $content) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return '<div class="callout small warning"><p>Please <a href="/wp-login.php">log in</a> to download membership cards.</p></div>';
+		}
+		$user_info = get_userdata($current_user->ID);
+		$is_admin = in_array('administrator', $user_info->roles);
+		if ( !$is_admin ) {
+			return '<div class="callout small warning"><p>You must have administrator rights to download membership cards.</p></div>';
+		}
+        	ob_start();
+        	include('generate-rider-cards-form.php');
+        	return ob_get_clean();
 	}
 
 	/*************************************************************/
