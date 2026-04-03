@@ -74,7 +74,7 @@ jobs:
           yarn install
           
           # Build the theme
-          yarn build
+          yarn build:production
           
           # Install PHP dependencies
           composer install --no-dev --optimize-autoloader
