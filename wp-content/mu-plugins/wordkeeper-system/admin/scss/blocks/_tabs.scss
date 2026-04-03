@@ -1,0 +1,38 @@
+.wrap-page-admin-panel{
+    .tabs{
+        margin: 0;
+        list-style: none;
+        display: flex;
+        background-color: #32373B;
+        padding: 0 20px;
+        flex-wrap: wrap;
+        @include media(">=desktop") {
+            padding: 0 50px;   
+        }
+        li{
+            margin-bottom: 0;
+            a{
+                display: block;
+                padding: 10px 5px;
+                font-size: 12px;
+                color: #ffffff;
+                text-decoration: none;
+                outline: none;
+                font-weight: 700;
+                @include media(">=desktop") {
+                    padding: 27px 25px;
+                    font-size: 16px;
+                }
+                &:hover,
+                &:focus{
+                    background-color: var(--tabs-hover);
+                    box-shadow: none;
+                }
+            }
+            &.active a{
+                background-color: var(--tabs-hover);
+            }
+        }
+    }
+}
+

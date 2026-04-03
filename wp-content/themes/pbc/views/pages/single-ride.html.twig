@@ -19,7 +19,7 @@
                         </div>
                         <div class="column">
                             <span class="term">Departure Time:</span>
-                            <span class="value">{{ fn('get_field', 'date', post.ID)|date("g:i a") }}</span>
+                            <span class="value">{{ date|date("g:i a", "UTC") }}</span>
                         </div>
                         <div class="column">
                             {% include 'partials/ride-type.html.twig' with {type: fn('get_field', 'type', post.ID)} only %}
