@@ -26,7 +26,8 @@ add_action('manage_posts_custom_column', function($column_name, $post_ID){
         return;
     }
 
-    $date = DateTime::createFromFormat('Y-m-d H:i:s', get_field('date', $post_ID, false));
+    $timezone = new DateTimeZone(pwtc_get_timezone_string());
+    $date = DateTime::createFromFormat('Y-m-d H:i:s', get_field('date', $post_ID, false), $timezone);
 
     if(!$date) {
         return;

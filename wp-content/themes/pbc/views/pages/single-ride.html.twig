@@ -18,7 +18,8 @@
                             {% include 'partials/ride-date.html.twig' with {date: fn('get_field', 'date', post.ID)} only %}
                         </div>
                         <div class="column">
-                            {% include 'partials/ride-time.html.twig' with {date: fn('get_field', 'date', post.ID)} only %}
+                            <span class="term">Departure Time:</span>
+                            <span class="value">{{ fn('get_field', 'date', post.ID)|date("g:i a") }}</span>
                         </div>
                         <div class="column">
                             {% include 'partials/ride-type.html.twig' with {type: fn('get_field', 'type', post.ID)} only %}

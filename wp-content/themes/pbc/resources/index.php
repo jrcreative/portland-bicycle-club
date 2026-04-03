@@ -28,7 +28,8 @@ if(is_singular())
             }
             elseif(get_row_layout() == "rides")
             {
-                $today = new DateTime(null, new DateTimeZone(pwtc_get_timezone_string()));
+                $timezone = new DateTimeZone(pwtc_get_timezone_string());
+                $today = new DateTime(null, $timezone);
                 $rides_query = new WP_Query([
                     'posts_per_page' => 6,
                     'post_type' => 'scheduled_rides',
@@ -45,7 +46,7 @@ if(is_singular())
                 $rides_data = [];
                 while($rides_query->have_posts()){
                     $rides_query->the_post();
-                    $datetime = DateTime::createFromFormat('Y-m-d H:i:s', get_field('date'));
+                    $datetime = DateTime::createFromFormat('Y-m-d H:i:s', get_field('date'), $timezone);
                     $date = $datetime ? $datetime->format('Y-m-d') : '';
                     if(!empty($date) && !isset($rides_data[$date])){
                         $rides_data[$date] = [];

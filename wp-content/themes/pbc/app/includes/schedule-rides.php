@@ -9,8 +9,9 @@ add_action('acf/save_post', function ($post_id) {
 
 
     $ride_ids = [];
+    $timezone = new DateTimeZone(pwtc_get_timezone_string());
     foreach($_POST['events'] as $event) {
-        $date = DateTime::createFromFormat('Y/n/j g:i a', $event.' '.get_field('time'));
+        $date = DateTime::createFromFormat('Y/n/j g:i a', $event.' '.get_field('time'), $timezone);
         $id = wp_insert_post([
             'post_type' => 'scheduled_rides',
             'post_title' => get_the_title(),
