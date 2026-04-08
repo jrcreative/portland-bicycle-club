@@ -14,7 +14,7 @@
         <div class="row column card">
             <div class="row callout">
                 <div class="small-4 medium-2 columns">
-                    <h4 class="time">{{ ride.meta('date') | date('g:i') }}<sup>{{ ride.meta('date') | date('a') }}</sup></h4>
+                    <h4 class="time">{{ ride.meta('date') | date('g:i', "UTC") }}<sup>{{ ride.meta('date') | date('a', "UTC") }}</sup></h4>
                 </div>
                 <div class="small-8 medium-10 columns">
                     <h4 class="{% if ride.meta('is_canceled') %}canceled{% endif %}"><a href="{{ ride.link }}">{{ ride.title }}</a></h4>
