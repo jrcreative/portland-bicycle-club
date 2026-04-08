@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2014-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -59,7 +59,7 @@ else :
 				 */
 				$my_membership_products_columns = (array) apply_filters( 'wc_memberships_members_area_my_membership_products_column_names', array(
 					'membership-product-image'      => '&nbsp;',
-					'membership-product-title'      => wc_memberships_get_members_area_sorting_link( 'title', __( 'Title', 'woocommerce-memberships' ) ),
+					'membership-product-title'      => wc_memberships_get_members_area_sorting_link( 'title', esc_html__( 'Title', 'woocommerce-memberships' ) ),
 					'membership-product-accessible' => esc_html__( 'Accessible', 'woocommerce-memberships' ),
 					'membership-product-price'      => esc_html__( 'Price', 'woocommerce-memberships' ),
 					'membership-product-excerpt'    => esc_html__( 'Description', 'woocommerce-memberships' ),
@@ -68,7 +68,7 @@ else :
 
 				?>
 				<?php foreach ( $my_membership_products_columns as $column_id => $column_header ) : ?>
-					<th class="<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo $column_header; ?></span></th>
+					<th class="<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo wp_kses_post( $column_header ); ?></span></th>
 				<?php endforeach; ?>
 			</tr>
 		</thead>
@@ -85,8 +85,8 @@ else :
 				}
 
 				if ( $product->is_type( 'variation' ) ) {
-					$parent     = wc_memberships_get_product_parent( $product );
-					$product_id = $parent->get_id();
+					$parent     = wc_get_product( $product->get_parent_id( 'edit' ) );
+					$product_id = $parent ? $parent->get_id() : 0;
 				} else {
 					$product_id = $product->get_id();
 				}
@@ -105,9 +105,9 @@ else :
 
 							<td class="membership-product-image" style="min-width: 84px;" data-title="<?php esc_attr_e( 'Image', 'woocommerce-memberships' ); ?>">
 								<?php if ( $can_view_product ) : ?>
-									<a href="<?php echo esc_url( get_permalink( $product_id ) ); ?>"><?php echo $product->get_image(); ?></a>
+									<a href="<?php echo esc_url( get_permalink( $product_id ) ); ?>"><?php echo wp_kses_post( $product->get_image() ); ?></a>
 								<?php else : ?>
-									<?php echo wc_placeholder_img( 'shop_thumbnail' ); ?>
+									<?php echo wp_kses_post( wc_placeholder_img( 'shop_thumbnail' ) ); ?>
 								<?php endif; ?>
 							</td>
 
@@ -127,7 +127,7 @@ else :
 								<?php if ( $can_view_product ) : ?>
 									<?php esc_html_e( 'Now', 'woocommerce-memberships' ); ?>
 								<?php else : ?>
-									<time datetime="<?php echo date( 'Y-m-d H:i:s', $view_start_time ); ?>" title="<?php echo esc_attr( $view_start_time ); ?>"><?php echo date_i18n( wc_date_format(), $view_start_time ); ?></time>
+									<time datetime="<?php echo esc_attr( date( 'Y-m-d H:i:s', $view_start_time ) ); ?>" title="<?php echo esc_attr( $view_start_time ); ?>"><?php echo esc_html( date_i18n( wc_date_format(), $view_start_time ) ); ?></time>
 								<?php endif; ?>
 							</td>
 
@@ -154,7 +154,7 @@ else :
 						<?php elseif ( 'membership-product-actions' === $column_id ) : ?>
 
 							<td class="membership-product-actions order-actions" data-title="<?php echo esc_attr( $column_header ); ?>">
-								<?php echo wc_memberships_get_members_area_action_links( 'my-membership-products', $customer_membership, $product ); ?>
+								<?php echo wp_kses_post( wc_memberships_get_members_area_action_links( 'my-membership-products', $customer_membership, $product ) ); ?>
 							</td>
 
 						<?php else : ?>
@@ -178,7 +178,7 @@ else :
 			<tfoot>
 				<tr>
 					<th colspan="<?php echo count( $my_membership_products_columns ); ?>">
-						<?php echo $tfoot; ?>
+						<?php echo wp_kses_post( $tfoot ); ?>
 					</th>
 				</tr>
 			</tfoot>

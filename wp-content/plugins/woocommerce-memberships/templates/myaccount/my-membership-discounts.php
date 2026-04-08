@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2014-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -59,7 +59,7 @@ else :
 				 */
 				$my_membership_discounts_columns = (array) apply_filters( 'wc_memberships_members_area_my_membership_discounts_column_names', array(
 					'membership-discount-image'   => '&nbsp;' ,
-					'membership-discount-title'   => wc_memberships_get_members_area_sorting_link( 'title', __( 'Title', 'woocommerce-memberships' ) ),
+					'membership-discount-title'   => wc_memberships_get_members_area_sorting_link( 'title', esc_html__( 'Title', 'woocommerce-memberships' ) ),
 					'membership-discount-amount'  => esc_html__( 'Discount', 'woocommerce-memberships' ),
 					'membership-discount-price'   => esc_html__( 'My Price', 'woocommerce-memberships' ),
 					'membership-discount-excerpt' => esc_html__( 'Description', 'woocommerce-memberships' ),
@@ -68,7 +68,7 @@ else :
 
 				?>
 				<?php foreach ( $my_membership_discounts_columns as $column_id => $column_header ) : ?>
-					<th class="<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo $column_header; ?></span></th>
+					<th class="<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo wp_kses_post( $column_header ); ?></span></th>
 				<?php endforeach; ?>
 			</tr>
 		</thead>
@@ -86,9 +86,9 @@ else :
 				}
 
 				if ( $product->is_type( 'variation' ) ) {
-					$parent      = wc_memberships_get_product_parent( $product );
-					$product_id  = $parent->get_id();
-					$the_product = $parent;
+					$parent      = wc_get_product( $product->get_parent_id( 'edit' ) );
+					$product_id  = $parent ? $parent->get_id() : 0;
+					$the_product = $parent ?: null;
 				} else {
 					$product_id  = $product->get_id();
 					$the_product = $product;
@@ -127,9 +127,9 @@ else :
 
 							<td class="membership-discount-image" style="min-width: 84px;" data-title="<?php esc_attr_e( 'Image', 'woocommerce-memberships' ); ?>">
 								<?php if ( $can_view_product ) : ?>
-									<a href="<?php echo esc_url( get_permalink( $product_id ) ); ?>"><?php echo $product->get_image(); ?></a>
+									<a href="<?php echo esc_url( get_permalink( $product_id ) ); ?>"><?php echo wp_kses_post( $product->get_image() ); ?></a>
 								<?php else : ?>
-									<?php echo wc_placeholder_img( 'shop_thumbnail' ); ?>
+									<?php echo wp_kses_post( wc_placeholder_img( 'shop_thumbnail' ) ); ?>
 								<?php endif; ?>
 							</td>
 
@@ -149,7 +149,7 @@ else :
 								<?php if ( $can_have_discount ) : ?>
 									<?php echo wp_kses_post( wc_memberships_get_member_product_discount( $customer_membership, $product, true ) ); ?>
 								<?php else : ?>
-									<time datetime="<?php echo date( 'Y-m-d', $purchase_start_time ); ?>" title="<?php echo esc_attr( $purchase_start_time ); ?>">
+									<time datetime="<?php echo esc_attr( date( 'Y-m-d', $purchase_start_time ) ); ?>" title="<?php echo esc_attr( $purchase_start_time ); ?>">
 										<?php /* translators: discount available from date */ ?>
 										<?php echo esc_html( sprintf( __( 'Available from %s', 'woocommerce-memberships' ), date_i18n( get_option( 'date_format' ), $purchase_start_time ) ) ); ?>
 									</time>
@@ -179,7 +179,7 @@ else :
 						<?php elseif ( 'membership-discount-actions' === $column_id ) : ?>
 
 							<td class="membership-discount-actions order-actions" data-title="<?php echo esc_attr( $column_header ); ?>">
-								<?php echo wc_memberships_get_members_area_action_links( 'my-membership-discounts', $customer_membership, $product ); ?>
+								<?php echo wp_kses_post( wc_memberships_get_members_area_action_links( 'my-membership-discounts', $customer_membership, $product ) ); ?>
 							</td>
 
 						<?php else : ?>
@@ -212,7 +212,7 @@ else :
 			<tfoot>
 				<tr>
 					<th colspan="<?php echo count( $my_membership_discounts_columns ); ?>">
-						<?php echo $tfoot; ?>
+						<?php echo wp_kses_post( $tfoot ); ?>
 					</th>
 				</tr>
 			</tfoot>

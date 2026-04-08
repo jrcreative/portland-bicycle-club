@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "woocommerce-box-office/private-content",
+  "version": "0.1.0",
+  "title": "Private Content",
+  "category": "woocommerce-box-office",
+  "icon": "tickets-alt",
+  "description": "WooCommerce Box Office block to display form that can be used to access private ticket information.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "textdomain": "woocommerce-box-office",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css"
+}

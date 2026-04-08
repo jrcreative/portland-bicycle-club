@@ -18,15 +18,18 @@
  *
  * @package   SkyVerge/WooCommerce/Utilities
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
- namespace SkyVerge\WooCommerce\PluginFramework\v5_4_0;
+ namespace SkyVerge\WooCommerce\PluginFramework\v6_1_1;
+
+ use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Helpers\ScriptHelper;
 
  defined( 'ABSPATH' ) or exit;
 
- if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_4_0\\SV_WP_Job_Batch_Handler' ) ) :
+ if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\SV_WP_Job_Batch_Handler' ) ) :
+
 
 /**
  * The job batch handler class.
@@ -36,6 +39,7 @@
  *
  * @since 4.8.0
  */
+#[\AllowDynamicProperties]
 class SV_WP_Job_Batch_Handler {
 
 
@@ -85,6 +89,18 @@ class SV_WP_Job_Batch_Handler {
 		add_action( 'wp_ajax_' . $this->get_job_handler()->get_identifier() . '_cancel_job', array( $this, 'ajax_cancel_job' ) );
 	}
 
+	/**
+	 * Gets the name of the script handle.
+	 *
+	 * @since 6.0.1
+	 *
+	 * @return string
+	 */
+	protected function getScriptHandle() : string
+	{
+		return $this->get_job_handler()->get_identifier() . '_batch_handler';
+	}
+
 
 	/**
 	 * Enqueues the scripts.
@@ -93,7 +109,7 @@ class SV_WP_Job_Batch_Handler {
 	 */
 	public function enqueue_scripts() {
 
-		wp_enqueue_script( $this->get_job_handler()->get_identifier() . '_batch_handler',  $this->get_plugin()->get_framework_assets_url() . '/js/admin/sv-wp-admin-job-batch-handler.min.js', array( 'jquery' ), $this->get_plugin()->get_version() );
+		wp_enqueue_script( $this->getScriptHandle(),  $this->get_plugin()->get_framework_assets_url() . '/js/admin/sv-wp-admin-job-batch-handler.min.js', [ 'jquery' ], $this->get_plugin()->get_assets_version() );
 	}
 
 
@@ -114,11 +130,13 @@ class SV_WP_Job_Batch_Handler {
 		 */
 		$args = apply_filters( $this->get_job_handler()->get_identifier() . '_batch_handler_js_args', $this->get_js_args(), $this );
 
-		wc_enqueue_js( sprintf( 'window.%1$s_batch_handler = new %2$s( %3$s );',
+		$script = sprintf( 'window.%1$s_batch_handler = new %2$s( %3$s );',
 			esc_js( $this->get_job_handler()->get_identifier() ),
 			esc_js( $this->get_js_class() ),
 			json_encode( $args )
-		) );
+		);
+
+		ScriptHelper::addInlineScript($this->getScriptHandle(), $script);
 	}
 
 
@@ -304,5 +322,6 @@ class SV_WP_Job_Batch_Handler {
 
 
 }
+
 
 endif;

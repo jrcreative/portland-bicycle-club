@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2014-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -51,10 +51,10 @@ if ( ! empty( $customer_memberships ) ) : ?>
 				 * @param int $user_id the member ID
 				 */
 				$my_memberships_columns = apply_filters( 'wc_memberships_my_memberships_column_names', array(
-					'membership-plan'       => _x( 'Plan', 'Membership plan', 'woocommerce-memberships' ),
-					'membership-start-date' => _x( 'Start', 'Membership start date', 'woocommerce-memberships' ),
-					'membership-end-date'   => _x( 'Expires', 'Membership end date', 'woocommerce-memberships' ),
-					'membership-status'     => _x( 'Status', 'Membership status', 'woocommerce-memberships' ),
+					'membership-plan'       => esc_html_x( 'Plan', 'Membership plan', 'woocommerce-memberships' ),
+					'membership-start-date' => esc_html_x( 'Start', 'Membership start date', 'woocommerce-memberships' ),
+					'membership-end-date'   => esc_html_x( 'Expires', 'Membership end date', 'woocommerce-memberships' ),
+					'membership-status'     => esc_html_x( 'Status', 'Membership status', 'woocommerce-memberships' ),
 					'membership-actions'    => '&nbsp;',
 				), $user_id );
 
@@ -102,7 +102,7 @@ if ( ! empty( $customer_memberships ) ) : ?>
 								<?php
 
 								$order           = $customer_membership->get_order();
-								$order_datetime  = $order ? wc_memberships_get_order_date( $order, 'created' ) : null;
+								$order_datetime  = $order ? $order->get_date_created( 'edit' ) : null;
 								$order_timestamp = $order_datetime ? $order_datetime->getTimestamp() : null;
 								$past_start_date = $order_timestamp ? ( $customer_membership->get_start_date( 'timestamp' ) < $order_timestamp ) : false;
 
@@ -115,7 +115,7 @@ if ( ! empty( $customer_memberships ) ) : ?>
 
 								?>
 								<?php if ( ! empty( $start_time ) && is_numeric( $start_time ) ) : ?>
-									<time datetime="<?php echo date( 'Y-m-d', $start_time ); ?>" title="<?php echo esc_attr( date_i18n( wc_date_format(), $start_time ) ); ?>"><?php echo date_i18n( wc_date_format(), $start_time ); ?></time>
+									<time datetime="<?php echo esc_attr( date( 'Y-m-d', $start_time ) ); ?>" title="<?php echo esc_attr( date_i18n( wc_date_format(), $start_time ) ); ?>"><?php echo esc_html( date_i18n( wc_date_format(), $start_time ) ); ?></time>
 								<?php else : ?>
 									<?php esc_html_e( 'N/A', 'woocommerce-memberships' ); ?>
 								<?php endif; ?>
@@ -125,7 +125,7 @@ if ( ! empty( $customer_memberships ) ) : ?>
 
 							<td class="membership-end-date" data-title="<?php echo esc_attr( $column_name ); ?>">
 								<?php if ( $end_time = $customer_membership->get_local_end_date( 'timestamp', ! $customer_membership->is_expired() ) ) : ?>
-									<time datetime="<?php echo date( 'Y-m-d', $end_time ); ?>" title="<?php echo esc_attr( date_i18n( wc_date_format(), $end_time ) ); ?>"><?php echo date_i18n( wc_date_format(), $end_time ); ?></time>
+									<time datetime="<?php echo esc_attr( date( 'Y-m-d', $end_time ) ); ?>" title="<?php echo esc_attr( date_i18n( wc_date_format(), $end_time ) ); ?>"><?php echo esc_html( date_i18n( wc_date_format(), $end_time ) ); ?></time>
 								<?php else : ?>
 									<?php esc_html_e( 'N/A', 'woocommerce-memberships' ); ?>
 								<?php endif; ?>
@@ -142,7 +142,7 @@ if ( ! empty( $customer_memberships ) ) : ?>
 							<td class="membership-actions order-actions" data-title="<?php echo esc_attr( $column_name ); ?>">
 								<?php
 
-								echo wc_memberships_get_members_area_action_links( 'my-memberships', $customer_membership, $post );
+								echo wp_kses_post( wc_memberships_get_members_area_action_links( 'my-memberships', $customer_membership, $post ) );
 
 								// ask confirmation before cancelling a membership
 								wc_enqueue_js( "
@@ -197,7 +197,7 @@ else :
 		 * @param string $no_memberships_text the text displayed to users without memberships
 		 * @param int $user_id the current user
 		 */
-		echo (string) apply_filters( 'wc_memberships_my_memberships_no_memberships_text', __( "Looks like you don't have a membership yet!", 'woocommerce-memberships' ), $user_id );
+		echo esc_html( (string) apply_filters( 'wc_memberships_my_memberships_no_memberships_text', __( "Looks like you don't have a membership yet!", 'woocommerce-memberships' ), $user_id ) );
 
 		?>
 	</p>

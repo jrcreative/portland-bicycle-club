@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2014-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -46,7 +46,7 @@ if ( ! empty( $membership_details ) && is_array( $membership_details ) ) :
 			<?php foreach ( $membership_details as $setting_id => $data ) : ?>
 				<tr class="<?php echo sanitize_html_class( $data['class'] ); ?>">
 					<td><?php echo esc_html( $data['label'] ); ?></td>
-					<td><?php echo $data['content']; ?></td>
+					<td><?php echo wp_kses_post( $data['content'] ); ?></td>
 				</tr>
 			<?php endforeach; ?>
 		</tbody>
@@ -54,4 +54,3 @@ if ( ! empty( $membership_details ) && is_array( $membership_details ) ) :
 	<?php
 
 endif;
-

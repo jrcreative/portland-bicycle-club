@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2014-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -36,6 +36,6 @@ global $product;
 
 if ( $product && wc_memberships_user_has_member_discount( $product ) ) :
 
-	echo wc_memberships_get_member_discount_badge( $product );
+	echo wp_kses_post( wc_memberships_get_member_discount_badge( $product ) );
 
 endif;
