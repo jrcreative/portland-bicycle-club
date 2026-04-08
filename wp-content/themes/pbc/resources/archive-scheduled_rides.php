@@ -11,6 +11,7 @@ $timezone = new \DateTimeZone(pwtc_get_timezone_string());
 
 $today = new DateTime('now', $timezone);
 $context['today'] = $today->format('n/d/Y g:i A');
+$context['timezone'] = $timezone;
 
 // time for a little magic
 // note that current date is refering to the selected month not the current date.
