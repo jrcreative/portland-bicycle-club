@@ -124,22 +124,24 @@ Copy the entire output (including `-----BEGIN` and `-----END` lines) and add it 
 **Included:**
 - WordPress core files
 - Themes with built assets (dist/ folder)
-- PHP vendor dependencies (composer)
-- Plugins
+- PHP vendor dependencies (composer) - **including plugin vendors**
+- Plugins (with their vendor directories)
 - Theme templates and PHP files
 
 **Excluded:**
 - `.git/` and `.github/` (version control)
 - `node_modules/` (all JS dependencies)
-- `resources/assets/` (source files)
-- `package.json`, `webpack.*.js` (build config)
-- `composer.json`, `composer.lock` (dependency config)
-- `.eslintrc`, `.babelrc`, etc. (dev configs)
+- Theme source files (`wp-content/themes/*/resources/assets/`)
+- Theme build configs (`wp-content/themes/*/package.json`, `webpack.*.js`, etc.)
+- Theme composer files (`wp-content/themes/*/composer.json`, `composer.lock`)
+- `.eslintrc`, `.babelrc`, etc. (dev configs in themes)
 - `wp-content/uploads/` (user content)
 - `wp-content/cache/` (temporary files)
 - `wp-config.php` (server-specific config)
 - `.env` (environment variables)
 - `*.log` (log files)
+
+**Important:** Plugin `vendor/` directories and dependencies ARE included. Only theme build files are excluded.
 
 ### Why Build on GitHub Actions?
 
@@ -176,6 +178,23 @@ Copy the entire output (including `-----BEGIN` and `-----END` lines) and add it 
   curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
   chmod +x wp-cli.phar
   ```
+
+### Plugin Errors After Deployment
+If you see errors like `Failed to open stream: No such file or directory` mentioning `vendor/`:
+
+**Cause:** Plugin dependencies weren't deployed correctly.
+
+**Solution:**
+1. The deployment now correctly includes plugin vendor directories
+2. Redeploy to restore any missing files:
+   ```bash
+   git push origin staging  # triggers staging deployment
+   ```
+3. If a specific plugin is missing its vendor directory, SSH to the server and run:
+   ```bash
+   cd wp-content/plugins/plugin-name
+   composer install --no-dev
+   ```
 
 ## Rollback Procedure
 

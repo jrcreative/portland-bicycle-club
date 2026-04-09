@@ -480,6 +480,50 @@ The deployment path might be incorrect:
 
 ---
 
+### Problem: Plugin Error "Failed to open stream" or "vendor" Directory Missing
+
+**Symptoms:**
+- Error like: `require_once(...vendor/...): Failed to open stream: No such file or directory`
+- Plugins fail after deployment
+- Error mentions WooCommerce, memberships, or other plugins
+
+**What Happened:**
+
+Many WordPress plugins use **Composer** (a PHP dependency manager) and have a `vendor/` directory with required libraries. The deployment was accidentally excluding these files.
+
+**Solution:**
+
+This has been fixed in the deployment configuration! The exclusions now only apply to **theme** build files, not plugin dependencies.
+
+**If you're still seeing this error after the fix:**
+
+1. **Redeploy to restore missing files:**
+   ```bash
+   git push origin staging  # For staging
+   # Or trigger production deployment from GitHub Actions
+   ```
+
+2. **If the plugin vendor directory is still missing locally:**
+   ```bash
+   # Navigate to the plugin directory
+   cd wp-content/plugins/plugin-name
+   
+   # Install its dependencies
+   composer install
+   ```
+
+3. **Check if the plugin is in your repository:**
+   - Some plugins shouldn't be in Git (if installed via WordPress admin)
+   - Check your `.gitignore` file
+   - Plugins managed through WordPress should be installed directly on staging/production
+
+**Prevention:**
+- The deployment now correctly includes plugin `vendor/` directories
+- Only theme build files (node_modules, source assets) are excluded
+- Plugin dependencies will deploy correctly
+
+---
+
 ## Important Notes About Databases
 
 ### Database Are NOT Deployed

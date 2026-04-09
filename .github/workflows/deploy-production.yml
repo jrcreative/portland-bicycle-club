@@ -118,7 +118,7 @@ jobs:
           ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc wp-content/plugins --exclude='node_modules' --exclude='*.log' || mkdir -p ../backups && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc"
           echo "Backup created: ${BACKUP_NAME}"
 
-      - name: Deploy to production via rsync
+       - name: Deploy to production via rsync
         env:
           PROD_USER: ${{ secrets.PRODUCTION_SSH_USER }}
           PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
@@ -142,18 +142,18 @@ jobs:
             --exclude='*.log' \
             --exclude='.DS_Store' \
             --exclude='Local Sites/' \
-            --exclude='package.json' \
-            --exclude='package-lock.json' \
-            --exclude='yarn.lock' \
-            --exclude='composer.json' \
-            --exclude='composer.lock' \
-            --exclude='webpack.*.js' \
-            --exclude='gulpfile.js' \
-            --exclude='.eslintrc*' \
-            --exclude='.stylelintrc*' \
-            --exclude='.babelrc*' \
-            --exclude='phpunit.xml*' \
-            --exclude='.travis.yml' \
+            --exclude='wp-content/themes/*/package.json' \
+            --exclude='wp-content/themes/*/package-lock.json' \
+            --exclude='wp-content/themes/*/yarn.lock' \
+            --exclude='wp-content/themes/*/composer.json' \
+            --exclude='wp-content/themes/*/composer.lock' \
+            --exclude='wp-content/themes/*/webpack.*.js' \
+            --exclude='wp-content/themes/*/gulpfile.js' \
+            --exclude='wp-content/themes/*/.eslintrc*' \
+            --exclude='wp-content/themes/*/.stylelintrc*' \
+            --exclude='wp-content/themes/*/.babelrc*' \
+            --exclude='wp-content/themes/*/phpunit.xml*' \
+            --exclude='wp-content/themes/*/.travis.yml' \
             ./ ${PROD_USER}@${PROD_HOST}:${PROD_PATH}
 
       - name: Clear WordPress cache

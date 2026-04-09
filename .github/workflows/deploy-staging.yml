@@ -138,7 +138,7 @@ jobs:
             echo "  Port 2222" >> ~/.ssh/config
           }
 
-      - name: Deploy to staging via rsync
+       - name: Deploy to staging via rsync
         env:
           STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
           STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
@@ -162,18 +162,18 @@ jobs:
             --exclude='*.log' \
             --exclude='.DS_Store' \
             --exclude='Local Sites/' \
-            --exclude='package.json' \
-            --exclude='package-lock.json' \
-            --exclude='yarn.lock' \
-            --exclude='composer.json' \
-            --exclude='composer.lock' \
-            --exclude='webpack.*.js' \
-            --exclude='gulpfile.js' \
-            --exclude='.eslintrc*' \
-            --exclude='.stylelintrc*' \
-            --exclude='.babelrc*' \
-            --exclude='phpunit.xml*' \
-            --exclude='.travis.yml' \
+            --exclude='wp-content/themes/*/package.json' \
+            --exclude='wp-content/themes/*/package-lock.json' \
+            --exclude='wp-content/themes/*/yarn.lock' \
+            --exclude='wp-content/themes/*/composer.json' \
+            --exclude='wp-content/themes/*/composer.lock' \
+            --exclude='wp-content/themes/*/webpack.*.js' \
+            --exclude='wp-content/themes/*/gulpfile.js' \
+            --exclude='wp-content/themes/*/.eslintrc*' \
+            --exclude='wp-content/themes/*/.stylelintrc*' \
+            --exclude='wp-content/themes/*/.babelrc*' \
+            --exclude='wp-content/themes/*/phpunit.xml*' \
+            --exclude='wp-content/themes/*/.travis.yml' \
             ./ ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}
 
       - name: Clear WordPress cache on staging
