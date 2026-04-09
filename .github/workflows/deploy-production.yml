@@ -118,7 +118,7 @@ jobs:
           ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc wp-content/plugins --exclude='node_modules' --exclude='*.log' || mkdir -p ../backups && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc"
           echo "Backup created: ${BACKUP_NAME}"
 
-       - name: Deploy to production via rsync
+      - name: Deploy to production via rsync
         env:
           PROD_USER: ${{ secrets.PRODUCTION_SSH_USER }}
           PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
