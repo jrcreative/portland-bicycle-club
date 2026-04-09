@@ -138,7 +138,7 @@ jobs:
             echo "  Port 2222" >> ~/.ssh/config
           }
 
-       - name: Deploy to staging via rsync
+      - name: Deploy to staging via rsync
         env:
           STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
           STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
