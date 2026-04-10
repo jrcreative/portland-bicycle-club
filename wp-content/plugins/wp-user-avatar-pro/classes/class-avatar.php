@@ -407,9 +407,9 @@ if ( ! class_exists( 'WPUA_Avatar' ) ) {
 		}
 		/**
 		 * Setup User's meta to save avatar.
-		 * @param  int $user_id User ID.
-		 */
-		public function wpua_avatar_save($user_id) {
+	 * @param  int $user_id User ID.
+	 */
+	public static function wpua_avatar_save($user_id) {
 			global $wpua_upload_dir, $wpua_admin, $wpdb;
 			$avatar_obj = new WPUA_Avatar();
 
