@@ -9,11 +9,11 @@
 
             {% block months %}
                 <div class="align-justify grid-x grid-padding-x">
-                    <a href="/scheduled_rides/?month={{ month_previous_val }}" class="dark button">
+                    <a href="{{ SP.WordPress.site_url(false, 'scheduled_rides') }}?month={{ month_previous_val }}" class="dark button">
                         <i class="fa fa-chevron-left"></i>&nbsp;{{ month_previous }}
                     </a>
                     <a class="dark button" href="/scheduled_rides_list?month={{ month_val }}"><i class="fa fa-list" aria-hidden="true"></i> List View</a>
-                    <a href="/scheduled_rides/?month={{ month_next_val }}" class="dark button">
+                    <a href="{{ SP.WordPress.site_url(false, 'scheduled_rides') }}?month={{ month_next_val }}" class="dark button">
                         {{ month_next }}&nbsp;<i class="fa fa-chevron-right"></i>
                     </a>
                 </div>
@@ -28,8 +28,8 @@
                             <div class="rides-filter">
                                 <div class="row">
                                     <div class="medium-12 columns">
-                                        <label>Term
-                                            <input type="text" name="s" value="{{ args.s }}"/>
+                                        <label>Title
+                                            <input type="text" name="title" value="{{ args.s }}"/>
                                         </label>
                                     </div>
                                 </div>
@@ -40,8 +40,8 @@
                                                 <option value="0" {% if not args.terrain %}selected{% endif %}>Any</option>
                                                 <option value="a" {% if args.terrain == 'a' %}selected{% endif %}>Flat</option>
                                                 <option value="b" {% if args.terrain == 'b' %}selected{% endif %}>Mostly Flat</option>
-                                                <option value="c" {% if args.terrain == 'c' %}selected{% endif %}>Small hills</option>
-                                                <option value="d" {% if args.terrain == 'd' %}selected{% endif %}>Large hills</option>
+                                                <option value="c" {% if args.terrain == 'c' %}selected{% endif %}>Small Hills</option>
+                                                <option value="d" {% if args.terrain == 'd' %}selected{% endif %}>Large Hills</option>
                                                 <option value="e" {% if args.terrain == 'e' %}selected{% endif %}>Mountainous</option>
                                             </select>
                                         </label>
@@ -61,10 +61,11 @@
                                         <label>Length
                                             <select name="length">
                                                 <option value="0" {% if not args.length %}selected{% endif %}>Any</option>
-                                                <option value="1" {% if args.length == '1' %}selected{% endif %}>&lt; 2 miles</option>
-                                                <option value="2" {% if args.length == '2' %}selected{% endif %}>2-5 miles</option>
-                                                <option value="3" {% if args.length == '3' %}selected{% endif %}>5-10 miles</option>
-                                                <option value="4" {% if args.length == '4' %}selected{% endif %}>&gt; 10 miles</option>
+                                                <option value="1" {% if args.length == '1' %}selected{% endif %}>0-25 miles</option>
+                                                <option value="2" {% if args.length == '2' %}selected{% endif %}>25-50 miles</option>
+                                                <option value="3" {% if args.length == '3' %}selected{% endif %}>50-75 miles</option>
+                                                <option value="4" {% if args.length == '4' %}selected{% endif %}>75-100 miles</option>
+                                                <option value="5" {% if args.length == '5' %}selected{% endif %}>&gt; 100 miles</option>
                                             </select>
                                         </label>
                                     </div>
@@ -81,7 +82,7 @@
             {% if month_current_numeric == month_now_numeric %}
                 <a href="#" class="dark button hide-for-medium toggle-previous-days">Show Hidden Days</a>
             {% endif %}
-            <div class="rides-calendar {% if month_current_numeric < month_now_numeric %}previous{% endif %}">
+            <div class="rides-calendar {% if month_current_numeric < month_now_numeric %} previous{% endif %}">
                 {% for week in calendar|batch(7, false) %}
                     <div class="week header">
                         {% for day in week %}
@@ -96,7 +97,7 @@
                                     weekend
                                 {% endif %}"
                             >
-                                <div class="date">{{ day.date|date('j') }} <span class="day-of-week">{{ day.date|date('D') }}{% if day.events %} <a href="{{ SP.WordPress.site_url(false, 'scheduled_rides') }}?view=daily&date={{ day.date|date('Y-m-d') }}" title="Show ride start locations"><i class="far fa-map"></i></a>{% endif %}</span></div>
+                                <div class="date">{{ day.date|date('j') }} <span class="day-of-week">{{ day.date|date('D') }}</span></div>
                                 <ul class="vertical menu">
                                     {% for event in day.events %}
                                         <li>
