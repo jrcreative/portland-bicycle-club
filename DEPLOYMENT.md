@@ -2,7 +2,67 @@
 
 This repository uses GitHub Actions for automated deployments to staging and production servers.
 
-## Prerequisites
+## Local Development Setup
+
+### Recommended Environment
+
+**LocalWP** - The recommended local WordPress development environment
+- Download: https://localwp.com/
+- Includes everything needed: PHP, MySQL, nginx/Apache
+- Built-in database management with **AdminNeo**
+
+### Required Dependencies
+
+Install these on your local machine:
+
+1. **Node.js and npm** (v18 or higher)
+   - Install from: https://nodejs.org/
+   - Verify: `node --version && npm --version`
+   - Required for building theme assets
+
+2. **Composer** (PHP dependency manager)
+   - Install from: https://getcomposer.org/
+   - Verify: `composer --version`
+   - Required for PHP dependencies
+
+3. **Git**
+   - Install from: https://git-scm.com/
+   - Verify: `git --version`
+   - Required for version control
+
+### Initial Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd <project-directory>
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   # Install Node.js dependencies for theme builds
+   npm install
+   
+   # Install PHP dependencies (if any)
+   composer install
+   ```
+
+3. **Build theme assets:**
+   ```bash
+   # Development build (with watch)
+   npm run watch
+   
+   # Production build
+   npm run build:production
+   ```
+
+4. **Access database:**
+   - Open LocalWP
+   - Right-click on your site
+   - Select **"Open AdminNeo"** to manage the database
+   - AdminNeo provides a modern interface for viewing/editing database tables
+
+## Server Deployment Prerequisites
 
 1. SSH access to staging and production servers
 2. rsync installed on servers
@@ -171,13 +231,9 @@ Copy the entire output (including `-----BEGIN` and `-----END` lines) and add it 
   ```
 
 ### Cache Not Clearing
-- Ensure WP-CLI is installed on server
-- Manually clear cache via WordPress admin
-- Install WP-CLI:
-  ```bash
-  curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-  chmod +x wp-cli.phar
-  ```
+- Clear cache via WordPress admin dashboard
+- Use hosting control panel cache tools
+- Check server cache configuration
 
 ### Plugin Errors After Deployment
 If you see errors like `Failed to open stream: No such file or directory` mentioning `vendor/`:

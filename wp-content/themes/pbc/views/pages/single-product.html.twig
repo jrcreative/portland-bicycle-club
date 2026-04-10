@@ -11,8 +11,6 @@
                 <div itemscope itemtype="http://schema.org/Product" id="product-{{ post.id }}" class="single-product-details {{ fn('post_class') }}">
                     {% do action('woocommerce_before_single_product_summary') %}
                     <div class="summary entry-summary">
-                    
-HELLO!
                         {% do action('woocommerce_single_product_summary') %}
                     </div>
                     
