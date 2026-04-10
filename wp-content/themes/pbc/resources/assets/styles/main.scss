@@ -10,6 +10,7 @@ $slick-loader-path: "~slick-carousel/slick/";
 @include foundation-everything(true);
 @include foundation-flex-classes;
 @include foundation-flex-grid;
+@import "~foundation-sites/scss/components/tabs";
 @import "woocommerce";
 @import "layout/header";
 @import "layout/footer";
