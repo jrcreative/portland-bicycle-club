@@ -11,6 +11,12 @@ if (is_singular('product')) {
     $context['product'] = $product;
 
     Timber::render('pages/single-product.html.twig', $context);
+} elseif (is_cart() || is_checkout() || is_account_page()) {
+    // Handle WooCommerce shortcode pages (cart, checkout, my-account)
+    $context['post'] = Timber::get_post();
+    $context['title'] = get_the_title();
+    
+    Timber::render('pages/woocommerce-page.html.twig', $context);
 } else {
     $posts = Timber::get_posts();
     $context['products'] = $posts;
