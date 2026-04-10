@@ -19,7 +19,7 @@
             {% else %}
                 <h5 class="entry-title"><a href="{{ post.link }}">{{ fn('the_title') }}</a></h5>
             {% endif %}
-            {% do action( 'woocommerce_after_shop_loop_item_title' ) %}
+            {% do action( 'woocommerce_after_shop_loop_item_title' ) %}<br>
             {% do action( 'woocommerce_after_shop_loop_item' ) %}
         </div>
     </div>
