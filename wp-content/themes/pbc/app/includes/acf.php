@@ -914,52 +914,6 @@ if( function_exists('acf_add_local_field_group') ):
         'title' => 'Leader Details',
         'fields' => array (
             array (
-                'key' => 'field_online_ride_signup',
-                'label' => 'Online Ride Signup',
-                'name' => 'online_ride_signup',
-                'type' => 'radio',
-                'instructions' => '',
-                'required' => 0,
-                'conditional_logic' => 0,
-                'wrapper' => array (
-                    'width' => '33',
-                    'class' => '',
-                    'id' => '',
-                ),
-                'choices' => array (
-                    'no' => 'No',
-                    'hardcopy' => 'Hardcopy',
-                    'paperless' => 'Paperless',
-                ),
-                'allow_null' => 0,
-                'other_choice' => 0,
-                'save_other_choice' => 0,
-                'default_value' => 'no',
-                'layout' => 'vertical',
-                'return_format' => 'value',
-            ),
-            array (
-                'key' => 'field_signup_cutoff_time',
-                'label' => 'Signup Cutoff Time (hours)',
-                'name' => 'signup_cutoff_time',
-                'type' => 'text',
-                'instructions' => '',
-                'required' => 0,
-                'conditional_logic' => 0,
-                'wrapper' => array (
-                    'width' => 50,
-                    'class' => '',
-                    'id' => '',
-                ),
-                'default_value' => '',
-                'placeholder' => '',
-                'prepend' => '',
-                'append' => '',
-                'maxlength' => '',
-                'readonly' => 0,
-                'disabled' => 0,
-            ),
-            array (
                 'key' => 'field_5a8b7617b5c2d',
                 'label' => 'Use Contact Email',
                 'name' => 'use_contact_email',
@@ -1218,9 +1172,9 @@ if( function_exists('acf_add_local_field_group') ):
                 'name' => 'terrain',
                 'type' => 'checkbox',
                 'instructions' => '<b>Flat (a)</b> Basically flat, no steep hills<br />
-<b>Mostly flat (b)</b> Gently rolling terrain with one or two short hills<br />
-<b>Small hills (c)</b> Moderate terrain with rolling short steep hills or moderate, sustained climbs<br />
-<b>Large hills (d)</b> Difficult terrain with longer, steeper hills <br />
+<b>Mostly Flat (b)</b> Gently rolling terrain with one or two short hills<br />
+<b>Small Hills (c)</b> Moderate terrain with rolling short steep hills or moderate, sustained climbs<br />
+<b>Large Hills (d)</b> Difficult terrain with longer, steeper hills <br />
 <b>Mountainous (e)</b> Extreme terrain with frequent steep hills and long sustained climbs',
                 'required' => 1,
                 'conditional_logic' => 0,
@@ -1231,9 +1185,9 @@ if( function_exists('acf_add_local_field_group') ):
                 ),
                 'choices' => array (
                     'a' => '(A) Flat',
-                    'b' => '(B) Mostly flat',
-                    'c' => '(C) Small hills',
-                    'd' => '(D) Large hills',
+                    'b' => '(B) Mostly Flat',
+                    'c' => '(C) Small Hills',
+                    'd' => '(D) Large Hills',
                     'e' => '(E) Mountainous',
                 ),
                 'default_value' => array (
