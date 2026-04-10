@@ -138,12 +138,25 @@ jobs:
             echo "  Port 2222" >> ~/.ssh/config
           }
 
+      - name: Verify plugin vendor directories before deploy
+        run: |
+          echo "Verifying plugin vendor directories exist in git..."
+          ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/ || echo "❌ woocommerce-memberships-for-teams vendor missing!"
+          ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/action-scheduler/action-scheduler.php || echo "❌ action-scheduler.php missing!"
+          ls -la wp-content/plugins/woocommerce-memberships/vendor/ || echo "❌ woocommerce-memberships vendor missing!"
+          ls -la wp-content/plugins/simple-local-avatars/vendor/ || echo "❌ simple-local-avatars vendor missing!"
+          echo "✓ Vendor directories verified"
+
       - name: Deploy to staging via rsync
         env:
           STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
           STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
           STAGING_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
         run: |
+          echo "Starting rsync deployment..."
+          echo "Plugin vendor directories that will be synced:"
+          find wp-content/plugins/*/vendor -type d -maxdepth 0 2>/dev/null || echo "No plugin vendor directories found"
+          
           rsync -avz --delete -e "ssh -p 2222" \
             --exclude='.git/' \
             --exclude='.github/' \
@@ -175,6 +188,29 @@ jobs:
             --exclude='wp-content/themes/*/phpunit.xml*' \
             --exclude='wp-content/themes/*/.travis.yml' \
             ./ ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}
+          
+          echo "✓ Rsync completed"
+
+      - name: Verify deployment on staging server
+        env:
+          STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
+          STAGING_HOST: ${{ secrets.STAGING_SERVER_HOST }}
+          STAGING_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
+        run: |
+          echo "Verifying vendor directories on staging server..."
+          ssh -p 2222 ${STAGING_USER}@${STAGING_HOST} "
+            cd ${STAGING_PATH}
+            echo 'Checking for action-scheduler.php...'
+            if [ -f wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/action-scheduler/action-scheduler.php ]; then
+              echo '✓ action-scheduler.php exists on staging'
+            else
+              echo '❌ action-scheduler.php missing on staging!'
+              exit 1
+            fi
+            
+            echo 'Checking vendor directory structure...'
+            ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/ || echo 'Vendor directory missing or empty'
+          "
 
       - name: Clear WordPress cache on staging
         env:

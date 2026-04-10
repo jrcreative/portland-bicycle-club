@@ -118,12 +118,25 @@ jobs:
           ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc wp-content/plugins --exclude='node_modules' --exclude='*.log' || mkdir -p ../backups && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc"
           echo "Backup created: ${BACKUP_NAME}"
 
+      - name: Verify plugin vendor directories before deploy
+        run: |
+          echo "Verifying plugin vendor directories exist in git..."
+          ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/ || echo "❌ woocommerce-memberships-for-teams vendor missing!"
+          ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/action-scheduler/action-scheduler.php || echo "❌ action-scheduler.php missing!"
+          ls -la wp-content/plugins/woocommerce-memberships/vendor/ || echo "❌ woocommerce-memberships vendor missing!"
+          ls -la wp-content/plugins/simple-local-avatars/vendor/ || echo "❌ simple-local-avatars vendor missing!"
+          echo "✓ Vendor directories verified"
+
       - name: Deploy to production via rsync
         env:
           PROD_USER: ${{ secrets.PRODUCTION_SSH_USER }}
           PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
           PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
         run: |
+          echo "Starting rsync deployment..."
+          echo "Plugin vendor directories that will be synced:"
+          find wp-content/plugins/*/vendor -type d -maxdepth 0 2>/dev/null || echo "No plugin vendor directories found"
+          
           rsync -avz --delete -e "ssh -p 2222" \
             --exclude='.git/' \
             --exclude='.github/' \
@@ -155,6 +168,8 @@ jobs:
             --exclude='wp-content/themes/*/phpunit.xml*' \
             --exclude='wp-content/themes/*/.travis.yml' \
             ./ ${PROD_USER}@${PROD_HOST}:${PROD_PATH}
+          
+          echo "✓ Rsync completed"
 
       - name: Clear WordPress cache
         env:
@@ -170,7 +185,23 @@ jobs:
           PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
           PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
         run: |
+          echo "Verifying theme deployment..."
           ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH}/wp-content/themes/pbc && ls -la"
+          
+          echo "Verifying vendor directories on production server..."
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "
+            cd ${PROD_PATH}
+            echo 'Checking for action-scheduler.php...'
+            if [ -f wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/action-scheduler/action-scheduler.php ]; then
+              echo '✓ action-scheduler.php exists on production'
+            else
+              echo '❌ action-scheduler.php missing on production!'
+              exit 1
+            fi
+            
+            echo 'Checking vendor directory structure...'
+            ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/ || echo 'Vendor directory missing or empty'
+          "
 
       - name: Deployment Summary
         if: always()
