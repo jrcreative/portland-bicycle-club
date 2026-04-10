@@ -285,7 +285,8 @@ if ( ! class_exists( 'WPUA_Avatar' ) ) {
         <?php 
         
         $total_thumbnail =  1;
-        for ( $count = 0; $count < $total_thumbnail - count( $all_avatar_thumbnails ); $count++ ) { ?>
+        $avatar_count = is_array( $all_avatar_thumbnails ) ? count( $all_avatar_thumbnails ) : 0;
+        for ( $count = 0; $count < $total_thumbnail - $avatar_count; $count++ ) { ?>
             <img src="<?php echo $data['default_avatar_url'] ; ?>" alt="" id="wp-user-avatar-img-2" class="ci_choose_image" />
         <?php }  ?>
         </div>
