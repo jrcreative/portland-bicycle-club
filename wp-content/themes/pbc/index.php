@@ -6,6 +6,12 @@ use Timber\Timber;
 $context = Timber::context();
 $template = 'base.html.twig';
 
+// Handle WooCommerce pages first
+if (function_exists('is_woocommerce') && (is_woocommerce() || is_cart() || is_checkout() || is_account_page())) {
+    include __DIR__.'/resources/woocommerce.php';
+    return;
+}
+
 if(is_404()) {
     $context['post'] = Timber::get_post();
     $template = 'pages/404.html.twig';
