@@ -22,7 +22,7 @@
                     <div class="marker" data-lat="{{ location.lat }}" data-lng="{{ location.lng }}">
                         <div style="max-width: 200px; background-color: lightgray; padding: 4px">{{ location.address }}</div>
                         {% for event in location.events %}
-                            <div style="max-width: 200px; margin-top: 5px; padding: 4px"><div>{{ event.time | date('g:i') }}<sup>{{ event.time | date('a') }}</sup></div><div><a href="{{ event.link }}" target="_blank" {% if event.is_canceled %}style="color: red; text-decoration: line-through"{% endif %}>{{ event.title }}</a></div></div>
+                            <div style="max-width: 200px; margin-top: 5px; padding: 4px"><div>{{ event.time | date('g:i', false) }}<sup>{{ event.time | date('a', false) }}</sup></div><div><a href="{{ event.link }}" target="_blank" {% if event.is_canceled %}style="color: red; text-decoration: line-through"{% endif %}>{{ event.title }}</a></div></div>
                         {% endfor %}
                     </div>
                 {% endfor %}

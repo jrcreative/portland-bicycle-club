@@ -97,11 +97,11 @@
                                     weekend
                                 {% endif %}"
                             >
-                                <div class="date">{{ day.date|date('j') }} <span class="day-of-week">{{ day.date|date('D') }}</span></div>
+                                <div class="date">{{ day.date|date('j', false) }} <span class="day-of-week">{{ day.date|date('D', false) }}</span></div>
                                 <ul class="vertical menu">
                                     {% for event in day.events %}
                                         <li>
-                                            <div class="time">{{ event.date | date('g:i') }}<sup>{{ event.date | date('a') }}</sup></div>
+                                            <div class="time">{{ event.date | date('g:i', false) }}<sup>{{ event.date | date('a', false) }}</sup></div>
                                             <a href="{{ event.link }}" class="{% if event.is_canceled %}canceled{% endif %}">{{ event.title }}</a>
                                         </li>
                                     {% else %}

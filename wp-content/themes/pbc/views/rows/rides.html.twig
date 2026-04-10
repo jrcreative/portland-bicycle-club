@@ -4,18 +4,18 @@
 	<p class="help-text">(as of&nbsp; {{ today }})</p>
     </div>
     {% for ride in rides %}
-        {% if loop.first or ride.get_field('date') | date("l, M j") != prev_date %}
-            {% set prev_date = ride.get_field('date') | date("l, M j") %}
+        {% if loop.first or ride.get_field('date') | date("l, M j", false) != prev_date %}
+            {% set prev_date = ride.get_field('date') | date("l, M j", false) %}
             <div class="date">
                 <div class="row column">
-                    <h4>{{ ride.get_field('date') | date("l, M j") }}<sup>{{ ride.get_field('date') | date("S") }}</sup></h4>
+                    <h4>{{ ride.get_field('date') | date("l, M j", false) }}<sup>{{ ride.get_field('date') | date("S", false) }}</sup></h4>
                 </div>
             </div>
         {% endif %}
         <div class="row column card">
             <div class="row callout">
                 <div class="small-4 medium-2 columns">
-                    <h4 class="time">{{ ride.get_field('date') | date('g:i') }}<sup>{{ ride.get_field('date') | date('a') }}</sup></h4>
+                    <h4 class="time">{{ ride.get_field('date') | date('g:i', false) }}<sup>{{ ride.get_field('date') | date('a', false) }}</sup></h4>
                 </div>
                 <div class="small-8 medium-10 columns">
                     <h4 class="{% if ride.get_field('is_canceled') %}canceled{% endif %}"><a href="{{ ride.link }}">{{ ride.title }}</a></h4>
