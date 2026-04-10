@@ -1342,19 +1342,26 @@ class WP_User_Avatar_Functions {
 
 				}
 
-				$url2x = get_avatar_url( $email,$size);
-				$args = get_avatar_data( $id_or_email);
-				$url = $args['url'];
-				$avatar = sprintf(
-	                "<img alt='%s' src='%s' srcset='%s' class='%s' height='%d' width='%d' %s/>",
-	                esc_attr( $alt ),
-	                esc_url( $url ),
-	                esc_url( $url2x ) . ' 2x',
-	                esc_attr( join( ' ', $class ) ),
-	                (int) $args['height'],
-	                (int) $args['width'],
-	                $args['extra_attr']
-	       		 );
+			$url2x = get_avatar_url( $email,$size);
+			$args = get_avatar_data( $id_or_email);
+			$url = $args['url'];
+			
+			// Handle class as array or string
+			$class = isset( $args['class'] ) ? $args['class'] : array();
+			if ( is_string( $class ) ) {
+				$class = explode( ' ', $class );
+			}
+			
+			$avatar = sprintf(
+                "<img alt='%s' src='%s' srcset='%s' class='%s' height='%d' width='%d' %s/>",
+                esc_attr( $alt ),
+                esc_url( $url ),
+                esc_url( $url2x ) . ' 2x',
+                esc_attr( join( ' ', $class ) ),
+                (int) $args['height'],
+                (int) $args['width'],
+                $args['extra_attr']
+       		 );
 
 
 

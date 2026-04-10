@@ -19,29 +19,28 @@
                             </ul>
                         </li>
                     </ul>
+                    <div class="float-right" style="padding-top:6px">
                 {% else %}
                     <ul class="login-menu menu float-right">
                         <li><a href="{{ function('wp_login_url') }}" class="tiny primary hollow button">Login</a></li>
                     </ul>
+                    <div class="float-right" style="padding-top:20px">
                 {% endif %}
-                
-                <!-- Search Form (Added to match production) -->
-                <div class="search-wrap float-right hide-for-small-only" style="padding-top:6px">
-                     <form role="search" method="get" class="search-form" action="{{ site.url }}" style="margin-bottom: 0;">
-                        <div class="input-group" style="margin-bottom: 0;align-items: center;">
-                            <input type="search" class="search-field input-group-field" placeholder="Enter search text..." value="" name="s" title="Search for:" style="height: 30px; font-size: 0.9rem;">
+                    <form method="get" action="{{ site.url }}">
+                        <div class="input-group">
+		                    <input class="input-group-field" type="search" name="s" value="" placeholder="Enter search text..." required />
                             <div class="input-group-button">
                                 <button type="submit" class="clear button" style="border:0"><i class="fa fa-search" aria-hidden="true"></i></button>
                             </div>
-                        </div>
-                    </form>
-                </div>
+	                    </div> 
+	                </form>
+	            </div>
             </div>
             <!-- bottom row -->
             <div class="bottom clearfix">
 
                 <ul class="vertical menu">
-                    <li><a href="{{ site.url }}" class="title float-left"><img src="/android-chrome-192x192.png" alt="" style="width: 96px;"></a></li>
+                    <li><a href="{{ site.url }}" class="title float-left"><img src="/android-chrome-192x192.png" alt="" style="width: 64px;"></a></li>
                 </ul>
                 <ul class="dropdown menu hide-for-small-only float-right" data-dropdown-menu data-close-on-click-inside="false">
                     {% for item in primary_menu.items %}
