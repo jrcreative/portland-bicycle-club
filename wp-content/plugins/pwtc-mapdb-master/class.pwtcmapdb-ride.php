@@ -186,7 +186,9 @@ class PwtcMapdb_Ride {
 			), get_permalink()), 303);
 			
 			if (!$is_template) {
-				WordKeeper\System\Purge::purge_all();
+				if (class_exists('WordKeeper\System\Purge')) {
+					WordKeeper\System\Purge::purge_all();
+				}
 			}
 
 			exit;
@@ -486,7 +488,9 @@ class PwtcMapdb_Ride {
 			), get_permalink()), 303);
 
 			if (!$is_template) {
-				WordKeeper\System\Purge::purge_all();
+				if (class_exists('WordKeeper\System\Purge')) {
+					WordKeeper\System\Purge::purge_all();
+				}
 			}
 
 			exit;

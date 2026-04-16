@@ -254,7 +254,9 @@ class PwtcMapdb {
 
 	public static function shortcode_clear_cache($atts) {
 		if (isset($_POST['clearcache'])) {
-			WordKeeper\System\Purge::purge_all();
+			if (class_exists('WordKeeper\System\Purge')) {
+				WordKeeper\System\Purge::purge_all();
+			}
 			wp_redirect(get_permalink(), 303);
 			exit;
 		}
