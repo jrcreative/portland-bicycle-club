@@ -2,13 +2,13 @@
 
 class PwtcMapdb_Signup {
 
-	const LOCAL_SIGNUP_ID = 'ride_signup_id';
-	const LOCAL_SIGNUP_NAME = 'ride_signup_name';
-	const LOCAL_SIGNUP_PHONE = 'ride_signup_phone';
-	const LOCAL_EMER_NAME = 'ride_signup_contact_name';
-	const LOCAL_EMER_PHONE = 'ride_signup_contact_phone';
+	public const LOCAL_SIGNUP_ID = 'ride_signup_id';
+	public const LOCAL_SIGNUP_NAME = 'ride_signup_name';
+	public const LOCAL_SIGNUP_PHONE = 'ride_signup_phone';
+	public const LOCAL_EMER_NAME = 'ride_signup_contact_name';
+	public const LOCAL_EMER_PHONE = 'ride_signup_contact_phone';
 
-	const TIMESTAMP_OFFSET = 50*365*24*60*60;
+	public const TIMESTAMP_OFFSET = 50*365*24*60*60;
 
     private static $initiated = false;
 

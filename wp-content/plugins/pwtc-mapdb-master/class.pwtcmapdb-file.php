@@ -2,8 +2,8 @@
 
 class PwtcMapdb_File {
 	
-	const UPLOAD_FILE_URI = '/upload-file';
-	const DELETE_FILE_URI = '/delete-file';
+	public const UPLOAD_FILE_URI = '/upload-file';
+	public const DELETE_FILE_URI = '/delete-file';
 
     	private static $initiated = false;
 

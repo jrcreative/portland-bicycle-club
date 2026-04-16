@@ -2,15 +2,15 @@
 
 class PwtcMileage {
 
-	const VIEW_MILEAGE_CAP = 'pwtc_view_mileage';
-	const EDIT_MILEAGE_CAP = 'pwtc_edit_mileage';
-	const EDIT_RIDERS_CAP = 'pwtc_edit_riders';
-	const DB_OPS_CAP = 'pwtc_mileage_db_ops';
+	public const VIEW_MILEAGE_CAP = 'pwtc_view_mileage';
+	public const EDIT_MILEAGE_CAP = 'pwtc_edit_mileage';
+	public const EDIT_RIDERS_CAP = 'pwtc_edit_riders';
+	public const DB_OPS_CAP = 'pwtc_mileage_db_ops';
 
-	const MEMBER_SYNC_ACT = 'Synchronize';
-	const RIDE_MERGE_ACT = 'Consolidate';
-	const DB_RESTORE_ACT = 'Restore';
-	const RIDER_PURGE_ACT = 'Purge';
+	public const MEMBER_SYNC_ACT = 'Synchronize';
+	public const RIDE_MERGE_ACT = 'Consolidate';
+	public const DB_RESTORE_ACT = 'Restore';
+	public const RIDER_PURGE_ACT = 'Purge';
 
     private static $initiated = false;
 

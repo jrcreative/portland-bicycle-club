@@ -2,10 +2,10 @@
 
 class PwtcMapdb_Map {
 
-	const EDIT_MAP_URI = '/edit-map';
-	const SUBMIT_MAP_URI = '/submit-map';
-	const DELETE_MAP_URI = '/delete-map';
-	const USAGE_MAP_URI = '/map-usage';
+	public const EDIT_MAP_URI = '/edit-map';
+	public const SUBMIT_MAP_URI = '/submit-map';
+	public const DELETE_MAP_URI = '/delete-map';
+	public const USAGE_MAP_URI = '/map-usage';
 	
     	private static $initiated = false;
 

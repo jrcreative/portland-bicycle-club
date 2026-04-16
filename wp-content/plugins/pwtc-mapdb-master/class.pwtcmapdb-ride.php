@@ -2,13 +2,13 @@
 
 class PwtcMapdb_Ride {
 	
-	const EDIT_RIDE_URI = '/edit-ride';
-	const SUBMIT_RIDE_URI = '/submit-ride';
-	const DELETE_RIDE_URI = '/delete-ride';
+	public const EDIT_RIDE_URI = '/edit-ride';
+	public const SUBMIT_RIDE_URI = '/submit-ride';
+	public const DELETE_RIDE_URI = '/delete-ride';
 	
-	const EDIT_TEMPLATE_URI = '/edit-ride-template';
-	const SUBMIT_TEMPLATE_URI = '/submit-ride-template';
-	const DELETE_TEMPLATE_URI = '/delete-ride-template';
+	public const EDIT_TEMPLATE_URI = '/edit-ride-template';
+	public const SUBMIT_TEMPLATE_URI = '/submit-ride-template';
+	public const DELETE_TEMPLATE_URI = '/delete-ride-template';
 	
     	private static $initiated = false;
 

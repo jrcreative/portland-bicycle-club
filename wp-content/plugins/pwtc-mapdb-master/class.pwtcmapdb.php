@@ -92,9 +92,9 @@ class PwtcMapdb {
 	public const POST_TYPE_RIDE = 'scheduled_rides';
 	public const POST_TYPE_TEMPLATE = 'ride_template';
 	
-	private const ROAD_CAPTAIN_EMAIL = 'roadcaptain@portlandbicyclingclub.com';
+	public const ROAD_CAPTAIN_EMAIL = 'roadcaptain@portlandbicyclingclub.com';
 	
-	private const ROAD_CAPTAIN_CAPS = [
+	public const ROAD_CAPTAIN_CAPS = [
         	'delete_others_rides',
         	'delete_private_rides',
         	'delete_published_rides',

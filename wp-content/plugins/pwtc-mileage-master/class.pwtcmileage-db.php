@@ -2,30 +2,30 @@
 
 class PwtcMileage_DB {
 
-	const MEMBER_TABLE = 'pwtc_membership';					// club membership list table
-	const RIDE_TABLE = 'pwtc_club_rides';					// club ride list table
-	const MILEAGE_TABLE = 'pwtc_ride_mileage';				// club ride mileage table
-	const LEADER_TABLE = 'pwtc_ride_leaders';				// club ride leader table
-	const JOBS_TABLE = 'pwtc_running_jobs';					// currently running jobs table
+	public const MEMBER_TABLE = 'pwtc_membership';					// club membership list table
+	public const RIDE_TABLE = 'pwtc_club_rides';					// club ride list table
+	public const MILEAGE_TABLE = 'pwtc_ride_mileage';				// club ride mileage table
+	public const LEADER_TABLE = 'pwtc_ride_leaders';				// club ride leader table
+	public const JOBS_TABLE = 'pwtc_running_jobs';					// currently running jobs table
 
-	const LT_MILES_VIEW = 'pwtc_lt_miles_vw';				// lifetime mileage view
-	const YTD_MILES_VIEW = 'pwtc_ytd_miles_vw';				// year-to-date mileage view
-	const LY_MILES_VIEW = 'pwtc_ly_miles_vw';				// last year's mileage view
-	const LY_LT_MILES_VIEW = 'pwtc_ly_lt_miles_vw';			// last year's lifetime mileage view
-	const YBL_LT_MILES_VIEW = 'pwtc_ybl_lt_miles_vw';		// year before last's lifetime mileage view
-	const LY_LT_ACHVMNT_VIEW = 'pwtc_ly_lt_achvmnt_vw';		// last year's lifetime achiviement view
-	const YTD_RIDES_LED_VIEW = 'pwtc_ytd_rides_led_vw';		// year-to-date rides led list view
-	const LY_RIDES_LED_VIEW = 'pwtc_ly_rides_led_vw';		// last year's rides led list view
-	const YTD_LED_VIEW = 'pwtc_ytd_led_vw';					// year-to-date number of rides led view 
-	const LY_LED_VIEW = 'pwtc_ly_led_vw';					// last year's number of rides led view
-	const PRE_LY_LED_VIEW = 'pwtc_pre_ly_led_vw';			// pre-last year's number of rides led view
-	const YTD_RIDES_VIEW = 'pwtc_ytd_rides_vw';				// year-to-date rides ridden list view
-	const LY_RIDES_VIEW = 'pwtc_ly_rides_vw';				// last year's rides ridden list view
+	public const LT_MILES_VIEW = 'pwtc_lt_miles_vw';				// lifetime mileage view
+	public const YTD_MILES_VIEW = 'pwtc_ytd_miles_vw';				// year-to-date mileage view
+	public const LY_MILES_VIEW = 'pwtc_ly_miles_vw';				// last year's mileage view
+	public const LY_LT_MILES_VIEW = 'pwtc_ly_lt_miles_vw';			// last year's lifetime mileage view
+	public const YBL_LT_MILES_VIEW = 'pwtc_ybl_lt_miles_vw';		// year before last's lifetime mileage view
+	public const LY_LT_ACHVMNT_VIEW = 'pwtc_ly_lt_achvmnt_vw';		// last year's lifetime achiviement view
+	public const YTD_RIDES_LED_VIEW = 'pwtc_ytd_rides_led_vw';		// year-to-date rides led list view
+	public const LY_RIDES_LED_VIEW = 'pwtc_ly_rides_led_vw';		// last year's rides led list view
+	public const YTD_LED_VIEW = 'pwtc_ytd_led_vw';					// year-to-date number of rides led view 
+	public const LY_LED_VIEW = 'pwtc_ly_led_vw';					// last year's number of rides led view
+	public const PRE_LY_LED_VIEW = 'pwtc_pre_ly_led_vw';			// pre-last year's number of rides led view
+	public const YTD_RIDES_VIEW = 'pwtc_ytd_rides_vw';				// year-to-date rides ridden list view
+	public const LY_RIDES_VIEW = 'pwtc_ly_rides_vw';				// last year's rides ridden list view
 
-	const TRIGGERED_STATUS = 'triggered';
-	const STARTED_STATUS = 'started';
-	const FAILED_STATUS = 'failed';
-	const SUCCESS_STATUS = 'success';
+	public const TRIGGERED_STATUS = 'triggered';
+	public const STARTED_STATUS = 'started';
+	public const FAILED_STATUS = 'failed';
+	public const SUCCESS_STATUS = 'success';
 
 	public static function get_new_ride_id() {
     	global $wpdb;
