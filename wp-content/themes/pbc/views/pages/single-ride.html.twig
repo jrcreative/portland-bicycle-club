@@ -54,17 +54,18 @@
                     <h4>Start Location </h4>
                     <div>
                         <p>{{ post.get_field('start_location').address|escape }}
+                        &nbsp;<a href="https://www.google.com/maps/search/?api=1&amp;query={{ post.get_field('start_location').lat }},{{ post.get_field('start_location').lng }}" target="_blank"><i class="fa fa-map-marker"></i> Open in Google Maps</a>
                         <br><em>{{ post.get_field('start_location_comment')|escape }}</em></p>
                     </div>
-<iframe
-  width="100%"
-  height="450"
-  style="border:0"
-  loading="lazy"
-  allowfullscreen
-  referrerpolicy="no-referrer-when-downgrade"
-  src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAOx1I4Zr3acY0Mp5kB4kEujdtCO_EBNQw&q={{ post.get_field('start_location').lat }},{{ post.get_field('start_location').lng }}">
-</iframe>
+                    <iframe
+                        width="100%"
+                        height="450"
+                        style="border:0"
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAOx1I4Zr3acY0Mp5kB4kEujdtCO_EBNQw&q={{ post.get_field('start_location').lat }},{{ post.get_field('start_location').lng }}">
+                    </iframe>
                 </div>
                 <div>
                     {% if is_published %}
