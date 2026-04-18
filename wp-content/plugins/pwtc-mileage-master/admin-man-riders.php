@@ -16,6 +16,8 @@ else {
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
 
+    var enable_history = false;
+
 	function populate_users_table(users) {
         $('#rider-edit-section .users-div').empty();
         if (users.length > 0) {
@@ -177,12 +179,17 @@ jQuery(document).ready(function($) {
 		}
 		else {
 			show_rider_section(res, false);
-			if (history.pushState) {
+			if (history.pushState && enable_history) {
 				var state = {
 					'action': 'pwtc_mileage_get_rider',
 					'member_id': res.member_id
 				};
+                //console.log("History length before push is " + history.length);
+                //console.log("History.state before push is " + JSON.stringify(history.state));
+                console.log("Push state call, state is " + JSON.stringify(state));
 				history.pushState(state, '');
+                //console.log("History length after push is " + history.length);
+                //console.log("History.state after push is " + JSON.stringify(history.state));
 			}
         }
         $('body').removeClass('waiting');
@@ -437,8 +444,12 @@ jQuery(document).ready(function($) {
     });
 
     $('#rider-edit-section .back-btn').on('click', function(evt) {
-        if (history.pushState) {
+        if (history.pushState  && enable_history) {
+            //console.log("History length before back button is " + history.length);
+            //console.log("History.state before back button is " + JSON.stringify(history.state));
 			history.back();
+            //console.log("History length after back button is " + history.length);
+            //console.log("History.state after back button is " + JSON.stringify(history.state));
 		}
 		else {
 			return_main_section();
@@ -538,23 +549,25 @@ jQuery(document).ready(function($) {
     <?php } ?>		
     });
 
-    if (history.pushState) {
+    if (history.pushState && enable_history) {
 		$(window).on('popstate', function(evt) {
+            //console.log("History length after popstate event is " + history.length);
+            //console.log("History.state after popstate event is " + JSON.stringify(history.state));
 			var state = evt.originalEvent.state;
 			if (state !== null) {
-				//console.log("Popstate event, state is " + JSON.stringify(state));
+				console.log("Popstate event, state is " + JSON.stringify(state));
 				var action = '<?php echo admin_url('admin-ajax.php'); ?>';
 				$('body').addClass('waiting');
 				$.post(action, state, restore_rider_cb);
 			}
 			else {
-				//console.log("Popstate event, state is null.");
+				console.log("Popstate event, state is null.");
 				return_main_section();
 			}
 		});
 	}
     else {
-        //console.log("history.pushState is not supported");
+        console.log("history.pushState is not supported or disabled");
     }
 
     $("#rider-inspect-section .search-frm input[type='text']").val('');
