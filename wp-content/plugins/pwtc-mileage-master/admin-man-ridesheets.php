@@ -948,7 +948,7 @@ if ($running_jobs > 0) {
 		</div>
 
 		<p><div><button class="add-btn button button-primary button-large">New</button>
-		<span class="add-blk popup-frm initially-hidden">
+		<div class="add-blk popup-frm initially-hidden">
 			<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<span>Title</span>
 				<input name="title" type="text" required/>
@@ -958,7 +958,7 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" value="Create"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		</span></div></p>
+		</div></div></p>
 		<p><div class="rides-div"></div></p>
 	<?php
 	}
