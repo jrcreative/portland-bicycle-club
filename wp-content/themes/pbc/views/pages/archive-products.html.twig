@@ -10,9 +10,15 @@
                 {% do action('woocommerce_before_shop_loop') %}
             </div>
         </div>
-        {% apply shortcodes %}
-            [products columns="3" category="memberships,donations" cat_operator="NOT IN" orderby="title"]
-        {% endapply %}
+        {% if category %}
+            {% apply shortcodes %}
+                [products columns="3" category="{{ category.slug }}" orderby="title"]
+            {% endapply %}
+        {% else %}
+            {% apply shortcodes %}
+                [products columns="3" category="memberships,donations" cat_operator="NOT IN" orderby="title"]
+            {% endapply %}
+        {% endif %}
         <div class="grid-x grid-padding-x">
             <div class="cell auto">
                 {% do action('woocommerce_after_shop_loop') %}
