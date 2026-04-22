@@ -64,6 +64,9 @@ class PwtcMembers {
 		add_action('wc_memberships_for_teams_add_team_member', 
 			array('PwtcMembers', 'adjust_team_member_data_callback' ), 10, 3);
 
+		add_action('wc_memberships_for_teams_add_team_member', 
+			array('PwtcMembers', 'email_team_member_callback' ), 100, 3);
+
 		add_action('wc_memberships_for_teams_team_created', 
 			array('PwtcMembers', 'adjust_team_members_data_callback' ));
 
@@ -355,6 +358,24 @@ class PwtcMembers {
 				$user_data->remove_role('current_member');
 			}
 		}
+	}
+
+	public static function email_team_member_callback($team_member, $team, $membership) {
+		if ($team_member->is_team_owner()) {
+			return;
+		}
+		$user_data = $team_member->get_user();
+		$membership_plan = $membership->get_plan();
+        if (get_field('send_membership_email', 'option')) {
+		    $email = self::build_confirmation_email($membership_plan, $user_data, $membership);
+		    $status = wp_mail($email['to'], $email['subject'], $email['message'], $email['headers']);
+		    if ($status) {
+			    $membership->add_note('PWTC Members plugin sent confirmation email to this family member, send was successful.');
+		    }
+		    else {
+			    $membership->add_note('PWTC Members plugin sent confirmation email to this family member, send failed.');
+		    }
+        }
 	}
 
 	public static function adjust_team_member_data_callback($team_member, $team, $user_membership) {
@@ -1733,11 +1754,17 @@ class PwtcMembers {
 		if ( $team ) {
 			if ($team->get_owner_id() != $user_data->ID) {
 				$team_not_owner = true;
+				$message = get_field('family_member_email', 'option');
+				$member_expires = date('F j, Y', $team->get_local_membership_end_date('timestamp'));
+				$member_starts = date('F j, Y', $team->get_local_date('timestamp'));
+				$member_type = 'Family ' . $member_type;
 			}
-			$message = get_field('family_membership_email', 'option');
-			$member_expires = date('F j, Y', $team->get_local_membership_end_date('timestamp'));
-			$member_starts = date('F j, Y', $team->get_local_date('timestamp'));
-			$member_type = 'Family ' . $member_type;
+			else {
+				$message = get_field('family_membership_email', 'option');
+				$member_expires = date('F j, Y', $team->get_local_membership_end_date('timestamp'));
+				$member_starts = date('F j, Y', $team->get_local_date('timestamp'));
+				$member_type = 'Family ' . $member_type;
+			}
 		}
 		else {
 			$message = get_field('individual_membership_email', 'option');
@@ -1774,8 +1801,10 @@ class PwtcMembers {
 		}
 		$headers = array();
 		$headers[] = 'Content-type: text/html';
-		if (get_field('bcc_membership_secretary', 'option')) {
-			$headers[] = 'Bcc: ' . $membersec_email;
+		if (empty($test_email)) {
+			if (get_field('bcc_membership_secretary', 'option')) {
+				$headers[] = 'Bcc: ' . $membersec_email;
+			}
 		}
 		return array(
 			'team_not_owner' => $team_not_owner,

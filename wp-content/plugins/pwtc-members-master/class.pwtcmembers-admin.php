@@ -442,45 +442,38 @@ class PwtcMembers_Admin {
 							else {
 								$email_to = $_POST['email_to'];
 								$email = PwtcMembers::build_confirmation_email($membership_plan, $user_data, $membership, $email_to);
-								if ($email['team_not_owner']) {
+								$esc_headers = array();
+								foreach ( $email['headers'] as $header ) {
+									$esc_headers[] = esc_html($header);
+								}
+								if (empty($email_to)) {
 									$response = array(
-										'status' => 'Confirmation email test failed - family member is not membership owner.'
-									);
+										'to' => esc_html($email['to']),
+										'subject' => esc_html($email['subject']),
+										'message' => $email['message'],
+										'headers' => $esc_headers
+									);				
 								}
 								else {
-									$esc_headers = array();
-									foreach ( $email['headers'] as $header ) {
-										$esc_headers[] = esc_html($header);
+									$status = wp_mail($email['to'], $email['subject'], $email['message'], $email['headers']);
+									if ($member_email == $email_to) {
+										if ($status) {
+											$membership->add_note('Membership confirmation email manually sent to this member, send was successful.');
+										}
+										else {
+											$membership->add_note('Membership confirmation email manually sent to this member, send failed.');
+										}									
 									}
-									if (empty($email_to)) {
+									$sent_to = 'Confirmation email sent to ' . esc_html($email['to']);
+									if ($status) {
 										$response = array(
-											'to' => esc_html($email['to']),
-											'subject' => esc_html($email['subject']),
-											'message' => $email['message'],
-											'headers' => $esc_headers
+											'status' => $sent_to . ' - send was successful (wp_mail returned true).'
 										);				
 									}
 									else {
-										$status = wp_mail($email['to'], $email['subject'], $email['message'], $email['headers']);
-										if ($member_email == $email_to) {
-											if ($status) {
-												$membership->add_note('Membership confirmation email manually sent to this member, send was successful.');
-											}
-											else {
-												$membership->add_note('Membership confirmation email manually sent to this member, send failed.');
-											}									
-										}
-										$sent_to = 'Confirmation email sent to ' . esc_html($email['to']);
-										if ($status) {
-											$response = array(
-												'status' => $sent_to . ' - wp_mail returned true.'
-											);				
-										}
-										else {
-											$response = array(
-												'status' => $sent_to . ' - wp_mail returned false.'
-											);				
-										}
+										$response = array(
+											'status' => $sent_to . ' - send failed (wp_mail returned false).'
+										);				
 									}
 								}
 							}

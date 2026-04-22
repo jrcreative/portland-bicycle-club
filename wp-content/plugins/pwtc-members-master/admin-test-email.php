@@ -98,6 +98,7 @@ jQuery(document).ready(function($) {
                 <input name="email_to" type="text" required/>
 				<input class="button button-primary" type="submit" value="Send Email"/>
             </form>
+            <span>(Copy of confirmation email will NOT be sent to Membership Secretary.)</span>
         </div>
     </div>
 <?php
