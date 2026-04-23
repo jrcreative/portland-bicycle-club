@@ -156,7 +156,7 @@ add_action('woocommerce_before_my_account', function(){
 });
 
 
-add_filter('wp_insert_post', function($data, $postarr){
+add_filter('wp_insert_post_data', function($data, $postarr){
     if($postarr->post_type != "wc_memberships_team") {
         return $data;
     }
