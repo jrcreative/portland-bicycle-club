@@ -1106,7 +1106,7 @@ class PwtcMembers_Admin {
 		wp_die();		
 	}
 
-	public function process_team_meta_callback( $post_id, \WP_Post $post ) {
+	public static function process_team_meta_callback( $post_id, \WP_Post $post ) {
 		$team = wc_memberships_for_teams_get_team( $post->ID );
 		if ($team) {
 			$user_memberships = $team->get_user_memberships();
