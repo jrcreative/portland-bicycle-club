@@ -322,7 +322,8 @@ class RML_View {
         
         $output = '<i class="fa fa-folder-open"></i>';
         
-        if (count($breadcrumb) == 0) {
+        // Check breadcrumb for null to prevent PHP 8 upgrade error
+        if (!$breadcrumb or count($breadcrumb) == 0) {
             return $output . ' ' . __('Unorganized pictures', RML_TD);
         }
         
