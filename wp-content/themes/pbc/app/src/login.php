@@ -1,6 +1,6 @@
 <?php
 add_action('login_enqueue_scripts', function () {
-    $logo = get_theme_mod('login_page_background_image', get_stylesheet_directory_uri().'/dist/images/logo.png');
+    $logo = get_theme_mod('login_page_background_image', get_stylesheet_directory_uri().'/logo.png');
     $bg_color = get_theme_mod('login_page_background_color', '#BA383B');
     $box_color = get_theme_mod('login_page_box_color', '#353535');
     $text_color = get_theme_mod('login_font_color', '#f1f1f1');
@@ -49,4 +49,7 @@ add_action('login_enqueue_scripts', function () {
     body.login div#login p#backtoblog a { color: $link_color; }
 </style>
 HTML;
+});
+add_filter('login_headerurl', function($value) {
+    return '/';
 });
