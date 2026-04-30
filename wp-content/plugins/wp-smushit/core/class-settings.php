@@ -10,6 +10,7 @@ namespace Smush\Core;
 
 use Smush\Core\CDN\CDN_Helper;
 use Smush\Core\LCP\LCP_Helper;
+use Smush\Core\Membership\Membership;
 use Smush\Core\Next_Gen\Next_Gen_Manager;
 use Smush\Core\Stats\Global_Stats;
 use WP_Smush;
@@ -70,7 +71,6 @@ class Settings {
 			'lossy'                  => 0,   // works with CDN.
 			'strip_exif'             => true,    // works with CDN.
 			'resize'                 => false,
-			'detection'              => false,
 			'original'               => true,
 			'backup'                 => true,
 			'no_scale'               => false,
@@ -118,7 +118,7 @@ class Settings {
 	 *
 	 * @var array $basic_features
 	 */
-	public static $basic_features = array( 'bulk', 'auto', 'strip_exif', 'resize', 'original', 'directory_smush', 'gutenberg', 'js_builder', 'gform', 'lazy_load', 'lossy' );
+	public static $basic_features = array( 'bulk', 'auto', 'strip_exif', 'resize', 'original', 'directory_smush', 'gutenberg', 'js_builder', 'gform', 'lazy_load', 'lossy', 'png_to_jpg' );
 
 	/**
 	 * List of fields in bulk smush form.
@@ -134,7 +134,7 @@ class Settings {
 	 *
 	 * Upsell fields.
 	 */
-	private $upsell_fields = array( 'background_email', 'png_to_jpg' );
+	private $upsell_fields = array( 'background_email' );
 
 	/**
 	 * List of fields in integration form.
@@ -179,7 +179,7 @@ class Settings {
 	 *
 	 * @var array
 	 */
-	private $settings_fields = array( 'detection', 'accessible_colors', 'usage', 'keep_data', 'api_auth', 'disable_streams' );
+	private $settings_fields = array( 'accessible_colors', 'usage', 'keep_data', 'api_auth', 'disable_streams' );
 
 	/**
 	 * List of fields in lazy loading form.
@@ -344,11 +344,6 @@ class Settings {
 				'label'       => esc_html__( 'Disable scaled images', 'wp-smushit' ),
 				'short_label' => esc_html__( 'Disable Scaled Images', 'wp-smushit' ),
 				'desc'        => esc_html__( 'When enabled, WordPress won’t create scaled versions of large images; only your original upload is kept.', 'wp-smushit' ),
-			),
-			'detection'         => array(
-				'label'       => esc_html__( 'Detect and show incorrectly sized images', 'wp-smushit' ),
-				'short_label' => esc_html__( 'Image Resize Detection', 'wp-smushit' ),
-				'desc'        => esc_html__( 'This will add functionality to your website that highlights images that are either too large or too small for their containers.', 'wp-smushit' ),
 			),
 			'original'          => array(
 				'label'       => esc_html__( 'Optimize original images', 'wp-smushit' ),
@@ -717,6 +712,10 @@ class Settings {
 	public function get( $setting = '' ) {
 		$settings = $this->get_site_settings();
 
+		if ( 'lossy' === $setting && isset( $settings['lossy'] ) ) {
+			return $this->sanitize_lossy_level( $settings['lossy'] );
+		}
+
 		if ( ! empty( $setting ) ) {
 			return isset( $settings[ $setting ] ) ? $settings[ $setting ] : false;
 		}
@@ -840,6 +839,10 @@ class Settings {
 		delete_site_option( self::$subsite_controls_option_id );
 		delete_site_option( 'wp-smush-webp_hide_wizard' );
 		delete_site_option( 'wp-smush-preset_configs' );
+
+		// Reset rating notification flags.
+		$this->delete_setting( 'wp-smush-rating-status' );
+
 		$this->delete_setting( 'wp-smush-image_sizes' );
 		$this->delete_setting( 'wp-smush-resize_sizes' );
 		$this->delete_setting( 'wp-smush-cdn_status' );
@@ -850,6 +853,12 @@ class Settings {
 		delete_option( 'wp_smush_scan_slice_size' );
 
 		LCP_Helper::delete_all_lcp_data();
+
+		// Delete activity log notifications.
+		delete_option( 'wp_smush_notifications' );
+
+		// Delete dismissed notices.
+		delete_option( 'wp-smush-dismissed-notices' );
 
 		// We used update_option for skip-smush-setup,
 		// so let's reset it with delete_option instead of delete_site_option for MU site.
@@ -1019,7 +1028,6 @@ class Settings {
 
 			if ( 'general' === $tab ) {
 				$new_settings['usage']            = (bool) filter_input( INPUT_POST, 'usage', FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-				$new_settings['detection']        = (bool) filter_input( INPUT_POST, 'detection', FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 				$new_settings['image_dimensions'] = (bool) filter_input( INPUT_POST, 'image_dimensions', FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 			}
 			if ( 'permissions' === $tab ) {
@@ -1296,53 +1304,7 @@ class Settings {
 	 * @since 3.2.0
 	 */
 	public function init_lazy_load_defaults() {
-		$defaults = array(
-			'format'            => array(
-				'jpeg'        => true,
-				'png'         => true,
-				'webp'        => true,
-				'gif'         => true,
-				'svg'         => true,
-				'iframe'      => true,
-				'embed_video' => false,
-			),
-			'output'            => array(
-				'content'    => true,
-				'widgets'    => true,
-				'thumbnails' => true,
-				'gravatars'  => true,
-			),
-			'animation'         => array(
-				'selected'    => 'fadein', // Accepts: fadein, spinner, placeholder, false.
-				'fadein'      => array(
-					'duration' => 400,
-					'delay'    => 0,
-				),
-				'spinner'     => array(
-					'selected' => 1,
-					'custom'   => array(),
-				),
-				'placeholder' => array(
-					'selected' => 1,
-					'custom'   => array(),
-					'color'    => '#F3F3F3',
-				),
-			),
-			'include'           => array(
-				'frontpage' => true,
-				'home'      => true,
-				'page'      => true,
-				'single'    => true,
-				'archive'   => true,
-				'category'  => true,
-				'tag'       => true,
-			),
-			'exclude-pages'     => array(),
-			'exclude-classes'   => array(),
-			'footer'            => true,
-			'native'            => false,
-			'noscript_fallback' => false,
-		);
+		$defaults = $this->get_lazy_load_defaults();
 
 		$this->set_setting( 'wp-smush-lazy_load', $defaults );
 	}
@@ -1473,7 +1435,6 @@ class Settings {
 	protected function get_placeholder_modules() {
 		return array(
 			'cdn',
-			'png_to_jpg',
 			'webp_mod',
 			'avif_mod',
 			's3',
@@ -1515,6 +1476,9 @@ class Settings {
 	}
 
 	public function get_highest_lossy_level() {
+		if ( is_multisite() && ! Membership::get_instance()->has_access_to_hub() ) {
+			return self::$level_lossless;
+		}
 		return self::$level_super_lossy;
 	}
 
@@ -1647,6 +1611,20 @@ class Settings {
 	}
 
 	/**
+	 * // TODO: [WPMUDEV SMUSH UI] there is another method above that does the same thing. Merge the two methods.
+	 */
+	public function is_auto_smush_enabled() {
+		$auto_smush = $this->get( 'auto' );
+
+		// Keep the auto smush on by default.
+		if ( ! isset( $auto_smush ) ) {
+			$auto_smush = 1;
+		}
+
+		return $auto_smush;
+	}
+
+	/**
 	 * Get the maximum content width for images.
 	 *
 	 * @return int
@@ -1713,6 +1691,13 @@ class Settings {
 	 */
 	public static function get_level_lossless() {
 		return self::$level_lossless;
+	}
+
+	/**
+	 * Mark the current setting as level lossless.
+	 */
+	public static function set_lossless_level() {
+		return self::get_instance()->set( 'lossy', self::get_level_lossless() );
 	}
 
 
@@ -1785,4 +1770,57 @@ class Settings {
 		return self::$webp_cdn_mode;
 	}
 
+	/**
+	 * @return array
+	 */
+	public function get_lazy_load_defaults() {
+		$defaults = array(
+			'format'            => array(
+				'jpeg'        => true,
+				'png'         => true,
+				'webp'        => true,
+				'gif'         => true,
+				'svg'         => true,
+				'iframe'      => true,
+				'embed_video' => false,
+			),
+			'output'            => array(
+				'content'    => true,
+				'widgets'    => true,
+				'thumbnails' => true,
+				'gravatars'  => true,
+			),
+			'animation'         => array(
+				'selected'    => 'fadein', // Accepts: fadein, spinner, placeholder, false.
+				'fadein'      => array(
+					'duration' => 400,
+					'delay'    => 0,
+				),
+				'spinner'     => array(
+					'selected' => 1,
+					'custom'   => array(),
+				),
+				'placeholder' => array(
+					'selected' => 1,
+					'custom'   => array(),
+					'color'    => '#F3F3F3',
+				),
+			),
+			'include'           => array(
+				'frontpage' => true,
+				'home'      => true,
+				'page'      => true,
+				'single'    => true,
+				'archive'   => true,
+				'category'  => true,
+				'tag'       => true,
+			),
+			'exclude-pages'     => array(),
+			'exclude-classes'   => array(),
+			'footer'            => true,
+			'native'            => false,
+			'noscript_fallback' => false,
+		);
+		return $defaults;
+	}
 }
