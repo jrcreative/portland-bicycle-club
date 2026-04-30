@@ -635,7 +635,7 @@ if ($running_jobs > 0) {
 		    <h3>Rider <span class="rider-id"></span> - <span class="rider-name"></span></h3>
             <p>This rider expires on <strong><span class="exp-date"></span></strong>.</p> 
             <p><div><button class="modify-btn button button-primary button-large" title="Modify this rider's identity information.">Modify</button>
-		    <span class="modify-blk popup-frm initially-hidden">
+		    <div class="modify-blk popup-frm initially-hidden">
 			<form class="modify-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>First Name</span>
                 <input name="firstname" type="text" required/>
@@ -649,7 +649,7 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" value="Modify"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		    </span></div></p>
+            </div></div></p>
             <p><span class="ridesheet-count"></span></p>
             <p>
                 <button class="delete-btn button button-primary button-large">Delete Rider</button>
