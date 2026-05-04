@@ -108,6 +108,9 @@ class PwtcMembers {
 		add_shortcode('pwtc_member_renew_nag', 
 			array( 'PwtcMembers', 'shortcode_member_renew_nag'));
 
+		add_shortcode('pwtc_member_delete_membership', 
+			array( 'PwtcMembers', 'shortcode_delete_membership'));
+
 		add_shortcode('pwtc_member_accept_release', 
 			array( 'PwtcMembers', 'shortcode_member_accept_release'));
 
@@ -411,70 +414,110 @@ class PwtcMembers {
 	}
 
 	public static function validate_checkout_callback() {
-		$membership_cnt = 0;
+		$link_to_delete = 'You must first <a href="/delete-membership">delete your expired membership</a> before you can purchase a different one.';
+		$wait_to_expire = 'You must wait for your current membership to expire before you can purchase a different one.';
+
+		$membership_products = [];
+		$membership_variations = [];
 		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 				$product = wc_get_product( $values['product_id'] );
 				if (has_term('memberships', 'product_cat', $product->get_id())) {
-					$membership_cnt++;
+					$membership_products[] = $product;
+					$membership_variations[] = wc_get_product( $values['variation_id'] );
 				}
 			}
 		}
-		if ($membership_cnt > 1) {
+		if (empty($membership_products)) {
+			return;
+		}
+		else if (count($membership_products) > 1) {
 			$msg = 'You may not purchase more than one membership product at a time.';
-			if (is_cart()) {
-				wc_print_notice($msg, 'error');
-			} 
-			else {
-				wc_add_notice($msg, 'error');
-			}
+			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			return;
 		}
-		else if ($membership_cnt == 1) {
-			$current_user = wp_get_current_user();
-			$current_date = current_time('timestamp');
-			if ( $current_user->ID > 0 ) {
-			    $end_date = 0;
-				$active_membership = false;
-				$team_owner = false;
-				$team_member = false;
-				$statuses = array(
-					'status' => array( 'active', 'complimentary', 'pending', 'free_trial' ),
-				);
-				$active_memberships = wc_memberships_get_user_memberships( $current_user->ID, $statuses );
-				if ( !empty( $active_memberships ) ) {
-					$active_membership = true;
-					$end_date = $active_memberships[0]->get_local_end_date('timestamp');
-				}
-				$teams = wc_memberships_for_teams_get_teams( $current_user->ID, array( 'role' => 'owner' ) );
-				if ($teams && !empty( $teams ) ) {
-					$team_owner = true;
-					$end_date = $teams[0]->get_local_membership_end_date('timestamp');
-				}
-				else {
-					$teams = wc_memberships_for_teams_get_teams( $current_user->ID, array( 'role' => 'member' ) );
-					if ($teams && !empty( $teams ) ) {
-						$team_member = true;
-					}
-				}
-				if ($team_member) {
-					$msg = 'You are a non-owning member of a family; you are not allowed to purchase any membership products.';
-					if (is_cart()) {
-						wc_print_notice($msg, 'error');
-					} 
-					else {
-						wc_add_notice($msg, 'error');
-					}
-				}
-				else if ($active_membership) {
-					if ($end_date - $current_date > 2592000) {
-						$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
-						if (is_cart()) {
-							wc_print_notice($msg, 'notice');
-						}
-					}
-				}
-			}
+
+		$membership_type = $membership_products[0]->get_slug(); // 'individual-membership' or 'family-membership'
+		$membership_duration = $membership_variations[0]->get_attribute('Membership Type'); // 'One Year' or 'Two Year'
+
+		$current_user = wp_get_current_user();
+		$current_date = current_time('timestamp');
+		if ( $current_user->ID == 0 ) {
+			return;
 		}
+
+		$teams = wc_memberships_for_teams_get_teams($current_user->ID); //\SkyVerge\WooCommerce\Memberships\Teams\Team[]
+		if (empty($teams)) {
+			$memberships = wc_memberships_get_user_memberships($current_user->ID); //WC_Memberships_User_Membership[]
+			if (empty($memberships)) {
+				return;
+			}
+			if (count($memberships) > 1) {
+				$msg = 'You already have multiple individual memberships, please contact the website admin to resolve.';
+				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				return;
+			}
+
+			if ($membership_duration === 'One Year' and $memberships[0]->get_plan()->get_slug() === 'two-year-membership') {
+				$msg = 'You currently have a two year membership; you cannot change to a one year membership. ';
+				$memberships[0]->is_active() ? $msg .= $wait_to_expire : $msg .= $link_to_delete;
+				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				return;
+			}
+			else if ($membership_duration === 'Two Year' and $memberships[0]->get_plan()->get_slug() === 'one-year-membership') {
+				$msg = 'You currently have a one year membership; you cannot change to a two year membership. ';
+				$memberships[0]->is_active() ? $msg .= $wait_to_expire : $msg .= $link_to_delete;
+				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				return;
+			}
+
+			if ($memberships[0]->is_active() and $membership_type === '') {
+				$msg = 'You currently have a individual membership that is still active; you cannot convert it to a family membership until it expires. ';
+				$memberships[0]->is_active() ? $msg .= $wait_to_expire : $msg .= $link_to_delete;
+				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				return;
+			}
+
+			return;
+		}
+		if (count($teams) > 1) {
+				$msg = 'You already have multiple family memberships, please contact the website admin to resolve.';
+				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				return;
+		}
+		if (!$teams[0]->is_user_owner($current_user->ID)) {
+			$msg = 'You are a member but not the owner of a family membership; you are not allowed to purchase any membership products.';
+			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			return;			
+		}
+
+		if ($membership_type === 'individual-membership') {
+			$msg = 'You currently have a family membership; you cannot change to a individual membership. ';
+			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire; 
+			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			return;	
+		}
+
+		if ($membership_duration === 'One Year' and $teams[0]->get_plan()->get_slug() === 'two-year-membership') {
+			$msg = 'You currently have a two year membership; you cannot change to a one year membership. ';
+			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire;
+			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			return;
+		}
+		else if ($membership_duration === 'Two Year' and $teams[0]->get_plan()->get_slug() === 'one-year-membership') {
+			$msg = 'You currently have a one year membership; you cannot change to a two year membership. ';
+			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire;
+			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			return;
+		}
+
+		if (!$teams[0]->is_membership_expired()) {
+			$msg = 'You currently have a family membership that is still active; you cannot purchase another until it expires.'; 
+			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			return;
+		}
+
+		return;		
 	}
 
 	public static function validate_family_invitation_callback($can_be_managed, $user, $team, $role) {
@@ -1002,7 +1045,7 @@ class PwtcMembers {
 			else {
 				ob_start();
 				?>
-				<div class="callout success"><p>You have no membership</p></div>		
+				<div class="callout warning"><p>You have no membership, visit the <a href="/home/join-renew/">Join page</a> to purchase one.</p></div>		
 				<?php
 				return ob_get_clean();
 			}
@@ -1229,6 +1272,82 @@ class PwtcMembers {
 			}
 		}
 	}	
+
+	// Generates the [pwtc_member_delete_membership] shortcode.
+	public static function shortcode_delete_membership($atts) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return '<div class="callout warning"><p>User not logged in.</p></div>';
+		}
+		if (isset($_POST['pwtc_membership_delete_membership']) and isset($_POST['userid']) and $current_user->ID != 0) {
+			if (!isset($_POST['nonce_field']) or !wp_verify_nonce($_POST['nonce_field'], 'delete-membership-form')) {
+				wp_nonce_ays('');
+			}
+			if (intval($_POST['userid']) !== $current_user->ID) {
+				wp_nonce_ays('');
+			}
+			if (isset($_POST['memberid'])) {
+				$id = intval($_POST['memberid']);
+				wc_memberships()->get_user_memberships_instance()->delete_related_data($id);
+				wc_memberships()->get_user_memberships_instance()->deleteUserMembership($id);
+			}
+			else if (isset($_POST['teamid'])) {
+				$id = intval($_POST['teamid']);
+				wc_memberships_for_teams()->get_teams_handler_instance()->maybe_delete_related_data($id);
+				wc_memberships_for_teams()->get_teams_handler_instance()->deleteTeam($id);
+			}
+			wp_redirect(get_permalink(), 303);
+			exit;
+		}
+		$teams = wc_memberships_for_teams_get_teams($current_user->ID);
+		$memberships = wc_memberships_get_user_memberships($current_user->ID);
+		if (empty($teams)) {
+			if (empty($memberships)) {
+				return '<div class="callout success"><p>You have no membership to delete; you can return to your cart and buy a new one.</p></div>';
+			}
+			if (count($memberships) > 1) {
+				return '<div class="callout alert"><p>You have multiple individual memberships, please notify website admin to resolve</p></div>';
+			}
+			if ($memberships[0]->is_active()) {
+				return '<div class="callout warning"><p>You have an active individual membership; you cannot delete it until it expires.</p></div>';
+			}
+			ob_start();
+			?>
+			<div class="callout success"><p>You may delete your expired individual membership. 
+				<form method="POST" novalidate>
+					<?php wp_nonce_field('delete-membership-form', 'nonce_field'); ?>
+					<input type="hidden" name="userid" value="<?php echo $current_user->ID; ?>"/>
+					<input type="hidden" name="memberid" value="<?php echo $memberships[0]->get_id(); ?>"/>
+					<button class="button" type="submit" name="pwtc_membership_delete_membership">Delete</button>
+				</form>
+			</p></div>		
+			<?php
+			return ob_get_clean();
+		}
+		else {
+			if (count($teams) > 1) {
+				return '<div class="callout alert"><p>You have multiple family memberships, please notify website admin to resolve</p></div>';
+			}
+			if (!$teams[0]->is_user_owner($current_user->ID)) {
+				return '<div class="callout warning"><p>You are a member but not the owner of this family membership; you are not allowed to delete it.</p></div>';
+			}
+			if (!$teams[0]->is_membership_expired()) {
+				return '<div class="callout warning"><p>You have an active family membership; you cannot delete it until it expires.</p></div>';
+			}
+			ob_start();
+			?>
+			<div class="callout success"><p>You may delete your expired family membership. The memberships of any family members will also be deleted.
+				<form method="POST" novalidate>
+					<?php wp_nonce_field('delete-membership-form', 'nonce_field'); ?>
+					<input type="hidden" name="userid" value="<?php echo $current_user->ID; ?>"/>
+					<input type="hidden" name="teamid" value="<?php echo $teams[0]->get_id(); ?>"/>
+					<button class="button" type="submit" name="pwtc_membership_delete_membership">Delete</button>
+				</form>
+			</p></div>		
+			<?php
+			return ob_get_clean();
+		}
+	}
 
 	// Generates the [pwtc_member_accept_release] shortcode.
 	public static function shortcode_member_accept_release($atts) {
