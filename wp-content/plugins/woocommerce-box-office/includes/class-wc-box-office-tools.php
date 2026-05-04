@@ -324,7 +324,7 @@ class WC_Box_Office_Tools {
 					'ticket_url'    => $ticket_url,
 					'purchase_date' => $purchase_time,
 					'order_id'      => $order_id,
-					'order_status'  => wc_get_order_status_name( get_post_status( $order_id ) ),
+					'order_status'  => $order ? wc_get_order_status_name( $order->get_status() ) : __( 'N/A', 'woocommerce-box-office' ),
 					'coupon_code'   => $coupon_codes,
 					'user_id'       => $user_id,
 					'is_checked_in' => $is_checked_in ? 'Yes' : 'No',

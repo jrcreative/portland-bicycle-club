@@ -38,8 +38,8 @@ use SkyVerge\WooCommerce\Memberships\Teams\TeamMembers\Abilities\GetTeamMember;
 use SkyVerge\WooCommerce\Memberships\Teams\TeamMembers\Abilities\ListTeamMembers;
 use SkyVerge\WooCommerce\Memberships\Teams\TeamMembers\Abilities\RemoveTeamMember;
 use SkyVerge\WooCommerce\Memberships\Teams\TeamMembers\Abilities\UpdateTeamMemberRole;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\AbstractAbilitiesProvider;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\AbilityCategory;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\AbstractAbilitiesProvider;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\AbilityCategory;
 
 /**
  * Abilities provider for Teams for WooCommerce Memberships.

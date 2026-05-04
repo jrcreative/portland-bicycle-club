@@ -49,6 +49,6 @@ if ( 'email' != $field['type'] ) {
 			</span>
 		</div>
 	</td>
-	<td class="field_required" width="1%"><select name="_ticket_field_required[]"><option value="yes" <?php selected( $field['required'], 'yes', true ); ?>><?php esc_html_e( 'Yes', 'woocommerce-box-office' ); ?></option><option value="no" <?php selected( $field['required'], 'no', true ); ?>><?php esc_html_e( 'No', 'woocommerce-box-office' ); ?></option></select></td>
+	<td class="field_required"><select name="_ticket_field_required[]"><option value="yes" <?php selected( $field['required'], 'yes', true ); ?>><?php esc_html_e( 'Yes', 'woocommerce-box-office' ); ?></option><option value="no" <?php selected( $field['required'], 'no', true ); ?>><?php esc_html_e( 'No', 'woocommerce-box-office' ); ?></option></select></td>
 	<td width="1%"><a href="#" class="delete"><?php esc_html_e( 'Delete', 'woocommerce-box-office' ); ?></a></td>
 </tr>

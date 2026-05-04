@@ -24,10 +24,11 @@
 namespace SkyVerge\WooCommerce\Memberships\Teams\Invitations\Abilities;
 
 use SkyVerge\WooCommerce\Memberships\Teams\Abilities\Provider;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\MakesAbilityContract;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\Ability;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\AbilityAnnotations;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\MakesAbilityContract;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\Ability;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\AbilityAnnotations;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\RestConfig;
 use WP_Error;
 
 defined( 'ABSPATH' ) or exit;
@@ -86,7 +87,8 @@ class CancelInvitation implements MakesAbilityContract
 				'description' => __('Whether the invitation was successfully cancelled.', 'woocommerce-memberships-for-teams'),
 			],
 			new AbilityAnnotations(false, true, true),
-			true
+			true,
+			new RestConfig('/invitations/(?P<id>\d+)')
 		);
 	}
 }

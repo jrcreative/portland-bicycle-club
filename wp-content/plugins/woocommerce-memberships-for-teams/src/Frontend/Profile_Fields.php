@@ -26,7 +26,7 @@ namespace SkyVerge\WooCommerce\Memberships\Teams\Frontend;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields as Profile_Fields_Handler;
 use SkyVerge\WooCommerce\Memberships\Teams\Product;
 use SkyVerge\WooCommerce\Memberships\Teams\Team;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 

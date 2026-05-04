@@ -26,7 +26,7 @@ namespace SkyVerge\WooCommerce\Memberships\Teams\Integrations;
 use SkyVerge\WooCommerce\Memberships\Teams\Team;
 use SkyVerge\WooCommerce\Memberships\Teams\Team_Member;
 use SkyVerge\WooCommerce\Memberships\Teams\Team_Members;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined('ABSPATH') or exit;
 

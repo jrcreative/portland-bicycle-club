@@ -24,6 +24,10 @@
       "type": "string",
       "default": "date"
     },
+    "order": {
+      "type": "string",
+      "default": "DESC"
+    },
     "avatarSize": {
       "type": "number",
       "default": 96
@@ -34,5 +38,6 @@
     }
   },
   "textdomain": "woocommerce-box-office",
-  "editorScript": "file:./index.js"
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css"
 }

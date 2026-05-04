@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "skyverge/wc-plugin-framework",
-            "version": "6.1.1",
-            "version_normalized": "6.1.1.0",
+            "version": "6.2.0",
+            "version_normalized": "6.2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/godaddy-wordpress/wc-plugin-framework.git",
-                "reference": "dfda04b4736f5a0acdd03a5ce72da52a156d9d48"
+                "reference": "becd6a9127cf050abadb6977530c67cf82531df8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/godaddy-wordpress/wc-plugin-framework/zipball/dfda04b4736f5a0acdd03a5ce72da52a156d9d48",
-                "reference": "dfda04b4736f5a0acdd03a5ce72da52a156d9d48",
+                "url": "https://api.github.com/repos/godaddy-wordpress/wc-plugin-framework/zipball/becd6a9127cf050abadb6977530c67cf82531df8",
+                "reference": "becd6a9127cf050abadb6977530c67cf82531df8",
                 "shasum": ""
             },
             "require": {
@@ -26,7 +26,7 @@
                 "lucatume/wp-browser": "3.0.5",
                 "phpcompatibility/php-compatibility": "9.3.5"
             },
-            "time": "2026-03-23T13:44:18+00:00",
+            "time": "2026-04-16T08:45:38+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -48,12 +48,12 @@
                     "woocommerce/class-sv-wp-admin-message-handler.php"
                 ],
                 "psr-4": {
-                    "SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\": "woocommerce/"
+                    "SkyVerge\\WooCommerce\\PluginFramework\\v6_2_0\\": "woocommerce/"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
-                    "SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\Tests\\": "tests/"
+                    "SkyVerge\\WooCommerce\\PluginFramework\\v6_2_0\\Tests\\": "tests/"
                 }
             },
             "license": [
@@ -61,7 +61,7 @@
             ],
             "description": "The official SkyVerge WooCommerce plugin framework",
             "support": {
-                "source": "https://github.com/godaddy-wordpress/wc-plugin-framework/tree/6.1.1",
+                "source": "https://github.com/godaddy-wordpress/wc-plugin-framework/tree/6.2.0",
                 "issues": "https://github.com/godaddy-wordpress/wc-plugin-framework/issues"
             },
             "install-path": "../skyverge/wc-plugin-framework"

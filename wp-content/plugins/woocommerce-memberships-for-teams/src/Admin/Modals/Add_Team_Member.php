@@ -23,7 +23,7 @@
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin\Modals;
 
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 

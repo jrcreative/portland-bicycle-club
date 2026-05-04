@@ -24,7 +24,7 @@
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
 use SkyVerge\WooCommerce\Memberships\Teams\Emails\Membership_Email;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 use WC_Email;
 
 defined( 'ABSPATH' ) or exit;

@@ -6,7 +6,7 @@
  * Description: Expands WooCommerce Memberships to sell memberships to teams, families, companies, or other groups!
  * Author: SkyVerge
  * Author URI: https://www.woocommerce.com/
- * Version: 1.8.0
+ * Version: 1.9.0
  * Text Domain: woocommerce-memberships-for-teams
  * Domain Path: /i18n/languages/
  *
@@ -22,7 +22,7 @@
  *
  * Woo: 2893267:f0b7ed22ec012e2e159ec30f5af5c1d1
  * WC requires at least: 3.9.4
- * WC tested up to: 10.6.1
+ * WC tested up to: 10.7.0
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -52,7 +52,7 @@ class WC_Memberships_For_Teams_Loader {
 	const MIN_MEMBERSHIPS_VERSION = '1.9.4';
 
 	/** SkyVerge plugin framework version used by this plugin */
-	const FRAMEWORK_VERSION = '6.1.1';
+	const FRAMEWORK_VERSION = '6.2.0';
 
 	/** the plugin namespace */
 	const PLUGIN_NAMESPACE = 'SkyVerge\WooCommerce\Memberships\Teams';

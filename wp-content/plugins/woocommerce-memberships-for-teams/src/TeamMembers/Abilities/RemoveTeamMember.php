@@ -24,10 +24,11 @@
 namespace SkyVerge\WooCommerce\Memberships\Teams\TeamMembers\Abilities;
 
 use SkyVerge\WooCommerce\Memberships\Teams\Abilities\Provider;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\MakesAbilityContract;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\Ability;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\AbilityAnnotations;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\MakesAbilityContract;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\Ability;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\AbilityAnnotations;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\RestConfig;
 use WP_Error;
 
 defined( 'ABSPATH' ) or exit;
@@ -85,7 +86,8 @@ class RemoveTeamMember implements MakesAbilityContract
 				'description' => __('Whether the member was successfully removed.', 'woocommerce-memberships-for-teams'),
 			],
 			new AbilityAnnotations(false, true, false),
-			true
+			true,
+			new RestConfig('/teams/(?P<team_id>\d+)/members/(?P<user_id>\d+)/remove', null, 'v1', 'POST')
 		);
 	}
 

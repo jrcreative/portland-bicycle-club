@@ -1,5 +1,11 @@
 *** Teams for WooCommerce Memberships Changelog ***
 
+2026.04.16 - version 1.9.0
+* New - Add REST API support for teams via `/wp-json/wc-memberships-for-teams/v1/teams`
+* New - Add REST API support for invitations via `/wp-json/wc-memberships-for-teams/v1/invitations`
+* New - Add REST API support for team members via `/wp-json/wc-memberships-for-teams/v1/teams/<team_id>/members`
+* Misc - Updated the SkyVerge Plugin Framework to version 6.2.0
+
 2026.03.25 - version 1.8.0
 * New - Added abilities (WP Abilities API) for teams: `woocommerce-memberships-for-teams/teams-create`, `woocommerce-memberships-for-teams/teams-get`, `woocommerce-memberships-for-teams/teams-delete`, `woocommerce-memberships-for-teams/teams-list`, `woocommerce-memberships-for-teams/teams-invite`
 * New - Added abilities for team members: `woocommerce-memberships-for-teams/team-members-get`, `woocommerce-memberships-for-teams/team-members-list`, `woocommerce-memberships-for-teams/team-members-add`, `woocommerce-memberships-for-teams/team-members-remove`, `woocommerce-memberships-for-teams/team-members-update-role`

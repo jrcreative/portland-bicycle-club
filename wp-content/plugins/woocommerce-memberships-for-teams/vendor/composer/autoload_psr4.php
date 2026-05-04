@@ -6,6 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\' => array($vendorDir . '/skyverge/wc-plugin-framework/woocommerce'),
+    'SkyVerge\\WooCommerce\\PluginFramework\\v6_2_0\\' => array($vendorDir . '/skyverge/wc-plugin-framework/woocommerce'),
     'SkyVerge\\WooCommerce\\Memberships\\Teams\\' => array($baseDir . '/src'),
 );

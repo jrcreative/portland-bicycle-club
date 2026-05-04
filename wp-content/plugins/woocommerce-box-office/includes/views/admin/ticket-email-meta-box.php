@@ -16,9 +16,13 @@ $ticket_ids = get_post_meta( $post->ID, '_ticket_ids', true );
 	<p class="form-field">
 		<strong>
 			<label><?php esc_html_e( 'Product:', 'woocommerce-box-office' ); ?></label>
-			<a href="<?php echo esc_url( admin_url( 'post.php?post=' . $product_id . '&action=edit' ) ); ?>">
-				<?php echo esc_html( $product->get_title() ); ?>
-			</a>
+			<?php if ( $product ) : ?>
+				<a href="<?php echo esc_url( admin_url( 'post.php?post=' . $product_id . '&action=edit' ) ); ?>">
+					<?php echo esc_html( $product->get_title() ); ?>
+				</a>
+			<?php else : ?>
+				<em><?php esc_html_e( '(deleted)', 'woocommerce-box-office' ); ?></em>
+			<?php endif; ?>
 		</strong>
 	</p>
 

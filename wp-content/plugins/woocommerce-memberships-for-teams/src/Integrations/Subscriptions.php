@@ -25,7 +25,7 @@ namespace SkyVerge\WooCommerce\Memberships\Teams\Integrations;
 
 use SkyVerge\WooCommerce\Memberships\Teams\Cart;
 use SkyVerge\WooCommerce\Memberships\Teams\Orders;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 use SkyVerge\WooCommerce\Memberships\Teams\Product;
 use SkyVerge\WooCommerce\Memberships\Teams\Seat_Manager;
 use SkyVerge\WooCommerce\Memberships\Teams\Team;

@@ -24,8 +24,8 @@
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
 use SkyVerge\WooCommerce\Memberships\Teams\Invitations\Adapters\JsonSerializers\InvitationSerializer;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\JsonSerializable;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\JsonSerializable;
 
 defined( 'ABSPATH' ) or exit;
 

@@ -24,8 +24,8 @@
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
 use SkyVerge\WooCommerce\Memberships\Teams\Abilities\Provider;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\AbilitiesProviderContract;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\AbilitiesProviderContract;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -38,7 +38,7 @@ class Plugin extends Framework\SV_WC_Plugin implements Framework\Abilities\Contr
 
 
 	/** plugin version number */
-	const VERSION = '1.8.0';
+	const VERSION = '1.9.0';
 
 	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Plugin single instance of this plugin */
 	protected static $instance;

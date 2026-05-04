@@ -411,7 +411,7 @@ function wc_box_office_get_tickets_by_user( $user_id = 0, $amount = 'all', $page
 function wc_box_office_get_all_ticket_products( $include_variation = false ) {
 	$args = array(
 		'post_type'      => 'product',
-		'post_status'    => 'publish',
+		'post_status'    => 'any',
 		'posts_per_page' => -1,
 		'meta_query'     => array(
 			array(

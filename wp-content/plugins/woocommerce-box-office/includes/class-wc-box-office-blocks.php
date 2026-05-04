@@ -164,7 +164,8 @@ class WC_Box_Office_Blocks {
 					$params                = array();
 					$params['products']    = isset( $attributes['products'] ) ? (string) $attributes['products'] : '0';
 					$params['amount']      = isset( $attributes['numberOfTickets'] ) ? (int) $attributes['numberOfTickets'] : -1;
-					$params['order']       = isset( $attributes['orderBy'] ) ? (string) $attributes['orderBy'] : 'date';
+					$params['order_by']    = isset( $attributes['orderBy'] ) ? (string) $attributes['orderBy'] : 'date';
+					$params['order']       = isset( $attributes['order'] ) ? (string) $attributes['order'] : 'DESC';
 					$params['avatar_size'] = isset( $attributes['avatarSize'] ) ? (int) $attributes['avatarSize'] : 96;
 					$params['columns']     = isset( $attributes['columns'] ) ? (int) $attributes['columns'] : 3;
 

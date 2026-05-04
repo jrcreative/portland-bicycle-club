@@ -425,23 +425,28 @@ class WC_Box_Office_Order {
 	 * @param array $callable_args Args to be passed to callable after ticket_id
 	 */
 	private function _apply_func_to_order_tickets( $order_id, $callable, $callable_args = array() ) {
-		if ( $order_id > 0 && 'shop_order' === get_post_type( $order_id ) ) {
-			global $wpdb;
+		if ( $order_id <= 0 ) {
+			return;
+		}
 
-			$order   = wc_get_order( $order_id );
-			$tickets = array();
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
+		}
 
-			foreach ( $order->get_items() as $order_item_id => $item ) {
-				if ( 'line_item' == $item['type'] ) {
-					$tickets = array_merge( $tickets, $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_ticket_order_item_id' AND meta_value = %d", $order_item_id ) ) );
-				}
+		global $wpdb;
+
+		$tickets = array();
+
+		foreach ( $order->get_items() as $order_item_id => $item ) {
+			if ( 'line_item' === $item['type'] ) {
+				$tickets = array_merge( $tickets, $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_ticket_order_item_id' AND meta_value = %d", $order_item_id ) ) );
 			}
+		}
 
-			foreach ( $tickets as $ticket_id ) {
-				// Ticket ID will be the first arg.
-				array_unshift( $callable_args, $ticket_id );
-				call_user_func_array( $callable, $callable_args );
-			}
+		foreach ( $tickets as $ticket_id ) {
+			array_unshift( $callable_args, $ticket_id );
+			call_user_func_array( $callable, $callable_args );
 		}
 	}
 

@@ -224,11 +224,12 @@ class WC_Box_Office_Ticket_Shortcode {
 		// Get shortcode parameters.
 		$attributes = shortcode_atts(
 			array(
-				'products' 		=> 0,
-				'amount' 		=> 'all',
-				'order' 		=> 'date',
-				'avatar_size' 	=> 96,
-				'columns'		=> 3,
+				'products'    => 0,
+				'amount'      => 'all',
+				'order_by'    => 'date',
+				'order'       => 'DESC',
+				'avatar_size' => 96,
+				'columns'     => 3,
 			),
 			$params
 		);
@@ -238,9 +239,11 @@ class WC_Box_Office_Ticket_Shortcode {
 		}
 
 		$args = array(
-			'post_type' 		=> 'event_ticket',
-			'post_status' 		=> 'publish',
-			'posts_per_page' 	=> $attributes['amount'],
+			'post_type'      => 'event_ticket',
+			'post_status'    => 'publish',
+			'posts_per_page' => $attributes['amount'],
+			'order_by'       => $attributes['order_by'],
+			'order'          => $attributes['order'],
 		);
 
 		if ( $attributes['products']  ) {
@@ -342,7 +345,7 @@ class WC_Box_Office_Ticket_Shortcode {
 			$html .= '<li class="' . esc_attr( $position ) . '">' . "\n";
 
 			if ( $avatar ) {
-				$html .= '<div>' . $avatar . '</div>' . "\n";
+				$html .= '<div class="avatar">' . $avatar . '</div>' . "\n";
 			}
 
 			$html .= '<div>' . "\n";

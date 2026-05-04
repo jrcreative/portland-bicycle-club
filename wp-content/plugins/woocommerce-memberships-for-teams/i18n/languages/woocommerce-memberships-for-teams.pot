@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: Teams for WooCommerce Memberships 1.8.0\n"
+"Project-Id-Version: Teams for WooCommerce Memberships 1.9.0\n"
 "Report-Msgid-Bugs-To: https://woocommerce.com/my-account/marketplace-ticket-form/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-25T09:39:05+00:00\n"
+"POT-Creation-Date: 2026-04-16T12:13:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: woocommerce-memberships-for-teams\n"
@@ -510,7 +510,7 @@ msgstr ""
 #: src/Admin/Meta_Boxes/Team_Members.php:88
 #: src/Admin/Modals/Add_Team_Member.php:48
 #: src/Admin/Modals/Add_Team_Member.php:49
-#: src/TeamMembers/Abilities/AddTeamMember.php:58
+#: src/TeamMembers/Abilities/AddTeamMember.php:59
 msgid "Add Team Member"
 msgstr ""
 
@@ -520,7 +520,7 @@ msgstr ""
 
 #: src/Admin/Modals/Confirm_Delete_Team.php:48
 #: src/Admin/Modals/Confirm_Delete_Team.php:49
-#: src/Teams/Abilities/DeleteTeam.php:58
+#: src/Teams/Abilities/DeleteTeam.php:59
 msgid "Delete Team"
 msgstr ""
 
@@ -1616,68 +1616,68 @@ msgid_plural "Cancelled <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Invitations/Abilities/CancelInvitation.php:57
+#: src/Invitations/Abilities/CancelInvitation.php:58
 msgid "Cancel Team Invitation"
 msgstr ""
 
-#: src/Invitations/Abilities/CancelInvitation.php:58
+#: src/Invitations/Abilities/CancelInvitation.php:59
 msgid "Cancels a pending team invitation."
 msgstr ""
 
-#: src/Invitations/Abilities/CancelInvitation.php:64
-#: src/Invitations/Abilities/GetInvitation.php:64
+#: src/Invitations/Abilities/CancelInvitation.php:65
+#: src/Invitations/Abilities/GetInvitation.php:65
 msgid "Invitation not found."
 msgstr ""
 
-#: src/Invitations/Abilities/CancelInvitation.php:80
-#: src/Invitations/Abilities/GetInvitation.php:74
+#: src/Invitations/Abilities/CancelInvitation.php:81
+#: src/Invitations/Abilities/GetInvitation.php:75
 msgid "The invitation ID."
 msgstr ""
 
-#: src/Invitations/Abilities/CancelInvitation.php:86
+#: src/Invitations/Abilities/CancelInvitation.php:87
 msgid "Whether the invitation was successfully cancelled."
 msgstr ""
 
-#: src/Invitations/Abilities/GetInvitation.php:57
+#: src/Invitations/Abilities/GetInvitation.php:58
 msgid "Get Team Invitation"
 msgstr ""
 
-#: src/Invitations/Abilities/GetInvitation.php:58
+#: src/Invitations/Abilities/GetInvitation.php:59
 msgid "Retrieves a team invitation by ID."
 msgstr ""
 
-#: src/Invitations/Abilities/ListInvitations.php:56
+#: src/Invitations/Abilities/ListInvitations.php:57
 msgid "List Team Invitations"
 msgstr ""
 
-#: src/Invitations/Abilities/ListInvitations.php:57
+#: src/Invitations/Abilities/ListInvitations.php:58
 msgid "Retrieves a collection of invitations for a given team."
 msgstr ""
 
-#: src/Invitations/Abilities/ListInvitations.php:92
-#: src/Teams/Abilities/ListTeams.php:92
+#: src/Invitations/Abilities/ListInvitations.php:94
+#: src/Teams/Abilities/ListTeams.php:94
 msgid "Query parameters. Accepts standard WP_Query arguments in addition to the listed properties."
 msgstr ""
 
-#: src/Invitations/Abilities/ListInvitations.php:97
+#: src/Invitations/Abilities/ListInvitations.php:99
 msgid "The team ID to retrieve invitations for."
 msgstr ""
 
-#: src/Invitations/Abilities/ListInvitations.php:102
+#: src/Invitations/Abilities/ListInvitations.php:104
 msgid "Filter by invitation status (e.g. \"pending\", \"accepted\", \"cancelled\"). Defaults to \"pending\". Use \"any\" for all statuses."
 msgstr ""
 
-#: src/Invitations/Abilities/ListInvitations.php:107
+#: src/Invitations/Abilities/ListInvitations.php:109
 msgid "Filter by the invited member role (e.g. \"member\", \"manager\")."
 msgstr ""
 
-#: src/Invitations/Abilities/ListInvitations.php:111
+#: src/Invitations/Abilities/ListInvitations.php:113
 msgid "Number of invitations to return per page."
 msgstr ""
 
-#: src/Invitations/Abilities/ListInvitations.php:115
-#: src/TeamMembers/Abilities/ListTeamMembers.php:110
-#: src/Teams/Abilities/ListTeams.php:117
+#: src/Invitations/Abilities/ListInvitations.php:117
+#: src/TeamMembers/Abilities/ListTeamMembers.php:112
+#: src/Teams/Abilities/ListTeams.php:119
 msgid "Page number when paginating results."
 msgstr ""
 
@@ -2000,210 +2000,210 @@ msgstr ""
 msgid "Team management is not permitted"
 msgstr ""
 
-#: src/TeamMembers/Abilities/AddTeamMember.php:59
+#: src/TeamMembers/Abilities/AddTeamMember.php:60
 msgid "Adds a user as a member of a team."
 msgstr ""
 
-#: src/TeamMembers/Abilities/AddTeamMember.php:65
-#: src/TeamMembers/Abilities/RemoveTeamMember.php:64
-#: src/Teams/Abilities/GetTeam.php:64
-#: src/Teams/Abilities/InviteToTeam.php:65
+#: src/TeamMembers/Abilities/AddTeamMember.php:66
+#: src/TeamMembers/Abilities/RemoveTeamMember.php:65
+#: src/Teams/Abilities/GetTeam.php:65
+#: src/Teams/Abilities/InviteToTeam.php:66
 #: src/Teams_Handler.php:579
 msgid "Team not found."
 msgstr ""
 
-#: src/TeamMembers/Abilities/AddTeamMember.php:99
-#: src/TeamMembers/Abilities/GetTeamMember.php:78
-#: src/TeamMembers/Abilities/RemoveTeamMember.php:107
-#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:85
-#: src/Teams/Abilities/DeleteTeam.php:75
-#: src/Teams/Abilities/GetTeam.php:74
-#: src/Teams/Abilities/InviteToTeam.php:83
+#: src/TeamMembers/Abilities/AddTeamMember.php:101
+#: src/TeamMembers/Abilities/GetTeamMember.php:79
+#: src/TeamMembers/Abilities/RemoveTeamMember.php:109
+#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:86
+#: src/Teams/Abilities/DeleteTeam.php:76
+#: src/Teams/Abilities/GetTeam.php:75
+#: src/Teams/Abilities/InviteToTeam.php:84
 msgid "The team ID."
 msgstr ""
 
-#: src/TeamMembers/Abilities/AddTeamMember.php:105
+#: src/TeamMembers/Abilities/AddTeamMember.php:107
 msgid "The user ID to add as a member."
 msgstr ""
 
-#: src/TeamMembers/Abilities/AddTeamMember.php:110
+#: src/TeamMembers/Abilities/AddTeamMember.php:112
 msgid "The member role (e.g. \"member\", \"manager\")."
 msgstr ""
 
-#: src/TeamMembers/Abilities/GetTeamMember.php:57
+#: src/TeamMembers/Abilities/GetTeamMember.php:58
 msgid "Get Team Member"
 msgstr ""
 
-#: src/TeamMembers/Abilities/GetTeamMember.php:58
+#: src/TeamMembers/Abilities/GetTeamMember.php:59
 msgid "Retrieves a team member by team ID and user ID."
 msgstr ""
 
-#: src/TeamMembers/Abilities/GetTeamMember.php:64
-#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:65
+#: src/TeamMembers/Abilities/GetTeamMember.php:65
+#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:66
 msgid "Team member not found."
 msgstr ""
 
-#: src/TeamMembers/Abilities/GetTeamMember.php:84
+#: src/TeamMembers/Abilities/GetTeamMember.php:85
 msgid "The user ID."
 msgstr ""
 
-#: src/TeamMembers/Abilities/ListTeamMembers.php:56
+#: src/TeamMembers/Abilities/ListTeamMembers.php:57
 msgid "List Team Members"
 msgstr ""
 
-#: src/TeamMembers/Abilities/ListTeamMembers.php:57
+#: src/TeamMembers/Abilities/ListTeamMembers.php:58
 msgid "Retrieves a collection of members for a given team."
 msgstr ""
 
-#: src/TeamMembers/Abilities/ListTeamMembers.php:92
+#: src/TeamMembers/Abilities/ListTeamMembers.php:94
 msgid "Query parameters. Accepts standard WP_User_Query arguments in addition to the listed properties."
 msgstr ""
 
-#: src/TeamMembers/Abilities/ListTeamMembers.php:97
+#: src/TeamMembers/Abilities/ListTeamMembers.php:99
 msgid "The team ID to retrieve members for."
 msgstr ""
 
-#: src/TeamMembers/Abilities/ListTeamMembers.php:102
+#: src/TeamMembers/Abilities/ListTeamMembers.php:104
 msgid "Filter by team member role (e.g. \"owner\", \"manager\", \"member\")."
 msgstr ""
 
-#: src/TeamMembers/Abilities/ListTeamMembers.php:106
+#: src/TeamMembers/Abilities/ListTeamMembers.php:108
 msgid "Number of members to return per page."
 msgstr ""
 
-#: src/TeamMembers/Abilities/RemoveTeamMember.php:57
+#: src/TeamMembers/Abilities/RemoveTeamMember.php:58
 msgid "Remove Team Member"
 msgstr ""
 
-#: src/TeamMembers/Abilities/RemoveTeamMember.php:58
+#: src/TeamMembers/Abilities/RemoveTeamMember.php:59
 msgid "Removes a user from a team."
 msgstr ""
 
-#: src/TeamMembers/Abilities/RemoveTeamMember.php:85
+#: src/TeamMembers/Abilities/RemoveTeamMember.php:86
 msgid "Whether the member was successfully removed."
 msgstr ""
 
-#: src/TeamMembers/Abilities/RemoveTeamMember.php:113
+#: src/TeamMembers/Abilities/RemoveTeamMember.php:115
 msgid "The user ID to remove from the team."
 msgstr ""
 
-#: src/TeamMembers/Abilities/RemoveTeamMember.php:118
+#: src/TeamMembers/Abilities/RemoveTeamMember.php:120
 msgid "Whether to keep the user's memberships after removal. If false, memberships are deleted."
 msgstr ""
 
-#: src/TeamMembers/Abilities/RemoveTeamMember.php:123
+#: src/TeamMembers/Abilities/RemoveTeamMember.php:125
 msgid "Whether to add a note to the user's membership when keeping memberships."
 msgstr ""
 
-#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:58
+#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:59
 msgid "Update Team Member Role"
 msgstr ""
 
-#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:59
+#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:60
 msgid "Changes a team member's role."
 msgstr ""
 
-#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:91
+#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:92
 msgid "The user ID of the team member."
 msgstr ""
 
-#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:97
+#: src/TeamMembers/Abilities/UpdateTeamMemberRole.php:98
 msgid "The new role for the team member (e.g. \"member\", \"manager\")."
 msgstr ""
 
-#: src/Teams/Abilities/CreateTeam.php:58
+#: src/Teams/Abilities/CreateTeam.php:59
 msgid "Create Team"
 msgstr ""
 
-#: src/Teams/Abilities/CreateTeam.php:59
+#: src/Teams/Abilities/CreateTeam.php:60
 msgid "Creates a new team."
 msgstr ""
 
-#: src/Teams/Abilities/CreateTeam.php:92
+#: src/Teams/Abilities/CreateTeam.php:94
 msgid "The team name. Defaults to \"Team\"."
 msgstr ""
 
-#: src/Teams/Abilities/CreateTeam.php:97
+#: src/Teams/Abilities/CreateTeam.php:99
 msgid "The owner user ID."
 msgstr ""
 
-#: src/Teams/Abilities/CreateTeam.php:103
+#: src/Teams/Abilities/CreateTeam.php:105
 msgid "The membership plan ID."
 msgstr ""
 
-#: src/Teams/Abilities/CreateTeam.php:108
+#: src/Teams/Abilities/CreateTeam.php:110
 msgid "The product ID that grants access."
 msgstr ""
 
-#: src/Teams/Abilities/CreateTeam.php:113
+#: src/Teams/Abilities/CreateTeam.php:115
 msgid "The order ID associated with the team."
 msgstr ""
 
-#: src/Teams/Abilities/CreateTeam.php:118
+#: src/Teams/Abilities/CreateTeam.php:120
 msgid "The number of seats. If not provided, uses the max member count from the product."
 msgstr ""
 
-#: src/Teams/Abilities/DeleteTeam.php:59
+#: src/Teams/Abilities/DeleteTeam.php:60
 msgid "Deletes a team by ID."
 msgstr ""
 
-#: src/Teams/Abilities/DeleteTeam.php:81
+#: src/Teams/Abilities/DeleteTeam.php:82
 msgid "Whether the team was successfully deleted."
 msgstr ""
 
-#: src/Teams/Abilities/GetTeam.php:57
+#: src/Teams/Abilities/GetTeam.php:58
 msgid "Get Team"
 msgstr ""
 
-#: src/Teams/Abilities/GetTeam.php:58
+#: src/Teams/Abilities/GetTeam.php:59
 msgid "Retrieves a team by ID."
 msgstr ""
 
-#: src/Teams/Abilities/InviteToTeam.php:58
+#: src/Teams/Abilities/InviteToTeam.php:59
 msgid "Invite to Team"
 msgstr ""
 
-#: src/Teams/Abilities/InviteToTeam.php:59
+#: src/Teams/Abilities/InviteToTeam.php:60
 msgid "Invites a user to a team by email."
 msgstr ""
 
-#: src/Teams/Abilities/InviteToTeam.php:90
+#: src/Teams/Abilities/InviteToTeam.php:91
 msgid "The email address to send the invitation to."
 msgstr ""
 
-#: src/Teams/Abilities/InviteToTeam.php:94
+#: src/Teams/Abilities/InviteToTeam.php:95
 msgid "The role to assign the invited user (e.g. \"member\", \"manager\")."
 msgstr ""
 
-#: src/Teams/Abilities/ListTeams.php:56
+#: src/Teams/Abilities/ListTeams.php:57
 msgid "List Teams"
 msgstr ""
 
-#: src/Teams/Abilities/ListTeams.php:57
+#: src/Teams/Abilities/ListTeams.php:58
 msgid "Retrieves a collection of teams for a given user."
 msgstr ""
 
-#: src/Teams/Abilities/ListTeams.php:97
+#: src/Teams/Abilities/ListTeams.php:99
 msgid "The user ID to retrieve teams for."
 msgstr ""
 
-#: src/Teams/Abilities/ListTeams.php:103
+#: src/Teams/Abilities/ListTeams.php:105
 msgid "Filter by team status. A single status string or an array of statuses (e.g. \"active\", [\"active\", \"expired\"], \"any\")."
 msgstr ""
 
-#: src/Teams/Abilities/ListTeams.php:108
+#: src/Teams/Abilities/ListTeams.php:110
 msgid "Comma-separated list of team member roles to filter by (e.g. \"owner\", \"manager\", \"member\")."
 msgstr ""
 
-#: src/Teams/Abilities/ListTeams.php:113
+#: src/Teams/Abilities/ListTeams.php:115
 msgid "Number of teams to return per page. Use -1 for all."
 msgstr ""
 
-#: src/Teams/Abilities/ListTeams.php:122
+#: src/Teams/Abilities/ListTeams.php:124
 msgid "Sort teams by parameter (e.g. \"date\", \"title\", \"modified\", \"ID\")."
 msgstr ""
 
-#: src/Teams/Abilities/ListTeams.php:126
+#: src/Teams/Abilities/ListTeams.php:128
 msgid "Sort order."
 msgstr ""
 

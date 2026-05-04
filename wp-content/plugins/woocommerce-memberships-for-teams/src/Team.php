@@ -24,7 +24,7 @@
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
 use SkyVerge\WooCommerce\Memberships\Teams\Teams\Adapters\JsonSerializers\TeamSerializer;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 1.0.0
  */
-class Team implements \SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\JsonSerializable {
+class Team implements \SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\JsonSerializable {
 
 
 	/** @var int team (post) ID */

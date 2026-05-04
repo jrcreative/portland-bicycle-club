@@ -23,7 +23,7 @@
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin;
 
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Helpers\ScriptHelper;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Helpers\ScriptHelper;
 
 defined( 'ABSPATH' ) or exit;
 

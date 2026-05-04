@@ -25,9 +25,10 @@ namespace SkyVerge\WooCommerce\Memberships\Teams\TeamMembers\Abilities;
 
 use SkyVerge\WooCommerce\Memberships\Teams\Abilities\Provider;
 use SkyVerge\WooCommerce\Memberships\Teams\Team_Member;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\MakesAbilityContract;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\Ability;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\AbilityAnnotations;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\MakesAbilityContract;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\Ability;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\AbilityAnnotations;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\DataObjects\RestConfig;
 use WP_Error;
 
 defined( 'ABSPATH' ) or exit;
@@ -88,7 +89,8 @@ class GetTeamMember implements MakesAbilityContract
 			],
 			Team_Member::getJsonSchema(),
 			new AbilityAnnotations(true, false, true),
-			true
+			true,
+			new RestConfig('/teams/(?P<team_id>\d+)/members/(?P<user_id>\d+)')
 		);
 	}
 }

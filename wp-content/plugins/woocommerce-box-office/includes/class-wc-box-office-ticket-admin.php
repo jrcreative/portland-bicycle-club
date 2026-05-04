@@ -18,6 +18,7 @@ class WC_Box_Office_Ticket_Admin {
 
 		// Filterings.
 		add_action( 'restrict_manage_posts', array( $this, 'filter_ticket_product_id' ) );
+		add_action( 'manage_posts_extra_tablenav', array( $this, 'display_ticket_counter' ) );
 		add_action( 'parse_query', array( $this, 'filter_ticket_product_id_query' ) );
 
 		// Add metabox to ticket and ticket's email edit screens.
@@ -110,6 +111,46 @@ class WC_Box_Office_Ticket_Admin {
 	}
 
 	/**
+	 * Display ticket check-in counter.
+	 *
+	 * Shows total tickets and remaining unchecked tickets based on current filters.
+	 *
+	 * @param string $which The location of the extra table nav markup: 'top' or 'bottom'.
+	 * @return void
+	 */
+	public function display_ticket_counter( $which ) {
+		global $typenow, $wp_query;
+
+		if ( 'event_ticket' !== $typenow || 'top' !== $which ) {
+			return;
+		}
+
+		$total_count = $wp_query->found_posts;
+
+		if ( 0 === $total_count ) {
+			return;
+		}
+
+		$unchecked_count = $this->get_unchecked_ticket_count( $wp_query );
+
+		if ( 0 === $unchecked_count ) {
+			$message = esc_html__( 'All checked in', 'woocommerce-box-office' );
+		} else {
+			$message = sprintf(
+				/* translators: 1: number of unchecked tickets, 2: total number of tickets */
+				esc_html__( '%1$s out of %2$s still left to check in', 'woocommerce-box-office' ),
+				number_format_i18n( $unchecked_count ),
+				number_format_i18n( $total_count )
+			);
+		}
+
+		printf(
+			'<span class="alignleft" style="line-height: 2.5;">%s</span>',
+			esc_html( $message )
+		);
+	}
+
+	/**
 	 * Filter ticket products query.
 	 *
 	 * @param mixed $query
@@ -162,6 +203,55 @@ class WC_Box_Office_Ticket_Admin {
 			isset( $query->query_vars['meta_query'] ) ? $query->query_vars['meta_query'] : array(),
 			$meta_query
 		);
+	}
+
+	/**
+	 * Get count of tickets not yet checked in based on current admin filters.
+	 *
+	 * @param WP_Query $main_query The main query object with all filters applied.
+	 *
+	 * @return int Number of unchecked tickets
+	 */
+	private function get_unchecked_ticket_count( $main_query ) {
+		$args = array(
+			'post_type'   => 'event_ticket',
+			'post_status' => $main_query->get( 'post_status' ),
+			'fields'      => 'ids',
+		);
+
+		$meta_query = array();
+
+		// Product filter (same as filter_ticket_product_id_query).
+		if ( ! empty( $_GET['filter_ticket_product_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$meta_query[] = array(
+				'key'   => '_product_id',
+				'value' => absint( $_GET['filter_ticket_product_id'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			);
+		}
+
+		// Check-in status: always filter for NOT attended.
+		$meta_query[] = array(
+			'key'     => '_attended',
+			'compare' => 'NOT EXISTS',
+		);
+
+		if ( ! empty( $meta_query ) ) {
+			$args['meta_query'] = $meta_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		}
+
+		// Date filter.
+		if ( ! empty( $_GET['m'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$args['m'] = absint( $_GET['m'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		// Search query.
+		if ( ! empty( $_GET['s'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$args['s'] = sanitize_text_field( wp_unslash( $_GET['s'] ) ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		$query = new WP_Query( $args );
+
+		return $query->found_posts;
 	}
 
 	/**
