@@ -17,14 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
-use SkyVerge\WooCommerce\Memberships\Teams\Product;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -66,30 +65,6 @@ class Orders {
 		// redirect to team settings on seat change orders
 		add_filter( 'woocommerce_get_return_url',                      array( $this, 'return_seat_change_to_team_settings' ), 10, 2 );
 		add_filter( 'woocommerce_checkout_no_payment_needed_redirect', array( $this, 'return_seat_change_to_team_settings' ), 10, 2 );
-	}
-
-
-	/**
-	 * Creates teams when an order is processed or completed.
-	 *
-	 * TODO remove this deprecated method by version 2.0.0 or May 2020 {FN 2019-01-28}
-	 *
-	 * @internal
-	 *
-	 * @since 1.0.0
-	 * @deprecated since 1.1.0
-	 *
-	 * @param int|\WC_Order $order WC_Order id or object
-	 */
-	public function create_teams_from_order( $order ) {
-
-		Framework\SV_WC_Plugin_Compatibility::wc_doing_it_wrong(
-			'Orders::create_teams_from_order()',
-			'Use Orders::process_team_actions_for_order() instead.',
-			'1.1.0'
-		);
-
-		$this->process_team_actions_for_order( $order );
 	}
 
 
@@ -343,7 +318,7 @@ class Orders {
 
 			// set the name is defined
 			if ( $team_name = $item->get_meta( 'team_name' ) ) {
-				$team_args['name'] = $team_name;
+				$team_args['name'] = sanitize_text_field( $team_name );
 			}
 
 			$team = wc_memberships_for_teams_create_team( $team_args, $action );
@@ -358,12 +333,13 @@ class Orders {
 			 * @param Team $team the team that was created
 			 * @param array $args contextual arguments
 			 */
-			do_action( 'wc_memberships_for_teams_create_team_from_order', $team, array(
+			do_action( 'wc_memberships_for_teams_create_team_from_order', $team, [
+				'action'     => $action,
 				'user_id'    => $user_id,
 				'product_id' => $product->get_id(),
 				'order_id'   => $order->get_id(),
 				'item_id'    => $item->get_id(),
-			) );
+			] );
 
 			// add owner as member if configured so, unless renewing - note that we do it _after_ the action hook above,
 			// so that 3rd parties and integrations (such as Subscriptions) have a chance to attach their data to the team before
@@ -482,8 +458,11 @@ class Orders {
 					$team_link = wc_memberships_for_teams()->get_frontend_instance()->get_teams_area_instance()->get_teams_area_url( $team );
 				}
 
-				$team_link     = '<a href="' . esc_url( $team_link ) . '">' . esc_html__( '(view team)', 'woocommerce-memberships-for-teams' ) . '</a>';
-				$display_value = wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', sprintf( '%s %s', stripslashes( $meta->value ), $team_link ), $meta, $item ) ) );
+				/* translators: Placeholders: %s - term used to represent a team (singular form) */
+				$team_link     = '<a href="' . esc_url( $team_link ) . '">' . sprintf( esc_html__( '(view %s)', 'woocommerce-memberships-for-teams' ), wc_memberships_for_teams()->get_singular_team_noun() ) . '</a>';
+
+				// NOTE: we use `$team->get_name()` here instead of the meta value to ensure we use the most recent version of the team name (i.e. in case it was edited/changed)
+				$display_value = wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', sprintf( '%s %s', $team->get_name(), $team_link ), $meta, $item ) ) );
 
 				$formatted_meta[ $meta_id ]->display_value = $display_value;
 			}
@@ -551,14 +530,6 @@ class Orders {
 								}
 							}
 						}
-					}
-
-					// pre WC 3.3, refunds will still be persisted in the database even if validation fails,
-					// so we're working around the issue by deleting it ourselves
-					// TODO: remove once dropping support for WC < 3.3 {IT 2017-11-23}
-					if ( $refund instanceof \WC_Order_Refund && Framework\SV_WC_Plugin_Compatibility::is_wc_version_lt( '3.3' ) ) {
-
-						wp_delete_post( $refund->get_id(), true );
 					}
 
 					throw new \Exception( $message );
@@ -655,53 +626,65 @@ class Orders {
 	 * @param \WC_Order $order the order object
 	 * @return string
 	 */
-	public function return_seat_change_to_team_settings( $return_url, $order ) {
+	public function return_seat_change_to_team_settings($return_url, $order)
+	{
 
-		if ( $order instanceof \WC_Order ) {
+		if ( ! $order instanceof \WC_Order ) {
+			return $return_url;
+		}
 
-			foreach ( $order->get_items() as $item ) {
+		foreach ($order->get_items() as $item) {
 
-				try {
-					$team = wc_memberships_for_teams_get_team_for_order_item( $item );
-				} catch ( \Exception $e ) {
-					$team = null;
-				}
-
-				$seat_change_value = (int) $item->get_meta( '_wc_memberships_for_teams_team_seat_change', true );
-				$old_seat_count    = (int) $item->get_meta( '_wc_memberships_for_teams_team_current_seat_count', true );
-
-				if ( $team instanceof Team && 0 !== $seat_change_value && 0 !== $old_seat_count ) {
-
-					$seat_change_count = $team->get_seat_count() - $old_seat_count;
-					$seat_n            = _n( 'seat has', 'seats have', abs( $seat_change_count ), 'woocommerce-memberships-for-teams' );
-					$seat_change_type  = $seat_change_count > 0 ? 'added to' : 'removed from';
-
-					$seat_change_message = sprintf(
-						/* translators: Placeholders: %1$d - number of seats, %2$s - seat(s), %3$s - seat change type */
-						__( 'Thank you! %1$d %2$s been %3$s your team.', 'woocommerce-memberships-for-teams' ),
-						abs( $seat_change_count ),
-						$seat_n,
-						$seat_change_type
-					);
-
-					/**
-					 * Filters the notice message that is shown after a successful seat change.
-					 *
-					 * @since 1.1.0
-					 *
-					 * @param string $seat_change_message the notice message
-					 * @param \WC_Order $order the order object
-					 * @param \WC_Order_Item $item the order item object that contains the seat change data
-					 * @param Team $team the team object
-					 */
-					$seat_change_message = apply_filters( 'wc_memberships_for_teams_seat_change_notice_message', $seat_change_message, $order, $item, $team );
-
-					wc_add_notice( $seat_change_message );
-
-					$return_url = wc_memberships_for_teams()->get_frontend_instance()->get_teams_area_instance()->get_teams_area_url( $team, 'settings' );
-					break;
-				}
+			try {
+				$team = wc_memberships_for_teams_get_team_for_order_item($item);
+			} catch (\Exception $e) {
+				continue;
 			}
+
+			$seat_change_value = (int) $item->get_meta('_wc_memberships_for_teams_team_seat_change', true);
+			$old_seat_count    = (int) $item->get_meta('_wc_memberships_for_teams_team_current_seat_count', true);
+
+			if ( ! $team instanceof Team || 0 === $seat_change_value || 0 === $old_seat_count ) {
+				continue;
+			}
+
+			$seat_change_count = $team->get_seat_count() - $old_seat_count;
+			if ($seat_change_count === 0) {
+				continue;
+			}
+
+			if ($seat_change_count > 0) {
+				$seat_change_message = sprintf(
+					/* translators: Placeholders: %1$d - number of seats, %2$s - noun used to represent a team (singular) */
+					_n('Thank you! %1$d seat has been added to your %2$s.', 'Thank you! %1$d seats have been added to your %2$s.', $seat_change_count, 'woocommerce-memberships-for-teams'),
+					abs($seat_change_count),
+					wc_memberships_for_teams()->get_singular_team_noun()
+				);
+			} else {
+				$seat_change_message = sprintf(
+					/* translators: Placeholders: %1$d - number of seats, %2$s - noun used to represent a team (singular) */
+					_n('Thank you! %1$d seat has been removed from your %2$s.', 'Thank you! %1$d seats have been removed from your %2$s.', $seat_change_count, 'woocommerce-memberships-for-teams'),
+					abs($seat_change_count),
+					wc_memberships_for_teams()->get_singular_team_noun()
+				);
+			}
+
+			/**
+			 * Filters the notice message that is shown after a successful seat change.
+			 *
+			 * @since 1.1.0
+			 *
+			 * @param string $seat_change_message the notice message
+			 * @param \WC_Order $order the order object
+			 * @param \WC_Order_Item $item the order item object that contains the seat change data
+			 * @param Team $team the team object
+			 */
+			$seat_change_message = apply_filters('wc_memberships_for_teams_seat_change_notice_message', $seat_change_message, $order, $item, $team);
+
+			wc_add_notice($seat_change_message);
+
+			$return_url = wc_memberships_for_teams()->get_frontend_instance()->get_teams_area_instance()->get_teams_area_url($team, 'settings');
+			break;
 		}
 
 		return $return_url;

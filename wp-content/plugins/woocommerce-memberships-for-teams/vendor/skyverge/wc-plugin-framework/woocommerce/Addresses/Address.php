@@ -18,24 +18,26 @@
  *
  * @package   SkyVerge/WooCommerce/Plugin/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2013-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2013-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-namespace SkyVerge\WooCommerce\PluginFramework\v5_3_1\Addresses;
+namespace SkyVerge\WooCommerce\PluginFramework\v6_2_0\Addresses;
 
 defined( 'ABSPATH' ) or exit;
 
-if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_3_1\\Addresses\\Address' ) ) :
+if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_2_0\\Addresses\\Address' ) ) :
+
 
 /**
  * The base address data class.
  *
- * This serves as a standard address object to be passed around by plugins whenever dealing with address data, and
- * eliminates the need to rely on WooCommerce's address arrays.
+ * This serves as a standard address object to be passed around by plugins whenever dealing with address data.
+ * Eliminates the need to rely on WooCommerce's address arrays.
  *
  * @since 5.3.0
  */
+#[\AllowDynamicProperties]
 class Address {
 
 
@@ -179,7 +181,7 @@ class Address {
 	 */
 	protected function get_hash_data() {
 
-		return array(
+		return [
 			$this->get_line_1(),
 			$this->get_line_2(),
 			$this->get_line_3(),
@@ -187,7 +189,7 @@ class Address {
 			$this->get_region(),
 			$this->get_country(),
 			$this->get_postcode(),
-		);
+		];
 	}
 
 
@@ -286,5 +288,6 @@ class Address {
 
 
 }
+
 
 endif;

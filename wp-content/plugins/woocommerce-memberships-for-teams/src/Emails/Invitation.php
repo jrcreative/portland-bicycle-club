@@ -17,13 +17,15 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Emails;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use ReflectionClass;
+use SkyVerge\WooCommerce\Memberships\Teams\Emails\Traits\CanGetRandomTeamTrait;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -35,7 +37,8 @@ defined( 'ABSPATH' ) or exit;
  * @since 1.0.0
  */
 class Invitation extends \WC_Email {
-
+	use CanGetRandomTeamTrait;
+	use Framework\Emails\Traits\HasEmailPreviewValuesTrait;
 
 	/**
 	 * Sets up the invitation email class.
@@ -49,7 +52,8 @@ class Invitation extends \WC_Email {
 		$this->description    = __( 'Invitation emails are sent when a new member is invited to a team.', 'woocommerce-memberships-for-teams' );
 
 		$this->subject        = __( "You've been invited to join {team_name}", 'woocommerce-memberships-for-teams');
-		$this->heading        = __( '{sender_name} has invited you to join the {team_name} team on {site_title}.', 'woocommerce-memberships-for-teams');
+                                /* translators: Placeholder: %s - noun used to represent a "team" (singular form) */
+		$this->heading        = ucfirst( sprintf( __( '{sender_name} has invited you to join the {team_name} %s on {site_title}.', 'woocommerce-memberships-for-teams' ), wc_memberships_for_teams()->get_singular_team_noun() ) );
 
 		$this->template_html  = 'emails/team-invitation.php';
 		$this->template_plain = 'emails/plain/team-invitation.php';
@@ -94,11 +98,12 @@ class Invitation extends \WC_Email {
 		ob_start();
 
 		wc_get_template( $this->template_html, array(
-			'invitation'      => $this->object,
-			'email_heading'   => $this->get_heading(),
-			'email'           => $this,
-			'sent_to_admin'   => false,
-			'plain_text'      => false
+			'invitation'         => $this->object,
+			'email_heading'      => $this->get_heading(),
+			'email'              => $this,
+			'additional_content' => $this->get_additional_content(),
+			'sent_to_admin'      => false,
+			'plain_text'         => false
 		) );
 
 		return ob_get_clean();
@@ -117,10 +122,11 @@ class Invitation extends \WC_Email {
 		ob_start();
 
 		wc_get_template( $this->template_plain, array(
-			'invitation'      => $this->object,
-			'email_heading'   => $this->get_heading(),
-			'sent_to_admin'   => false,
-			'plain_text'      => true
+			'invitation'         => $this->object,
+			'email_heading'      => $this->get_heading(),
+			'additional_content' => $this->get_additional_content(),
+			'sent_to_admin'      => false,
+			'plain_text'         => true
 		) );
 
 		return ob_get_clean();
@@ -234,5 +240,42 @@ class Invitation extends \WC_Email {
 		$this->form_fields = $form_fields;
 	}
 
+	public function setPreviewValues() : void
+	{
+		$team = $this->getRandomTeam();
 
+		$dummyInvitationPost = new \WP_Post((object) [
+			'ID' => 0,
+			'post_author' => get_current_user_id(),
+			'post_date' => gmdate('Y-m-d H:i:s'),
+			'post_date_gmt' => gmdate('Y-m-d H:i:s'),
+			'post_title' => 'janedoe@example.org',
+			'post_status' => 'wcmti-pending',
+			'post_type' => 'wc_team_invitation',
+			'post_parent' => $team->get_id(),
+		]);
+		$this->object = new \SkyVerge\WooCommerce\Memberships\Teams\Invitation($dummyInvitationPost);
+
+		// associate the team using reflection
+		// this is because the `$team` property is private and we may not want to add a public setter for it
+		$invitationReflection = new ReflectionClass($this->object);
+		$teamProperty = $invitationReflection->getProperty('team');
+		$teamProperty->setAccessible(true);
+		$teamProperty->setValue($this->object, $team);
+
+		$currentUser = wp_get_current_user();
+
+		$this->placeholders['{team_name}'] = $team->get_name();
+		$this->placeholders['{sender_name}'] = $currentUser->display_name;
+		$this->placeholders['{sender_first_name}'] = $currentUser->first_name ?: $currentUser->display_name;
+		$this->placeholders['{sender_last_name}'] = $currentUser->last_name ?: '';
+		$this->placeholders['{sender_full_name}'] = $currentUser->display_name;
+		$this->placeholders['{recipient_email}'] = 'janedoe@example.org';
+		$this->placeholders['{recipient_name}'] = 'Jane Doe';
+		$this->placeholders['{recipient_first_name}'] = 'Jane';
+		$this->placeholders['{recipient_last_name}'] = 'Doe';
+		$this->placeholders['{recipient_full_name}'] = 'Jane Doe';
+		$this->placeholders['{membership_plan}'] = $team->get_plan()->get_name();
+		$this->placeholders['{membership_expiration_date}'] = date_i18n(wc_date_format(), strtotime('+1 month'));
+	}
 }

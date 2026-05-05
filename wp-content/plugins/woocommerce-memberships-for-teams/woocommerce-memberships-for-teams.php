@@ -2,42 +2,34 @@
 /**
  * Plugin Name: Teams for WooCommerce Memberships
  * Plugin URI: https://woocommerce.com/products/teams-woocommerce-memberships/
+ * Documentation URI: https://docs.woocommerce.com/document/teams-woocommerce-memberships/
  * Description: Expands WooCommerce Memberships to sell memberships to teams, families, companies, or other groups!
  * Author: SkyVerge
  * Author URI: https://www.woocommerce.com/
- * Version: 1.1.3
+ * Version: 1.9.0
  * Text Domain: woocommerce-memberships-for-teams
  * Domain Path: /i18n/languages/
  *
- * Copyright: (c) 2017-2019 SkyVerge, Inc. (info@skyverge.com)
+ * Copyright: (c) 2017-2026 SkyVerge, Inc. (info@skyverge.com)
  *
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  *
  * @package   SkyVerge\WooCommerce\Memberships\Teams
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  *
  * Woo: 2893267:f0b7ed22ec012e2e159ec30f5af5c1d1
- * WC requires at least: 3.0.4
- * WC tested up to: 3.5.7
+ * WC requires at least: 3.9.4
+ * WC tested up to: 10.7.0
  */
 
 defined( 'ABSPATH' ) or exit;
 
-// ensure required functions are loaded
-if ( ! function_exists( 'woothemes_queue_update' ) ) {
-	require_once( plugin_dir_path( __FILE__ ) . 'woo-includes/woo-functions.php' );
-}
-
-// queue plugin updates
-woothemes_queue_update( plugin_basename( __FILE__ ), 'f0b7ed22ec012e2e159ec30f5af5c1d1', '2893267' );
-
 // Required Action Scheduler library: this ensures the latest version is loaded regardless of what Memberships, Subscriptions or WooCommerce have loaded
-// TODO: when WooCommerce 3.5 is the minimum required version we can stop bundling Action Scheduler as it's now part of core WooCommerce {FN 2018-10-09}
-require_once( plugin_dir_path( __FILE__ ) . 'vendor/prospress/action-scheduler/action-scheduler.php' );
-
+// TODO: when WooCommerce 4.0 is the minimum required version we can stop bundling Action Scheduler as it's now part of core WooCommerce {FN 2018-10-09}
+require_once( plugin_dir_path( __FILE__ ) . 'vendor/woocommerce/action-scheduler/action-scheduler.php' );
 
 /**
  * WooCommerce Memberships for Teams loader.
@@ -48,19 +40,19 @@ class WC_Memberships_For_Teams_Loader {
 
 
 	/** minimum PHP version required by this plugin */
-	const MIN_PHP_VERSION = '5.3.0';
+	const MIN_PHP_VERSION = '7.4';
 
 	/** minimum WordPress version required by this plugin */
-	const MIN_WP_VERSION = '4.6';
+	const MIN_WP_VERSION = '5.6';
 
 	/** minimum WooCommerce version required by this plugin */
-	const MIN_WC_VERSION = '3.0.4';
+	const MIN_WC_VERSION = '3.9.4';
 
 	/** minimum Memberships version required by this plugin */
 	const MIN_MEMBERSHIPS_VERSION = '1.9.4';
 
 	/** SkyVerge plugin framework version used by this plugin */
-	const FRAMEWORK_VERSION = '5.3.1';
+	const FRAMEWORK_VERSION = '6.2.0';
 
 	/** the plugin namespace */
 	const PLUGIN_NAMESPACE = 'SkyVerge\WooCommerce\Memberships\Teams';
@@ -88,9 +80,31 @@ class WC_Memberships_For_Teams_Loader {
 		add_action( 'admin_init',    array( $this, 'add_plugin_notices' ) );
 		add_action( 'admin_notices', array( $this, 'admin_notices' ), 15 );
 
+		add_filter( 'extra_plugin_headers', array( $this, 'add_documentation_header' ) );
+
 		// if environment checks pass, initialize the plugin
 		if ( $this->is_environment_compatible() ) {
+
 			add_action( 'plugins_loaded', array( $this, 'init_plugin' ) );
+		}
+
+
+		// handle HPOS compatibility
+		add_action( 'before_woocommerce_init', [ $this, 'handle_hpos_compatibility' ] );
+	}
+
+
+	/**
+	 * Declares HPOS compatibility.
+	 *
+	 * Due to load order as Memberships dependency, it may not work when declared through {@see Plugin::__construct()} arguments.
+	 *
+	 * @return void
+	 */
+	public function handle_hpos_compatibility()
+	{
+		if ( version_compare( static::get_memberships_version(), '1.25.0', '>=' ) && class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', plugin_basename( __FILE__ ), true );
 		}
 	}
 
@@ -102,7 +116,7 @@ class WC_Memberships_For_Teams_Loader {
 	 */
 	public function __clone() {
 
-		_doing_it_wrong( __FUNCTION__, sprintf( 'You cannot clone instances of %s.', get_class( $this ) ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, esc_html( sprintf( 'You cannot clone instances of %s.', get_class( $this ) ) ), '1.0.0' );
 	}
 
 
@@ -113,7 +127,7 @@ class WC_Memberships_For_Teams_Loader {
 	 */
 	public function __wakeup() {
 
-		_doing_it_wrong( __FUNCTION__, sprintf( 'You cannot unserialize instances of %s.', get_class( $this ) ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, esc_html( sprintf( 'You cannot unserialize instances of %s.', get_class( $this ) ) ), '1.0.0' );
 	}
 
 
@@ -206,7 +220,7 @@ class WC_Memberships_For_Teams_Loader {
 
 			$this->deactivate_plugin();
 
-			wp_die( sprintf( '%1$s could not be activated: %2$s', self::PLUGIN_NAME, $this->get_environment_message() ) );
+			wp_die( esc_html( sprintf( '%1$s could not be activated: %2$s', self::PLUGIN_NAME, $this->get_environment_message() ) ) );
 		}
 	}
 
@@ -325,6 +339,24 @@ class WC_Memberships_For_Teams_Loader {
 			<?php
 
 		endforeach;
+	}
+
+
+	/**
+	 * Adds the Documentation URI header.
+	 *
+	 * @internal
+	 *
+	 * @since 1.4.0
+	 *
+	 * @param string[] $headers original headers
+	 * @return string[]
+	 */
+	public function add_documentation_header( $headers ) {
+
+		$headers[] = 'Documentation URI';
+
+		return $headers;
 	}
 
 

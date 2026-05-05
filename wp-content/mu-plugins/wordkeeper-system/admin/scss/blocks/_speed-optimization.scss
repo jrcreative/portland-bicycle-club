@@ -1,0 +1,48 @@
+.wrap-page-admin-panel{
+    .speed-optimization{
+        .radio-holder{
+            border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 16px;
+            padding: 19px 0 14px;
+        }
+        .advanced-option{
+            .list-radio{
+                margin-left: 15px;
+                margin-bottom: 17px;
+            }
+            .list-form-item{
+                margin-bottom: 23px;
+            }
+            .range-slider{
+                margin-bottom: 21px;
+            }
+        }
+    }
+    .content-open-close{
+        .row{
+            display: flex;
+            margin: 0 -10px;
+            flex-wrap: wrap;
+            .col{
+                padding: 0 10px;
+                margin-bottom: 10px;
+                width: 100%;
+                @include media(">=tablet") {
+                    width: 50%;
+                }
+                @include media(">=1200px") {
+                    width: auto;
+                }
+                input[type="text"]{
+                    padding: 3px 15px;
+                    min-width: 205px;
+                    width: 100%;
+                    @include media(">=1200px") {
+                        margin-left: 15px;
+                        width: auto;
+                    }
+                }
+            }
+        }
+    }
+}

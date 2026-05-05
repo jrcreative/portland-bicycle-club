@@ -17,13 +17,15 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\Memberships\Teams\Emails\Membership_Email;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
+use WC_Email;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -59,6 +61,29 @@ class Emails {
 		foreach ( $emails as $email ) {
 			add_filter( "woocommerce_email_enabled_{$email}", array( $this, 'disable_team_user_membership_email' ), 10, 2 );
 		}
+
+		// support for experimental Email Improvements feature
+		add_filter('woocommerce_prepare_email_for_preview', [$this, 'maybeSetEmailPreviewValues']);
+	}
+
+	/**
+	 * Sets email preview values when rendering "Email Improvements" previews.
+	 *
+	 * {@see EmailPreview::set_email_type()}
+	 *
+	 * @param WC_Email|mixed $email
+	 * @return WC_Email|mixed
+	 */
+	public function maybeSetEmailPreviewValues($email)
+	{
+		if (
+			($email instanceof Membership_Email || $email instanceof Emails\Invitation)
+			&& method_exists($email, 'setPreviewValues')
+		) {
+			$email->setPreviewValues();
+		}
+
+		return $email;
 	}
 
 
@@ -70,7 +95,7 @@ class Emails {
 	 * @since 1.0.0
 	 *
 	 * @param array $emails optional, associative array of email objects
-	 * @return \WC_Email[] associative array with email objects as values
+	 * @return WC_Email[] associative array with email objects as values
 	 */
 	public function get_email_classes( $emails = array() ) {
 

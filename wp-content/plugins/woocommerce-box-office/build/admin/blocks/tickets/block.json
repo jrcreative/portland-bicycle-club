@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "woocommerce-box-office/tickets",
+  "version": "0.1.0",
+  "title": "Tickets",
+  "category": "woocommerce-box-office",
+  "icon": "tickets-alt",
+  "description": "WooCommerce Box Office block to display attendees by ticket ID.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "products": {
+      "type": "string",
+      "default": "0"
+    },
+    "numberOfTickets": {
+      "type": "number",
+      "default": -1
+    },
+    "orderBy": {
+      "type": "string",
+      "default": "date"
+    },
+    "order": {
+      "type": "string",
+      "default": "DESC"
+    },
+    "avatarSize": {
+      "type": "number",
+      "default": 96
+    },
+    "columns": {
+      "type": "number",
+      "default": 3
+    }
+  },
+  "textdomain": "woocommerce-box-office",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css"
+}

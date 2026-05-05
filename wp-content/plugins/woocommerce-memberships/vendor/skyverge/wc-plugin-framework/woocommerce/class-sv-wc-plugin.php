@@ -18,15 +18,24 @@
  *
  * @package   SkyVerge/WooCommerce/Plugin/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2013-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2013-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-namespace SkyVerge\WooCommerce\PluginFramework\v5_4_0;
+namespace SkyVerge\WooCommerce\PluginFramework\v6_1_1;
+
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\HasAbilitiesContract;
+use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Handlers\Country_Helper;
+use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Payment_Gateway\PaymentFormContextChecker;
+use stdClass;
+use Throwable;
+use WC_Logger_Interface;
 
 defined( 'ABSPATH' ) or exit;
 
-if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_4_0\\SV_WC_Plugin' ) ) :
+if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\SV_WC_Plugin' ) ) :
+
 
 /**
  * # WooCommerce Plugin Framework
@@ -36,13 +45,14 @@ if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_4_0\\SV_WC_Pl
  * plugin.  This class handles all the "non-feature" support tasks such
  * as verifying dependencies are met, loading the text domain, etc.
  *
- * @version 5.4.0
+ * @version 5.8.0
  */
+#[\AllowDynamicProperties]
 abstract class SV_WC_Plugin {
 
 
 	/** Plugin Framework Version */
-	const VERSION = '5.4.0';
+	public const VERSION = '6.1.1';
 
 	/** @var object single instance of plugin */
 	protected static $instance;
@@ -53,20 +63,29 @@ abstract class SV_WC_Plugin {
 	/** @var string version number */
 	private $version;
 
-	/** @var string plugin path without trailing slash */
+	/** @var string plugin path, without trailing slash */
 	private $plugin_path;
 
-	/** @var string plugin uri */
+	/** @var string plugin URL */
 	private $plugin_url;
 
-	/** @var \WC_Logger instance */
-	private $logger;
+	/** @var string template path, without trailing slash */
+	private $template_path;
+
+	/** @var WC_Logger_Interface|null instance */
+	private ?WC_Logger_Interface $logger = null;
 
 	/** @var  SV_WP_Admin_Message_Handler instance */
 	private $message_handler;
 
 	/** @var string the plugin text domain */
 	private $text_domain;
+
+	/** @var array{ hpos?: bool, blocks?: array{ cart?: bool, checkout?: bool }} plugin compatibility flags */
+	private $supported_features;
+
+	/** @var array memoized list of active plugins */
+	private $active_plugins = [];
 
 	/** @var SV_WC_Plugin_Dependencies dependency handler instance */
 	private $dependency_handler;
@@ -79,6 +98,12 @@ abstract class SV_WC_Plugin {
 
 	/** @var REST_API REST API handler instance */
 	protected $rest_api_handler;
+
+	/** @var Blocks\Blocks_Handler blocks handler instance */
+	protected Blocks\Blocks_Handler $blocks_handler;
+
+	/** @var ?Abilities\AbilitiesHandler abilities handler instance */
+	protected ?Abilities\AbilitiesHandler $abilities_handler = null;
 
 	/** @var Admin\Setup_Wizard handler instance */
 	protected $setup_wizard_handler;
@@ -96,31 +121,43 @@ abstract class SV_WC_Plugin {
 	 *
 	 * @param string $id plugin id
 	 * @param string $version plugin version number
-	 * @param array $args {
-	 *     optional plugin arguments
-	 *
-	 *     @type string $text_domain the plugin textdomain, used to set up translations
-	 *     @type array  $dependencies {
-	 *         PHP extension, function, and settings dependencies
-	 *
-	 *         @type array $php_extensions PHP extension dependencies
-	 *         @type array $php_functions  PHP function dependencies
-	 *         @type array $php_settings   PHP settings dependencies
+	 * @param array{
+	 *     latest_wc_versions?: int|float,
+	 *     text_domain?: string,
+	 *     supported_features?: array{
+	 *          hpos?: bool,
+	 *          blocks?: array{
+	 *               cart?: bool,
+	 *               checkout?: bool
+	 *          }
+	 *     },
+	 *     dependencies?: array{
+	 *          php_extensions?: array<string, mixed>,
+	 *          php_functions?: array<string, mixed>,
+	 *          php_settings?: array<string, mixed>
 	 *     }
-	 * }
+	 *  } $args
 	 */
-	public function __construct( $id, $version, $args = array() ) {
+	public function __construct( string $id, string $version, array $args = [] ) {
 
 		// required params
 		$this->id      = $id;
 		$this->version = $version;
 
-		$args = wp_parse_args( $args, array(
-			'text_domain'  => '',
-			'dependencies' => array(),
-		) );
+		$args = wp_parse_args( $this->maybeHandleBackwardsCompatibleArgs($args), [
+			'text_domain'        => '',
+			'dependencies'       => [],
+			'supported_features' => [
+				'hpos'   => false,
+				'blocks' => [
+					'cart'     => false,
+					'checkout' => false,
+				],
+			],
+		] );
 
-		$this->text_domain = $args['text_domain'];
+		$this->text_domain        = $args['text_domain'];
+		$this->supported_features = $args['supported_features'];
 
 		// includes that are required to be available at all times
 		$this->includes();
@@ -143,11 +180,38 @@ abstract class SV_WC_Plugin {
 		// build the REST API handler instance
 		$this->init_rest_api_handler();
 
-		// build the setup handler instance
-		$this->init_setup_wizard_handler();
+		// build the blocks handler instance
+		$this->init_blocks_handler();
+
+		// build the abilities handler instance
+		$this->init_abilities_handler();
 
 		// add the action & filter hooks
 		$this->add_hooks();
+	}
+
+	/**
+	 * Provides backward compatibility for arguments, where we can. This handles any format changes in the $args array.
+	 *
+	 * @param array $args
+	 * @return array
+	 */
+	protected function maybeHandleBackwardsCompatibleArgs(array $args): array
+	{
+		// handle format change for HPOS declaration
+		if (array_key_exists('supports_hpos', $args)) {
+			// make sure `supported_features` initialized
+			if (! array_key_exists('supported_features', $args)) {
+				$args['supported_features'] = [];
+			}
+
+			// Assign `supported_features.hpos` value if not already assigned
+			$args['supported_features']['hpos'] = $args['supported_features']['hpos'] ?? $args['supports_hpos'];
+
+			unset($args['supports_hpos']);
+		}
+
+		return $args;
 	}
 
 
@@ -205,10 +269,11 @@ abstract class SV_WC_Plugin {
 	 * Plugins can override this with their own handler.
 	 *
 	 * @since 5.2.0
+	 * @since 5.15.7 The full `SV_WC_Plugin` instance is now used to instantiate `SV_WC_Hook_Deprecator`.
 	 */
 	protected function init_hook_deprecator() {
 
-		$this->hook_deprecator = new SV_WC_Hook_Deprecator( $this->get_plugin_name(), $this->get_deprecated_hooks() );
+		$this->hook_deprecator = new SV_WC_Hook_Deprecator( $this, array_merge( $this->get_framework_deprecated_hooks(), $this->get_deprecated_hooks() ) );
 	}
 
 
@@ -240,15 +305,49 @@ abstract class SV_WC_Plugin {
 
 
 	/**
+	 * Builds the blocks handler instance.
+	 *
+	 * @since 5.11.11
+	 *
+	 * @return void
+	 */
+	protected function init_blocks_handler() : void {
+
+		// individual plugins should initialize their block integrations handler by overriding this method
+		$this->blocks_handler = new Blocks\Blocks_Handler( $this );
+	}
+
+
+	/**
+	 * Builds the abilities handler instance.
+	 *
+	 * Hooks into the WordPress Abilities API (WP 6.9+) to register plugin abilities.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return void
+	 */
+	protected function init_abilities_handler() : void {
+
+		if ($this instanceof HasAbilitiesContract && function_exists('wp_register_ability')) {
+			$this->abilities_handler = new Abilities\AbilitiesHandler($this->getAbilitiesProvider());
+			$this->abilities_handler->addHooks();
+		}
+	}
+
+
+	/**
 	 * Builds the Setup Wizard handler instance.
 	 *
 	 * Plugins can override and extend this method to add their own setup wizard.
 	 *
 	 * @since 5.3.0
+	 *
+	 * @deprecated
 	 */
 	protected function init_setup_wizard_handler() {
 
-		require_once( $this->get_framework_path() . '/admin/abstract-sv-wc-plugin-admin-setup-wizard.php' );
+		// np-op
 	}
 
 
@@ -265,8 +364,11 @@ abstract class SV_WC_Plugin {
 		// initialize the plugin admin
 		add_action( 'admin_init', array( $this, 'init_admin' ), 0 );
 
-		// hook for translations seperately to ensure they're loaded
+		// hook for translations separately to ensure they're loaded
 		add_action( 'init', array( $this, 'load_translations' ) );
+
+		// handle WooCommerce features compatibility (such as HPOS, WC Cart & Checkout Blocks support...)
+		add_action( 'before_woocommerce_init', [ $this, 'handle_features_compatibility' ] );
 
 		// add the admin notices
 		add_action( 'admin_notices', array( $this, 'add_admin_notices' ) );
@@ -279,11 +381,7 @@ abstract class SV_WC_Plugin {
 		$this->add_api_request_logging();
 
 		// add any PHP incompatibilities to the system status report
-		if ( SV_WC_Plugin_Compatibility::is_wc_version_gte_3_0() ) {
-			add_filter( 'woocommerce_system_status_environment_rows', array( $this, 'add_system_status_php_information' ) );
-		} else {
-			add_filter( 'woocommerce_debug_posting', array( $this, 'add_system_status_php_information' ) );
-		}
+		add_filter( 'woocommerce_system_status_environment_rows', array( $this, 'add_system_status_php_information' ) );
 	}
 
 
@@ -383,8 +481,7 @@ abstract class SV_WC_Plugin {
 	/**
 	 * Initializes the plugin admin.
 	 *
-	 * Plugins can override this to set up any handlers after the WordPress
-	 * admin is ready.
+	 * Plugins can override this to set up any handlers after the WordPress admin is ready.
 	 *
 	 * @since 5.2.0
 	 */
@@ -398,57 +495,85 @@ abstract class SV_WC_Plugin {
 	 * Include any critical files which must be available as early as possible,
 	 *
 	 * @since 2.0.0
+	 *
+	 * @deprecated class files are loaded via composer
 	 */
 	private function includes() {
 
-		$framework_path = $this->get_framework_path();
+		$this->setupClassAliases();
+	}
 
-		// common exception class
-		require_once(  $framework_path . '/class-sv-wc-plugin-exception.php' );
+	/**
+	 * Setup aliases for classes that got renamed, moved, or namespace changed.
+	 *
+	 * @since 5.13.1
+	 *
+	 * @return void
+	 */
+	protected function setupClassAliases() : void
+	{
+		$countryHelperAlias = '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\Country_Helper';
+		if (! class_exists($countryHelperAlias)) {
+			class_alias(
+				Country_Helper::class,
+				$countryHelperAlias
+			);
+		}
 
-		// addresses
-		require_once(  $framework_path . '/Addresses/Address.php' );
-		require_once(  $framework_path . '/Addresses/Customer_Address.php' );
-
-		// common utility methods
-		require_once( $framework_path . '/class-sv-wc-helper.php' );
-
-		// backwards compatibility for older WC versions
-		require_once( $framework_path . '/class-sv-wc-plugin-compatibility.php' );
-		require_once( $framework_path . '/compatibility/abstract-sv-wc-data-compatibility.php' );
-		require_once( $framework_path . '/compatibility/class-sv-wc-order-compatibility.php' );
-		require_once( $framework_path . '/compatibility/class-sv-wc-product-compatibility.php' );
-
-		// TODO: Remove this when WC 3.x can be required {CW 2017-03-16}
-		require_once( $framework_path . '/compatibility/class-sv-wc-datetime.php' );
-
-		// generic API base
-		require_once( $framework_path . '/api/class-sv-wc-api-exception.php' );
-		require_once( $framework_path . '/api/class-sv-wc-api-base.php' );
-		require_once( $framework_path . '/api/interface-sv-wc-api-request.php' );
-		require_once( $framework_path . '/api/interface-sv-wc-api-response.php' );
-
-		// XML API base
-		require_once( $framework_path . '/api/abstract-sv-wc-api-xml-request.php' );
-		require_once( $framework_path . '/api/abstract-sv-wc-api-xml-response.php' );
-
-		// JSON API base
-		require_once( $framework_path . '/api/abstract-sv-wc-api-json-request.php' );
-		require_once( $framework_path . '/api/abstract-sv-wc-api-json-response.php' );
-
-		// Handlers
-		require_once( $framework_path . '/class-sv-wc-plugin-dependencies.php' );
-		require_once( $framework_path . '/class-sv-wc-hook-deprecator.php' );
-		require_once( $framework_path . '/class-sv-wp-admin-message-handler.php' );
-		require_once( $framework_path . '/class-sv-wc-admin-notice-handler.php' );
-		require_once( $framework_path . '/Lifecycle.php' );
-		require_once( $framework_path . '/rest-api/class-sv-wc-plugin-rest-api.php' );
+		$paymentFormContextCheckerAlias = '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\PaymentFormContextChecker';
+		if (! class_exists($paymentFormContextCheckerAlias)) {
+			class_alias(
+				PaymentFormContextChecker::class,
+				$paymentFormContextCheckerAlias
+			);
+		}
 	}
 
 
 	/**
-	 * Return deprecated/removed hooks. Implementing classes should override this
-	 * and return an array of deprecated/removed hooks in the following format:
+	 * Gets a list of framework deprecated/removed hooks.
+	 *
+	 * @see SV_WC_Plugin::init_hook_deprecator()
+	 * @see SV_WC_Plugin::get_deprecated_hooks()
+	 *
+	 * @since 5.8.0
+	 *
+	 * @return array associative array
+	 */
+	private function get_framework_deprecated_hooks() {
+
+		$plugin_id          = $this->get_id();
+		$deprecated_hooks   = [];
+		$deprecated_filters = [
+			/** @see SV_WC_Payment_Gateway_My_Payment_Methods handler - once migrated to WC core tokens UI, we removed these and have no replacement */
+			// TODO: remove deprecated hooks handling by version 6.0.0 or by 2021-02-25 {FN 2020-02-25}
+			"wc_{$plugin_id}_my_payment_methods_table_html",
+			"wc_{$plugin_id}_my_payment_methods_table_head_html",
+			"wc_{$plugin_id}_my_payment_methods_table_title",
+			"wc_{$plugin_id}_my_payment_methods_table_title_html",
+			"wc_{$plugin_id}_my_payment_methods_table_row_html",
+			"wc_{$plugin_id}_my_payment_methods_table_body_html",
+			"wc_{$plugin_id}_my_payment_methods_table_body_row_data",
+			"wc_{$plugin_id}_my_payment_methods_table_method_expiry_html",
+			"wc_{$plugin_id}_my_payment_methods_table_actions_html",
+		];
+
+		foreach ( $deprecated_filters as $deprecated_filter ) {
+			$deprecated_hooks[ $deprecated_filter ] = [
+				'removed'     => true,
+				'replacement' => false,
+				'version'     => '5.8.1',
+			];
+		}
+
+		return $deprecated_hooks;
+	}
+
+
+	/**
+	 * Gets a list of the plugin's deprecated/removed hooks.
+	 *
+	 * Implementing classes should override this and return an array of deprecated/removed hooks in the following format:
 	 *
 	 * $old_hook_name = array {
 	 *   @type string $version version the hook was deprecated/removed in
@@ -458,12 +583,13 @@ abstract class SV_WC_Plugin {
 	 * }
 	 *
 	 * @since 4.3.0
+	 *
 	 * @return array
 	 */
 	protected function get_deprecated_hooks() {
 
 		// stub method
-		return array();
+		return [];
 	}
 
 
@@ -483,15 +609,13 @@ abstract class SV_WC_Plugin {
 
 
 	/**
-	 * Checks if required PHP extensions are loaded and adds an admin notice
-	 * for any missing extensions.  Also plugin settings can be checked
-	 * as well.
+	 * Adds admin notices upon initialization.
 	 *
 	 * @since 3.0.0
 	 */
 	public function add_admin_notices() {
 
-
+		// stub method
 	}
 
 
@@ -544,6 +668,45 @@ abstract class SV_WC_Plugin {
 	}
 
 
+	/**
+	 * Declares HPOS compatibility if the plugin is compatible with HPOS.
+	 *
+	 * @internal
+	 *
+	 * @since 5.11.0
+	 * @deprecated since 5.11.11
+	 * @see SV_WC_Plugin::handle_features_compatibility()
+	 *
+	 * @return void
+	 */
+	public function handle_hpos_compatibility() : void {
+
+		wc_deprecated_function( 'SV_WC_Plugin::handle_hpos_compatibility', '5.11.11', 'SV_WC_Plugin::handle_features_compatibility' );
+
+		$this->handle_features_compatibility();
+	}
+
+
+	/**
+	 * Declares compatibility with specific WooCommerce features.
+	 *
+	 * @internal
+	 *
+	 * @since 5.12.0
+	 *
+	 * @return void
+	 */
+	public function handle_features_compatibility() : void {
+
+		if ( ! class_exists( FeaturesUtil::class ) ) {
+			return;
+		}
+
+		FeaturesUtil::declare_compatibility( 'custom_order_tables', $this->get_plugin_file(), $this->is_hpos_compatible() );
+		FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', $this->get_plugin_file(), $this->get_blocks_handler()->is_cart_block_compatible() || $this->get_blocks_handler()->is_checkout_block_compatible() );
+	}
+
+
 	/** Helper methods ******************************************************/
 
 
@@ -562,38 +725,54 @@ abstract class SV_WC_Plugin {
 
 
 	/**
-	 * Log API requests/responses
+	 * Logs API requests/responses.
 	 *
 	 * @since 2.2.0
-	 * @param array $request request data, see SV_WC_API_Base::broadcast_request() for format
-	 * @param array $response response data
+	 *
+	 * @param array<mixed>|stdClass $request request data, see SV_WC_API_Base::broadcast_request() for format
+	 * @param array<mixed>|stdClass $response response data
 	 * @param string|null $log_id log to write data to
 	 */
-	public function log_api_request( $request, $response, $log_id = null ) {
+	public function log_api_request( $request, $response, ?string $log_id = null ) : void {
 
-		$this->log( "Request\n" . $this->get_api_log_message( $request ), $log_id );
+		if ( ! empty( $request ) ) {
+			$this->log( "Request\n" . $this->get_api_log_message( $request, 'request' ), $log_id );
+		}
 
 		if ( ! empty( $response ) ) {
-			$this->log( "Response\n" . $this->get_api_log_message( $response ), $log_id );
+			$this->log( "Response\n" . $this->get_api_log_message( $response, 'response' ), $log_id );
 		}
 	}
 
 
 	/**
-	 * Transform the API request/response data into a string suitable for logging
+	 * Transform the API request/response data into a string suitable for logging.
 	 *
 	 * @since 2.2.0
-	 * @param array $data
+	 *
+	 * @param array<string, mixed>|scalar $data
+	 * @param string|null $type optional type of data, either 'request' or 'response'
 	 * @return string
 	 */
-	public function get_api_log_message( $data ) {
+	public function get_api_log_message( $data, ?string $type = null ) : string {
 
-		$messages = array();
+		$messages = [];
 
-		$messages[] = isset( $data['uri'] ) && $data['uri'] ? 'Request' : 'Response';
+		if ( ! empty( $type ) )  {
+			$messages[] = ucfirst( $type );
+		} else {
+			$messages[] = isset( $data['uri'] ) && $data['uri'] ? 'Request' : 'Response';
+		}
 
 		foreach ( (array) $data as $key => $value ) {
-			$messages[] = trim( sprintf( '%s: %s', $key, is_array( $value ) || ( is_object( $value ) && 'stdClass' == get_class( $value ) ) ? print_r( (array) $value, true ) : $value ) );
+
+			if ( is_array( $value ) || ( is_object( $value ) && 'stdClass' === get_class( $value ) ) ) {
+				$value = print_r( (array) $value, true );
+			} elseif ( is_bool( $value ) ) {
+				$value = wc_bool_to_string( $value );
+			}
+
+			$messages[] = trim( sprintf( '%s: %s', $key, $value ) );
 		}
 
 		return implode( "\n", $messages ) . "\n";
@@ -619,6 +798,7 @@ abstract class SV_WC_Plugin {
 					continue;
 				}
 
+				/* translators: Placeholders: %1$s - PHP setting value, %2$s - version or value required */
 				$note = __( '%1$s - A minimum of %2$s is required.', 'woocommerce-plugin-framework' );
 
 			} else {
@@ -628,6 +808,7 @@ abstract class SV_WC_Plugin {
 					continue;
 				}
 
+				/* translators: Context: As in "Value has been set as [foo], but [bar] is required". Placeholders: %1$s - current value for a PHP setting, %2$s - required value for the PHP setting */
 				$note = __( 'Set as %1$s - %2$s is required.', 'woocommerce-plugin-framework' );
 			}
 
@@ -658,13 +839,22 @@ abstract class SV_WC_Plugin {
 			$log_id = $this->get_id();
 		}
 
-		if ( ! is_object( $this->logger ) ) {
-			$this->logger = new \WC_Logger();
-		}
-
-		$this->logger->add( $log_id, $message );
+		$this->logger()->add( $log_id, $message );
 	}
 
+	protected function logger() : WC_Logger_Interface
+	{
+		return $this->logger ??= wc_get_logger();
+	}
+
+	public function assert($assertion) : void
+	{
+		try {
+			assert($assertion);
+		} catch (Throwable $exception) {
+			$this->logger()->debug('Assertion failed, backtrace summery: '.wp_debug_backtrace_summary());
+		}
+	}
 
 	/**
 	 * Require and instantiate a class
@@ -679,6 +869,76 @@ abstract class SV_WC_Plugin {
 		require_once( $this->get_plugin_path() . $local_path );
 
 		return new $class_name;
+	}
+
+
+	/**
+	 * Determines if TLS v1.2 is required for API requests.
+	 *
+	 * Subclasses should override this to return true if TLS v1.2 is required.
+	 *
+	 * @since 5.5.2
+	 *
+	 * @return bool
+	 */
+	public function require_tls_1_2() {
+
+		return false;
+	}
+
+
+	/**
+	 * Determines if TLS 1.2 is available.
+	 *
+	 * @since 5.5.2
+	 *
+	 * @return bool
+	 */
+	public function is_tls_1_2_available() {
+
+		// assume availability to avoid notices for unknown SSL types
+		$is_available = true;
+
+		// check the cURL version if installed
+		if ( is_callable( 'curl_version' ) ) {
+
+			$versions = curl_version();
+
+			// cURL 7.34.0 is considered the minimum version that supports TLS 1.2
+			if ( version_compare( $versions['version'], '7.34.0', '<' ) ) {
+				$is_available = false;
+			}
+		}
+
+		return $is_available;
+	}
+
+
+	/**
+	 * Gets a list of the plugin's compatibility flags.
+	 *
+	 * @since 5.11.11
+	 *
+	 * @return array{ hpos?: bool, blocks?: array{ cart?: bool, checkout?: bool }}
+	 */
+	public function get_supported_features() : array {
+
+		return $this->supported_features ?? [];
+	}
+
+
+	/**
+	 * Determines if the plugin supports HPOS.
+	 *
+	 * @since 5.11.0
+	 *
+	 * @return bool
+	 */
+	public function is_hpos_compatible() : bool {
+
+		return isset( $this->supported_features['hpos'] )
+			&& true === $this->supported_features['hpos']
+			&& SV_WC_Plugin_Compatibility::is_wc_version_gte( '7.6' );
 	}
 
 
@@ -774,6 +1034,32 @@ abstract class SV_WC_Plugin {
 
 
 	/**
+	 * Gets the blocks handler instance.
+	 *
+	 * @since 5.11.11
+	 *
+	 * @return Blocks\Blocks_Handler
+	 */
+	public function get_blocks_handler() : Blocks\Blocks_Handler {
+
+		return $this->blocks_handler;
+	}
+
+
+	/**
+	 * Gets the abilities handler instance.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return ?Abilities\AbilitiesHandler
+	 */
+	public function get_abilities_handler() : ?Abilities\AbilitiesHandler {
+
+		return $this->abilities_handler;
+	}
+
+
+	/**
 	 * Gets the Setup Wizard handler instance.
 	 *
 	 * @since 5.3.0
@@ -813,9 +1099,25 @@ abstract class SV_WC_Plugin {
 
 
 	/**
+	 * Gets the settings API handler instance.
+	 *
+	 * Plugins can use this to init the settings API handler.
+	 *
+	 * @since 5.7.0
+	 *
+	 * @return void|Settings_API\Abstract_Settings
+	 */
+	public function get_settings_handler() {
+
+		return;
+	}
+
+
+	/**
 	 * Returns the plugin version name.  Defaults to wc_{plugin id}_version
 	 *
 	 * @since 2.0.0
+	 *
 	 * @return string the plugin version name
 	 */
 	public function get_plugin_version_name() {
@@ -828,10 +1130,44 @@ abstract class SV_WC_Plugin {
 	 * Returns the current version of the plugin
 	 *
 	 * @since 2.0.0
+	 *
 	 * @return string plugin version
 	 */
 	public function get_version() {
+
 		return $this->version;
+	}
+
+
+	/**
+	 * Gets the plugin version to be used by any internal scripts.
+	 *
+	 * This normally returns the plugin version, but will return `time()` if debug is enabled, to burst assets caches.
+	 *
+	 * @since 5.12.0
+	 *
+	 * @return string
+	 */
+	public function get_assets_version() : string {
+
+		if ( defined( 'SCRIPT_DEBUG' ) && true === SCRIPT_DEBUG || defined( 'WP_DEBUG' ) && true === WP_DEBUG ) {
+			return (string) time();
+		}
+
+		return $this->version;
+	}
+
+
+	/**
+	 * Gets the plugin's textdomain.
+	 *
+	 * @since 5.12.0
+	 *
+	 * @return string
+	 */
+	public function get_textdomain() : string {
+
+		return $this->text_domain;
 	}
 
 
@@ -953,48 +1289,56 @@ abstract class SV_WC_Plugin {
 
 
 	/**
-	 * Returns the plugin's path without a trailing slash, i.e.
-	 * /path/to/wp-content/plugins/plugin-directory
+	 * Gets the plugin's path without a trailing slash.
+	 *
+	 * e.g. /path/to/wp-content/plugins/plugin-directory
 	 *
 	 * @since 2.0.0
-	 * @return string the plugin path
+	 *
+	 * @return string
 	 */
 	public function get_plugin_path() {
 
-		if ( $this->plugin_path ) {
-			return $this->plugin_path;
+		if ( null === $this->plugin_path ) {
+			$this->plugin_path = untrailingslashit( plugin_dir_path( $this->get_file() ) );
 		}
 
-		return $this->plugin_path = untrailingslashit( plugin_dir_path( $this->get_file() ) );
+		return $this->plugin_path;
 	}
 
 
 	/**
-	 * Returns the plugin's url without a trailing slash, i.e.
-	 * http://skyverge.com/wp-content/plugins/plugin-directory
+	 * Gets the plugin's URL without a trailing slash.
+	 *
+	 * E.g. http://skyverge.com/wp-content/plugins/plugin-directory
 	 *
 	 * @since 2.0.0
-	 * @return string the plugin URL
+	 *
+	 * @return string
 	 */
 	public function get_plugin_url() {
 
-		if ( $this->plugin_url ) {
-			return $this->plugin_url;
+		if ( null === $this->plugin_url ) {
+			$this->plugin_url = untrailingslashit( plugins_url( '/', $this->get_file() ) );
 		}
 
-		return $this->plugin_url = untrailingslashit( plugins_url( '/', $this->get_file() ) );
+		return $this->plugin_url;
 	}
 
 
 	/**
-	 * Returns the woocommerce uploads path, without trailing slash.  Oddly WooCommerce
-	 * core does not provide a way to get this
+	 * Gets the woocommerce uploads path, without trailing slash.
+	 *
+	 * Oddly WooCommerce core does not provide a way to get this.
 	 *
 	 * @since 2.0.0
-	 * @return string upload path for woocommerce
+	 *
+	 * @return string
 	 */
 	public static function get_woocommerce_uploads_path() {
+
 		$upload_dir = wp_upload_dir();
+
 		return $upload_dir['basedir'] . '/woocommerce_uploads';
 	}
 
@@ -1012,8 +1356,9 @@ abstract class SV_WC_Plugin {
 
 
 	/**
-	 * Returns the loaded framework path, without trailing slash. Ths is the highest
-	 * version framework that was loaded by the bootstrap.
+	 * Gets the loaded framework path, without trailing slash.
+	 *
+	 * This matches the path to the highest version of the framework currently loaded.
 	 *
 	 * @since 4.0.0
 	 * @return string
@@ -1025,10 +1370,10 @@ abstract class SV_WC_Plugin {
 
 
 	/**
-	 * Returns the absolute path to the loaded framework image directory, without a
-	 * trailing slash
+	 * Gets the absolute path to the loaded framework image directory, without a trailing slash.
 	 *
 	 * @since 4.0.0
+	 *
 	 * @return string
 	 */
 	public function get_framework_assets_path() {
@@ -1038,9 +1383,10 @@ abstract class SV_WC_Plugin {
 
 
 	/**
-	 * Returns the loaded framework assets URL without a trailing slash
+	 * Gets the loaded framework assets URL without a trailing slash.
 	 *
 	 * @since 4.0.0
+	 *
 	 * @return string
 	 */
 	public function get_framework_assets_url() {
@@ -1050,226 +1396,93 @@ abstract class SV_WC_Plugin {
 
 
 	/**
-	 * Helper function to determine whether a plugin is active
+	 * Gets the plugin default template path, without a trailing slash.
+	 *
+	 * @since 5.5.0
+	 *
+	 * @return string
+	 */
+	public function get_template_path() {
+
+		if ( null === $this->template_path ) {
+			$this->template_path = $this->get_plugin_path() . '/templates';
+		}
+
+		return $this->template_path;
+	}
+
+
+	/**
+	 * Loads and outputs a template file HTML.
+	 *
+	 * @see \wc_get_template() except we define automatically the default path
+	 *
+	 * @since 5.5.0
+	 *
+	 * @param string $template template name/part
+	 * @param array $args associative array of optional template arguments
+	 * @param string $path optional template path, can be empty, as themes can override this
+	 * @param string $default_path optional default template path, will normally use the plugin's own template path unless overridden
+	 */
+	public function load_template( $template, array $args = [], $path = '', $default_path = '' ) {
+
+		if ( '' === $default_path || ! is_string( $default_path ) ) {
+			$default_path = trailingslashit( $this->get_template_path() );
+		}
+
+		wc_get_template( $template, $args, $path, $default_path );
+	}
+
+
+	/**
+	 * Determines whether a plugin is active.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @param string $plugin_name plugin name, as the plugin-filename.php
 	 * @return boolean true if the named plugin is installed and active
 	 */
 	public function is_plugin_active( $plugin_name ) {
 
-		$active_plugins = (array) get_option( 'active_plugins', array() );
+		$is_active = false;
 
-		if ( is_multisite() ) {
-			$active_plugins = array_merge( $active_plugins, array_keys( get_site_option( 'active_sitewide_plugins', array() ) ) );
-		}
+		if ( is_string( $plugin_name ) ) {
 
-		$plugin_filenames = array();
+			if ( ! array_key_exists( $plugin_name, $this->active_plugins ) ) {
 
-		foreach ( $active_plugins as $plugin ) {
+				$active_plugins = (array) get_option( 'active_plugins', array() );
 
-			if ( SV_WC_Helper::str_exists( $plugin, '/' ) ) {
+				if ( is_multisite() ) {
+					$active_plugins = array_merge( $active_plugins, array_keys( get_site_option( 'active_sitewide_plugins', array() ) ) );
+				}
 
-				// normal plugin name (plugin-dir/plugin-filename.php)
-				list( , $filename ) = explode( '/', $plugin );
+				$plugin_filenames = array();
 
-			} else {
+				foreach ( $active_plugins as $plugin ) {
 
-				// no directory, just plugin file
-				$filename = $plugin;
+					if ( SV_WC_Helper::str_exists( $plugin, '/' ) ) {
+
+						// normal plugin name (plugin-dir/plugin-filename.php)
+						[ , $filename ] = explode( '/', $plugin );
+
+					} else {
+
+						// no directory, just plugin file
+						$filename = $plugin;
+					}
+
+					$plugin_filenames[] = $filename;
+				}
+
+				$this->active_plugins[ $plugin_name ] = in_array( $plugin_name, $plugin_filenames, true );
 			}
 
-			$plugin_filenames[] = $filename;
+			$is_active = (bool) $this->active_plugins[ $plugin_name ];
 		}
 
-		return in_array( $plugin_name, $plugin_filenames );
+		return $is_active;
 	}
-
-
-	/** Deprecated methods ****************************************************/
-
-
-	/**
-	 * Handles version checking.
-	 *
-	 * @since 2.0.0
-	 * @deprecated 5.2.0
-	 */
-	public function do_install() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0', get_class( $this->get_lifecycle_handler() ) . '::init()' );
-
-		$this->get_lifecycle_handler()->init();
-	}
-
-
-	/**
-	 * Helper method to install default settings for a plugin.
-	 *
-	 * @since 4.2.0
-	 * @deprecated 5.2.0
-	 *
-	 * @param array $settings array of settings in format required by WC_Admin_Settings
-	 */
-	public function install_default_settings( array $settings ) {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0', get_class( $this->get_lifecycle_handler() ) . '::install_default_settings()' );
-
-		$this->get_lifecycle_handler()->install_default_settings( $settings );
-	}
-
-
-	/**
-	 * Plugin activated method. Perform any activation tasks here.
-	 * Note that this _does not_ run during upgrades.
-	 *
-	 * @since 4.2.0
-	 * @deprecated 5.2.0
-	 */
-	public function activate() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0' );
-	}
-
-
-	/**
-	 * Plugin deactivation method. Perform any deactivation tasks here.
-	 *
-	 * @since 4.2.0
-	 * @deprecated 5.2.0
-	 */
-	public function deactivate() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0' );
-	}
-
-
-	/**
-	 * Gets the string name of any required PHP extensions that are not loaded.
-	 *
-	 * @since 4.5.0
-	 * @deprecated 5.2.0
-	 *
-	 * @return array
-	 */
-	public function get_missing_extension_dependencies() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0', get_class( $this->get_dependency_handler() ) . '::get_missing_php_extensions()' );
-
-		return $this->get_dependency_handler()->get_missing_php_extensions();
-	}
-
-
-	/**
-	 * Gets the string name of any required PHP functions that are not loaded.
-	 *
-	 * @since 2.1.0
-	 * @deprecated 5.2.0
-	 *
-	 * @return array
-	 */
-	public function get_missing_function_dependencies() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0', get_class( $this->get_dependency_handler() ) . '::get_missing_php_functions()' );
-
-		return $this->get_dependency_handler()->get_missing_php_functions();
-	}
-
-
-	/**
-	 * Gets the string name of any required PHP extensions that are not loaded.
-	 *
-	 * @since 4.5.0
-	 * @deprecated 5.2.0
-	 *
-	 * @return array
-	 */
-	public function get_incompatible_php_settings() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0', get_class( $this->get_dependency_handler() ) . '::get_incompatible_php_settings()' );
-
-		return $this->get_dependency_handler()->get_incompatible_php_settings();
-	}
-
-
-	/**
-	 * Gets the PHP dependencies.
-	 *
-	 * @since 2.0.0
-	 * @deprecated 5.2.0
-	 *
-	 * @return array
-	 */
-	protected function get_dependencies() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0' );
-
-		return array();
-	}
-
-
-	/**
-	 * Gets the PHP extension dependencies.
-	 *
-	 * @since 4.5.0
-	 * @deprecated 5.2.0
-	 *
-	 * @return array
-	 */
-	protected function get_extension_dependencies() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0', get_class( $this->get_dependency_handler() ) . '::get_php_extensions()' );
-
-		return $this->get_dependency_handler()->get_php_extensions();
-	}
-
-
-	/**
-	 * Gets the PHP function dependencies.
-	 *
-	 * @since 2.1.0
-	 * @deprecated 5.2.0
-	 *
-	 * @return array
-	 */
-	protected function get_function_dependencies() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0', get_class( $this->get_dependency_handler() ) . '::get_php_functions()' );
-
-		return $this->get_dependency_handler()->get_php_functions();
-	}
-
-
-	/**
-	 * Gets the PHP settings dependencies.
-	 *
-	 * @since 4.5.0
-	 * @deprecated 5.2.0
-	 *
-	 * @return array
-	 */
-	protected function get_php_settings_dependencies() {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0', get_class( $this->get_dependency_handler() ) . '::get_php_settings()' );
-
-		return $this->get_dependency_handler()->get_php_settings();
-	}
-
-
-	/**
-	 * Sets the plugin dependencies.
-	 *
-	 * @since 4.5.0
-	 * @deprecated 5.2.0
-	 *
-	 * @param array $dependencies the environment dependencies
-	 */
-	protected function set_dependencies( $dependencies = array() ) {
-
-		SV_WC_Plugin_Compatibility::wc_deprecated_function( __METHOD__, '5.2.0' );
-	}
-
-
 }
 
-endif; // Class exists check
+
+endif;

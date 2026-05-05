@@ -17,13 +17,15 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\Memberships\Teams\TeamMembers\Adapters\JsonSerializers\TeamMemberSerializer;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\JsonSerializable;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -35,7 +37,7 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 1.0.0
  */
-class Team_Member {
+class Team_Member implements JsonSerializable {
 
 
 	/** @var int member (user) ID */
@@ -233,7 +235,21 @@ class Team_Member {
 			throw new Framework\SV_WC_Plugin_Exception( __( "Changing owner's role is not allowed", 'woocommerce-memberships-for-teams' ) );
 		}
 
-		update_user_meta( $this->get_id(), $this->team_role_meta, $role );
+		$new_role = $role;
+		$old_role = $this->get_role();
+
+		update_user_meta( $this->get_id(), $this->team_role_meta, $new_role );
+
+		/**
+		 * Fires when updating a team member's role.
+		 *
+		 * @since 1.2.0
+		 *
+		 * @param string $new_role the member's new role
+		 * @param string $old_role the member's old role
+		 * @param Team_Member $team_member the member object
+		 */
+		do_action( 'wc_memberships_for_teams_team_member_role_updated', $new_role, $old_role, $this );
 	}
 
 
@@ -351,6 +367,33 @@ class Team_Member {
 		$user_membership_ids = $this->get_user_memberships( 'ids' );
 
 		return ! empty( $user_membership_ids ) ? (int) $user_membership_ids[0] : null;
+	}
+
+
+	/**
+	 * Returns a JSON-serializable representation of this team member.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	#[\ReturnTypeWillChange]
+	public function jsonSerialize()
+	{
+		return TeamMemberSerializer::convert($this);
+	}
+
+
+	/**
+	 * Returns the JSON schema describing the shape of {@see jsonSerialize()} output.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function getJsonSchema() : array
+	{
+		return TeamMemberSerializer::getJsonSchema();
 	}
 
 

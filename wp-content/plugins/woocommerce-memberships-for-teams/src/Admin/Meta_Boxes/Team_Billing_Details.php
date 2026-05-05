@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin\Meta_Boxes;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -84,21 +84,22 @@ class Team_Billing_Details {
 		if ( $order ) {
 
 			/* translators: Placeholder: %s - order number */
-			$order_ref       = '<a href="' . esc_url( get_edit_post_link( Framework\SV_WC_Order_Compatibility::get_prop( $order, 'id' ) ) ) . '">' . sprintf(  esc_html__( 'Order %s', 'woocommerce-memberships-for-teams' ), $order->get_order_number() ) . '</a>';
-			$billing_fields  = array(
-				__( 'Purchased in:', 'woocommerce-memberships-for-teams' ) => $order_ref,
-				__( 'Order Date:', 'woocommerce-memberships-for-teams' )   => date_i18n( wc_date_format(), Framework\SV_WC_Order_Compatibility::get_date_created( $order )->getTimestamp() ),
-				__( 'Order Total:', 'woocommerce-memberships-for-teams' )  => $order->get_formatted_order_total(),
-			);
+			$order_ref       = '<a href="' . esc_url( $order->get_edit_order_url() ) . '">' . sprintf(  esc_html__( 'Order %s', 'woocommerce-memberships-for-teams' ), esc_html( $order->get_order_number() ) ) . '</a>';
+			$order_created   = $order->get_date_created( 'edit' );
+			$billing_fields  = [
+				esc_html__( 'Purchased in:', 'woocommerce-memberships-for-teams' ) => $order_ref,
+				esc_html__( 'Order Date:', 'woocommerce-memberships-for-teams' )   => $order_created ? esc_html( date_i18n( wc_date_format(), $order_created->getTimestamp() ) ) : '',
+				esc_html__( 'Order Total:', 'woocommerce-memberships-for-teams' )  => $order->get_formatted_order_total(),
+			];
 
 		} else {
 
-			$billing_fields = array(
-				__( 'No billing details:', 'woocommerce-memberships-for-teams' ) => esc_html__( 'This team was created manually.', 'woocommerce-memberships-for-teams' ),
-			);
+			$billing_fields = [
+				esc_html__( 'No billing details:', 'woocommerce-memberships-for-teams' ) => esc_html__( 'This team was created manually.', 'woocommerce-memberships-for-teams' ),
+			];
 		}
 
-		$billing_fields[ __( 'Product:', 'woocommerce-memberships-for-teams' ) ] = $this->get_edit_product_input( $team, $team->get_product() );
+		$billing_fields[ esc_html__( 'Product:', 'woocommerce-memberships-for-teams' ) ] = $this->get_edit_product_input( $team, $team->get_product() );
 
 		/**
 		 * Filters the team billing details fields.
@@ -115,7 +116,7 @@ class Team_Billing_Details {
 			?>
 			<p class="billing-detail">
 				<strong><?php echo esc_html( $label ); ?></strong>
-				<?php echo $field; ?>
+				<?php echo $field; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</p>
 			<?php
 
@@ -185,7 +186,7 @@ class Team_Billing_Details {
 		$input .= ob_get_clean();
 
 		// toggle editing of product id link
-		wc_enqueue_js( '
+        Framework\Helpers\ScriptHelper::addInlinejQuery( 'woocommerce-memberships-for-teams-product-toggle', '
 			$( ".js-edit-product-link-toggle" ).on( "click", function( e ) { e.preventDefault(); $( ".wc-memberships-for-teams-edit-product-link-field" ).toggle(); } ).click();
 		' );
 
@@ -204,10 +205,9 @@ class Team_Billing_Details {
 	 * @param \WP_Post $post the post object
 	 */
 	public function save( $post_id, \WP_Post $post ) {
-		global $wpdb;
 
 		$team       = wc_memberships_for_teams_get_team( $post );
-		$product_id = $_POST['_product_id'];
+		$product_id = wc_clean( $_POST['_product_id'] );
 
 		if ( ! empty( $product_id ) ) {
 
@@ -218,8 +218,10 @@ class Team_Billing_Details {
 			}
 
 		} else {
+
 			$team->delete_product_id();
 		}
-
 	}
+
+
 }

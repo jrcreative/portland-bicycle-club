@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -26,11 +26,12 @@ defined( 'ABSPATH' ) or exit;
 /**
  * Team invitation email.
  *
- * @type string $email_heading email heading
- * @type \WC_Email $email email object
- * @type \SkyVerge\WooCommerce\Memberships\Teams\Invitation $invitation the invitation instance
+ * @var string $email_heading email heading
+ * @var \WC_Email $email email object
+ * @var \SkyVerge\WooCommerce\Memberships\Teams\Invitation $invitation the invitation instance
+ * @var string $additional_content optional additional user-defined content
  *
- * @version 1.1.2
+ * @version 1.5.4
  * @since 1.0.0
  */
 
@@ -43,7 +44,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	<?php printf(
 		/* translators: Placeholder: %s - membership plan name */
 		esc_html__( 'This will give you %s access.', 'woocommerce-memberships-for-teams' ),
-		$plan->get_name()
+		esc_html( $plan->get_name() )
 	); ?>
 </p>
 
@@ -58,21 +59,23 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 			if ( $current_team = wc_memberships_for_teams()->get_teams_handler_instance()->get_user_membership_team( $existing_membership->get_id() ) ) :
 
-				printf(
-					/* translators: Placeholders: %1$s - current team name, %2$s - membership plan name, %3$s - new team name to join */
-					esc_html__( 'You are a member of %1$s, which already gives you access to %2$s. Joining %3$s means you will leave your current team and your existing membership will be moved under new team management.' ),
+				echo esc_html( ucfirst( sprintf(
+					/* translators: Placeholders: %1$s - current team name, %2$s - membership plan name, %3$s - new team name to join, %4$s - the noun used to represent a team (singular) */
+					__( 'You are a member of %1$s, which already gives you access to %2$s. Joining %3$s means you will leave your current %4$s and your existing membership will be moved under new %4$s management.', 'woocommerce-memberships-for-teams' ),
 					$current_team->get_name(),
 					$team->get_plan()->get_name(),
-					$team->get_name()
-				);
+					$team->get_name(),
+					wc_memberships_for_teams()->get_singular_team_noun()
+				) ) );
 
 			else :
 
-				printf(
-					/* translators: Placeholder: %s - membership plan name */
-					esc_html__( 'Your existing %s membership will be moved under team management.', 'woocommerce-memberships-for-teams' ),
-					$plan->get_name()
-				);
+				echo esc_html( ucfirst( sprintf(
+					/* translators: Placeholders: %1$s - membership plan name, %2$s - the noun used to represent a team (singular) */
+					__( 'Your existing %1$s membership will be moved under %2$s management.', 'woocommerce-memberships-for-teams' ),
+					$plan->get_name(),
+					wc_memberships_for_teams()->get_singular_team_noun()
+				) ) );
 
 			endif;
 
@@ -89,13 +92,17 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <p>
 	<a class="link" href="<?php echo esc_url( $invitation->get_accept_url() ); ?>"><?php
-		printf(
+		echo esc_html( ucfirst( sprintf(
 			/* translators: Placeholder: %s - team name */
-			esc_html__( 'Click here to join %s', 'woocommerce-memberships-for-teams' ),
+			__( 'Click here to join %s', 'woocommerce-memberships-for-teams' ),
 			$team->get_name()
-	); ?></a>
+	) ) ); ?></a>
 </p>
 
 <?php
+
+if ( ! empty( $additional_content ) ) {
+	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
+}
 
 do_action( 'woocommerce_email_footer', $email );

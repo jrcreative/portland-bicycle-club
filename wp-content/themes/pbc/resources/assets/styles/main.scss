@@ -1,6 +1,8 @@
 $fa-font-path: "../libs/font-awesome/fonts/";
-@import "~slick-carousel/slick/slick";
-@import "~slick-carousel/slick/slick-theme";
+$slick-font-path: "~slick-carousel/slick/fonts/";
+$slick-loader-path: "~slick-carousel/slick/";
+@import "~slick-carousel/slick/slick.scss";
+@import "~slick-carousel/slick/slick-theme.scss";
 //@import "~font-awesome/scss/font-awesome";
 @import "~@fancyapps/fancybox/dist/jquery.fancybox.css";
 @import "settings";
@@ -8,6 +10,7 @@ $fa-font-path: "../libs/font-awesome/fonts/";
 @include foundation-everything(true);
 @include foundation-flex-classes;
 @include foundation-flex-grid;
+@import "~foundation-sites/scss/components/tabs";
 @import "woocommerce";
 @import "layout/header";
 @import "layout/footer";

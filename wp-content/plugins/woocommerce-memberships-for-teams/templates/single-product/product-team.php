@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -44,7 +44,14 @@ defined( 'ABSPATH' ) or exit;
 		if ( ! empty( $fields ) ) :
 			foreach ( $fields as $key => $field ) :
 
-				$value = isset( $_POST[ $key ] ) && ! empty( $_POST[ $key ] ) ? stripslashes( $_POST[ $key ] ) : null;
+				$value = isset( $_POST[ $key ] ) && ! empty( $_POST[ $key ] ) ? stripslashes( $_POST[ $key ] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				if (! empty( $value )) {
+					if ( 'textarea' === ( $field['type'] ?? null ) ) {
+						$value = sanitize_textarea_field( $value );
+					} else {
+						$value = wc_clean( $value );
+					}
+				}
 
 				woocommerce_form_field( $key, $field, $value );
 			endforeach;

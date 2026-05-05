@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Frontend;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 use SkyVerge\WooCommerce\Memberships\Teams\Product;
 
 defined( 'ABSPATH' ) or exit;
@@ -165,31 +165,32 @@ class Products {
 			if ( ! self::$add_variation_switch_scripts && $product->is_type( array( 'variable', 'product_variation' ) ) ) {
 
 				// note: a small delay is necessary as other scripts need to change the input's min/max attributes first, and our script needs to pull the updated information timely
-				wc_enqueue_js( "
-					jQuery( document ).ready( function( $ ) {
+                Framework\Helpers\ScriptHelper::addInlinejQuery( 'woocommerce-memberships-for-teams-product-options', "
+					( function( $ ) {
 
-						var timeout; 
+						var timeout;
 
 						$( 'form.variations_form .variations select, form.variations_form .variations input' ).on( 'change', function( e ) {
 
-							clearTimeout( timeout ); 
+							clearTimeout( timeout );
 
 							timeout = setTimeout( function() {
 
 								qty = $( '.woocommerce-variation-add-to-cart input[name=quantity]' );
-								min = qty.length > 0 ? parseInt( $( qty ).attr( 'min' ), 10 ) : false; 
+								min = qty.length > 0 ? parseInt( $( qty ).attr( 'min' ), 10 ) : false;
 								max = qty.length > 0 ? parseInt( $( qty ).attr( 'max' ), 10 ) : false;
 
-								if ( ! isNaN( min ) && $( qty ).val() < min ) { 
-									$( qty ).val( min ); 
-								} else if ( ! isNaN( max ) && $( qty ).val() > max ) { 
-									$( qty ).val( max ); 
+								if ( ! isNaN( min ) && $( qty ).val() < min ) {
+									$( qty ).val( min );
+								} else if ( ! isNaN( max ) && $( qty ).val() > max ) {
+									$( qty ).val( max );
 								}
 
 							}, 250 );
 
 						} ).change();
-					} );
+
+					} ) ( jQuery );
 				" );
 
 				self::$add_variation_switch_scripts = true;

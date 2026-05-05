@@ -1,0 +1,222 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+        default: ''
+        type: string
+
+jobs:
+  validate:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        if: ${{ github.event.inputs.confirm != 'deploy' }}
+        run: |
+          echo "❌ Deployment cancelled. You must type 'deploy' to confirm."
+          exit 1
+      
+      - name: Confirm branch
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: |
+          echo "❌ Production deployments must be from main branch"
+          exit 1
+
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+    needs: validate
+    environment:
+      name: production
+      url: https://portlandbicycleclub.com
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+
+      - name: Install and build pbc theme
+        run: |
+          cd wp-content/themes/pbc
+          
+          # Install dependencies (package.json now uses dart-sass)
+          yarn install
+          
+          # Build the theme
+          yarn build
+          
+          # Install PHP dependencies
+          composer install --no-dev --optimize-autoloader
+
+      - name: Clean up build artifacts and dev files
+        run: |
+          # Remove all node_modules from themes
+          find wp-content/themes -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
+          
+          # Remove development files from pbc theme
+          cd wp-content/themes/pbc
+          rm -rf resources/assets/build/
+          rm -rf resources/assets/config/
+          rm -rf .cache-loader/
+          rm -f .babelrc .eslintrc.js .stylelintrc.js
+          rm -f webpack.*.js gulpfile.js
+          rm -f package.json package-lock.json yarn.lock
+          rm -f composer.json composer.lock
+          rm -f phpunit.xml* .travis.yml
+          
+          # Show what we're deploying
+          echo "Production files prepared:"
+          ls -la dist/ || echo "No dist directory"
+          ls -la vendor/ || echo "No vendor directory"
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        env:
+          PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          if [ -z "$PROD_HOST" ]; then
+            echo "Error: PRODUCTION_SERVER_HOST secret is not set"
+            exit 1
+          fi
+          ssh-keyscan -p 2222 -H $PROD_HOST >> ~/.ssh/known_hosts 2>&1 || {
+            echo "Warning: ssh-keyscan failed, disabling strict host checking"
+            echo "Host *" >> ~/.ssh/config
+            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+            echo "  Port 2222" >> ~/.ssh/config
+          }
+
+      - name: Create backup on production
+        env:
+          PROD_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
+          PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
+        run: |
+          BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc wp-content/plugins --exclude='node_modules' --exclude='*.log' || mkdir -p ../backups && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc"
+          echo "Backup created: ${BACKUP_NAME}"
+
+      - name: Verify plugin vendor directories before deploy
+        run: |
+          echo "Verifying plugin vendor directories exist in git..."
+          ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/ || echo "❌ woocommerce-memberships-for-teams vendor missing!"
+          ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/action-scheduler/action-scheduler.php || echo "❌ action-scheduler.php missing!"
+          ls -la wp-content/plugins/woocommerce-memberships/vendor/ || echo "❌ woocommerce-memberships vendor missing!"
+          ls -la wp-content/plugins/simple-local-avatars/vendor/ || echo "❌ simple-local-avatars vendor missing!"
+          echo "✓ Vendor directories verified"
+
+      - name: Deploy to production via rsync
+        env:
+          PROD_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
+          PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
+        run: |
+          echo "Starting rsync deployment..."
+          echo "Plugin vendor directories that will be synced:"
+          find wp-content/plugins/*/vendor -type d -maxdepth 0 2>/dev/null || echo "No plugin vendor directories found"
+          
+          rsync -avz --delete -e "ssh -p 2222" \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='wp-content/themes/*/node_modules/' \
+            --exclude='wp-content/themes/*/resources/assets/' \
+            --exclude='wp-content/themes/*/tests/' \
+            --exclude='wp-content/themes/*/.cache-loader/' \
+            --exclude='wp-content/uploads/' \
+            --exclude='wp-content/cache/' \
+            --exclude='wp-content/backups/' \
+            --exclude='wp-content/backup-db/' \
+            --exclude='wp-content/wflogs/' \
+            --exclude='wp-config.php' \
+            --exclude='.env' \
+            --exclude='*.log' \
+            --exclude='.DS_Store' \
+            --exclude='Local Sites/' \
+            --exclude='wp-content/themes/*/package.json' \
+            --exclude='wp-content/themes/*/package-lock.json' \
+            --exclude='wp-content/themes/*/yarn.lock' \
+            --exclude='wp-content/themes/*/composer.json' \
+            --exclude='wp-content/themes/*/composer.lock' \
+            --exclude='wp-content/themes/*/webpack.*.js' \
+            --exclude='wp-content/themes/*/gulpfile.js' \
+            --exclude='wp-content/themes/*/.eslintrc*' \
+            --exclude='wp-content/themes/*/.stylelintrc*' \
+            --exclude='wp-content/themes/*/.babelrc*' \
+            --exclude='wp-content/themes/*/phpunit.xml*' \
+            --exclude='wp-content/themes/*/.travis.yml' \
+            ./ ${PROD_USER}@${PROD_HOST}:${PROD_PATH}
+          
+          echo "✓ Rsync completed"
+
+      - name: Clear WordPress cache
+        env:
+          PROD_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
+          PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
+        run: |
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && [ -f wp-cli.phar ] && php wp-cli.phar cache flush || echo 'WP-CLI not found, skipping cache flush'"
+
+      - name: Verify deployment
+        env:
+          PROD_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
+          PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
+        run: |
+          echo "Verifying theme deployment..."
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH}/wp-content/themes/pbc && ls -la"
+          
+          echo "Verifying vendor directories on production server..."
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "
+            cd ${PROD_PATH}
+            echo 'Checking for action-scheduler.php...'
+            if [ -f wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/action-scheduler/action-scheduler.php ]; then
+              echo '✓ action-scheduler.php exists on production'
+            else
+              echo '❌ action-scheduler.php missing on production!'
+              exit 1
+            fi
+            
+            echo 'Checking vendor directory structure...'
+            ls -la wp-content/plugins/woocommerce-memberships-for-teams/vendor/woocommerce/ || echo 'Vendor directory missing or empty'
+          "
+
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ **Production deployment successful!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Deployed to: \`${{ secrets.PRODUCTION_SERVER_HOST }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Backup created on server" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Production deployment failed!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please check the logs above for error details." >> $GITHUB_STEP_SUMMARY
+          fi

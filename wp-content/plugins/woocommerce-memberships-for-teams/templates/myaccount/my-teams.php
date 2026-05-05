@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -95,7 +95,7 @@ global $post;
 								<td class="team-created-date" data-title="<?php echo esc_attr( $column_name ); ?>">
 									<?php $created_time = $team->get_local_date( 'timestamp' ); ?>
 									<?php if ( ! empty( $created_time ) && is_numeric( $created_time ) ) : ?>
-										<time datetime="<?php echo date( 'Y-m-d', $created_time ); ?>" title="<?php echo esc_attr( date_i18n( wc_date_format(), $created_time ) ); ?>"><?php echo date_i18n( wc_date_format(), $created_time ); ?></time>
+										<time datetime="<?php echo esc_attr( date( 'Y-m-d', $created_time ) ); ?>" title="<?php echo esc_attr( date_i18n( wc_date_format(), $created_time ) ); ?>"><?php echo esc_html( date_i18n( wc_date_format(), $created_time ) ); ?></time>
 									<?php else : ?>
 										<?php esc_html_e( 'N/A', 'woocommerce-memberships-for-teams' ); ?>
 									<?php endif; ?>
@@ -109,9 +109,9 @@ global $post;
 									$used_seat_count = $team->get_used_seat_count();
 
 									if ( $seat_count = $team->get_seat_count() ) {
-										printf( esc_html__( '%1$d of %2$s seats', 'woocommerce-memberships-for-teams' ), $used_seat_count, $seat_count );
+										printf( esc_html__( '%1$d of %2$s seats', 'woocommerce-memberships-for-teams' ), esc_html( $used_seat_count ), esc_html( $seat_count ) );
 									} else {
-										printf( esc_html__( '%d of unlimited seats', 'woocommerce-memberships-for-teams' ), $used_seat_count );
+										printf( esc_html__( '%d of unlimited seats', 'woocommerce-memberships-for-teams' ), esc_html( $used_seat_count ) );
 									}
 
 									?>
@@ -132,7 +132,7 @@ global $post;
 
 								?>
 								<td class="team-actions order-actions" data-title="<?php echo esc_attr( $column_name ); ?>">
-									<?php echo $teams_area->get_action_links( 'teams', $team ); ?>
+									<?php echo $teams_area->get_action_links( 'teams', $team ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</td>
 
 							<?php else : ?>
@@ -174,7 +174,7 @@ global $post;
 			 * @param string $no_teams_text the text displayed to users without team ownerships
 			 * @param int $user_id the current user
 			 */
-			echo (string) apply_filters( 'wc_memberships_for_teams_my_teams_no_teams_text', __( "Looks like you don't have any teams yet!", 'woocommerce-memberships-for-teams' ), get_current_user_id() );
+			echo wp_kses_post( (string) apply_filters( 'wc_memberships_for_teams_my_teams_no_teams_text', esc_html__( "Looks like you don't have any teams yet!", 'woocommerce-memberships-for-teams' ), get_current_user_id() ) );
 
 			?>
 		</p>

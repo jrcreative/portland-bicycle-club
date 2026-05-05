@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -57,7 +57,7 @@ $teams_area_sections = $teams_area->get_teams_area_navigation_items( $team );
 	<nav class="woocommerce-MyAccount-navigation wc-memberships-for-teams-teams-area-navigation">
 		<ul>
 			<?php foreach ( $teams_area_sections as $section_id => $section_data ) : ?>
-				<li class="<?php echo wc_get_account_menu_item_classes( $section_id ) . ' ' . $section_data['class']; ?>">
+				<li class="<?php echo esc_attr( wc_get_account_menu_item_classes( $section_id ) . ' ' . $section_data['class'] ); ?>">
 					<a href="<?php echo esc_url( $section_data['url'] ); ?>"><?php echo esc_html( $section_data['label'] ); ?></a>
 				</li>
 			<?php endforeach; ?>

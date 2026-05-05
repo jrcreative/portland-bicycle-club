@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "woocommerce-box-office/scan-ticket",
+  "version": "0.1.0",
+  "title": "Scan Ticket",
+  "category": "woocommerce-box-office",
+  "icon": "tickets-alt",
+  "description": "WooCommerce Box Office block to scan a ticket or mark a ticket as attended.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {},
+  "textdomain": "woocommerce-box-office",
+  "editorScript": "file:./index.js"
+}

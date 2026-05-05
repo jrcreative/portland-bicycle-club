@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -75,14 +75,14 @@ class Team_Members {
 
 		$action = str_replace( 'admin_action_team_', '', current_action() );
 		$team   = wc_memberships_for_teams_get_team( $id );
-		$users  = ! empty( $_REQUEST['users'] ) ? (array) $_REQUEST['users'] : array();
+		$users  = ! empty( $_REQUEST['users'] ) ? (array) wc_clean( $_REQUEST['users'] ) : array();
 
 		if ( ! $team ) {
 			return;
 		}
 
 		if ( empty( $users ) ) {
-			wp_redirect( wp_get_referer() );
+			wp_safe_redirect( wp_get_referer() );
 			exit;
 		}
 
@@ -139,7 +139,7 @@ class Team_Members {
 			break;
 		}
 
-		wp_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() );
 		exit;
 	}
 
@@ -160,7 +160,7 @@ class Team_Members {
 		// get the post
 		$id      = isset( $_REQUEST['post'] ) ? absint( $_REQUEST['post'] ) : '';
 		$team    = wc_memberships_for_teams_get_team( $id );
-		$user_id = ! empty( $_REQUEST['user'] ) ? $_REQUEST['user'] : null;
+		$user_id = ! empty( $_REQUEST['user'] ) ? wc_clean( $_REQUEST['user'] ) : null;
 
 		if ( ! $user_id || ! $team ) {
 			return;
@@ -255,7 +255,7 @@ class Team_Members {
 			break;
 		}
 
-		wp_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() );
 		exit;
 	}
 

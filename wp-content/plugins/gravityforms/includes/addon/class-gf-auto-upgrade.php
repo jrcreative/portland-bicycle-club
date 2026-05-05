@@ -141,7 +141,7 @@ class GFAutoUpgrade {
 			'plugin'      => $this->_path,
 			'url'         => $this->_url,
 			'slug'        => $this->_slug,
-			'package'     => str_replace( '{KEY}', $key, $version_info['url'] ),
+			'package'     => $version_info['url'] ? str_replace( '{KEY}', $key, $version_info['url'] ) : '',
 			'new_version' => $version_info['version'],
 			'id'          => '0',
 		);
@@ -190,13 +190,12 @@ class GFAutoUpgrade {
 			'Content-Type'   => 'application/x-www-form-urlencoded; charset=' . get_option( 'blog_charset' ),
 			'Content-Length' => strlen( $body ),
 			'User-Agent'     => 'WordPress/' . get_bloginfo( 'version' ),
-			'Referer'        => get_bloginfo( 'url' ),
 		);
 
 		$raw_response = GFCommon::post_to_manager( 'changelog.php', $this->get_remote_request_params( $this->_slug, $key, $this->_version ), $options );
 
 		if ( is_wp_error( $raw_response ) || 200 != $raw_response['response']['code'] ) {
-			$text = sprintf( esc_html__( 'Oops!! Something went wrong.%sPlease try again or %scontact us%s.', 'gravityforms' ), '<br/>', "<a href='https://www.gravityforms.com/support/'>", '</a>' );
+			$text = sprintf( esc_html__( 'Oops!! Something went wrong.%sPlease try again or %scontact us%s.', 'gravityforms' ), '<br/>', "<a href='" . esc_attr( GFCommon::get_support_url() ). "'>", '</a>' );
 		} else {
 			$text = $raw_response['body'];
 			if ( substr( $text, 0, 10 ) != '<!--GFM-->' ) {
@@ -220,7 +219,7 @@ class GFAutoUpgrade {
 	private function get_remote_request_params( $offering, $key, $version ) {
 		global $wpdb;
 
-		return sprintf( 'of=%s&key=%s&v=%s&wp=%s&php=%s&mysql=%s', urlencode( $offering ), urlencode( $key ), urlencode( $version ), urlencode( get_bloginfo( 'version' ) ), urlencode( phpversion() ), urlencode( $wpdb->db_version() ) );
+		return sprintf( 'of=%s&key=%s&v=%s&wp=%s&php=%s&mysql=%s', urlencode( $offering ), urlencode( $key ), urlencode( $version ), urlencode( get_bloginfo( 'version' ) ), urlencode( phpversion() ), urlencode( GFCommon::get_db_version() ) );
 	}
 
 	private function get_key() {

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "woocommerce-box-office/order-tickets",
+  "version": "0.1.0",
+  "title": "Order Tickets",
+  "category": "woocommerce-box-office",
+  "icon": "tickets-alt",
+  "description": "WooCommerce Box Office block to display tickets by order ID.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "orderId": {
+      "type": "number",
+      "default": 0
+    },
+    "format": {
+      "type": "string",
+      "default": "flat"
+    },
+    "numberOfTickets": {
+      "type": "number",
+      "default": -1
+    }
+  },
+  "textdomain": "woocommerce-box-office",
+  "editorScript": "file:./index.js"
+}

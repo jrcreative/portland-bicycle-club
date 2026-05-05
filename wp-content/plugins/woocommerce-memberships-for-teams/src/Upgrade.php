@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -38,6 +38,24 @@ class Upgrade extends Framework\Plugin\Lifecycle {
 
 
 	/**
+	 * Lifecycle constructor.
+	 *
+	 * @since 1.1.4
+	 *
+	 * @param Plugin $plugin
+	 */
+	public function __construct( $plugin ) {
+
+		parent::__construct( $plugin );
+
+		$this->upgrade_versions = [
+			'1.0.2',
+			'1.3.0',
+		];
+	}
+
+
+	/**
 	 * Handles plugin activation.
 	 *
 	 * @internal
@@ -47,6 +65,8 @@ class Upgrade extends Framework\Plugin\Lifecycle {
 	public function activate() {
 
 		$this->get_plugin()->add_rewrite_endpoints();
+
+		flush_rewrite_rules();
 	}
 
 
@@ -64,22 +84,6 @@ class Upgrade extends Framework\Plugin\Lifecycle {
 
 
 	/**
-	 * Runs updates.
-	 *
-	 * TODO remove this deprecated method by version 2.0.0 or by May 2020, whichever comes first {FN 2018-01-14}
-	 *
-	 * @since 1.0.2
-	 * @deprecated since 1.1.2
-	 *
-	 * @param string $installed_version semver
-	 */
-	public static function run_update_scripts( $installed_version ) {
-
-		_deprecated_function( 'SkyVerge\WooCommerce\Memberships\Teams\Upgrade::run_update_scripts()', '1.1.1' );
-	}
-
-
-	/**
 	 * Runs plugin upgrade scripts.
 	 *
 	 * @since 1.1.2
@@ -88,63 +92,86 @@ class Upgrade extends Framework\Plugin\Lifecycle {
 	 */
 	protected function upgrade( $installed_version ) {
 
-		if ( ! empty( $installed_version ) ) {
-
-			$update_path = array(
-				'1.0.2' => 'update_to_1_0_2',
-			);
-
-			foreach ( $update_path as $update_to_version => $update_script ) {
-
-				if ( version_compare ( $installed_version, $update_to_version, '<' ) ) {
-
-					$this->$update_script();
-
-					$this->get_plugin()->log( sprintf( 'Updated to version %s', $update_to_version ) );
-				}
-			}
-		}
+		parent::upgrade( $installed_version );
 
 		$this->get_plugin()->add_rewrite_endpoints();
+
+		flush_rewrite_rules();
 	}
 
 
 	/**
 	 * Updates to v1.0.2
 	 *
-	 * @since 1.0.2
+	 * @since 1.1.4
 	 */
-	private function update_to_1_0_2() {
+	protected function upgrade_to_1_0_2() {
 		global $wpdb;
 
-		// Before 1.0.1, team subscription items were missing the purchased team id, which caused a duplicate team
-		// being created when the subscription renewed. The issue was fixed in 1.0.1, but no automatic way to fix
-		// existing subscriptions was provided.
-		// This update tries to resolve the issue for team subscriptions created before 1.0.1 as follows:
-		// 1. Find all subscription items with a team name, but missing a team id
-		// 2. Look up the team id from the parent order's order item, matching on the team name
-		// 3. Add team id as subscription item meta
-		$order_items = $wpdb->get_results( "
-			SELECT oi1.order_item_id AS id, oim3.meta_value AS team_id
-			FROM {$wpdb->posts} p
-			JOIN {$wpdb->posts} p2 ON ( p2.ID = p.post_parent AND p2.post_type = 'shop_order' )
-			JOIN {$wpdb->prefix}woocommerce_order_items oi1 ON p.ID = oi1.order_id 
-			JOIN {$wpdb->prefix}woocommerce_order_items oi2 ON p2.ID = oi2.order_id 
-			JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim1 ON ( oim1.order_item_id = oi1.order_item_id AND oim1.meta_key = 'team_name' )
-			JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim2 ON ( oim2.order_item_id = oi2.order_item_id AND oim2.meta_key = 'team_name' AND oim2.meta_value = oim1.meta_value )
-			JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim3 ON ( oim3.order_item_id = oi2.order_item_id AND oim3.meta_key = '_wc_memberships_for_teams_team_id' )
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim4 ON ( oim4.order_item_id = oi1.order_item_id AND oim4.meta_key = '_wc_memberships_for_teams_team_id' )
-			WHERE p.post_type = 'shop_subscription'
-			AND oim4.order_item_id IS NULL
-		" );
+		/**
+		 * Before v1.0.1, team subscription items were missing the purchased team id, which caused a duplicate team being created when the subscription renewed.
+		 * The issue was fixed in v1.0.1, but no automatic way to fix existing subscriptions was provided.
+		 *
+		 * This update tries to resolve the issue for team subscriptions created before 1.0.1 as follows:
+		 *
+		 *  1. Find all subscription items with a team name, but missing a team id
+		 *  2. Look up the team id from the parent order's order item, matching on the team name
+		 *  3. Add team id as subscription item meta
+		 */
+		$orders_table = Framework\SV_WC_Order_Compatibility::get_orders_table();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		if ( Framework\SV_WC_Plugin_Compatibility::is_hpos_enabled() ) {
+			$order_items  = $wpdb->get_results( "
+				SELECT oi1.order_item_id AS id, oim3.meta_value AS team_id
+				FROM {$orders_table} o
+				JOIN {$orders_table} o2 ON ( o2.id = o.parent_order_id AND o2.type = 'shop_order' )
+				JOIN {$wpdb->prefix}woocommerce_order_items oi1 ON o.id = oi1.order_id
+				JOIN {$wpdb->prefix}woocommerce_order_items oi2 ON o.id = oi2.order_id
+				JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim1 ON ( oim1.order_item_id = oi1.order_item_id AND oim1.meta_key = 'team_name' )
+				JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim2 ON ( oim2.order_item_id = oi2.order_item_id AND oim2.meta_key = 'team_name' AND oim2.meta_value = oim1.meta_value )
+				JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim3 ON ( oim3.order_item_id = oi2.order_item_id AND oim3.meta_key = '_wc_memberships_for_teams_team_id' )
+				LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim4 ON ( oim4.order_item_id = oi1.order_item_id AND oim4.meta_key = '_wc_memberships_for_teams_team_id' )
+				WHERE o.type = 'shop_subscription'
+				AND oim4.order_item_id IS NULL
+			" );
+		} else {
+			$order_items = $wpdb->get_results( "
+				SELECT oi1.order_item_id AS id, oim3.meta_value AS team_id
+				FROM {$wpdb->posts} p
+				JOIN {$wpdb->posts} p2 ON ( p2.ID = p.post_parent AND p2.post_type = 'shop_order' )
+				JOIN {$wpdb->prefix}woocommerce_order_items oi1 ON p.ID = oi1.order_id
+				JOIN {$wpdb->prefix}woocommerce_order_items oi2 ON p2.ID = oi2.order_id
+				JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim1 ON ( oim1.order_item_id = oi1.order_item_id AND oim1.meta_key = 'team_name' )
+				JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim2 ON ( oim2.order_item_id = oi2.order_item_id AND oim2.meta_key = 'team_name' AND oim2.meta_value = oim1.meta_value )
+				JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim3 ON ( oim3.order_item_id = oi2.order_item_id AND oim3.meta_key = '_wc_memberships_for_teams_team_id' )
+				LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim4 ON ( oim4.order_item_id = oi1.order_item_id AND oim4.meta_key = '_wc_memberships_for_teams_team_id' )
+				WHERE p.post_type = 'shop_subscription'
+				AND oim4.order_item_id IS NULL
+			" );
+		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( empty( $order_items ) ) {
 			return;
 		}
 
 		foreach( $order_items as $order_item ) {
-			wc_update_order_item_meta( $order_item->id, '_wc_memberships_for_teams_team_id', $order_item->team_id );
+			try {
+				wc_update_order_item_meta( $order_item->id, '_wc_memberships_for_teams_team_id', $order_item->team_id );
+			} catch ( \Exception $e ) {}
 		}
+	}
+
+
+	/**
+	 * Updates to v1.3.0
+	 *
+	 * @since 1.3.0
+	 */
+	protected function upgrade_to_1_3_0() {
+
+		update_option( 'wc_memberships_for_teams_show_teams_terminology_notice', 'yes' );
 	}
 
 

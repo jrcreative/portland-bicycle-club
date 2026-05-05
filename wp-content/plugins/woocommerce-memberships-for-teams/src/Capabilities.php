@@ -17,22 +17,23 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
-defined( 'ABSPATH' ) or exit;
+defined('ABSPATH') or exit;
 
 /**
  * Capabilities class
  *
  * @since 1.0.0
  */
-class Capabilities {
+class Capabilities
+{
 
 
 	/**
@@ -40,17 +41,16 @@ class Capabilities {
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 
 		// adjust user capabilities
-		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 ); // 1 step later than Memberships to prevent conflicts with cancel/renew caps
+		add_filter('user_has_cap', array($this, 'user_has_cap'), 10, 3); // 1 step later than Memberships to prevent conflicts with cancel/renew caps
 	}
 
 
 	/**
 	 * Checks if a user has a certain capability.
-	 *
-	 * @internal
 	 *
 	 * @since 1.0.0
 	 *
@@ -58,14 +58,17 @@ class Capabilities {
 	 * @param array $caps capabilities
 	 * @param array $args capability arguments
 	 * @return array all capabilities
+	 * @internal
+	 *
 	 */
-	public function user_has_cap( $all_caps, $caps, $args ) {
+	public function user_has_cap($all_caps, $caps, $args)
+	{
 		global $pagenow, $typenow;
 
-		if ( ! empty( $caps ) ) {
-			foreach ( $caps as $cap ) {
+		if (!empty($caps)) {
+			foreach ($caps as $cap) {
 
-				switch ( $cap ) {
+				switch ($cap) {
 
 					// only owners can adjust seats on teams, renew team memberships, or manage team settings:
 					case 'wc_memberships_for_teams_update_team_seats':
@@ -73,133 +76,185 @@ class Capabilities {
 					case 'wc_memberships_for_teams_manage_team_settings':
 
 						$user_id = (int) $args[1];
-						$team    = $this->get_team_from_args( $args );
+						$team = $this->get_team_from_args($args);
 
-						if ( $user_id && $team && $team->is_user_owner( $user_id ) ) {
-							$all_caps[ $cap ] = true;
+						if ($user_id && $team && $team->is_user_owner($user_id)) {
+							$all_caps[$cap] = true;
 						}
 
-					break;
+						break;
 
 					// owners and managers can manage team and its members
 					case 'wc_memberships_for_teams_manage_team':
 					case 'wc_memberships_for_teams_manage_team_members':
 
 						$user_id = (int) $args[1];
-						$team    = $this->get_team_from_args( $args );
-						$member  = wc_memberships_for_teams_get_team_member( $team, $user_id );
+						$team = $this->get_team_from_args($args);
+						$member = wc_memberships_for_teams_get_team_member($team, $user_id);
 
 						// users cannot manage their own roles in team
-						if ( $user_id && $team && ( $team->is_user_owner( $user_id ) || ( $member && $member->has_role( 'manager' ) ) ) ) {
-							$all_caps[ $cap ] = true;
+						if ($user_id && $team && ($team->is_user_owner($user_id) || ($member && $member->has_role('manager')))) {
+							$all_caps[$cap] = true;
 						}
 
-					break;
+						break;
+
+					// owners may always promote team members to managers; other managers may do it if the settings allow
+					case 'wc_memberships_for_teams_promote_team_member':
+
+						$user_id = (int) $args[1];
+						$team = $this->get_team_from_args($args);
+						$member = wc_memberships_for_teams_get_team_member($team, $user_id);
+						$other_member_id = (int) $args[3];
+						$other_member = $other_member_id ? wc_memberships_for_teams_get_team_member($team, $other_member_id) : null;
+						$is_owner = $team->is_user_owner($user_id);
+						$is_manger = $member && $member->has_role('manager');
+
+						// not an owner, and not a manager
+						if (!$is_owner && !$is_manger) {
+							break;
+						}
+
+						// they are a manger, but the settings do not allow promoting members to managers
+						if ($is_manger && 'yes' !== get_option('wc_memberships_for_teams_managers_may_manage_managers', 'yes')) {
+							break;
+						}
+
+						$all_caps[$cap] = true;
+
+						break;
 
 					// owners and managers can manage team members, but not themselves
 					case 'wc_memberships_for_teams_manage_team_member':
 
-						$user_id         = (int) $args[1];
-						$team            = $this->get_team_from_args( $args );
-						$member          = wc_memberships_for_teams_get_team_member( $team, $user_id );
+						$user_id = (int) $args[1];
+						$team = $this->get_team_from_args($args);
+						$member = wc_memberships_for_teams_get_team_member($team, $user_id);
 						$other_member_id = (int) $args[3];
-						$other_member    = $other_member_id ? wc_memberships_for_teams_get_team_member( $team, $other_member_id ) : null;
+						$other_member = $other_member_id ? wc_memberships_for_teams_get_team_member($team, $other_member_id) : null;
+						$is_owner = $team->is_user_owner($user_id);
 
 						// only owners and managers can manage team members
-						if ( $user_id && $other_member_id && $team && ( $team->is_user_owner( $user_id ) || ( $member && $member->has_role( 'manager' ) ) ) ) {
+						if ($user_id && $other_member_id && $team && ($is_owner || ($member && $member->has_role('manager')))) {
 
 							// users cannot manage themselves, though
-							if ( $user_id === $other_member_id ) {
+							if ($user_id === $other_member_id) {
 								break;
 							}
 
-							// check if able to manage another manager
-							if ( $other_member && $other_member->has_role( 'manager' ) && 'yes' !== get_option( 'wc_memberships_for_teams_managers_may_manage_managers', 'yes' ) ) {
+							// check if a manager (but not the owner) is able to manage another manager
+							if (!$is_owner && $other_member && $other_member->has_role('manager') && 'yes' !== get_option('wc_memberships_for_teams_managers_may_manage_managers', 'yes')) {
 								break;
 							}
 
 							// ...and managers cannot manage owners
-							if ( $member && $member->has_role( 'manager' ) && $team->is_user_owner( $other_member_id ) ) {
+							if ($member && $member->has_role('manager') && $team->is_user_owner($other_member_id)) {
 								break;
 							}
 
-							$all_caps[ $cap ] = true;
+							$all_caps[$cap] = true;
 						}
 
-					break;
+						break;
 
 					// owners and managers can remove team members, but manager cannot remove themselves
 					case 'wc_memberships_for_teams_remove_team_member':
 
 						// short-circuit if member removal is disabled
-						if ( 'no' === get_option( 'wc_memberships_for_teams_allow_removing_members', 'yes' ) ) {
+						if ('no' === get_option('wc_memberships_for_teams_allow_removing_members', 'yes')) {
 							break;
 						}
 
-						$user_id         = (int) $args[1];
-						$team            = $this->get_team_from_args( $args );
-						$member          = wc_memberships_for_teams_get_team_member( $team, $user_id );
+						$user_id = (int) $args[1];
+						$team = $this->get_team_from_args($args);
+						$member = wc_memberships_for_teams_get_team_member($team, $user_id);
 						$other_member_id = (int) $args[3];
-						$other_member    = $other_member_id ? wc_memberships_for_teams_get_team_member( $team, $other_member_id ) : null;
-						$is_owner        = $team->is_user_owner( $user_id );
+						$other_member = $other_member_id ? wc_memberships_for_teams_get_team_member($team, $other_member_id) : null;
+						$is_owner = $team->is_user_owner($user_id);
 
 						// only owners and managers can remove team members
-						if ( $user_id && $other_member_id && $team && ( $is_owner || ( $member && $member->has_role( 'manager' ) ) ) ) {
+						if ($user_id && $other_member_id && $team && ($is_owner || ($member && $member->has_role('manager')))) {
 
 							// users cannot remove themselves, though, unless an owner and they don't need to take up a seat
-							if ( $user_id === $other_member_id && ( ! $is_owner || ( $is_owner && 'yes' === get_option( 'wc_memberships_for_teams_owners_must_take_seat' ) ) ) ) {
+							if ($user_id === $other_member_id && (!$is_owner || ($is_owner && 'yes' === get_option('wc_memberships_for_teams_owners_must_take_seat')))) {
 								break;
 							}
 
-							// check if able to manage another manager
-							if ( $other_member && $other_member->has_role( 'manager' ) && 'yes' !== get_option( 'wc_memberships_for_teams_managers_may_manage_managers', 'yes' ) ) {
+							// check if a manager (but not the owner) is able to manage another manager
+							if (!$is_owner && $other_member && $other_member->has_role('manager') && 'yes' !== get_option('wc_memberships_for_teams_managers_may_manage_managers', 'yes')) {
 								break;
 							}
 
 							// ...and managers cannot remove owners
-							if ( $member && $member->has_role( 'manager' ) && $team->is_user_owner( $other_member_id ) ) {
+							if ($member && $member->has_role('manager') && $team->is_user_owner($other_member_id)) {
 								break;
 							}
 
-							$all_caps[ $cap ] = true;
+							$all_caps[$cap] = true;
 						}
 
-					break;
+						break;
+
+					// eLearning progress reports are only available for enabled roles
+					case 'wc_memberships_for_teams_view_learner_progress_reports' :
+
+						$roles = get_option('wc_memberships_for_teams_learner_progress_reports_viewers', []) ?: [];
+						$roles = is_array($roles) ? $roles : (array) $roles;
+
+						// short-circuit if no roles have been enabled
+						if (empty($roles)) {
+							break;
+						}
+
+						$user_id = (int) $args[1];
+						$team = $this->get_team_from_args($args);
+						$member = wc_memberships_for_teams_get_team_member($team, $user_id);
+						$is_owner = $team->is_user_owner($user_id);
+
+						if (!$member && ! $is_owner) {
+							break;
+						}
+
+						if ((in_array('owner', $roles, true) && $is_owner) || (in_array('manager', $roles, true) && $member && $member->has_role('manager'))) {
+							$all_caps[$cap] = true;
+						}
+
+						break;
 
 					// prevent deleting teams with active members
 					case 'delete_published_memberships_team' :
 					case 'delete_published_memberships_teams' :
 
 						// this workaround (*hack*, *cough*) allows displaying the trash/delete link on teams list table even if the team has active members
-						if ( 'edit.php' === $pagenow && 'wc_memberships_team' === $typenow && empty( $_POST ) && is_admin() ) {
+						if ('edit.php' === $pagenow && 'wc_memberships_team' === $typenow && empty($_POST) && is_admin()) {
 							break;
 						}
 
-						$team = $this->get_team_from_args( $args );
+						$team = $this->get_team_from_args($args);
 
-						if ( $team->has_active_members() ) {
-							$all_caps[ $cap ] = false;
+						if ($team->has_active_members()) {
+							$all_caps[$cap] = false;
 						}
 
-					break;
+						break;
 
 					// prevent cancelling or renewing team-based user memberships
 					case 'wc_memberships_cancel_membership' :
 					case 'wc_memberships_renew_membership' :
 
-						if ( ! empty( $all_caps[ $cap ] ) ) {
+						if (!empty($all_caps[$cap])) {
 
-							$user_id            = (int) $args[1];
+							$user_id = (int) $args[1];
 							$user_membership_id = (int) $args[2];
-							$user_membership    = wc_memberships_get_user_membership( $user_membership_id );
-							$team_id            = wc_memberships_for_teams_get_user_membership_team_id( $user_membership_id );
+							$user_membership = wc_memberships_get_user_membership($user_membership_id);
+							$team_id = wc_memberships_for_teams_get_user_membership_team_id($user_membership_id);
 
-							if ( $team_id && $user_membership ) {
-								$all_caps[ $cap ] = false;
+							if ($team_id && $user_membership) {
+								$all_caps[$cap] = false;
 							}
 						}
 
-					break;
+						break;
 				}
 			}
 		}
@@ -216,8 +271,9 @@ class Capabilities {
 	 * @param array $args an array of arguments passed to 'user_has_cap'
 	 * @return \SkyVerge\WooCommerce\Memberships\Teams\Team|false
 	 */
-	private function get_team_from_args( $args ) {
-		return ( $args[2] instanceof Team ) ? $args[2] : wc_memberships_for_teams_get_team( $args[2] );
+	private function get_team_from_args($args)
+	{
+		return ($args[2] instanceof Team) ? $args[2] : wc_memberships_for_teams_get_team($args[2]);
 	}
 
 }

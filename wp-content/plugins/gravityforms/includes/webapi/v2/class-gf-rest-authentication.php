@@ -61,7 +61,7 @@ class GF_REST_Authentication {
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'authentication_fallback' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 99 );
-		add_filter( 'rest_pre_dispatch', array( $this, 'check_user_permissions' ), 10, 3 );
+		add_filter( 'rest_pre_dispatch', array( $this, 'check_user_permissions' ), 99, 3 );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
 
 	}
@@ -198,13 +198,16 @@ class GF_REST_Authentication {
 	 * @return WP_Error|null|bool
 	 */
 	public function check_authentication_error( $error ) {
-		if ( ! $this->is_request_to_rest_api() ) {
-			// Pass through other errors.
+		if ( ! $this->is_request_to_rest_api() || $_SERVER['REQUEST_METHOD'] === 'OPTIONS' ) {
+			// Pass through OPTIONS requests or those to non-GF endpoints.
 			return $error;
 		}
 
 		$error = $this->get_error();
 		if ( empty( $error ) ) {
+			// rest_handle_options_request() will be called by $this->check_user_permissions().
+			remove_filter( 'rest_pre_dispatch', 'rest_handle_options_request' );
+
 			// Indicate auth succeeded.
 			return true;
 		}
@@ -816,22 +819,25 @@ class GF_REST_Authentication {
 	 * @return mixed
 	 */
 	public function check_user_permissions( $result, $server, $request ) {
-		if ( $this->user ) {
-			$this->log_debug( sprintf( '%s(): Running for user #%d.', __METHOD__, $this->user->user_id ) );
-			// Check API Key permissions.
-			$allowed = $this->check_permissions( $request->get_method() );
-			if ( is_wp_error( $allowed ) ) {
-				$this->log_error( __METHOD__ . '(): ' . print_r( $allowed, true ) );
-
-				return $allowed;
-			}
-
-			// Register last access.
-			$this->update_last_access();
-			$this->log_debug( __METHOD__ . '(): Permissions valid.' );
+		if ( ! $this->user ) {
+			return $result;
 		}
 
-		return $result;
+		$this->log_debug( sprintf( '%s(): Running for user #%d.', __METHOD__, $this->user->user_id ) );
+
+		// Check API Key permissions.
+		$allowed = $this->check_permissions( $request->get_method() );
+		if ( is_wp_error( $allowed ) ) {
+			$this->log_error( __METHOD__ . '(): ' . print_r( $allowed, true ) );
+
+			return $allowed;
+		}
+
+		// Register last access.
+		$this->update_last_access();
+		$this->log_debug( __METHOD__ . '(): Permissions valid.' );
+
+		return rest_handle_options_request( null, $server, $request );
 	}
 
 

@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -37,3 +37,4 @@ function wc_memberships_for_teams() {
 require_once( __DIR__ . '/Functions/Teams.php' );
 require_once( __DIR__ . '/Functions/Team_Members.php' );
 require_once( __DIR__ . '/Functions/Invitations.php' );
+require_once( __DIR__ . '/Functions/Courseware.php' );

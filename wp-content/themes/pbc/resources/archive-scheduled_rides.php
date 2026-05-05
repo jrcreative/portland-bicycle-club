@@ -2,18 +2,16 @@
 require_once __DIR__ . '/../app/bootstrap.php';
 
 use Timber\Timber;
-use Timber\PostQuery;
 
 /** @var $timber Timber */
-/** @var $timber Timber */
-//$timber = $container->get('timber');
 $context = Timber::context();
 
 // get timezone
 $timezone = new \DateTimeZone(pwtc_get_timezone_string());
 
-$today = new DateTime(null, $timezone);
+$today = new DateTime('now', $timezone);
 $context['today'] = $today->format('n/d/Y g:i A');
+$context['timezone'] = $timezone;
 
 // time for a little magic
 // note that current date is refering to the selected month not the current date.
@@ -21,7 +19,8 @@ $context['today'] = $today->format('n/d/Y g:i A');
 
 $daily_view = false;
 if (isset($_GET['view']) && $_GET['view']) {
-    if ($_GET['view'] == 'daily') {
+    $view = sanitize_text_field($_GET['view']);
+    if ($view === 'daily') {
         $daily_view = true;
     }
 }
@@ -32,8 +31,9 @@ if ($daily_view) {
     // get current date (use WP 'current_time' function to return local time instead of UTC time)
     $current_datetime = new DateTime(date('Y-m-d', current_time('timestamp')), $timezone);
     if (isset($_GET['date']) && $_GET['date']) {
-        $valid_date = DateTime::createFromFormat('Y-m-d', $_GET['date']);
-        if ($valid_date) {
+        $date_input = sanitize_text_field($_GET['date']);
+        $valid_date = DateTime::createFromFormat('Y-m-d', $date_input);
+        if ($valid_date && $valid_date->format('Y-m-d') === $date_input) {
             $current_datetime = $valid_date;
         }
     }
@@ -90,7 +90,7 @@ if ($daily_view) {
         $locations[$location]['events'][] = [
             'title' => get_the_title(),
             'link' => get_the_permalink(),
-            'time' => DateTime::createFromFormat('Y-m-d H:i:s', get_field('date'))->getTimestamp(),
+            'time' => DateTime::createFromFormat('Y-m-d H:i:s', get_field('date'), $timezone)->getTimestamp(),
             'is_canceled' => get_field('is_canceled')
         ];
     }
@@ -110,8 +110,9 @@ if ($daily_view) {
     $current_datetime = new DateTime(date('Y-m-01', current_time('timestamp')), $timezone);
     $context['invalid_date'] = false;
     if (isset($_GET['month']) && $_GET['month']) {
-        $valid_date = DateTime::createFromFormat('Y-m-d', $_GET['month'] . '-01');
-        if (!$valid_date) {
+        $month_input = sanitize_text_field($_GET['month']);
+        $valid_date = DateTime::createFromFormat('Y-m-d', $month_input . '-01');
+        if (!$valid_date || $valid_date->format('Y-m') !== $month_input) {
             $context['invalid_date'] = true;
         } else {
             $current_datetime = $valid_date;
@@ -119,7 +120,7 @@ if ($daily_view) {
     }
 
     // get current time
-    $now_datetime = new DateTime(null, $timezone);
+    $now_datetime = new DateTime('now', $timezone);
 
     // get the first and last days of the selected month so we can get the previous/next month by adding or subtracting one day
     // using months would add/suntract 31 days which would cause issues for february
@@ -181,99 +182,64 @@ if ($daily_view) {
         'orderby' => ['date' => 'ASC'],
     ];
     // search term
-    if (isset($_GET['title'])) {
-        $context['args']['s'] = $query_args['s'] = $_GET['title'];
+    if (isset($_GET['title']) && $_GET['title']) {
+        $search_term = sanitize_text_field($_GET['title']);
+        $context['args']['s'] = $query_args['s'] = $search_term;
     }
     // search terrain
-    if (isset($_GET['terrain'])) {
-        switch ($_GET['terrain']) {
-            case 'a':
-            case 'b':
-            case 'c':
-            case 'd':
-            case 'e':
-                $context['args']['terrain'] = $_GET['terrain'];
-                $query_args['meta_query'][] = [
-                    'key' => 'terrain',
-                    'value' => '"' . $_GET['terrain'] . '"',
-                    'compare' => 'LIKE',
-                ];
-                break;
-            default:
-                ;
-                break;
+    if (isset($_GET['terrain']) && $_GET['terrain']) {
+        $terrain = sanitize_text_field($_GET['terrain']);
+        $valid_terrains = ['a', 'b', 'c', 'd', 'e'];
+        if (in_array($terrain, $valid_terrains, true)) {
+            $context['args']['terrain'] = $terrain;
+            $query_args['meta_query'][] = [
+                'key' => 'terrain',
+                'value' => '"' . $terrain . '"',
+                'compare' => 'LIKE',
+            ];
         }
     }
     // search speed
-    if (isset($_GET['speed'])) {
-        switch ($_GET['speed']) {
-            case 'slow':
-            case 'leisurely':
-            case 'moderate':
-            case 'fast':
-                $context['args']['speed'] = $_GET['speed'];
-                $query_args['meta_query'][] = [
-                    'key' => 'pace',
-                    'value' => $_GET['speed'],
-                    'compare' => '=',
-                ];
-                break;
-            default:
-                ;
-                break;
+    if (isset($_GET['speed']) && $_GET['speed']) {
+        $speed = sanitize_text_field($_GET['speed']);
+        $valid_speeds = ['slow', 'leisurely', 'moderate', 'fast'];
+        if (in_array($speed, $valid_speeds, true)) {
+            $context['args']['speed'] = $speed;
+            $query_args['meta_query'][] = [
+                'key' => 'pace',
+                'value' => $speed,
+                'compare' => '=',
+            ];
         }
     }
     // search length
-    if (isset($_GET['length'])) {
-        switch ($_GET['length']) {
-            case 1:
-                $context['args']['length'] = $_GET['length'];
-                $query_args['meta_query'][] = [
-                    'key' => 'length',
-                    'value' => [0, 25],
-                    'type' => 'NUMERIC',
-                    'compare' => 'BETWEEN',
-                ];
-                break;
-            case 2:
-                $context['args']['length'] = $_GET['length'];
-                $query_args['meta_query'][] = [
-                    'key' => 'length',
-                    'value' => [25, 50],
-                    'type' => 'NUMERIC',
-                    'compare' => 'BETWEEN',
-                ];
-                break;
-            case 3:
-                $context['args']['length'] = $_GET['length'];
-                $query_args['meta_query'][] = [
-                    'key' => 'length',
-                    'value' => [50, 75],
-                    'type' => 'NUMERIC',
-                    'compare' => 'BETWEEN',
-                ];
-                break;
-            case 4:
-                $context['args']['length'] = $_GET['length'];
-                $query_args['meta_query'][] = [
-                    'key' => 'length',
-                    'value' => [75, 100],
-                    'type' => 'NUMERIC',
-                    'compare' => 'BETWEEN',
-                ];
-                break;
-            case 5:
-                $context['args']['length'] = $_GET['length'];
-                $query_args['meta_query'][] = [
-                    'key' => 'length',
-                    'value' => 100,
-                    'type' => 'NUMERIC',
-                    'compare' => '>',
-                ];
-                break;
-            default:
-                ;
-                break;
+    if (isset($_GET['length']) && $_GET['length']) {
+        $length = intval($_GET['length']);
+        // Map filter values to length ranges (in miles)
+        $length_ranges = [
+            1 => ['min' => 0, 'max' => 2, 'compare' => 'BETWEEN'],
+            2 => ['min' => 2, 'max' => 5, 'compare' => 'BETWEEN'],
+            3 => ['min' => 5, 'max' => 10, 'compare' => 'BETWEEN'],
+            4 => ['min' => 10, 'max' => null, 'compare' => '>'],
+        ];
+        
+        if (isset($length_ranges[$length])) {
+            $range = $length_ranges[$length];
+            $context['args']['length'] = $length;
+            
+            $meta_query = [
+                'key' => 'length',
+                'type' => 'NUMERIC',
+                'compare' => $range['compare'],
+            ];
+            
+            if ($range['compare'] === 'BETWEEN') {
+                $meta_query['value'] = [$range['min'], $range['max']];
+            } else {
+                $meta_query['value'] = $range['min'];
+            }
+            
+            $query_args['meta_query'][] = $meta_query;
         }
     }
     // fill scheduled rides array with results
@@ -281,7 +247,7 @@ if ($daily_view) {
     $scheduled_rides = [];
     while ($query->have_posts()) {
         $query->the_post();
-        $datetime = DateTime::createFromFormat('Y-m-d H:i:s', get_field('date'));
+        $datetime = DateTime::createFromFormat('Y-m-d H:i:s', get_field('date'), $timezone);
         $date = $datetime->format('Y-m-d');
         if (!isset($scheduled_rides[$date])) {
             $scheduled_rides[$date] = [];
@@ -290,7 +256,6 @@ if ($daily_view) {
             'title' => get_the_title(),
             'link' => get_the_permalink(),
             'date' => $datetime->getTimestamp(),
-            'time' => $datetime->getTimestamp(),
             'is_canceled' => get_field('is_canceled'),
         ];
     }

@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -99,7 +99,7 @@ class Membership_Plans {
 
 					<p class="form-field plan-team-products-field">
 						<label><?php esc_html_e( 'Team products', 'woocommerce-memberships-for-teams' ); ?></label>
-						<span class="team-products"><?php echo $product_links; ?></span>
+						<span class="team-products"><?php echo $product_links; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 					</p>
 
 				<?php endif; ?>
@@ -116,19 +116,16 @@ class Membership_Plans {
 				$team_access_note = '<br /><em><small>' . esc_html__( 'Default access method options are disabled because this plan has at least one team product associated.', 'woocommerce-memberships-for-teams' ) . '<small></em>';
 
 				// given this is a team membership plan, disable other access methods options unless team products are removed and leave a note
-				wc_enqueue_js( "
-					jQuery( document ).ready( function( $ ) {
-
-						$( 'input.js-access-method-type' ).each( function() {
-							if ( 'purchase' !== $( this ).val() ) {
-								$( this ).attr( 'disabled', 'disabled' );
-							} else {
-								$( this ).attr( 'checked', 'checked' );
-							}
-						} );
-
-						$( '.plan-access-method-selectors' ).after( '" . $team_access_note . "' ); 
+                Framework\Helpers\ScriptHelper::addInlinejQuery( 'woocommerce-memberships-for-teams-options', "
+					$( 'input.js-access-method-type' ).each( function() {
+						if ( 'purchase' !== $( this ).val() ) {
+							$( this ).attr( 'disabled', 'disabled' );
+						} else {
+							$( this ).attr( 'checked', 'checked' );
+						}
 					} );
+
+					$( '.plan-access-method-selectors' ).after( '" . $team_access_note . "' );
 				" );
 
 				?>
@@ -171,7 +168,7 @@ class Membership_Plans {
 				if ( ! empty( $shared_products ) ) {
 
 					wc_memberships_for_teams()->get_message_handler()->add_message(
-						__( 'It looks like that this plan has at least one product that is both a team product and a product that can grant access to individual customers that complete a purchase. They will become team owners and plan members at the same time. Please make sure that this is intentional.', 'woocommerce-memberships' )
+						__( 'It looks like that this plan has at least one product that is both a team product and a product that can grant access to individual customers that complete a purchase. They will become team owners and plan members at the same time. Please make sure that this is intentional.', 'woocommerce-memberships-for-teams' )
 					);
 				}
 			}
@@ -210,7 +207,7 @@ class Membership_Plans {
 						foreach ( $products as $product ) :
 
 							$product_link      = $this->get_edit_product_link( $product );
-							$product_link_html = sprintf( '<li>%1$s%2$s</li>', $product_link, ' <small>(' . strtolower( __( 'Team', 'woocommerce-memberships-for-teams' ) ) . ')</small>' );
+							$product_link_html = sprintf( '<li>%1$s%2$s</li>', $product_link, ' <small>(' . strtolower( esc_html__( 'Team', 'woocommerce-memberships-for-teams' ) ) . ')</small>' );
 
 							/**
 							 * Filters the team product link appearing on a membership plan column.
@@ -222,7 +219,7 @@ class Membership_Plans {
 							 * @param \WC_Product $product the product object
 							 * @param \WC_Memberships_Membership_Plan the plan object
 							 */
-							echo (string) apply_filters( 'wc_memberships_for_teams_membership_plan_column_team_product_link', $product_link_html, $product_link, $product, $membership_plan );
+							echo wp_kses_post( (string) apply_filters( 'wc_memberships_for_teams_membership_plan_column_team_product_link', $product_link_html, $product_link, $product, $membership_plan ) );
 
 						endforeach;
 

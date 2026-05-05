@@ -17,13 +17,14 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Emails;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\Memberships\Teams\Team;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -36,7 +37,6 @@ defined( 'ABSPATH' ) or exit;
  */
 class Membership_Renewal_Reminder extends Membership_Email {
 
-
 	/**
 	 * Sets up the invitation email class.
 	 */
@@ -48,9 +48,7 @@ class Membership_Renewal_Reminder extends Membership_Email {
 		$this->title          = __( 'Team membership renewal reminder', 'woocommerce-memberships-for-teams' );
 
 		/* translators: Placeholders: %1$s - <strong> tag, %2$s - </strong> tag */
-		$description  =  sprintf( __( 'Team membership renewal reminder emails are sent to team owners inviting them to renew their membership. %1$sRenewal reminders are not sent for non-renewable team memberships, such as registration-based or admin-assign only memberships%2$s.', 'woocommerce-memberships-for-teams' ), '<strong>', '</strong>' );
-
-		$this->description    = $description;
+		$this->description    = sprintf( __( 'Team membership renewal reminder emails are sent to team owners inviting them to renew their membership. %1$sRenewal reminders are not sent for non-renewable team memberships, such as registration-based or admin-assign only memberships%2$s.', 'woocommerce-memberships-for-teams' ), '<strong>', '</strong>' );
 		$this->subject        = __( 'Renew {team_name} membership on {site_title}!', 'woocommerce-memberships-for-teams');
 		$this->heading        = __( 'You can renew your {membership_plan} for {team_name}', 'woocommerce-memberships-for-teams');
 
@@ -86,6 +84,5 @@ class Membership_Renewal_Reminder extends Membership_Email {
 
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 	}
-
 
 }

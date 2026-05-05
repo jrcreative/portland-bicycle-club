@@ -2,14 +2,8 @@
 require_once __DIR__.'/../app/bootstrap.php';
 use Timber\Timber;
 
-/** @var $timber Timber */
-/** @var $timber Timber */
-//$timber = $container->get('timber');
-
 $context            = Timber::context();
-ob_start();
-dynamic_sidebar('shop-sidebar');
-$context['sidebar'] = ob_get_clean();
+$context['sidebar'] = Timber::get_widgets('shop-sidebar');
 
 if (is_singular('product')) {
     $context['post']    = Timber::get_post();
@@ -17,6 +11,12 @@ if (is_singular('product')) {
     $context['product'] = $product;
 
     Timber::render('pages/single-product.html.twig', $context);
+} elseif (is_cart() || is_checkout() || is_account_page()) {
+    // Handle WooCommerce shortcode pages (cart, checkout, my-account)
+    $context['post'] = Timber::get_post();
+    $context['title'] = get_the_title();
+    
+    Timber::render('pages/woocommerce-page.html.twig', $context);
 } else {
     $posts = Timber::get_posts();
     $context['products'] = $posts;

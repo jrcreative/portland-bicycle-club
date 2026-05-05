@@ -6,6 +6,12 @@ use Timber\Timber;
 $context = Timber::context();
 $template = 'base.html.twig';
 
+// Handle WooCommerce pages first
+if (function_exists('is_woocommerce') && (is_woocommerce() || is_cart() || is_checkout() || is_account_page())) {
+    include __DIR__.'/resources/woocommerce.php';
+    return;
+}
+
 if(is_404()) {
     $context['post'] = Timber::get_post();
     $template = 'pages/404.html.twig';
@@ -45,7 +51,8 @@ if(is_singular())
             }
             elseif(get_row_layout() == "rides")
             {
-                $today = new DateTime('now', new DateTimeZone(pwtc_get_timezone_string()));
+                $timezone = new DateTimeZone(pwtc_get_timezone_string());
+                $today = new DateTime('now', $timezone);
                 $later = clone $today;
                 $later->add(new DateInterval('P2D'));
                 $rides_query = new WP_Query([
@@ -64,7 +71,7 @@ if(is_singular())
                 $rides_data = [];
                 while($rides_query->have_posts()){
                     $rides_query->the_post();
-                    $datetime = DateTime::createFromFormat('Y-m-d H:i:s', get_field('date'));
+                    $datetime = DateTime::createFromFormat('Y-m-d H:i:s', get_field('date'), $timezone);
                     $date = $datetime->format('Y-m-d');
                     if(!isset($rides_data[$date])){
                         $rides_data[$date] = [];

@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -68,6 +68,9 @@ class Teams_Handler {
 		add_action( 'wc_memberships_for_teams_team_membership_expiry',           array( $this, 'trigger_expiration_events' ), 10, 1 );
 		add_action( 'wc_memberships_for_teams_team_membership_expiring_soon',    array( $this, 'trigger_expiration_events' ), 10, 1 );
 		add_action( 'wc_memberships_for_teams_team_membership_renewal_reminder', array( $this, 'trigger_expiration_events' ), 10, 1 );
+
+		// prevent membership renewal under certain circumstances
+		add_filter('wc_memberships_existing_membership_for_potential_renewal', [$this, 'maybePreventMembershipRenewals'], 10, 4);
 	}
 
 
@@ -278,7 +281,9 @@ class Teams_Handler {
 
 
 	/**
-	 * Triggers `wc_memberships_for_teams_team_saved` when a team is created or updated.
+	 * Updates owner user roles.
+	 *
+	 * Triggers `wc_memberships_for_teams_team_saved` action hook when a team is created or updated.
 	 *
 	 * @internal
 	 *
@@ -291,6 +296,8 @@ class Teams_Handler {
 	public function save_team( $post_id, $post, $update ) {
 
 		if ( 'wc_memberships_team' === get_post_type( $post ) && ( $team = $this->get_team( $post ) ) ) {
+
+			$team->update_owner_roles();
 
 			/**
 			 * Fires after a team post has been saved.
@@ -402,8 +409,12 @@ class Teams_Handler {
 			'nopaging' => true,
 		) );
 
+        if (array_key_exists('status', $args) && ! is_array($args['status'])) {
+            $args['status'] = [$args['status']];
+        }
+
 		// add the wcm- prefix for the status if it's not "any"
-		foreach ( (array) $args['status'] as $index => $status ) {
+        foreach ( $args['status'] as $index => $status ) {
 
 			if ( 'any' !== $status ) {
 				$args['post_status'][ $index ] = 'wcm-' . $status;
@@ -550,6 +561,28 @@ class Teams_Handler {
 			case 'wc_user_membership':
 				$this->handle_user_membership_deletion( $post_id );
 			break;
+		}
+	}
+
+
+	/**
+	 * Deletes a team by ID.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $teamId team (post) ID
+	 * @throws Framework\SV_WC_Plugin_Exception if the team is not found or could not be deleted
+	 */
+	public function deleteTeam(int $teamId) : void
+	{
+		if (! $this->get_team($teamId)) {
+			throw new Framework\SV_WC_Plugin_Exception(__('Team not found.', 'woocommerce-memberships-for-teams'));
+		}
+
+		$deleted = wp_delete_post($teamId, true);
+
+		if (! $deleted) {
+			throw new Framework\SV_WC_Plugin_Exception(__('Team could not be deleted.', 'woocommerce-memberships-for-teams'));
 		}
 	}
 
@@ -736,6 +769,47 @@ class Teams_Handler {
 				$emails_instance->send_membership_renewal_reminder_email( $team_id );
 			}
 		}
+	}
+
+	/**
+	 * This modifies the "existing membership" that might be renewed after an order is placed. Our goal here is to
+	 * prevent the renewal of a membership under certain circumstances.
+	 *
+	 * @param ?WC_Memberships_User_Membership|mixed $existingMembership
+	 * @param int|mixed $userId
+	 * @param int|mixed $planId
+	 * @param int|mixed $productId
+	 *
+	 * @return ?WC_Memberships_User_Membership|mixed
+	 */
+	public function maybePreventMembershipRenewals($existingMembership, $userId, $planId, $productId)
+	{
+		if (! $existingMembership) {
+			return $existingMembership;
+		}
+
+		// if the existing membership is not via a team then that's fine and we can let defaults work their magic
+		$team = $this->get_user_membership_team($existingMembership);
+		if (! $team) {
+			return $existingMembership;
+		}
+
+		/*
+		 * We should NOT allow a renewal if the team's associated product does not match the new product that was purchased.
+		 * Example use case:
+		 * "Membership Plan A" is granted access after purchasing either "Team Product A" or "Regular Product A" (only
+		 * the former of which is a team membership; the latter is not).
+		 * Someone purchases Team Product A, which creates a team. Later, their team membership expires. They now want
+		 * their own individual membership for "Membership Plan A", so they purchase "Regular Product A". The default
+		 * behaviour would identify their old, expired team membership as an `$existingMembership` and would renew that
+		 * instead. We want to prevent that from happening, and instead force Memberships into creating an entirely
+		 * new membership plan.
+		 */
+		if ($team->get_product_id() != $productId) {
+			return null;
+		}
+
+		return $existingMembership;
 	}
 
 

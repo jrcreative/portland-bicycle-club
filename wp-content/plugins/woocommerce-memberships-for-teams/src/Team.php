@@ -17,13 +17,14 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\Memberships\Teams\Teams\Adapters\JsonSerializers\TeamSerializer;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -32,7 +33,7 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 1.0.0
  */
-class Team {
+class Team implements \SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\JsonSerializable {
 
 
 	/** @var int team (post) ID */
@@ -245,16 +246,17 @@ class Team {
 	 * @since 1.0.1
 	 *
 	 * @param string $name new team name
+	 * @param bool $force whether to force the name change. default false.
 	 */
-	public function set_name( $name ) {
+	public function set_name( $name, $force = false ) {
 
 		$name = (string) $name;
 
-		if ( $this->get_name() !== $name ) {
-			wp_update_post( array(
+		if ( $force || $this->get_name() !== $name ) {
+			wp_update_post( [
 				'ID'         => $this->get_id(),
-				'post_title' => sanitize_title( $name ),
-			) );
+				'post_title' => sanitize_text_field( $name ),
+			] );
 		}
 	}
 
@@ -428,6 +430,36 @@ class Team {
 		return ! empty( $date ) ? wc_memberships_adjust_date_by_timezone( $date, $format ) : null;
 	}
 
+	/**
+	 * Returns the team membership end date in local timezone. The context for this method is specifically for new member
+	 * invites, where we don't want to use the {@see static::get_local_membership_end_date()} but want to use the _plan_
+	 * expiration date, as that's what the member will actually get after being added.
+	 *
+	 * In short: this calculates the end date from today, using the plan settings.
+	 *
+	 * @param \WC_Memberships_User_Membership|null $existingUserMembership
+	 * @return string|null
+	 */
+	public function getLocalMembershipEndDateForNewInvite(?\WC_Memberships_User_Membership $existingUserMembership = null) : ?string
+	{
+		$endDate = $this->get_plan()->get_expiration_date();
+		if (! $endDate) {
+			return null;
+		}
+
+		$endDate = strtotime($endDate);
+		if (! $endDate) {
+			return null;
+		}
+
+		// if the user has an existing membership with a later end date, use that
+		if ($existingUserMembership && $existingUserMembership->get_end_date('timestamp') > $endDate) {
+			$endDate = $existingUserMembership->get_end_date('timestamp');
+		}
+
+		return wc_memberships_adjust_date_by_timezone($endDate, 'timestamp');
+	}
+
 
 	/**
 	 * Checks whether the team membership is expired or not.
@@ -495,7 +527,7 @@ class Team {
 			$args['meta_query'] = array(
 				array(
 					'key'   => $this->user_team_role_meta,
-					'value' => $role
+					'value' => $role,
 				),
 			);
 		}
@@ -861,7 +893,26 @@ class Team {
 
 		// ensure there's a free seat available for the member
 		if ( $seat_count > 0 && $used_seat_count >= $seat_count ) {
-			throw new Framework\SV_WC_Plugin_Exception( __( 'No more seats left', 'woocommerce-memberships-for-teams' ) );
+
+			if ( get_current_user_id() !== $this->get_owner_id() ) {
+				$no_seats_left_message = __( 'Oops, this team is full! Please contact the team owner for assistance.', 'woocommerce-memberships-for-teams' );
+			} else {
+				$no_seats_left_message = __( 'No more seats left', 'woocommerce-memberships-for-teams' );
+			}
+
+			/**
+			 * Filters the no more seats left error message when adding a team member.
+			 *
+			 * @since 1.4.4
+			 *
+			 * @param string $no_seats_left_message error message
+			 * @param Team $team the team the member is being added to
+			 * @param int $user_id the ID of the user to add
+			 * @param string $role the added member role
+			 */
+			$no_seats_left_message = apply_filters( 'wc_memberships_for_teams_add_team_member_no_more_seats_left_error_message', $no_seats_left_message, $this, $user_id, $role );
+
+			throw new Framework\SV_WC_Plugin_Exception( $no_seats_left_message );
 		}
 
 		if ( $this->is_user_owner( $user_id ) ) {
@@ -947,7 +998,13 @@ class Team {
 		// store a reference to the team on the user membership
 		update_post_meta( $user_membership->id, '_team_id', $this->id );
 
-		$member = wc_memberships_for_teams_get_team_member( $this, $user_id );
+		$member     = wc_memberships_for_teams_get_team_member( $this, $user_id );
+		$invitation = $member ? $this->get_invitation( $member->get_email() ) : null;
+
+		// sanity check in case an invitation for a newly added user couldn't be resolved while registering
+		if ( $invitation && 'pending' === $invitation->get_status() ) {
+			$invitation->accept( $member->get_user(), false );
+		}
 
 		/**
 		 * Fires after a member is added to a team.
@@ -961,6 +1018,33 @@ class Team {
 		do_action( 'wc_memberships_for_teams_add_team_member', $member, $this, $user_membership );
 
 		return $member;
+	}
+
+
+	/**
+	 * Sets the user roles so the 'owner' role matches the post author.
+	 *
+	 * Called when a team is saved.
+	 * @see \SkyVerge\WooCommerce\Memberships\Teams\Teams_Handler::save_team()
+	 *
+	 * @since 1.6.1
+	 */
+	public function update_owner_roles() {
+
+		foreach ( $this->get_member_ids() as $member_id ) {
+
+			$role = get_user_meta( $member_id, $this->user_team_role_meta, true );
+
+			// downgrade the user if they're no longer an owner
+			if ( 'owner' === $role && $this->get_owner_id() !== $member_id ) {
+				update_user_meta( $member_id, $this->user_team_role_meta, 'member' );
+			}
+
+			// upgrade the user if they've become an owner
+			if ( 'owner' !== $role && $this->get_owner_id() === $member_id ) {
+				update_user_meta($member_id, $this->user_team_role_meta, 'owner');
+			}
+		}
 	}
 
 
@@ -1359,11 +1443,11 @@ class Team {
 				array(
 					'key'     => '_team_id',
 					'value'   => $this->id,
-					'compare' => '!='
+					'compare' => '!=',
 				),
 				array(
 					'key'     => '_team_id',
-					'compare' => 'NOT EXISTS'
+					'compare' => 'NOT EXISTS',
 				),
 			),
 		);
@@ -1380,32 +1464,29 @@ class Team {
 	 *
 	 * @since 1.0.0
 	 */
-	public function unschedule_expiration_events() {
-
-		$hook_args = array( 'team_id' => $this->id );
-
+	public function unschedule_expiration_events() : void
+	{
 		// set a post meta to use as a lock to ensure all events are unscheduled before scheduling new ones
-		if ( ! get_post_meta( $this->id, $this->locked_meta, true ) ) {
-			add_post_meta( $this->id, $this->locked_meta, true, true );
+		if (! get_post_meta($this->id, $this->locked_meta, true)) {
+			add_post_meta($this->id, $this->locked_meta, true, true);
 		}
 
-		// unschedule any previous expiry hooks
-		if ( as_next_scheduled_action( 'wc_memberships_for_teams_team_membership_expiry', $hook_args, 'woocommerce-memberships-for-teams'  ) ) {
-			as_unschedule_action( 'wc_memberships_for_teams_team_membership_expiry', $hook_args, 'woocommerce-memberships-for-teams' );
-		}
+		$events = [
+			'wc_memberships_for_teams_team_membership_expiry',
+			'wc_memberships_for_teams_team_membership_expiring_soon',
+			'wc_memberships_for_teams_team_membership_renewal_reminder',
+		];
 
-		// unschedule any previous expiring soon hooks
-		if ( as_next_scheduled_action( 'wc_memberships_for_teams_team_membership_expiring_soon', $hook_args, 'woocommerce-memberships-for-teams' ) ) {
-			as_unschedule_action( 'wc_memberships_for_teams_team_membership_expiring_soon', $hook_args, 'woocommerce-memberships-for-teams' );
-		}
+		foreach ($events as $eventName) {
+			$eventData = $this->getScheduledTeamEventData($eventName);
 
-		// unschedule any previous renewal reminder hooks
-		if ( as_next_scheduled_action( 'wc_memberships_for_teams_team_membership_renewal_reminder', $hook_args, 'woocommerce-memberships-for-teams' ) ) {
-			as_unschedule_action( 'wc_memberships_for_teams_team_membership_renewal_reminder', $hook_args, 'woocommerce-memberships-for-teams' );
+			if (as_next_scheduled_action($eventName, $eventData, 'woocommerce-memberships-for-teams')) {
+				as_unschedule_action($eventName, $eventData, 'woocommerce-memberships-for-teams');
+			}
 		}
 
 		// remove the lock
-		delete_post_meta( $this->id, $this->locked_meta );
+		delete_post_meta($this->id, $this->locked_meta);
 	}
 
 
@@ -1437,27 +1518,134 @@ class Team {
 		// schedule team membership expiration hooks, provided there's an end date and it's after the beginning of today's date
 		if ( is_numeric( $end_timestamp ) && (int) $end_timestamp > strtotime( 'today', $now ) ) {
 
-			$hook_args = array( 'team_id' => $this->id );
-
 			// Schedule the membership expiration event:
-			as_schedule_single_action( $end_timestamp, 'wc_memberships_for_teams_team_membership_expiry', $hook_args, 'woocommerce-memberships-for-teams' );
+			$this->scheduleTeamEvent($end_timestamp, 'wc_memberships_for_teams_team_membership_expiry');
 
 			// Schedule the membership ending soon event:
-			$days_before_expiry = $this->get_expiring_soon_time_before( $end_timestamp );
+			$this->scheduleExpiringSoonEvent($end_timestamp, $now);
 
-			if ( $end_timestamp - $days_before_expiry >= DAY_IN_SECONDS ) {
-
-				if ( $days_before_expiry > $now ) {
-					// if there's at least one day before the expiry date, use the email setting (days before)
-					as_schedule_single_action( $days_before_expiry, 'wc_memberships_for_teams_team_membership_expiring_soon', $hook_args, 'woocommerce-memberships-for-teams' );
-				} elseif ( $end_timestamp > $now && $median_time = absint( ( $now + $end_timestamp ) / 2 ) ) {
-					// if it's less than one day, schedule as a median time between now and the effective end date (in the course of the last remaining day)
-					as_schedule_single_action( $median_time, 'wc_memberships_for_teams_team_membership_expiring_soon', $hook_args, 'woocommerce-memberships-for-teams' );
-				}
-			}
+			// Schedule the membership renewal reminder event:
+			$this->scheduleRenewalReminderEvent($end_timestamp, $now);
 		}
 	}
 
+	/**
+	 * Gets event data to use as hook argument for the scheduled event.
+	 *
+	 * @param string $event
+	 *
+	 * @return array
+	 */
+	protected function getScheduledTeamEventData(string $event) : array
+	{
+		/**
+		 * Filters scheduled team event data.
+		 *
+		 * @since 1.7.5
+		 *
+		 * @param array $data associative array of event data
+		 * @param string $event event hook name
+		 *
+		 * @return array
+		 */
+		return (array) apply_filters(
+			'wc_memberships_for_teams_scheduled_team_event_data',
+			['team_id' => $this->id],
+			$event
+		);
+	}
+
+	/**
+	 * @param int $timestamp When the event will fire
+	 * @param string $eventName
+	 *
+	 * @return string The scheduled event job ID
+	 */
+	protected function scheduleTeamEvent(int $timestamp, string $eventName) : string
+	{
+		return as_schedule_single_action(
+			$timestamp,
+			$eventName,
+			$this->getScheduledTeamEventData($eventName),
+			'woocommerce-memberships-for-teams'
+		);
+	}
+
+	/**
+	 * Schedule team membership expiring soon reminder events.
+	 *
+	 * @param int $endTimestamp
+	 * @param int|null $now
+	 * @return ?string
+	 */
+	protected function scheduleExpiringSoonEvent(int $endTimestamp, ?int $now = null) : ?string
+	{
+		$now ??= current_time('timestamp', true);
+		$eventName = 'wc_memberships_for_teams_team_membership_expiring_soon';
+		$daysBeforeExpiry = $this->getExpiringReminderTimeBefore($endTimestamp);
+
+		if ($endTimestamp - $daysBeforeExpiry < DAY_IN_SECONDS) {
+			return null;
+		}
+
+		if ($daysBeforeExpiry > $now) {
+			// if there's at least one day before the expiry date, use the email setting (days before)
+			return $this->scheduleTeamEvent($daysBeforeExpiry, $eventName);
+		}
+
+		if ($endTimestamp > $now && $medianTime = absint(($now + $endTimestamp) / 2)) {
+			// if it's less than one day, schedule as a median time between now and the effective end date (in the course of the last remaining day)
+			return $this->scheduleTeamEvent($medianTime, $eventName);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Schedule team membership renewal reminder events.
+	 *
+	 * @param int $endTimestamp
+	 * @param int|null $now
+	 * @return ?string
+	 */
+	protected function scheduleRenewalReminderEvent(int $endTimestamp, ?int $now = null) : ?string
+	{
+		$now ??= current_time('timestamp', true);
+		$eventName = 'wc_memberships_for_teams_team_membership_renewal_reminder';
+		$daysAfterExpiry = $this->getExpiringReminderTimeAfter($endTimestamp);
+
+		if ($endTimestamp + $daysAfterExpiry < DAY_IN_SECONDS) {
+			return null;
+		}
+
+		if ($daysAfterExpiry > $now) {
+			// if there's at least one day after the expiry date
+			return $this->scheduleTeamEvent($daysAfterExpiry, $eventName);
+		}
+
+		if ($endTimestamp > $now && $medianTime = absint(($now + $endTimestamp) / 2)) {
+			// if it's less than one day, schedule as a median time between now and the effective end date (in the course of the last remaining day)
+			return $this->scheduleTeamEvent($medianTime, $eventName);
+		}
+
+		return null;
+	}
+
+	private function getConfiguredDaysBeforeExpiry() : int
+	{
+		$daysBefore = absint(wc_memberships()->get_user_memberships_instance()->get_ending_soon_days());
+
+		// at least 1 day before
+		return max(1, $daysBefore);
+	}
+
+	private function getConfiguredDaysAfterExpiry() : int
+	{
+		$daysAfter = absint(wc_memberships()->get_user_memberships_instance()->get_renewal_reminder_days());
+
+		// at least 1 day after
+		return max(1, $daysAfter);
+	}
 
 	/**
 	 * Returns the timestamp for days before expiry date.
@@ -1466,29 +1654,29 @@ class Team {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $expiry_date timestamp when the membership expires
+	 * @param int $expiryTimestamp timestamp when the membership expires
 	 * @return int timestamp
 	 */
-	private function get_expiring_soon_time_before( $expiry_date ) {
+	private function getExpiringReminderTimeBefore(int $expiryTimestamp) : int
+	{
+		$timeBefore = $expiryTimestamp - ($this->getConfiguredDaysBeforeExpiry() * DAY_IN_SECONDS);
 
-		// the email that stores the setting
-		$email = 'wc_memberships_for_teams_team_membership_ending_soon';
+		// sanity check: the future can't be in the past :)
+		return $timeBefore > current_time('timestamp', true) ? $timeBefore : $expiryTimestamp - DAY_IN_SECONDS;
+	}
 
-		/** @see \WC_Memberships_User_Membership_Ending_Soon_Email */
-		$email_setting = get_option( "woocommerce_{$email}_settings" );
+	/**
+	 * Returns the timestamp for days after expiry date.
+	 *
+	 * @param int $expiryTimestamp timestamp when the membership expires
+	 * @return int timestamp
+	 */
+	private function getExpiringReminderTimeAfter(int $expiryTimestamp) : int
+	{
+		$timeAfter = $expiryTimestamp + ($this->getConfiguredDaysAfterExpiry() * DAY_IN_SECONDS);
 
-		if (    $email_setting
-			 && isset( $email_setting['send_days_before'] )
-			 && $days_before = absint( $email_setting['send_days_before'] ) ) {
-
-			$time_before = $expiry_date - ( max( 1, $days_before ) * DAY_IN_SECONDS );
-
-			// sanity check: the future can't be in the past :)
-			return $time_before > current_time( 'timestamp', true ) ? $time_before : $expiry_date - DAY_IN_SECONDS;
-		}
-
-		// default value (3 days before)
-		return $expiry_date - ( 3 * DAY_IN_SECONDS );
+		// sanity check: the future can't be in the past :)
+		return $timeAfter > current_time('timestamp', true) ? $timeAfter : $expiryTimestamp + DAY_IN_SECONDS;
 	}
 
 
@@ -1793,7 +1981,7 @@ class Team {
 		 * @param bool $can_add_seats whether seats can be added
 		 * @param Team $this the Team object
 		 */
-		return apply_filters( 'wc_memberships_for_teams_team_can_add_seats', $can_add_seats, $this );
+		return (bool) apply_filters( 'wc_memberships_for_teams_team_can_add_seats', $can_add_seats, $this );
 	}
 
 
@@ -1927,15 +2115,29 @@ class Team {
 
 
 	/**
-	 * Validates team management status.
+	 * Returns a JSON-serializable representation of this team.
 	 *
-	 * TODO remove this deprecated method by version 2.0.0 or by March 2020, whichever comes first {FN 2019-03-13}
+	 * @since 1.8.0
 	 *
-	 * @since 1.0.0
-	 * @deprecated since 1.1.3
+	 * @return array<string, mixed>
 	 */
-	public function validate_management_status() {
-		_deprecated_function( __METHOD__, '1.1.3' );
+	#[\ReturnTypeWillChange]
+	public function jsonSerialize()
+	{
+		return TeamSerializer::convert($this);
+	}
+
+
+	/**
+	 * Returns the JSON schema describing the shape of {@see jsonSerialize()} output.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function getJsonSchema() : array
+	{
+		return TeamSerializer::getJsonSchema();
 	}
 
 

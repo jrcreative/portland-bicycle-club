@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -105,8 +105,8 @@ class User_Memberships {
 
 				$member = wc_memberships_for_teams_get_team_member( $team->get_id(), $post ? $post->post_author : 0 );
 
-				echo '<a href="' . get_edit_post_link( $team->get_id() ) .' ">' . $team->get_formatted_name() . '</a>';
-				echo $member ? '<br /><em>' . $member->get_role( 'label' ) . '</em>' : '';
+				echo '<a href="' . esc_url( get_edit_post_link( $team->get_id() ) ) .' ">' . esc_html( $team->get_formatted_name() ) . '</a>';
+				echo $member ? '<br /><em>' . esc_html( $member->get_role( 'label' ) ) . '</em>' : '';
 
 			} else {
 
@@ -129,33 +129,32 @@ class User_Memberships {
 	 */
 	public function replace_user_membership_billing_details( $billing_fields, $user_membership ) {
 
-		$team_id = wc_memberships_for_teams_get_user_membership_team_id( $user_membership->id );
+		if ( $team_id = wc_memberships_for_teams_get_user_membership_team_id( $user_membership->id ) ) {
 
-		if ( $team_id ) {
+			$team       = wc_memberships_for_teams_get_team( $team_id );
+			$member     = $team   ? wc_memberships_for_teams_get_team_member( $team, $user_membership->get_user() ) : null;
+			$added_time = $member ? $member->get_local_added_date( 'timestamp' )                              : null;
 
-			$team   = wc_memberships_for_teams_get_team( $team_id );
-			$member = wc_memberships_for_teams_get_team_member( $team, $user_membership->get_user() );
+			if ( $added_time ) {
 
-			$added_time = $member->get_local_added_date( 'timestamp' );
+				$date_format = wc_date_format();
+				$time_format = wc_time_format();
 
-			if ( ! $added_time ) {
-				return __( 'N/A', 'woocommerce-memberships-for-teams' );
+				$date = esc_html( date_i18n( $date_format, (int) $added_time ) );
+				$time = esc_html( date_i18n( $time_format, (int) $added_time ) );
+
+				$billing_fields = [
+					__( 'Granted from team:', 'woocommerce-memberships-for-teams' ) => '<a href="' . get_edit_post_link( $team_id ) . '">' . esc_html( $team->get_formatted_name() ) . '</a>',
+					__( 'Member added:', 'woocommerce-memberships-for-teams' )      => esc_html( sprintf( '%1$s %2$s', $date, $time ) ),
+					__( 'Team role:', 'woocommerce-memberships-for-teams' )         => esc_html( $member->get_role( 'label' ) ),
+				];
+
+			} else {
+
+				$billing_fields = [
+					__( 'Team details:', 'woocommerce-memberships-for-teams' ) => __( 'N/A', 'woocommerce-memberships-for-teams' ),
+				];
 			}
-
-			$date_format = wc_date_format();
-			$time_format = wc_time_format();
-
-			$date = esc_html( date_i18n( $date_format, (int) $added_time ) );
-			$time = esc_html( date_i18n( $time_format, (int) $added_time ) );
-
-			$added = sprintf( '%1$s %2$s', $date, $time );
-			$role  = $member->get_role( 'label' );
-
-			$billing_fields = array(
-				__( 'Granted from team:', 'woocommerce-memberships-for-teams' ) => '<a href="' . get_edit_post_link( $team_id ) . '">' . esc_html( $team->get_formatted_name() ) . '</a>',
-				__( 'Member added:', 'woocommerce-memberships-for-teams' )      => esc_html( $added ),
-				__( 'Team role:', 'woocommerce-memberships-for-teams' )         => esc_html( $role ),
-			);
 		}
 
 		return $billing_fields;
@@ -216,15 +215,15 @@ class User_Memberships {
 					<?php printf(
 						/* translators: Placeholders: %s - text with possible actions for the user */
 						esc_html__( 'Editing has been disabled because this membership belongs to a team. %s', 'woocommerce-memberships-for-teams' ),
-						wc_memberships_list_items( $editing_actions )
+						wc_memberships_list_items( $editing_actions ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					); ?>
 				</p>
 			</div>
 			<?php
 
 			// alter the deletion alert text
-			wc_enqueue_js( " 
-				wc_memberships_admin.i18n.delete_membership_confirm += ' " . esc_html__( 'This will remove the member from the team.', 'woocommerce-memberships-for-teams' ) . "'; 
+            Framework\Helpers\ScriptHelper::addInlinejQuery( 'woocommerce-memberships-for-teams-remove-member', "
+				wc_memberships_admin.i18n.delete_membership_confirm += ' " . esc_html__( 'This will remove the member from the team.', 'woocommerce-memberships-for-teams' ) . "';
 			" );
 
 		endif;
@@ -314,7 +313,7 @@ class User_Memberships {
 					id="wc-memberships-for-teams-filter-by-team-id"
 					style="min-width:200px;"
 					data-action="wc_memberships_for_teams_json_search_teams"
-					data-nonce="<?php echo wp_create_nonce( 'search-teams' ); ?>"
+					data-nonce="<?php echo esc_attr( wp_create_nonce( 'search-teams' ) ); ?>"
 					data-placeholder="<?php esc_attr_e( 'Search for a team&hellip;', 'woocommerce-memberships-for-teams' ); ?>"
 					data-allow_clear="true">
 					<?php if ( $team_id > 0 ) : ?>
@@ -376,22 +375,6 @@ class User_Memberships {
 		}
 
 		return $vars;
-	}
-
-
-	/**
-	 * Disables updating user membership for team-based memberships.
-	 *
-	 * TODO remove this deprecated method by version 2.0.0 or by May 2020, whichever comes first {FN 2019-01-15}
-	 *
-	 * @internal
-	 *
-	 * @since 1.0.0
-	 * @deprecated since 1.1.1
-	 */
-	public function maybe_disable_updating_user_membership() {
-
-		_deprecated_function( 'SkyVerge\WooCommerce\Memberships\Teams\Admin\User_Memberships::maybe_disable_updating_user_membership::()', '1.1.1' );
 	}
 
 

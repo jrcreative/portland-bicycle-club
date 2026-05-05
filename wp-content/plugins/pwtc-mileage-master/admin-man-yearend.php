@@ -216,7 +216,7 @@ if ($show_buttons) {
         <p>Synchronize the rider list with the contents of the UPDMEMBS.DBF file. This file is provided by the membership secretary.</p>
         <div>
             <button class="updmembs-btn button button-primary button-large">Synchronize</button>
-            <span class="updmembs-blk popup-frm initially-hidden">
+            <div class="updmembs-blk popup-frm initially-hidden">
 			<form class="updmembs-frm stacked-form" method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('pwtc_mileage_updmembs'); ?>
                 <span>UPDMEMBS File</span>
@@ -225,7 +225,7 @@ if ($show_buttons) {
 				<input class="button button-primary" type="submit" name="updmembs" value="Synchronize"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		    </span>
+            </div>
         </div><br>
 <?php } ?>
 <?php if ($show_purge) { ?>
@@ -262,7 +262,7 @@ if ($show_buttons) {
         <p>Restore the mileage database from the four exported CSV files.</p>
         <div>
             <button class="restore-btn button button-primary button-large">Restore</button>
-            <span class="restore-blk popup-frm initially-hidden">
+            <div class="restore-blk popup-frm initially-hidden">
 			<form class="restore-frm stacked-form" method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('pwtc_mileage_restore'); ?>
                 <span>Members File</span>
@@ -280,7 +280,7 @@ if ($show_buttons) {
 				<input class="button button-primary" type="submit" name="restore" value="Restore"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		    </span>
+            </div>
         </div><br>
         <p>Current status of the mileage database.</p>
         <div>

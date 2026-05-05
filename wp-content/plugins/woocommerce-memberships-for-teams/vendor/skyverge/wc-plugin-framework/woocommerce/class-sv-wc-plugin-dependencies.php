@@ -18,16 +18,23 @@
  *
  * @package   SkyVerge/WooCommerce/Plugin/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2013-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2013-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-namespace SkyVerge\WooCommerce\PluginFramework\v5_3_1;
+namespace SkyVerge\WooCommerce\PluginFramework\v6_2_0;
 
 defined( 'ABSPATH' ) or exit;
 
-if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_3_1\\SV_WC_Plugin_Dependencies' ) ) :
+if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_2_0\\SV_WC_Plugin_Dependencies' ) ) :
 
+
+/**
+ * Plugin dependencies handler.
+ *
+ * @since 5.2.0
+ */
+#[\AllowDynamicProperties]
 class SV_WC_Plugin_Dependencies {
 
 
@@ -46,6 +53,8 @@ class SV_WC_Plugin_Dependencies {
 
 	/**
 	 * Constructs the class.
+	 *
+	 * @since 5.2.0
 	 *
 	 * @param SV_WC_Plugin $plugin plugin instance
 	 * @param array $args {
@@ -216,7 +225,7 @@ class SV_WC_Plugin_Dependencies {
 						if ( ! empty( $values['type'] ) && 'min' === $values['type'] ) {
 
 							$setting_message = sprintf(
-								/** translators: Placeholders: %s - a PHP setting value */
+								/* translators: Placeholder: %s - a PHP setting value */
 								__( '%s or higher', 'woocommerce-plugin-framework' ),
 								$setting_message
 							);
@@ -242,40 +251,27 @@ class SV_WC_Plugin_Dependencies {
 	 */
 	protected function add_deprecated_notices() {
 
-		// add a notice for PHP < 5.6
-		if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
+		// add a notice for PHP < 7.4
+		if ( version_compare( PHP_VERSION, '7.4.0', '<' ) ) {
 
 			$message = '<p>';
 
-			$message .= sprintf(
-				/* translators: Placeholders: %1$s - <strong>, %2$s - </strong> */
-				__( 'Hey there! We\'ve noticed that your server is running %1$san outdated version of PHP%2$s, which is the programming language that WooCommerce and its extensions are built on.
-					The PHP version that is currently used for your site is no longer maintained, nor %1$sreceives security updates%2$s; newer versions are faster and more secure.
-					As a result, %3$s no longer supports this version and you should upgrade PHP as soon as possible.
-					Your hosting provider can do this for you. %4$sHere are some resources to help you upgrade%5$s and to explain PHP versions further.', 'woocommerce-plugin-framework' ),
-				'<strong>', '</strong>',
-				esc_html( $this->get_plugin()->get_plugin_name() ),
-				'<a href="http://skyver.ge/upgradephp">', '</a>'
-			);
+			// for translation purposes, it's easier to keep these strings separate to avoid many tabs and newlines in the compiled pot file
+			$lines = [
+				/* translators: Placeholders: %1$s - <strong> HTML tag, %2$s - </strong> HTML tag */
+				sprintf( __( 'Hey there! We\'ve noticed that your server is running %1$san outdated version of PHP%2$s, which is the programming language that WooCommerce and its extensions are built on.', 'woocommerce-plugin-framework' ), '<strong>', '</strong>' ),
+				/* translators: Placeholders: %1$s - <strong> HTML tag, %2$s - </strong> HTML tag */
+				sprintf( __( 'The PHP version that is currently used for your site is no longer maintained, nor %1$sreceives security updates%2$s; newer versions are faster and more secure.', 'woocommerce-plugin-framework' ), '<strong>', '</strong>' ),
+				/* translators: Context: User is running an outdated PHP Version a plugin is not compatible with. Placeholders: %s - the plugin name */
+				sprintf( __( 'As a result, %s no longer supports this version and you should upgrade PHP as soon as possible.', 'woocommerce-plugin-framework' ), esc_html( $this->get_plugin()->get_plugin_name() ) ),
+				/* translators: Context: The host can update PHP version for the user. Placeholders: %1$s - <a> HTML tag, %2$s - </a> HTML tag */
+				sprintf( __( 'Your hosting provider can do this for you. %1$sHere are some resources to help you upgrade%2$s and to explain PHP versions further.', 'woocommerce-plugin-framework' ), '<a href="https://wordpress.org/support/update-php/">', '</a>' ),
+			];
 
+			$message .= implode( '<br>', $lines);
 			$message .= '</p>';
 
 			$this->add_admin_notice( 'sv-wc-deprecated-php-version', $message, 'error' );
-		}
-
-		// display a notice that WC < 3.0 support will soon be dropped
-		if ( isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && SV_WC_Plugin_Compatibility::is_wc_version_lt( '3.0' ) ) {
-
-			$message = sprintf(
-				/* translators: Placeholders: %1$s - WooCommerce version number, %2$s - <strong>, %3$s - </strong>, %4$s - Plugin name, %5$s - <a> tag, %6$s - </a> tag */
-				__( 'Hey there! We\'ve noticed that your site is running version %1$s of WooCommerce, but %2$sWooCommerce 3.0 or higher will soon be required%3$s by %4$s. We recommend you %5$supdate WooCommerce%6$s to the latest version as soon as possible.', 'woocommerce-plugin-framework' ),
-				esc_html( SV_WC_Plugin_Compatibility::get_wc_version() ),
-				'<strong>', '</strong>',
-				esc_html( $this->get_plugin()->get_plugin_name() ),
-				'<a href="' . esc_url( admin_url( 'update-core.php' ) ) . '">', '</a>'
-			);
-
-			$this->add_admin_notice( 'sv-wc-deprecated-wc-version', $message, 'warning' );
 		}
 	}
 
@@ -319,6 +315,61 @@ class SV_WC_Plugin_Dependencies {
 	}
 
 
+	/**
+	 * Returns the active scripts optimization plugins.
+	 *
+	 * Returns a key-value array where the key contains the plugin file identifier and the value is the name of the plugin.
+	 *
+	 * @since 5.7.0
+	 *
+	 * @return array
+	 */
+	public function get_active_scripts_optimization_plugins() {
+
+		/**
+		 * Filters script optimization plugins to look for.
+		 *
+		 * @since 5.7.0
+		 *
+		 * @param array $plugins an array of file identifiers (keys) and plugin names (values)
+		 */
+		$plugins = (array) apply_filters( 'wc_' . $this->get_plugin()->get_id() . '_scripts_optimization_plugins', [
+			'async-javascript.php' => 'Async JavaScript',
+			'autoptimize.php'      => 'Autoptimize',
+			'wp-hummingbird.php'   => 'Hummingbird',
+			'sg-optimizer.php'     => 'SG Optimizer',
+			'w3-total-cache.php'   => 'W3 Total Cache',
+			'wpFastestCache.php'   => 'WP Fastest Cache',
+			'wp-rocket.php'        => 'WP Rocket',
+		] );
+
+		$active_plugins = [];
+
+		foreach ( $plugins as $filename => $plugin_name ) {
+
+			if ( $this->get_plugin()->is_plugin_active( $filename ) ) {
+
+				$active_plugins[ $filename ] = $plugin_name;
+			}
+		}
+
+		return $active_plugins;
+	}
+
+
+	/**
+	 * Returns true if any of the known scripts optimization plugins is active.
+	 *
+	 * @since 5.7.0
+	 *
+	 * @return bool
+	 */
+	public function is_scripts_optimization_plugin_active() {
+
+		return ! empty( $this->get_active_scripts_optimization_plugins() );
+	}
+
+
 	/** Getter methods ********************************************************/
 
 
@@ -331,7 +382,7 @@ class SV_WC_Plugin_Dependencies {
 	 */
 	public function get_missing_php_extensions() {
 
-		$missing_extensions = array();
+		$missing_extensions = [];
 
 		foreach ( $this->get_php_extensions() as $extension ) {
 
@@ -366,7 +417,7 @@ class SV_WC_Plugin_Dependencies {
 	 */
 	public function get_missing_php_functions() {
 
-		$missing_functions = array();
+		$missing_functions = [];
 
 		foreach ( $this->get_php_functions() as $function ) {
 
@@ -401,9 +452,7 @@ class SV_WC_Plugin_Dependencies {
 	 */
 	public function get_incompatible_php_settings() {
 
-		$incompatible_settings = array();
-
-		$dependences = $this->get_php_settings();
+		$incompatible_settings = [];
 
 		if ( function_exists( 'ini_get' ) ) {
 
@@ -415,7 +464,7 @@ class SV_WC_Plugin_Dependencies {
 					continue;
 				}
 
-				if ( is_integer( $expected ) ) {
+				if ( is_int( $expected ) ) {
 
 					// determine if this is a size string, like "10MB"
 					$is_size = ! is_numeric( substr( $actual, -1 ) );
@@ -424,19 +473,19 @@ class SV_WC_Plugin_Dependencies {
 
 					if ( $actual_num < $expected ) {
 
-						$incompatible_settings[ $setting ] = array(
+						$incompatible_settings[ $setting ] = [
 							'expected' => $is_size ? size_format( $expected ) : $expected,
 							'actual'   => $is_size ? size_format( $actual_num ) : $actual,
 							'type'     => 'min',
-						);
+						];
 					}
 
 				} elseif ( $actual !== $expected ) {
 
-					$incompatible_settings[ $setting ] = array(
+					$incompatible_settings[ $setting ] = [
 						'expected' => $expected,
 						'actual'   => $actual,
-					);
+					];
 				}
 			}
 		}
@@ -472,5 +521,6 @@ class SV_WC_Plugin_Dependencies {
 
 
 }
+
 
 endif;

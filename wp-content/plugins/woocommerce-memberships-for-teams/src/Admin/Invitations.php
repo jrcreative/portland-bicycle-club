@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -76,14 +76,14 @@ class Invitations {
 
 		$action         = str_replace( 'admin_action_team_invitations_', '', current_action() );
 		$team           = wc_memberships_for_teams_get_team( $id );
-		$invitation_ids = ! empty( $_REQUEST['invitations'] ) ? (array) $_REQUEST['invitations'] : array();
+		$invitation_ids = ! empty( $_REQUEST['invitations'] ) ? (array) wc_clean( $_REQUEST['invitations'] ) : array();
 
 		if ( ! $team ) {
 			return;
 		}
 
 		if ( empty( $invitation_ids ) ) {
-			wp_redirect( wp_get_referer() );
+			wp_safe_redirect( wp_get_referer() );
 			exit;
 		}
 
@@ -153,7 +153,7 @@ class Invitations {
 			break;
 		}
 
-		wp_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() );
 		exit;
 	}
 
@@ -174,7 +174,7 @@ class Invitations {
 		// get the post
 		$id            = isset( $_REQUEST['post'] ) ? absint( $_REQUEST['post'] ) : '';
 		$team          = wc_memberships_for_teams_get_team( $id );
-		$invitation_id = ! empty( $_REQUEST['invitation'] ) ? $_REQUEST['invitation'] : null;
+		$invitation_id = ! empty( $_REQUEST['invitation'] ) ? wc_clean( $_REQUEST['invitation'] ) : null;
 
 		if ( ! $invitation_id || ! $team ) {
 			return;
@@ -188,7 +188,7 @@ class Invitations {
 		$invitation = wc_memberships_for_teams_get_invitation( $invitation_id );
 
 		if ( ! $invitation instanceof \SkyVerge\WooCommerce\Memberships\Teams\Invitation ) {
-			wp_redirect( wp_get_referer() );
+			wp_safe_redirect( wp_get_referer() );
 			exit;
 		}
 
@@ -265,7 +265,7 @@ class Invitations {
 			break;
 		}
 
-		wp_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() );
 		exit;
 	}
 

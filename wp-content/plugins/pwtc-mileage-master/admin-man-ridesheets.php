@@ -16,6 +16,8 @@ else {
 <script type="text/javascript" >
 jQuery(document).ready(function($) {  
 
+	var enable_history = false;
+
 <?php if ($plugin_options['show_ride_ids']) { ?>
 	var show_ride_id = true;
 <?php } else { ?>
@@ -410,11 +412,12 @@ if ($create_mode) {
 		else {
 			show_ridesheet_section(res.ride_id, res.startdate, res.title, res.post_guid, 
 				res.mileage, res.leaders);
-			if (history.pushState) {
+			if (history.pushState && enable_history) {
 				var state = {
 					'action': 'pwtc_mileage_lookup_ridesheet',
 					'ride_id': res.ride_id
 				};
+				console.log("Push state call, state is " + JSON.stringify(state));
 				history.pushState(state, '');
 			}
 		}
@@ -698,7 +701,7 @@ if ($create_mode) {
 
 	$('#ridesheet-sheet-page .back-btn').on('click', function(evt) {
         //evt.preventDefault();
-        if (history.pushState) {
+        if (history.pushState && enable_history) {
 			history.back();
 		}
 		else {
@@ -875,23 +878,23 @@ if ($create_mode) {
 		}
     });
 
-    if (history.pushState) {
+    if (history.pushState && enable_history) {
 		$(window).on('popstate', function(evt) {
 			var state = evt.originalEvent.state;
 			if (state !== null) {
-				//console.log("Popstate event, state is " + JSON.stringify(state));
+				console.log("Popstate event, state is " + JSON.stringify(state));
 				var action = '<?php echo admin_url('admin-ajax.php'); ?>';
 				$('body').addClass('waiting');
 				$.post(action, state, restore_ridesheet_cb);
 			}
 			else {
-				//console.log("Popstate event, state is null.");
+				console.log("Popstate event, state is null.");
 				return_main_section();
 			}
 		});
 	}
     else {
-        //console.log("history.pushState is not supported");
+        console.log("history.pushState is not supported or disabled");
     }
 
 <?php
@@ -945,7 +948,7 @@ if ($running_jobs > 0) {
 		</div>
 
 		<p><div><button class="add-btn button button-primary button-large">New</button>
-		<span class="add-blk popup-frm initially-hidden">
+		<div class="add-blk popup-frm initially-hidden">
 			<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<span>Title</span>
 				<input name="title" type="text" required/>
@@ -955,7 +958,7 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" value="Create"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		</span></div></p>
+		</div></div></p>
 		<p><div class="rides-div"></div></p>
 	<?php
 	}
@@ -970,7 +973,7 @@ if ($running_jobs > 0) {
 			<span class="sheet-title"></span> - <span class="sheet-date"></span>
 		</h3>
 		<div><button class="rename-btn button button-primary">Rename</button>
-		<span class="rename-blk popup-frm initially-hidden">
+		<div class="rename-blk popup-frm initially-hidden">
 			<form class="rename-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<span>Title</span>
 				<input name="title" type="text" required/>
@@ -981,12 +984,12 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" value="Rename"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		</span></div>
+		</div></div>
 		</div>
 		<div class="leader-section report-sec">
 			<h3>Ride Leaders</h3>
 			<div><button class="lookup-btn button button-primary">Lookup Leader</button>
-				<span class="add-blk popup-frm initially-hidden">
+				<div class="add-blk popup-frm initially-hidden">
 					<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 						<span>ID</span>
 						<input name="riderid" type="text" disabled/>
@@ -1000,14 +1003,14 @@ if ($running_jobs > 0) {
 						<input class="button button-primary" type="submit" value="Add Leader"/>
 						<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 					</form>
-				</span>
+				</div>
 			</div>
 			<p><div class="leader-div"></div></p>
 		</div>
 		<div class="mileage-section report-sec">
 			<h3>Rider Mileage</h3>
 			<div><button class="lookup-btn button button-primary">Lookup Rider</button>
-				<span class="add-blk popup-frm initially-hidden">
+				<div class="add-blk popup-frm initially-hidden">
 					<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 						<span>ID</span>
 						<input name="riderid" type="text" disabled/>
@@ -1025,7 +1028,7 @@ if ($running_jobs > 0) {
 						<input class="button button-primary" type="submit" value="Add Mileage"/>
 						<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 					</form>
-				</span>
+				</div>
 			</div>
 			<p><div class="mileage-div"></div></p>
 		</div>
@@ -1033,7 +1036,7 @@ if ($running_jobs > 0) {
 		<h3>Ride Linkage</h3>
 		<p class="sheet-guid"></p>
 		<div><button class="reassoc-btn button button-primary">Change</button>
-		<span class="reassoc-blk popup-frm initially-hidden">
+		<div class="reassoc-blk popup-frm initially-hidden">
 			<form class="reassoc-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<span>Date</span>
 				<input name="date" type="text"/>
@@ -1046,7 +1049,7 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" name="reassoc" value="Link to Ride"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		</span></div>
+		</div></div>
 		</div>
 	</div>
 <?php

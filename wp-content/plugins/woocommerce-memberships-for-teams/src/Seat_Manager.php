@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -292,7 +292,7 @@ class Seat_Manager {
 		}
 
 		// set up variation data (if needed) before adding to the cart
-		$product_id           = $product->is_type( 'variation' ) ? Framework\SV_WC_Product_Compatibility::get_prop( $product, 'parent_id' ) : $product->get_id();
+		$product_id           = $product->is_type( 'variation' ) ? $product->get_parent_id( 'edit' ) : $product->get_id();
 		$variation_id         = $product->is_type( 'variation' ) ? $product->get_id() : 0;
 		$variation_attributes = $product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $variation_id ) : array();
 
@@ -330,7 +330,7 @@ class Seat_Manager {
 		 * @param int $new_seat_count the desired seat count
 		 * @param string $cart_item_key the cart item key just added to the cart
 		 */
-		$redirect_url = apply_filters( 'wc_memberships_for_teams_seat_change_product_cart_data', wc_get_checkout_url(), $team, $new_seat_count, $cart_item_key );
+		$redirect_url = apply_filters( 'wc_memberships_for_teams_seat_change_product_cart_data', add_query_arg( [ 'team' => $team->get_id(), 'seat_change' => $new_seat_count ], wc_get_checkout_url() ), $team, $new_seat_count, $cart_item_key );
 
 		if ( $redirect_url ) {
 			wp_safe_redirect( $redirect_url );
@@ -360,4 +360,6 @@ class Seat_Manager {
 		 */
 		return apply_filters( 'wc_memberships_for_teams_should_prorate_seat_change', false, $team, $change_value );
 	}
+
+
 }

@@ -18,15 +18,16 @@
  *
  * @package     SkyVerge/WordPress/WP-Admin-Message-Handler
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2019, SkyVerge, Inc.
+ * @copyright   Copyright (c) 2013-2024, SkyVerge, Inc.
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-namespace SkyVerge\WooCommerce\PluginFramework\v5_3_1;
+namespace SkyVerge\WooCommerce\PluginFramework\v6_2_0;
 
 defined( 'ABSPATH' ) or exit;
 
-if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_3_1\\SV_WP_Admin_Message_Handler' ) ) :
+if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_2_0\\SV_WP_Admin_Message_Handler' ) ) :
+
 
 /**
  * # WordPress Admin Message Handler Class
@@ -51,6 +52,7 @@ if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_3_1\\SV_WP_Ad
  *
  * @version 1.0.1
  */
+#[\AllowDynamicProperties]
 class SV_WP_Admin_Message_Handler {
 
 
@@ -433,4 +435,5 @@ class SV_WP_Admin_Message_Handler {
 
 }
 
-endif; // class exists check
+
+endif;

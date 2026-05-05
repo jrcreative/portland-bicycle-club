@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Emails;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -45,8 +45,8 @@ class Membership_Ending_Soon extends Membership_Email {
 		$this->id             = 'wc_memberships_for_teams_team_membership_ending_soon';
 		$this->customer_email = true;
 
-		$this->title       = __( 'Team membership ending soon', 'woocommerce-memberships-for-teams' );
-		$this->description = __( 'Team membership ending soon emails are sent to team owners when their membership is about to expire.', 'woocommerce-memberships-for-teams' );
+		$this->title          = __( 'Team membership ending soon', 'woocommerce-memberships-for-teams' );
+		$this->description    = __( 'Team membership ending soon emails are sent to team owners when their membership is about to expire.', 'woocommerce-memberships-for-teams' );
 
 		$this->subject        = __( 'Your {team_name} membership on {site_title} end soon!', 'woocommerce-memberships-for-teams');
 		$this->heading        = __( 'An update about your {membership_plan} for {team_name}', 'woocommerce-memberships-for-teams');
@@ -55,6 +55,39 @@ class Membership_Ending_Soon extends Membership_Email {
 		$this->template_plain = 'emails/plain/team-membership-ending-soon.php';
 
 		parent::__construct();
+	}
+
+
+	/**
+	 * Adjusts the email settings form fields.
+	 *
+	 * Extends and overrides parent method.
+	 *
+	 * @since 1.4.4
+	 */
+	public function init_form_fields() {
+
+		parent::init_form_fields();
+
+		if ( isset( $this->form_fields['enabled'] ) ) {
+
+			// add a field for scheduling the email
+			$this->form_fields = Framework\SV_WC_Helper::array_insert_after( $this->form_fields, 'enabled', [
+				'send_days_before' => [
+					'title'             => __( 'Send email days before', 'woocommerce-teams-for-memberships' ),
+					'type'              => 'number',
+					'css'               => 'width: 50px;',
+					'description'       => _x( 'day(s) before', 'Days before a membership expires', 'woocommerce-teams-for-memberships' ),
+					'desc_tip'          => __( "Number of days before the team membership expires the email will be sent. Note: this shouldn't exceed the length of the Membership plan itself.", 'woocommerce-teams-for-memberships' ),
+					'default'           => 3,
+					'custom_attributes' => [
+						'step' => 1,
+						'min'  => 1,
+						'max'  => 60,
+					],
+				],
+			] );
+		}
 	}
 
 
@@ -83,5 +116,4 @@ class Membership_Ending_Soon extends Membership_Email {
 
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 	}
-
 }

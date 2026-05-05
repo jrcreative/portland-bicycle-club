@@ -1,4 +1,15 @@
 <?php
+// Override WooCommerce template path to use resources/woocommerce directory
+add_filter('woocommerce_locate_template', function($template, $template_name, $template_path) {
+    $custom_template_path = get_template_directory() . '/resources/woocommerce/' . $template_name;
+    
+    if (file_exists($custom_template_path)) {
+        return $custom_template_path;
+    }
+    
+    return $template;
+}, 10, 3);
+
 add_action('init', function() {
     add_filter('woocommerce_disable_admin_bar', function(){
         $user = wp_get_current_user();
@@ -121,8 +132,9 @@ add_action('init', function() {
     remove_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20 );
     remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
 
-    remove_action('woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10);
-    remove_action('woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10);
+    // Commented out to restore default WooCommerce content wrapper output
+    // remove_action('woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10);
+    // remove_action('woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10);
 });
 
 add_action('woocommerce_before_my_account', function(){
@@ -142,19 +154,6 @@ add_action('woocommerce_before_my_account', function(){
 
     wp_update_user( $args ) ;
 });
-
-
-add_filter('wp_insert_post', function($data, $postarr){
-    if($postarr->post_type != "wc_memberships_team") {
-        return $data;
-    }
-
-    $user = get_userdata($postarr->post_author);
-    $data['post_title'] = $user->first_name . ' ' . $user->last_name;
-
-    return $data;
-}, 10, 2);
-
 
 add_filter('wc_memberships_for_teams_new_team_data', function($team_post_data) {
     $user_data = get_userdata($team_post_data['post_author']);

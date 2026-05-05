@@ -1,5 +1,174 @@
 *** Teams for WooCommerce Memberships Changelog ***
 
+2026.04.16 - version 1.9.0
+* New - Add REST API support for teams via `/wp-json/wc-memberships-for-teams/v1/teams`
+* New - Add REST API support for invitations via `/wp-json/wc-memberships-for-teams/v1/invitations`
+* New - Add REST API support for team members via `/wp-json/wc-memberships-for-teams/v1/teams/<team_id>/members`
+* Misc - Updated the SkyVerge Plugin Framework to version 6.2.0
+
+2026.03.25 - version 1.8.0
+* New - Added abilities (WP Abilities API) for teams: `woocommerce-memberships-for-teams/teams-create`, `woocommerce-memberships-for-teams/teams-get`, `woocommerce-memberships-for-teams/teams-delete`, `woocommerce-memberships-for-teams/teams-list`, `woocommerce-memberships-for-teams/teams-invite`
+* New - Added abilities for team members: `woocommerce-memberships-for-teams/team-members-get`, `woocommerce-memberships-for-teams/team-members-list`, `woocommerce-memberships-for-teams/team-members-add`, `woocommerce-memberships-for-teams/team-members-remove`, `woocommerce-memberships-for-teams/team-members-update-role`
+* New - Added abilities for team invitations: `woocommerce-memberships-for-teams/invitations-get`, `woocommerce-memberships-for-teams/invitations-list`, `woocommerce-memberships-for-teams/invitations-cancel`
+* Fix - Replace deprecated `wc_enqueue_js()` calls
+* Misc - Tested up to WooCommerce 10.5.3
+* Misc - Updated the SkyVerge Plugin Framework to version 6.1.1
+
+2026.01.12 - version 1.7.8
+ * Fix - Subscriptions - Ensure subscription membership end date is synced when linked subscription changes
+ * Misc - Improve escaping and sanitizing throughout codebase
+
+2025.07.29 - version 1.7.7
+ * Fix - Declare compatibility with Cart and Checkout blocks
+ * Misc - The message for team seat changes has been reworked slightly so that it can be translated more easily
+ * Misc - Update SkyVerge Plugin Framework to version 5.15.12
+
+2025.03.13 - version 1.7.6
+ * Fix - When using Subscriptions, ensure the most recent copy of the team name is displayed in "Subscription Totals" table
+ * Fix - Subscriptions: Team owners unable to renew a team subscription if the team/subscription were originally manually created by an admin
+ * Fix - Subscriptions: If a team name has been edited, the name could unexpectedly revert back to the old version after a renewal
+ * Fix - Subscriptions: A team owner with an expired subscription was unable to purchase a new, non-team membership for the same plan. This fix requires Memberships v1.26.11+ to take effect.
+ * Fix - Subscriptions: Prevent expiration of cancelled team memberships on resubscribe
+ * Fix - Newly invited members might see an incorrect date for when the membership is valid until, if the plan has a fixed length
+ * Misc - Update SkyVerge Plugin Framework to version 5.15.5
+
+2025.01.13 - version 1.7.5
+ * Fix - Ensure team owners can always promote, demote, and remove managers
+ * Fix - Ensure team owners are able to view LearnDash course progress for their members
+ * Fix - Remove support for deprecated navigation feature
+ * Fix - Ensure team name is always saved as expected
+ * Fix - The team renewal reminder email was not being triggered
+
+2024.07.25 - version 1.7.4
+ * Fix - Fixed text domain typo for product admin page
+
+2024.07.05 - version 1.7.3
+ * Fix - Ensure team name is always saved as expected
+
+2024.05.28 - version 1.7.2
+ * Fix - Prevent Fatal Errors in PHP 8+ when loading the My Account page for a non-member
+
+2023.12.06 - version 1.7.1
+ * Fix - Fixed Fatal Error in PHP 8.0 and newer with LearnDash team members when viewing Teams in My Account
+
+2023.07.12 - version 1.7.0
+ * Misc - Add compatibility for WooCommerce High Performance Order Storage (HPOS)
+
+2022.09.12 - version 1.6.3
+ * Fix - Replace deprecated `is_ajax()` function calls with `wp_doing_ajax()`
+ * Misc - Require WooCommerce 3.9.4 or newer
+
+2021.11.30 - version 1.6.2
+ * Fix - Correctly render the my-team-no-members template when loading the Team Members table for a team with no members
+
+2021.11.04 - version 1.6.1
+ * Fix - When a team owner is changed in the WordPress dashboard, update the team role user meta to reflect the new owner
+ * Dev - Do not hardcode parameter types to hook callback methods to improve third-party compatibility
+
+2021.09.06 - version 1.6.0
+ * Feature - Allow team owners & managers to view eLearning progress reports for team members enrolled in Sensei or LearnDash courses
+ * Fix - Change team members' "Added On" time from UTC to the site's timezone
+ * Fix - Address a conflict that occurs with Uncanny Groups for LearnDash by Uncanny Owl
+
+2021.07.09 - version 1.5.5
+ * Fix - Ensure seats can be added to team again after a previously refunded team subscription is renewed
+ * Fix - Display a more specific error message when a user visits the same invitation link after having already accepted the invitation
+
+2021.06.10 - version 1.5.4
+ * Fix - Ensure that user-defined additional content may be passed to email templates
+
+2021.03.16 - version 1.5.3
+ * Tweak - Add support for WooCommerce Navigation admin feature
+
+2021.01.26 - version 1.5.2
+ * Fix - Ensure that guests invited as team managers have their designated role assigned when they register to the site while responding to the invitation
+ * Fix - Display a Registration Link when adding members to teams that have unlimited seats
+ * Fix - Improve compatibility with Twenty Twenty and Twenty Twenty-One WordPress themes
+
+2020.12.14 - version 1.5.1
+ * Fix - Fix fatal error when adding members
+
+2020.12.08 - version 1.5.0
+ * Misc - Add compatibility for WooCommerce 4.7
+ * Misc - Require PHP 7.0 or newer
+
+2020.10.26 - version 1.4.4
+ * Tweak - Update team members template to display the member's last login relative date to team owners and managers
+ * Tweak - Add setting in the "Team membership ending soon" email admin screen to set the number of days before team membership expiration to trigger the corresponding email
+ * Fix - Do not show the registration link field on the add member template if there are no remaining seats left
+
+2020.10.13 - version 1.4.3
+ * Fix - Prevent a fatal error when an older version of WooCommerce Memberships is active and trying to use profile fields
+
+2020.10.06 - version 1.4.2
+ * Fix - If the current team member is the owner, do not display a 'Leave Team' button in front end when managing the team
+ * Fix - When there is only a seat left in a team and viewing the Team Members front end page, ensure no PHP warning is issued and the remaining seats message is shown
+
+2020.09.24 - version 1.4.1
+ * Feature - Add member profile fields support when joining by invitation or taking a seat while purchasing a team product
+ * Misc - Remove the SkyVerge help menu item as part of the add on assets
+
+2020.08.24 - version 1.4.0
+ * Misc - Add SkyVerge help menu for support on WooCommerce.com connected sites
+
+2020.07.14 - version 1.3.2
+ * Fix - Do not show seat change notices when a team subscription is renewed
+
+2020.06.10 - version 1.3.1
+ * Fix - Settings screen error on PHP 7.2 or older
+
+2020.06.09 - version 1.3.0
+ * Feature - Offer the ability for shop administrators to rename what teams are called throughout the plugin's frontend
+
+2020.05.04 - version 1.2.8
+ * Misc - Add support for WooCommerce 4.1
+
+2020.04.24 - version 1.2.7
+ * Fix - Do not trigger a WordPress hook deprecation notice when visiting posts admin screens in WordPress 5.4
+
+2020.04.07 - version 1.2.6
+ * Fix - Prevent fatal error triggered while processing a subscription renewal from the admin dashboard
+ * Fix - Prevent number of seats to increase on teams with per-team pricing when a subscription renewal is processed
+ * Fix - Fix a logic error that could cause renewal links for team memberships not to work
+
+2020.03.26 - version 1.2.5
+ * Fix - Do not flush rewrite rules at every page load
+
+2020.03.10 - version 1.2.4
+ * Misc - Add support for WooCommerce 4.0
+
+2020.01.15 - version 1.2.3
+ * Misc - Add a documentation resource for teams with unlimited seats affected by the bug fixed in v1.2.1
+
+2020.01.05 - version 1.2.2
+ * Misc - Add support for WooCommerce 3.9
+
+2019.12.10 - version 1.2.1
+ * Fix - When renewing with per-team pricing and unlimited seats, quantity should be 1
+
+2019.11.13 - version 1.2.0
+ * Fix - Address a potential PHP error when joining a team by accepting an invitation
+ * Misc - Add support for WooCommerce 3.8
+ * Dev - Add action hook when a team member role is updated
+
+2019.08.09 - version 1.1.6
+ * Misc - Add support for WooCommerce 3.7
+ * Misc - Require PHP 5.6+
+ * Dev - Add filter when getting the team seat details in teams area
+
+2019.07.25 - version 1.1.5
+ * Fix - Ensure sign up fees are correctly applied when adding new seats to a subscription-based team
+ * Fix - Do not enable seat changes from customer dashboard for subscription-tied teams if the pricing is per-team based and seats are unlimited
+ * Fix - If team access is used with a variable subscription product, but switching is disabled, the switch button shouldn't appear to team members
+ * Fix - Address a potential PHP error on user memberships when a team member could not be determined to gather team details
+
+2019.05.15 - version 1.1.4
+ * Fix - When a team is linked to a subscription product with a limitation, override the limitation if the team owner wants to add a seat, without incurring into product purchase errors
+ * Fix - Remove a pending invitation when a team owner sends email invitations to new users, once they register and accept the invitation to join
+ * Fix - Ensure that the "Add Member" button in My Account dashboard template uses the same button styling as WooCommerce
+ * Misc - Add support for WooCommerce 3.6
+ * Misc - Require PHP 5.4+
+
 2019.03.20 - version 1.1.3
  * Fix - Only display the Teams menu item in My Account dashboard page if there is at least one Team the current user can manage
  * Fix - Allow removing a member from an existing team linked to an expired subscription to and adding them as members of another team with free seats and non expired status

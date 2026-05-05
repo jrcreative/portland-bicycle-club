@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -30,11 +30,13 @@ defined( 'ABSPATH' ) or exit;
  * @type int $paged the current page number
  * @type \SkyVerge\WooCommerce\Memberships\Teams\Frontend\Teams_Area $teams_area teams area handler instance
  *
- * @version 1.0.4
+ * @version 1.6.0
  * @since 1.0.0
  */
 
+/** @var array $results */
 $results = $team->get_members( array( 'number' => 20, 'paged' => $paged ), 'query' );
+/** @var \SkyVerge\WooCommerce\Memberships\Teams\Team_Member[] $members */
 $members = $results['team_members'];
 
 ?>
@@ -47,6 +49,19 @@ $members = $results['team_members'];
 			<tr>
 				<?php
 
+				$columns = [
+					'member-name'       => esc_html__( 'Name', 'woocommerce-memberships-for-teams' ),
+					'member-email'      => esc_html__( 'Email', 'woocommerce-memberships-for-teams' ),
+					'member-role'       => esc_html__( 'Role', 'woocommerce-memberships-for-teams' ),
+					'member-last-login' => esc_html__( 'Last Login', 'woocommerce-memberships-for-teams' ),
+					'member-actions'    => $teams_area->get_pagination_links( $team, 'members', $results['total_pages'], $results['current_page'] ),
+				];
+
+				// only team owners and manager can see the members last login
+				if ( ! current_user_can( 'wc_memberships_for_teams_manage_team_members', $team->get_id() ) ) {
+					unset( $columns['member-last-login'] );
+				}
+
 				/**
 				 * Filters the Team Members table columns in My Account page.
 				 *
@@ -55,16 +70,11 @@ $members = $results['team_members'];
 				 * @param array $columns associative array of column ids and names
 				 * @param \SkyVerge\WooCommerce\Memberships\Teams\Team $team the current team
 				 */
-				$columns = apply_filters( 'wc_memberships_for_teams_my_team_members_column_names', array(
-					'member-name'   => esc_html__( 'Name', 'woocommerce-memberships-for-teams' ),
-					'member-email'   => esc_html__( 'Email', 'woocommerce-memberships-for-teams' ),
-					'member-role'    => esc_html__( 'Role', 'woocommerce-memberships-for-teams' ),
-					'member-actions' => $teams_area->get_pagination_links( $team, 'members', $results['total_pages'], $results['current_page'] ),
-				), $team );
+				$columns = (array) apply_filters( 'wc_memberships_for_teams_my_team_members_column_names', $columns, $team );
 
 				?>
 				<?php foreach ( $columns as $column_id => $column_header ) : ?>
-					<th class="<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo $column_header; ?></span></th>
+					<th class="<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo $column_header; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span></th>
 				<?php endforeach; ?>
 			</tr>
 		</thead>
@@ -93,11 +103,27 @@ $members = $results['team_members'];
 								<?php echo esc_html( $member->get_role( 'label' ) ); ?>
 							</td>
 
+						<?php elseif ( 'member-last-login' === $column_id ) : ?>
+
+							<td class="member-last-login" data-title="<?php echo esc_attr( $column_name ); ?>">
+								<?php
+
+								$last_activity = get_user_meta( $member->get_id() , 'wc_last_active', true );
+
+								echo is_numeric( $last_activity ) ? sprintf(
+									/* translators: Placeholder: %s last login since */
+									esc_html__( '%s ago', 'woocommerce-memberships-for-teams' ),
+									esc_html( human_time_diff( (int) $last_activity ) )
+								) : '&mdash;';
+
+								?>
+							</td>
+
 						<?php elseif ( 'member-actions' === $column_id ) :
 
 							?>
 							<td class="team-actions order-actions" data-title="<?php echo esc_attr( $column_name ); ?>">
-								<?php echo $teams_area->get_action_links( 'members', $team, $member ); ?>
+								<?php echo $teams_area->get_action_links( 'members', $team, $member ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</td>
 
 						<?php else : ?>
@@ -131,7 +157,7 @@ $members = $results['team_members'];
 			<tfoot>
 				<tr>
 					<th colspan="<?php echo count( $columns ); ?>">
-						<?php echo $teams_area->get_pagination_links( $team, 'members', (int) $results['total_pages'], (int) $results['current_page'] ); ?>
+						<?php echo $teams_area->get_pagination_links( $team, 'members', (int) $results['total_pages'], (int) $results['current_page'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</th>
 				</tr>
 			</tfoot>
@@ -142,20 +168,6 @@ $members = $results['team_members'];
 
 <?php else : ?>
 
-	<p>
-		<?php
-
-		/**
-		 * Filters the text for no team members in My Account area.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param string $text the text displayed for teams with no members
-		 * @param \SkyVerge\WooCommerce\Memberships\Teams\Team $team current team instance
-		 */
-		echo (string) apply_filters( 'wc_memberships_for_teams_my_team_members_no_members_text', __( 'Looks like you your team has no members!', 'woocommerce-memberships-for-teams' ), $team );
-
-		?>
-	</p>
+	<?php wc_get_template( 'myaccount/my-team-no-members.php', [ 'team' => $team ] ); ?>
 
 <?php endif; ?>

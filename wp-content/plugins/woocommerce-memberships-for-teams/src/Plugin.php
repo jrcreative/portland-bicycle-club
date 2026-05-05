@@ -17,13 +17,15 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\Memberships\Teams\Abilities\Provider;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\AbilitiesProviderContract;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -32,11 +34,11 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 1.0.0
  */
-class Plugin extends Framework\SV_WC_Plugin {
+class Plugin extends Framework\SV_WC_Plugin implements Framework\Abilities\Contracts\HasAbilitiesContract {
 
 
 	/** plugin version number */
-	const VERSION = '1.1.3';
+	const VERSION = '1.9.0';
 
 	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Plugin single instance of this plugin */
 	protected static $instance;
@@ -77,11 +79,17 @@ class Plugin extends Framework\SV_WC_Plugin {
 	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Membership_Plans instance */
 	protected $membership_plans;
 
+	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Profile_Fields instance */
+	protected $profile_fields;
+
 	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Utilities instance */
 	private $utilities;
 
 	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Integrations instance */
 	protected $integrations;
+
+	/** @var bool whether profile fields are supported */
+	private $supports_profile_fields;
 
 
 	/**
@@ -94,14 +102,21 @@ class Plugin extends Framework\SV_WC_Plugin {
 		parent::__construct(
 			self::PLUGIN_ID,
 			self::VERSION,
-			array(
-				'text_domain'  => 'woocommerce-memberships-for-teams',
-				'dependencies' => array(
-					'php_extensions' => array(
+			[
+				'text_domain'   => 'woocommerce-memberships-for-teams',
+				'supported_features' => [
+					'hpos'   => true,
+					'blocks' => [
+						'cart'     => true,
+						'checkout' => true
+					],
+				],
+				'dependencies'  => [
+					'php_extensions' => [
 						'mbstring',
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 
 		// init post types and rewrite endpoints
@@ -144,25 +159,6 @@ class Plugin extends Framework\SV_WC_Plugin {
 
 
 	/**
-	 * Initializes the plugin (legacy method).
-	 *
-	 *
-	 * TODO remove this deprecated method by version 2.0.0 or by May 2020, whichever comes first {FN 2019-01-14}
-	 *
-	 * @internal
-	 *
-	 * @since 1.0.0
-	 * @deprecated since 1.1.2
-	 */
-	public function init() {
-
-		_deprecated_function( 'SkyVerge\WooCommerce\Memberships\Teams\Plugin::init()', '1.1.1', 'SkyVerge\WooCommerce\Memberships\Teams\Plugin::init_plugin()' );
-
-		$this->init_plugin();
-	}
-
-
-	/**
 	 * Loads and initializes the plugin's lifecycle handler.
 	 *
 	 * @internal
@@ -195,6 +191,11 @@ class Plugin extends Framework\SV_WC_Plugin {
 		$this->utilities        = new Utilities;
 		$this->integrations     = new Integrations;
 
+		// if supported, load the profile fields handler
+		if ( $this->supports_profile_fields() ) {
+			$this->profile_fields = new Profile_Fields;
+		}
+
 		// frontend includes
 		if ( ! is_admin() ) {
 			$this->frontend_includes();
@@ -204,7 +205,7 @@ class Plugin extends Framework\SV_WC_Plugin {
 		}
 
 		// AJAX includes
-		if ( is_ajax() ) {
+		if ( wp_doing_ajax() ) {
 			$this->ajax_includes();
 		}
 	}
@@ -367,6 +368,19 @@ class Plugin extends Framework\SV_WC_Plugin {
 
 
 	/**
+	 * Gets the Profile Fields instance.
+	 *
+	 * @since 1.4.1
+	 *
+	 * @return \SkyVerge\WooCommerce\Memberships\Teams\Profile_Fields|null
+	 */
+	public function get_profile_fields_instance() {
+
+		return $this->profile_fields;
+	}
+
+
+	/**
 	 * Gets the utilities instance.
 	 *
 	 * @since 1.1.2
@@ -388,6 +402,23 @@ class Plugin extends Framework\SV_WC_Plugin {
 	 */
 	public function get_integrations_instance() {
 		return $this->integrations;
+	}
+
+
+	/**
+	 * Determines whether the profile fields component is available.
+	 *
+	 * @since 1.4.3
+	 *
+	 * @return bool
+	 */
+	public function supports_profile_fields() {
+
+		if ( null === $this->supports_profile_fields ) {
+			$this->supports_profile_fields = version_compare( wc_memberships()->get_version(), '1.19.0', '>=' );
+		}
+
+		return $this->supports_profile_fields;
 	}
 
 
@@ -453,15 +484,35 @@ class Plugin extends Framework\SV_WC_Plugin {
 		if ( ( $screen && 'plugins' === $screen->id ) || $this->is_plugin_settings() ) {
 
 			$this->get_admin_notice_handler()->add_admin_notice(
-			/* translators: the %s placeholders are meant for pairs of opening <a> and closing </a> link tags */
-				sprintf( __( 'Thanks for installing Memberships for Teams! To get started, take a minute to %1$sread the documentation%2$s and then %3$ssetup a membership plan%4$s :)', 'woocommerce-memberships-for-teams' ),
-					'<a href="https://docs.woocommerce.com/document/teams-woocommerce-memberships/" target="_blank">',
-					'</a>',
-					'<a href="' . admin_url( 'edit.php?post_type=wc_membership_plan' ) . '">',
-					'</a>' ),
+				sprintf(
+					/* translators: the %s placeholders are meant for pairs of opening <a> and closing </a> link tags */
+					__( 'Thanks for installing Memberships for Teams! To get started, take a minute to %1$sread the documentation%2$s and then %3$ssetup a membership plan%4$s :)', 'woocommerce-memberships-for-teams' ),
+					'<a href="https://docs.woocommerce.com/document/teams-woocommerce-memberships/" target="_blank">', '</a>',
+					'<a href="' . admin_url( 'edit.php?post_type=wc_membership_plan' ) . '">', '</a>'
+				),
 				'get-started-notice',
-				array( 'always_show_on_settings' => false, 'notice_class' => 'updated' )
+				[
+					'always_show_on_settings' => false,
+					'notice_class'            => 'updated',
+				]
 			);
+
+			if ( 'yes' === get_option( 'wc_memberships_for_teams_show_teams_terminology_notice', 'no' ) ) {
+
+				$this->get_admin_notice_handler()->add_admin_notice(
+					sprintf(
+						/* translators: %1$s - <strong> HTML opening tag, %2$s - </strong> HTML closing tag, %3$s - <a> HTML opening tag, %4$s - </a> HTML closing tag */
+						__( '%1$sHeads up!%2$s In this version, you can change the "team" term from %3$sthe plugin settings%4$s. %1$sThis change may override other methods used for this purpose%2$s, such as the Say What? plugin. Please %3$supdate this setting%4$s to ensure teams are represented properly to your members.', 'woocommerce-memberships-for-teams' ),
+						'<strong>', '</strong>',
+						'<a href="' . esc_url( $this->get_settings_url() ) . '">', '</a>'
+					),
+					'update-teams-terminology-feature',
+					[
+						'always_show_on_settings' => false,
+						'notice_class'            => 'updated',
+					]
+				);
+			}
 		}
 	}
 
@@ -480,10 +531,8 @@ class Plugin extends Framework\SV_WC_Plugin {
 		// add Teams Area endpoint
 		add_rewrite_endpoint( get_option( 'woocommerce_myaccount_teams_area_endpoint', 'teams' ), EP_ROOT | EP_PAGES );
 
-		// add join team endpoint
+		// add Join Team endpoint
 		add_rewrite_endpoint( get_option( 'woocommerce_myaccount_join_team_endpoint', 'join-team' ), EP_ROOT | EP_PAGES );
-
-		flush_rewrite_rules();
 	}
 
 
@@ -596,6 +645,101 @@ class Plugin extends Framework\SV_WC_Plugin {
 
 
 	/**
+	 * Gets the default singular noun to be used to represent "team".
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return string lowercase, default 'team'
+	 */
+	public function get_default_singular_team_noun() {
+
+		return $this->get_team_noun( 'singular', true );
+	}
+
+
+	/**
+	 * Gets the default plural noun to be used to represent "teams".
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return string lowercase, default 'teams'
+	 */
+	public function get_default_plural_team_noun() {
+
+		return $this->get_team_noun( 'plural', true );
+	}
+
+
+	/**
+	 * Gets the user-defined singular noun to be used to represent "team".
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return string lowercase
+	 */
+	public function get_singular_team_noun() {
+
+		return $this->get_team_noun( 'singular' );
+	}
+
+
+	/**
+	 * Gets the user-defined plural noun to be used to represent "teams".
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return string lowercase
+	 */
+	public function get_plural_team_noun() {
+
+		return $this->get_team_noun( 'plural' );
+	}
+
+
+	/**
+	 * Gets the lowercase noun to be used to represent a team across the plugin interface.
+	 *
+	 * Do not open method to public, prefer using instead:
+	 * @see Plugin::get_singular_team_noun()
+	 * @see Plugin::get_plural_team_noun()
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param string $singular_or_plural either 'singular' or 'plural' (in some languages they may coincide)
+	 * @param bool $use_default whether to force return the default value (default false), used as a fallback otherwise
+	 * @return string
+	 */
+	private function get_team_noun( $singular_or_plural, $use_default = false ) {
+
+		$team_noun        = '';
+		$default_singular = _x( 'team', 'Used to represent what teams (singular form) are called throughout the plugin', 'woocommerce-memberships-for-teams' );
+		$default_plural   = _x( 'teams', 'Used to represent what teams (plural form) are called throughout the plugin', 'woocommerce-memberships-for-teams' );
+
+		if ( $use_default ) {
+
+			if ( 'singular' === $singular_or_plural ) {
+				$team_noun = $default_singular;
+			} elseif ( 'plural' === $singular_or_plural ) {
+				$team_noun = $default_plural;
+			}
+
+		} else {
+
+			$singular = trim( get_option( 'wc_memberships_for_teams_team_noun_singular', $default_singular ) );
+			$plural   = trim( get_option( 'wc_memberships_for_teams_team_noun_plural', $default_plural ) );
+
+			if ( 'singular' === $singular_or_plural ) {
+				$team_noun = empty( $singular ) ? $default_singular : $singular;
+			} elseif ( 'plural' === $singular_or_plural ) {
+				$team_noun = empty( $plural ) ? $default_plural : $plural;
+			}
+		}
+
+		return strtolower( $team_noun );
+	}
+
+
+	/**
 	 * Returns the full path to the plugin entry script.
 	 *
 	 * @since 1.0.0
@@ -629,4 +773,9 @@ class Plugin extends Framework\SV_WC_Plugin {
 	}
 
 
+    /** @inheritDoc */
+    public function getAbilitiesProvider(): AbilitiesProviderContract
+    {
+        return new Provider($this);
+    }
 }

@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Emails;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -45,8 +45,8 @@ class Membership_Ended extends Membership_Email {
 		$this->id             = 'wc_memberships_for_teams_team_membership_ended';
 		$this->customer_email = true;
 
-		$this->title = __( 'Team membership ended', 'woocommerce-memberships-for-teams' );
-		$this->description = __( 'Team membership ended emails are sent to team owners in the moment their membership expires.', 'woocommerce-memberships-for-teams' );
+		$this->title          = __( 'Team membership ended', 'woocommerce-memberships-for-teams' );
+		$this->description    = __( 'Team membership ended emails are sent to team owners in the moment their membership expires.', 'woocommerce-memberships-for-teams' );
 
 		$this->subject        = __( 'Your {team_name} membership on {site_title} has expired', 'woocommerce-memberships-for-teams');
 		$this->heading        = __( 'Renew your {membership_plan} for {team_name}', 'woocommerce-memberships-for-teams');
@@ -83,6 +83,5 @@ class Membership_Ended extends Membership_Email {
 
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 	}
-
 
 }

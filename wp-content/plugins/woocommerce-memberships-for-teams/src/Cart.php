@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 use SkyVerge\WooCommerce\Memberships\Teams\Product;
 
 defined( 'ABSPATH' ) or exit;
@@ -112,7 +112,7 @@ class Cart {
 	 */
 	public function validate_team_product_add_to_cart( $valid, $product_id, $quantity, $variation_id = '', $variations = array(), $cart_item_data = array() ) {
 
-		$_product_id = $variation_id ? $variation_id : $product_id;
+		$_product_id = $variation_id ?: $product_id;
 		$product     = wc_get_product( $_product_id );
 
 		// is this a team product?
@@ -276,7 +276,11 @@ class Cart {
 						$value = $item->get_meta( $key, true, 'edit' );
 					} else {
 						// otherwise, use whatever user input was supplied
-						$value = isset( $_REQUEST[ $key ] ) ? $_REQUEST[ $key ] : null;
+						$value = $_REQUEST[ $key ] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+						if ( ! is_null( $value ) ) {
+							$value = wc_clean( $value );
+						}
 					}
 
 					if ( $value ) {
@@ -347,7 +351,7 @@ class Cart {
 
 						$data[] = array(
 							'name'    => $label,
-							'display' => $value,
+							'display' => esc_html( $value ), // WooCommerce core runs it through `wp_kses_post()`, but that still allows some HTML that we don't want here
 							'hidden'  => false,
 						);
 					}
@@ -402,7 +406,11 @@ class Cart {
 
 			if ( isset( $data['team_meta_data']['_wc_memberships_for_teams_team_seat_change'] ) ) {
 
-				throw new Framework\SV_WC_Plugin_Exception( __( 'Oops! It looks like you’re currently changing the seat count for your team. Please complete checkout or remove that item from the cart in order to continue.', 'woocommerce-memberships-for-teams' ) );
+				throw new Framework\SV_WC_Plugin_Exception( sprintf(
+					/* translators: Placeholder: %s - noun used to represent a team (singular) */
+					__( 'Oops! It looks like you’re currently changing the seat count for your %s. Please complete checkout or remove that item from the cart in order to continue.', 'woocommerce-memberships-for-teams' ),
+					wc_memberships_for_teams()->get_singular_team_noun()
+				) );
 			}
 		}
 

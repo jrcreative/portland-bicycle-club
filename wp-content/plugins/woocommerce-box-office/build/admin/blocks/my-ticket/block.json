@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "woocommerce-box-office/my-ticket",
+  "version": "0.1.0",
+  "title": "My Ticket",
+  "category": "woocommerce-box-office",
+  "icon": "tickets-alt",
+  "description": "WooCommerce Box Office block to render ticket fields by passing the ticket token.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "token": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "textdomain": "woocommerce-box-office",
+  "editorScript": "file:./index.js"
+}

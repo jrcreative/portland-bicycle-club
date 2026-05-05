@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2014-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -70,11 +70,11 @@ else :
 					<th class="<?php echo esc_attr( $column_id ); ?>">
 						<span class="nobr">
 							<?php if ( 'membership-content-title' === $column_id ) : ?>
-								<?php echo wc_memberships_get_members_area_sorting_link( 'title', $column_header ); ?>
+								<?php echo wp_kses_post( wc_memberships_get_members_area_sorting_link( 'title', $column_header ) ); ?>
 							<?php elseif ( 'membership-content-type' === $column_id ) : ?>
-								<?php echo wc_memberships_get_members_area_sorting_link( 'type', $column_header ); ?>
+								<?php echo wp_kses_post( wc_memberships_get_members_area_sorting_link( 'type', $column_header ) ); ?>
 							<?php else: ?>
-								<?php echo $column_header; ?>
+								<?php echo wp_kses_post( $column_header ); ?>
 							<?php endif; ?>
 						</span>
 					</th>
@@ -112,7 +112,7 @@ else :
 						<?php elseif ( 'membership-content-type' === $column_id ) : ?>
 
 							<td class="membership-content-type" data-title="<?php echo esc_attr( $column_header ); ?>">
-								<?php echo wc_memberships_get_content_type_name( $member_post ); ?>
+								<?php echo esc_html( wc_memberships_get_content_type_name( $member_post ) ); ?>
 							</td>
 
 						<?php elseif ( 'membership-content-accessible' === $column_id ) : ?>
@@ -121,7 +121,7 @@ else :
 								<?php if ( $can_view_content ) : ?>
 									<?php esc_html_e( 'Now', 'woocommerce-memberships' ); ?>
 								<?php else : ?>
-									<time datetime="<?php echo date( 'Y-m-d H:i:s', $view_start_time ); ?>" title="<?php echo esc_attr( $view_start_time ); ?>"><?php echo date_i18n( wc_date_format(), $view_start_time ); ?></time>
+									<time datetime="<?php echo esc_attr( date( 'Y-m-d H:i:s', $view_start_time ) ); ?>" title="<?php echo esc_attr( $view_start_time ); ?>"><?php echo esc_html( date_i18n( wc_date_format(), $view_start_time ) ); ?></time>
 								<?php endif; ?>
 							</td>
 
@@ -138,7 +138,7 @@ else :
 						<?php elseif ( 'membership-content-actions' === $column_id ) : ?>
 
 							<td class="membership-content-actions order-actions" data-title="<?php echo esc_attr( $column_header ); ?>">
-								<?php echo wc_memberships_get_members_area_action_links( 'my-membership-content', $customer_membership, $member_post ); ?>
+								<?php echo wp_kses_post( wc_memberships_get_members_area_action_links( 'my-membership-content', $customer_membership, $member_post ) ); ?>
 							</td>
 
 						<?php else : ?>
@@ -162,7 +162,7 @@ else :
 			<tfoot>
 				<tr>
 					<th colspan="<?php echo count( $my_membership_content_columns ); ?>">
-						<?php echo $tfoot; ?>
+						<?php echo wp_kses_post( $tfoot ); ?>
 					</th>
 				</tr>
 			</tfoot>

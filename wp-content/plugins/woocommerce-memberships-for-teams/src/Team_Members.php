@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -254,7 +254,7 @@ class Team_Members {
 	 * @param string $base_url base URL
 	 * @return array
 	 */
-	public static function get_table_views( $team, $base_url ) {
+	public static function get_table_views( $team, string $base_url ) : array {
 
 		$views            = array();
 		$show_invitations = ! empty( $_REQUEST['show_invitations'] );
@@ -288,7 +288,18 @@ class Team_Members {
 
 		$views['invitations'] = self::get_view_link( $base_url, array( 'show_invitations' => 1 ), $invitations_label, $invitations_classes );
 
-		return $views;
+		/**
+		 * Filters the views available for the Team Members table.
+		 *
+		 * Note that this filter is applied both in admin and site frontend.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array $views the views
+		 * @param \SkyVerge\WooCommerce\Memberships\Teams\Team $team team object
+		 * @param string $base_url base URL
+		 */
+		return apply_filters( 'wc_memberships_for_teams_team_members_table_views', $views, $team, $base_url );
 	}
 
 

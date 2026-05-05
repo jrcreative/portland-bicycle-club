@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'skyverge/woocommerce-memberships-for-teams',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '9ae0dc9f4b98327d82d79df94492f3d9877f265d',
+        'type' => 'project',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => false,
+    ),
+    'versions' => array(
+        'skyverge/wc-plugin-framework' => array(
+            'pretty_version' => '6.2.0',
+            'version' => '6.2.0.0',
+            'reference' => 'becd6a9127cf050abadb6977530c67cf82531df8',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../skyverge/wc-plugin-framework',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'skyverge/woocommerce-memberships-for-teams' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '9ae0dc9f4b98327d82d79df94492f3d9877f265d',
+            'type' => 'project',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'woocommerce/action-scheduler' => array(
+            'pretty_version' => '2.2.5',
+            'version' => '2.2.5.0',
+            'reference' => 'fd7c6b76a7af27d6403ffe39b0963dbd8ce50488',
+            'type' => 'wordpress-plugin',
+            'install_path' => __DIR__ . '/../woocommerce/action-scheduler',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin\Meta_Boxes;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -45,6 +45,8 @@ class Team_Details {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ), 30 );
 
 		add_action( 'wc_memberships_for_teams_process_team_meta', array( $this, 'save' ), 30, 2 );
+
+		add_filter( 'wp_insert_post_data', array( $this, 'sanitize_team_name_on_save'));
 	}
 
 
@@ -121,19 +123,19 @@ class Team_Details {
 			?>
 			<input type="hidden" id="original_post_author" value="<?php echo esc_attr( $user_id ); ?>" />
 			<select class="wc-customer-search wide" id="post_author" name="post_author" data-placeholder="<?php esc_attr_e( 'No-one', 'woocommerce-memberships-for-teams' ); ?>" data-allow_clear="false">
-				<option value="<?php echo esc_attr( $user_id ); ?>"><?php echo htmlspecialchars( $user_string ); ?></option>
+				<option value="<?php echo esc_attr( $user_id ); ?>"><?php echo esc_html( $user_string ); ?></option>
 			</select>
 			<!--/email_off-->
 		</div>
 
 		<div id="team-created-date-section" class="section">
 			<label for="created_date"><?php esc_html_e( 'Created:', 'woocommerce-memberships-for-teams' ); ?></label><br>
-			<?php echo $this->date_input( $team->get_local_date( 'timestamp' ), array( 'name_attr' => 'created_date' ) ); ?>
+			<?php echo $this->date_input( $team->get_local_date( 'timestamp' ), array( 'name_attr' => 'created_date' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 
 		<div id="team-membership-end-date-section" class="section">
 			<label for="membership_end_date"><?php esc_html_e( 'Team memberships begin to expire:', 'woocommerce-memberships-for-teams' ); ?></label><br>
-			<?php echo $this->date_input( $team->get_local_membership_end_date( 'timestamp' ), array( 'name_attr' => 'membership_end_date' ) ); ?>
+			<?php echo $this->date_input( $team->get_local_membership_end_date( 'timestamp' ), array( 'name_attr' => 'membership_end_date' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 
 		<div id="team-seat-section" class="section">
@@ -170,10 +172,11 @@ class Team_Details {
 			<div id="delete-action">
 				<?php
 				if ( current_user_can( 'delete_post', $post->ID ) ) {
-					if ( ! EMPTY_TRASH_DAYS )
-						$delete_text = __( 'Delete Permanently' );
-					else
-						$delete_text = __( 'Move to Trash' );
+					if ( ! EMPTY_TRASH_DAYS ) {
+						$delete_text = __( 'Delete Permanently', 'woocommerce-memberships-for-teams' );
+					} else {
+						$delete_text = __( 'Move to Trash', 'woocommerce-memberships-for-teams' );
+					}
 					?>
 				<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>"><?php echo esc_html( $delete_text ); ?></a><?php
 				} ?>
@@ -243,7 +246,7 @@ class Team_Details {
 	 */
 	private function parse_posted_date( $date_field ) {
 
-		$date   = $_POST[ $date_field ];
+		$date   = wc_clean( $_POST[ $date_field ] );
 		$hour   = str_pad( (int) $_POST[ $date_field . '_hour' ], 2, '0', STR_PAD_LEFT );
 		$minute = str_pad( (int) $_POST[ $date_field . '_minute'  ], 2, '0', STR_PAD_LEFT );
 		$second = '00';
@@ -326,5 +329,19 @@ class Team_Details {
 		}
 	}
 
+	/**
+	 * Sanitizes the team name (post_title) before saving.
+	 *
+	 * @param array $data An array of slashed, sanitized, and processed post data.
+	 * @return array $data (Maybe) modified post data.
+	 */
+	public function sanitize_team_name_on_save($data) {
+		if ('wc_memberships_team' !== $data['post_type'] ?? '') {
+			return $data;
+		}
 
+		$data['post_title'] = sanitize_text_field( $data['post_title'] ?? '' );
+
+		return $data;
+	}
 }

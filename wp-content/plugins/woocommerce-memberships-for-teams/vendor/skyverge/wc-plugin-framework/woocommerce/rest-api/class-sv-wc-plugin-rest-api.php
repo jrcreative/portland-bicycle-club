@@ -18,15 +18,15 @@
  *
  * @package   SkyVerge/WooCommerce/Plugin/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2013-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2013-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-namespace SkyVerge\WooCommerce\PluginFramework\v5_3_1;
+namespace SkyVerge\WooCommerce\PluginFramework\v6_2_0;
 
 defined( 'ABSPATH' ) or exit;
 
-if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_3_1\\REST_API' ) ) :
+if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_2_0\\REST_API' ) ) :
 
 
 /**
@@ -37,6 +37,7 @@ if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_3_1\\REST_API
  *
  * @since 5.2.0
  */
+#[\AllowDynamicProperties]
 class REST_API {
 
 
@@ -90,6 +91,7 @@ class REST_API {
 
 		$data = array(
 			'is_payment_gateway' => $this->get_plugin() instanceof SV_WC_Payment_Gateway_Plugin,
+			'lifecycle_events'   => $this->get_plugin()->get_lifecycle_handler()->get_event_history(),
 		);
 
 		$data = array_merge( $data, $this->get_system_status_data() );
@@ -133,7 +135,12 @@ class REST_API {
 	 */
 	public function register_routes() {
 
-		// stub
+		if ( $settings = $this->get_plugin()->get_settings_handler() ) {
+
+			$settings_controller = new REST_API\Controllers\Settings( $settings );
+
+			$settings_controller->register_routes();
+		}
 	}
 
 
@@ -151,5 +158,6 @@ class REST_API {
 
 
 }
+
 
 endif;

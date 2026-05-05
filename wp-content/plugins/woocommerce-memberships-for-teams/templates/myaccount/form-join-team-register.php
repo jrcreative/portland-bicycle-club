@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -32,6 +32,9 @@
  *
  * Note that the use of 'woocommerce' textdomain is intentional!
  *
+ * @type \SkyVerge\WooCommerce\Memberships\Teams\Invitation $invitation invitation object
+ * @type string $token invitation token
+ *
  * @version 1.0.2
  * @since 1.0.0
  */
@@ -39,8 +42,8 @@
 defined( 'ABSPATH' ) or exit;
 
 // prefill email from
-$reg_email    = ( ! empty( $_POST['email'] ) )    ? $_POST['email']    : ( $invitation ? $invitation->get_email() : '' );
-$reg_username = ( ! empty( $_POST['username'] ) ) ? $_POST['username'] : ( $invitation ? sanitize_user( $invitation->get_email() )  : '' );
+$reg_email    = ( ! empty( $_POST['email'] ) )    ? wc_clean( $_POST['email'] )    : ( $invitation ? $invitation->get_email() : '' );
+$reg_username = ( ! empty( $_POST['username'] ) ) ? wc_clean( $_POST['username'] ) : ( $invitation ? sanitize_user( $invitation->get_email() )  : '' );
 
 ?>
 
@@ -118,7 +121,7 @@ $reg_username = ( ! empty( $_POST['username'] ) ) ? $_POST['username'] : ( $invi
 
 			<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
 				<label for="username"><?php esc_html_e( 'Username or email address', 'woocommerce' ); ?> <span class="required">*</span></label>
-				<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="username" value="<?php echo ( ! empty( $_POST['username'] ) ) ? esc_attr( $_POST['username'] ) : ''; ?>" />
+				<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="username" value="<?php echo ( ! empty( $_POST['username'] ) ) ? esc_attr( wc_clean( $_POST['username'] ) ) : ''; ?>" />
 			</p>
 			<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
 				<label for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?> <span class="required">*</span></label>
@@ -131,7 +134,7 @@ $reg_username = ( ! empty( $_POST['username'] ) ) ? $_POST['username'] : ( $invi
 				<?php wp_nonce_field( 'woocommerce-login', 'woocommerce-login-nonce' ); ?>
 				<input type="submit" class="woocommerce-Button button" name="login" value="<?php esc_attr_e( 'Login', 'woocommerce' ); ?>" />
 				<label class="woocommerce-form__label woocommerce-form__label-for-checkbox inline">
-					<input class="woocommerce-form__input woocommerce-form__input-checkbox" name="rememberme" type="checkbox" id="rememberme" value="forever" /> <span><?php _e( 'Remember me', 'woocommerce' ); ?></span>
+					<input class="woocommerce-form__input woocommerce-form__input-checkbox" name="rememberme" type="checkbox" id="rememberme" value="forever" /> <span><?php esc_html_e( 'Remember me', 'woocommerce' ); ?></span>
 				</label>
 			</p>
 			<p class="woocommerce-LostPassword lost_password">

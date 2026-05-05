@@ -18,6 +18,8 @@ else {
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
 
+    var enable_history = false;
+
 	function populate_report_table(data, header) {
         $('#report-results-section .results-div').empty();
         if (data.length > 0) {
@@ -67,7 +69,8 @@ jQuery(document).ready(function($) {
         }
         else {
             show_report_section(res.title, res.header, res.data);
-            if (history.pushState) {
+            if (history.pushState && enable_history) {
+                console.log("Push state call, state is " + JSON.stringify(res.state));
                 history.pushState(res.state, '');
             }
         }
@@ -258,7 +261,7 @@ jQuery(document).ready(function($) {
 
     $('#report-results-section .back-btn').on('click', function(evt) {
         //evt.preventDefault();
-        if (history.pushState) {
+        if (history.pushState && enable_history) {
             history.back();
         }
         else {
@@ -268,23 +271,23 @@ jQuery(document).ready(function($) {
 
     $('#report-main-section .download-slt').focus();
 
-    if (history.pushState) {
+    if (history.pushState && enable_history) {
         $(window).on('popstate', function(evt) {
             var state = evt.originalEvent.state;
             if (state !== null) {
-                //console.log("Popstate event, state is " + JSON.stringify(state));
+                console.log("Popstate event, state is " + JSON.stringify(state));
                 var action = '<?php echo admin_url('admin-ajax.php'); ?>';
                 $('body').addClass('waiting');
                 $.post(action, state, restore_report_cb);
             }
             else {
-                //console.log("Popstate event, state is null.");
+                console.log("Popstate event, state is null.");
                 return_main_section();
             }
         });
     }
     else {
-        //console.log("history.pushState is not supported");
+        console.log("history.pushState is not supported or disabled");
     }
 
 });
@@ -317,6 +320,7 @@ if ($running_jobs > 0) {
         <div class='awards'>
             <div><a href='#' report-id='award_achvmnt'>Accumulative mileage achievement</a></div>
             <div><a href='#' report-id='award_top_miles'>Top annual mileage</a></div>
+            <div><a href='#' report-id='award_top_attend'>Top annual attendance</a></div>
             <div><a href='#' report-id='award_members'>Member annual and accumulative mileage</a></div>
             <div><a href='#' report-id='award_members_500'>Member annual and accumulative mileage (500 miles or more)</a></div>
             <div><a href='#' report-id='award_leaders'>Ride leaders</a></div>

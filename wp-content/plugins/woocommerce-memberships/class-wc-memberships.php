@@ -17,11 +17,20 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2014-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-use SkyVerge\WooCommerce\PluginFramework\v5_4_0 as Framework;
+use Composer\Autoload\ClassLoader;
+use SkyVerge\WooCommerce\Memberships\Admin\Setup_Wizard;
+use SkyVerge\WooCommerce\Memberships\REST_API;
+use SkyVerge\WooCommerce\Memberships\API\Webhooks;
+use SkyVerge\WooCommerce\Memberships\Blocks;
+use SkyVerge\WooCommerce\Memberships\Shortcodes;
+use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\AbilitiesProviderContract;
+use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\HasAbilitiesContract;
+use SkyVerge\WooCommerce\Memberships\Profile_Fields;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -32,14 +41,17 @@ defined( 'ABSPATH' ) or exit;
  *
  * @method \SkyVerge\WooCommerce\Memberships\Admin\Setup_Wizard get_setup_wizard_handler()
  */
-class WC_Memberships extends Framework\SV_WC_Plugin  {
+class WC_Memberships extends Framework\SV_WC_Plugin implements HasAbilitiesContract {
 
 
 	/** plugin version number */
-	const VERSION = '1.13.0';
+	const VERSION = '1.28.1';
 
 	/** @var \WC_Memberships single instance of this plugin */
 	protected static $instance;
+
+	/** @var bool internal flag when user inactivity query is being performed */
+	private static bool $doing_user_inactivity_query = false;
 
 	/** plugin id */
 	const PLUGIN_ID = 'memberships';
@@ -83,9 +95,16 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	/** @var \WC_Memberships_Utilities instance */
 	private $utilities;
 
-	/** @var \SkyVerge\WooCommerce\Memberships\REST_API instance */
+	/** @var REST_API instance */
 	private $rest_api;
 
+	/** @var Webhooks instance */
+	private $webhooks;
+
+	/** @var Blocks instance */
+	private $blocks;
+
+	protected ?ClassLoader $composerAutoloader = null;
 
 	/**
 	 * Initializes the plugin.
@@ -97,38 +116,60 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 		parent::__construct(
 			self::PLUGIN_ID,
 			self::VERSION,
-			array(
-				'text_domain'  => 'woocommerce-memberships',
-				'dependencies' => array(
-					'php_extensions' => array(
+			[
+				'text_domain'        => 'woocommerce-memberships',
+				'supported_features' => [
+					'hpos'   => true,
+					'blocks' => [
+						'cart'     => true,
+						'checkout' => true,
+					],
+				],
+				'dependencies'       => [
+					'php_extensions' => [
+						'dom',
 						'mbstring',
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 
 		add_action( 'init', array( $this, 'init_post_types' ) );
 
-		// initializes the REST API handler
+		// initializes the REST API handler and the Webhooks handler
 		if ( Framework\SV_WC_Plugin_Compatibility::is_wc_version_gte( '3.6.0' ) ) {
-			add_action( 'init',                    array( $this, 'init_rest_api' ) );
+			add_action( 'rest_api_init',           [ $this, 'init_rest_api' ], 5 );
 		} else {
-			add_action( 'before_woocommerce_init', array( $this, 'init_rest_api' ) );
+			add_action( 'before_woocommerce_init', [ $this, 'init_rest_api' ] );
 		}
+
+		add_action( 'before_woocommerce_init', [ $this, 'init_webhooks' ] );
 
 		// add query vars for rewrite endpoints
 		add_action( 'init',                       array( $this, 'add_rewrite_endpoints' ), 0 );
 		add_filter( 'query_vars',                 array( $this, 'add_query_vars' ), 0 );
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'add_query_vars' ), 0 );
 
+		/** set submitted profile field values on the newly created membership @see Profile_Fields::set_member_profile_fields_from_purchase() */
+		add_action( 'wc_memberships_grant_membership_access_from_purchase', [ Profile_Fields::class, 'set_member_profile_fields_from_purchase' ], 10, 2 );
+		/** clears the profile fields data from the session on checkout @see Profile_Fields::clear_profile_fields_session_data() */
+		add_action( 'woocommerce_checkout_order_processed', [ Profile_Fields::class, 'clear_profile_fields_session_data' ], 999 );
+		/** deletes attachments that have not been set to profile fields when clearing session data @see Profile_Fields::remove_uploaded_profile_field_file_from_session() */
+		add_action( 'woocommerce_cleanup_sessions', [ Profile_Fields::class, 'remove_uploaded_profile_field_files_from_session' ], 1 );
+
 		// make sure template files are searched for in our plugin
 		add_filter( 'woocommerce_locate_template',      array( $this, 'locate_template' ), 20, 3 );
 		add_filter( 'woocommerce_locate_core_template', array( $this, 'locate_template' ), 20, 3 );
+
+		// @TODO: Move privacy handling methods and hooks below to own class {unfulvio 2024-02-22}
 
 		// GDPR handling: remove user memberships when erasing personal data
 		add_filter( 'wp_privacy_personal_data_erasers',   array( $this, 'register_personal_data_eraser' ) );
 		// GDPR handling: export user memberships personal data upon request
 		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_personal_data_exporter' ), 6 );
+		// GDPR handling: keep active user memberships if the "Retain inactive accounts" WooCommerce privacy setting is used
+		add_filter( 'woocommerce_delete_inactive_account_roles', [ $this, 'flag_active_member_user_exclusion_from_query' ], 1000 );
+		add_action( 'pre_get_users', [ $this, 'retain_active_members_from_erasure' ] );
 	}
 
 
@@ -139,13 +180,19 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 *
 	 * @since 1.11.0
 	 */
-	public function init_plugin() {
+	public function init_plugin()
+	{
+		$this->autoload();
 
 		$this->includes();
 
 		$this->add_milestone_hooks();
 	}
 
+	protected function autoload() : ClassLoader
+	{
+		return $this->composerAutoloader ??= require $this->get_plugin_path().'/vendor/autoload.php';
+	}
 
 	/**
 	 * Build and initialize the Setup Wizard handler.
@@ -156,16 +203,14 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 
 		parent::init_setup_wizard_handler();
 
-		require_once( $this->get_plugin_path() . '/includes/admin/class-wc-memberships-setup-wizard.php' );
+		require_once( $this->get_plugin_path() . '/src/Admin/class-wc-memberships-setup-wizard.php' );
 
-		$this->setup_wizard_handler = new \SkyVerge\WooCommerce\Memberships\Admin\Setup_Wizard( $this );
+		$this->setup_wizard_handler = new Setup_Wizard( $this );
 	}
 
 
 	/**
 	 * Initializes the REST API handler.
-	 *
-	 * This is done before init as WooCommerce registers webhooks early.
 	 *
 	 * @internal
 	 *
@@ -173,7 +218,20 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 */
 	public function init_rest_api() {
 
-		$this->rest_api = $this->get_rest_api_instance();
+		$this->get_rest_api_instance();
+	}
+
+
+	/**
+	 * Initializes the Webhooks handler.
+	 *
+	 * @internal
+	 *
+	 * @since 1.13.1
+	 */
+	public function init_webhooks() {
+
+		$this->get_webhooks_instance();
 	}
 
 
@@ -186,7 +244,7 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 */
 	protected function init_lifecycle_handler() {
 
-		require_once( $this->get_plugin_path() . '/includes/class-wc-memberships-upgrade.php' );
+		require_once( $this->get_plugin_path() . '/src/class-wc-memberships-upgrade.php' );
 
 		$this->lifecycle_handler = new \WC_Memberships_Upgrade( $this );
 	}
@@ -211,27 +269,34 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 * @internal
 	 *
 	 * @since 1.0.0
+	 * @since 1.27.0 Cache and helper classes, data stores, and profile field objects are autoloaded.
 	 */
 	public function includes() {
 
 		// load post types
-		require_once( $this->get_plugin_path() . '/includes/class-wc-memberships-post-types.php' );
+		require_once( $this->get_plugin_path() . '/src/class-wc-memberships-post-types.php' );
 
 		// load user messages helper
-		require_once( $this->get_plugin_path() . '/includes/class-wc-memberships-user-messages.php' );
+		require_once( $this->get_plugin_path() . '/src/class-wc-memberships-user-messages.php' );
 
 		// load helper functions
-		require_once( $this->get_plugin_path() . '/includes/functions/wc-memberships-functions.php' );
+		require_once( $this->get_plugin_path() . '/src/functions/wc-memberships-functions.php' );
 
 		// init general classes
-		$this->rules            = $this->load_class( '/includes/class-wc-memberships-rules.php',            'WC_Memberships_Rules' );
-		$this->plans            = $this->load_class( '/includes/class-wc-memberships-membership-plans.php', 'WC_Memberships_Membership_Plans' );
-		$this->emails           = $this->load_class( '/includes/class-wc-memberships-emails.php',           'WC_Memberships_Emails' );
-		$this->user_memberships = $this->load_class( '/includes/class-wc-memberships-user-memberships.php', 'WC_Memberships_User_Memberships' );
-		$this->capabilities     = $this->load_class( '/includes/class-wc-memberships-capabilities.php',     'WC_Memberships_Capabilities' );
-		$this->member_discounts = $this->load_class( '/includes/class-wc-memberships-member-discounts.php', 'WC_Memberships_Member_Discounts' );
-		$this->restrictions     = $this->load_class( '/includes/class-wc-memberships-restrictions.php',     'WC_Memberships_Restrictions' );
-		$this->shipping         = $this->load_class( '/includes/class-wc-memberships-shipping.php',         'WC_Memberships_Shipping' );
+		$this->rules            = $this->load_class( '/src/class-wc-memberships-rules.php',            'WC_Memberships_Rules' );
+		$this->plans            = $this->load_class( '/src/class-wc-memberships-membership-plans.php', 'WC_Memberships_Membership_Plans' );
+		$this->emails           = $this->load_class( '/src/class-wc-memberships-emails.php',           'WC_Memberships_Emails' );
+		$this->user_memberships = $this->load_class( '/src/class-wc-memberships-user-memberships.php', 'WC_Memberships_User_Memberships' );
+		$this->capabilities     = $this->load_class( '/src/class-wc-memberships-capabilities.php',     'WC_Memberships_Capabilities' );
+		$this->member_discounts = $this->load_class( '/src/class-wc-memberships-member-discounts.php', 'WC_Memberships_Member_Discounts' );
+		$this->shipping         = $this->load_class( '/src/class-wc-memberships-shipping.php',         'WC_Memberships_Shipping' );
+
+		require_once( $this->get_plugin_path() . '/src/Restrictions.php' );
+
+		$this->restrictions = new SkyVerge\WooCommerce\Memberships\Restrictions();
+
+		/** @deprecated remove legacy class aliases when the plugin has fully migrated to namespaces */
+		class_alias( \SkyVerge\WooCommerce\Memberships\Restrictions::class, 'WC_Memberships_Restrictions', false );
 
 		// frontend includes
 		if ( ! is_admin() ) {
@@ -239,28 +304,31 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 		}
 
 		// admin includes
-		if ( is_admin() && ! is_ajax() ) {
+		if ( is_admin() && ! wp_doing_ajax() ) {
 			$this->admin_includes();
 		}
 
 		// AJAX includes
-		if ( is_ajax() ) {
+		if ( wp_doing_ajax() ) {
 			$this->ajax_includes();
 		}
 
 		// load utilities
-		$this->utilities = $this->load_class( '/includes/class-wc-memberships-utilities.php', 'WC_Memberships_Utilities' );
+		$this->utilities = $this->load_class( '/src/class-wc-memberships-utilities.php', 'WC_Memberships_Utilities' );
 
 		// load integrations
-		$this->integrations = $this->load_class( '/includes/integrations/class-wc-memberships-integrations.php', 'WC_Memberships_Integrations' );
+		$this->integrations = $this->load_class( '/src/integrations/class-wc-memberships-integrations.php', 'WC_Memberships_Integrations' );
+
+		// Gutenberg blocks
+		$this->blocks = $this->load_class( '/src/Blocks.php', '\\SkyVerge\\WooCommerce\\Memberships\\Blocks' );
 
 		// WP CLI support
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			include_once $this->get_plugin_path() . '/includes/class-wc-memberships-cli.php';
+			include_once $this->get_plugin_path() . '/src/class-wc-memberships-cli.php';
 		}
 
 		// System Status Report static handler
-		require_once( $this->get_plugin_path() . '/includes/class-wc-memberships-system-status-report.php' );
+		require_once( $this->get_plugin_path() . '/src/class-wc-memberships-system-status-report.php' );
 	}
 
 
@@ -271,7 +339,7 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 */
 	private function admin_includes() {
 
-		$this->admin = $this->load_class( '/includes/admin/class-wc-memberships-admin.php', 'WC_Memberships_Admin' );
+		$this->admin = $this->load_class( '/src/Admin/class-wc-memberships-admin.php', 'WC_Memberships_Admin' );
 
 		// message handler
 		$this->admin->message_handler = $this->get_message_handler();
@@ -285,7 +353,7 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 */
 	private function ajax_includes() {
 
-		$this->ajax = $this->load_class( '/includes/class-wc-memberships-ajax.php', 'WC_Memberships_AJAX' );
+		$this->ajax = $this->load_class( '/src/class-wc-memberships-ajax.php', 'WC_Memberships_AJAX' );
 	}
 
 
@@ -297,12 +365,28 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	private function frontend_includes() {
 
 		// init shortcodes
-		require_once( $this->get_plugin_path() . '/includes/class-wc-memberships-shortcodes.php' );
+		require_once( $this->get_plugin_path() . '/src/Shortcodes.php' );
 
-		\WC_Memberships_Shortcodes::initialize();
+		/** @deprecated remove legacy class aliases when the plugin has fully migrated to namespaces */
+		class_alias( Shortcodes::class, 'WC_Memberships_Shortcodes' );
+
+		Shortcodes::initialize();
 
 		// load front end
-		$this->frontend = $this->load_class( '/includes/frontend/class-wc-memberships-frontend.php', 'WC_Memberships_Frontend' );
+		$this->frontend = $this->load_class( '/src/Frontend/class-wc-memberships-frontend.php', 'WC_Memberships_Frontend' );
+	}
+
+	public function load_class($local_path, $class_name)
+	{
+		if (! $this->composerAutoloader) {
+			$this->autoload();
+		}
+
+		if (class_exists($class_name)) {
+			return new $class_name;
+		}
+
+		return parent::load_class($local_path, $class_name);
 	}
 
 
@@ -327,6 +411,101 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 		}
 
 		return self::$instance;
+	}
+
+
+	/**
+	 * Gets a list of deprecated hooks and their replacements.
+	 *
+	 * @since 1.21.0
+	 *
+	 * @return array
+	 */
+	protected function get_deprecated_hooks() {
+
+		return [
+
+			// from the former Directory Shortcode free add on
+
+			'wcm_directory_before_member_directory' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_before_member_directory',
+			],
+			'wcm_directory_after_member_directory' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_after_member_directory',
+			],
+			'wcm_directory_before_member_card' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_member_directory_before_member_card',
+			],
+			'wcm_directory_after_member_card' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_member_directory_after_member_card',
+			],
+			'wcm_directory_before_member_bio' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_member_directory_before_member_bio',
+			],
+			'wcm_directory_member_listing_plans' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_member_directory_listing_plans',
+			],
+			'wcm_directory_included_members' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_member_directory_included_members',
+			],
+
+			// from the former Role Handler free add on
+
+			'wc_memberships_role_handler_update_role' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_update_member_user_role',
+			],
+			'wc_memberships_role_handler_updated_role' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_member_user_role_updated',
+			],
+			'wc_memberships_role_handler_settings' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_roles_settings',
+			],
+
+			// from the former Sensei Members Area free add on
+
+			'wcm_sensei_member_area_content_title' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_sensei_members_area_content_title',
+			],
+			'wcm_sensei_member_area_column_names' => [
+				'version'     => '1.21.0',
+				'removed'     => true,
+				'map'         => true,
+				'replacement' => 'wc_memberships_sensei_members_area_column_names',
+			],
+		];
 	}
 
 
@@ -374,7 +553,7 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 *
 	 * @since 1.9.0
 	 *
-	 * @return \WC_Memberships_Restrictions
+	 * @return \SkyVerge\WooCommerce\Memberships\Restrictions
 	 */
 	public function get_restrictions_instance() {
 
@@ -461,6 +640,19 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 
 
 	/**
+	 * Returns the plugin's abilities provider instance.
+	 *
+	 * @since 1.28.0
+	 *
+	 * @return AbilitiesProviderContract
+	 */
+	public function getAbilitiesProvider() : AbilitiesProviderContract
+	{
+		return new \SkyVerge\WooCommerce\Memberships\Abilities\Provider($this);
+	}
+
+
+	/**
 	 * Returns the Rules instance.
 	 *
 	 * @since 1.6.0
@@ -504,18 +696,48 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 *
 	 * @since 1.11.0
 	 *
-	 * @return \SkyVerge\WooCommerce\Memberships\REST_API
+	 * @return REST_API
 	 */
 	public function get_rest_api_instance() {
 
 		if ( null === $this->rest_api ) {
 
-			require_once( $this->get_plugin_path() . '/includes/api/class-wc-memberships-rest-api.php' );
+			require_once( $this->get_plugin_path() . '/src/class-wc-memberships-rest-api.php' );
 
-			$this->rest_api = new \SkyVerge\WooCommerce\Memberships\REST_API( $this );
+			$this->rest_api = new REST_API( $this );
 		}
 
 		return $this->rest_api;
+	}
+
+
+	/**
+	 * Gets the webhooks handler instance.
+	 *
+	 * @since 1.13.1
+	 *
+	 * @return Webhooks
+	 */
+	public function get_webhooks_instance() {
+
+		if ( null === $this->webhooks ) {
+			$this->webhooks = new Webhooks();
+		}
+
+		return $this->webhooks;
+	}
+
+
+	/**
+	 * Gets the Gutenberg Blocks instance.
+	 *
+	 * @since 1.15.0
+	 *
+	 * @return Blocks
+	 */
+	public function get_blocks_instance() {
+
+		return $this->blocks;
 	}
 
 
@@ -630,7 +852,161 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	}
 
 
+	/**
+	 * Adds admin notices upon initialization.
+	 *
+	 * @internal
+	 *
+	 * @since 1.17.1
+	 */
+	public function add_admin_notices() {
+
+		parent::add_admin_notices();
+
+		$migrated_free_add_ons_notices = [];
+
+		foreach ( (array) get_option( 'wc_memberships_installed_free_add_ons_migrated', [] ) as $free_add_on_installed ) {
+
+			switch ( $free_add_on_installed ) {
+
+				case 'directory-shortcode' :
+					$migrated_free_add_ons_notices[ $free_add_on_installed ] = sprintf(
+						/* translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag */
+						__( '%1$sHeads up!%2$s We\'ve merged the Directory Shortcode add-on into Memberships, so you no longer need this add-on to display a Member Directory. This add-on has been deactivated and can be safely removed from your plugin list.', 'woocommerce-memberships' ),
+						'<strong>', '</strong>'
+					);
+				break;
+				case 'excerpt-length' :
+					$migrated_free_add_ons_notices[ $free_add_on_installed ] = sprintf(
+						/* translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag */
+						__( '%1$sHeads up!%2$s We\'ve merged the Adjust Excerpt Length add-on into Memberships, so you no longer need this add-on to adjust the restricted content excerpt. This add-on has been deactivated and can be safely removed from your plugin list.', 'woocommerce-memberships' ),
+						'<strong>', '</strong>'
+					);
+				break;
+				case 'role-handler' :
+					$migrated_free_add_ons_notices[ $free_add_on_installed ] = sprintf(
+						/* translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag */
+						__( '%1$sHeads up!%2$s We\'ve merged the Role Handler add-on into Memberships, so you no longer need this add-on to set default member roles. This add-on has been deactivated and can be safely removed from your plugin list.', 'woocommerce-memberships' ),
+						'<strong>', '</strong>'
+					);
+				break;
+				case 'sensei-member-area' :
+					$migrated_free_add_ons_notices[ $free_add_on_installed ] = sprintf(
+						/* translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag */
+						__( '%1$sHeads up!%2$s We\'ve merged the Sensei Member Area add-on into Memberships, so you no longer need this add-on to add the "Courses & Lessons" section to your plan member areas. This add-on has been deactivated and can be safely removed from your plugin list.', 'woocommerce-memberships' ),
+						'<strong>', '</strong>'
+					);
+				break;
+			}
+		}
+
+		foreach ( $migrated_free_add_ons_notices as $add_on_id => $notice_message ) {
+
+			$this->get_admin_notice_handler()->add_admin_notice( $notice_message, sprintf( '%s-merged', $add_on_id ), [
+				'dismissible'             => true,
+				'notice_class'            => 'notice-info',
+				'always_show_on_settings' => false,
+			] );
+		}
+
+		// inform merchants about implications of having a Member Directory output
+		if ( $this->is_member_directory_enabled() ) {
+
+			$this->get_admin_notice_handler()->add_admin_notice(
+				/* translators: Placeholders: %1$s - "WooCommerce Memberships" plugin name in <strong> HTML tags, %2$s - opening <a> HTML tag, %3$s - closing </a> HTML tag */
+				sprintf( __( '%1$s: The Member Directory block and shortcode are enabled and ready to use. You can add the shortcode or the block to a post or a page to display members of your published plans. Make sure you have %2$sread the documentation%3$s about this feature.', 'woocommerce-memberships' ),
+					'<strong>' . $this->get_plugin_name() . '</strong>',
+					'<a href="https://woo.com/document/woocommerce-memberships-directory-shortcode/" target="_blank">', '</a>'
+				),
+				'wc-memberships-members-directory-enabled',
+				[
+					'dismissible'             => true,
+					'notice_class'            => 'notice-info',
+					'always_show_on_settings' => false,
+				]
+			);
+		}
+	}
+
+
+	/**
+	 * Adds any delayed admin notices.
+	 *
+	 * @internal
+	 *
+	 * @since 1.16.2
+	 */
+	public function add_delayed_admin_notices() {
+
+		parent::add_delayed_admin_notices();
+
+		if ( 'yes' === get_option( 'wc_memberships_use_as_3_0_0' ) ) {
+
+			$message = sprintf(
+				__( '%1$sHeads up!%2$s We introduced a bug in version 1.16.0 of Memberships that caused issues with scheduled actions. We\'re so sorry for this issue! The bug should be resolved in the current version, but %3$splease contact our support team immediately%4$s if you notice any further issues.', 'woocommerce-memberships' ),
+				'<strong>', '</strong>',
+				'<a href="' . esc_url( 'https://woocommerce.com/my-account/create-a-ticket/' ) . '">', '</a>'
+			);
+
+			$this->get_admin_notice_handler()->add_admin_notice( $message, 'wc-memberships-action-scheduler-migration', [
+				'notice_class'            => 'notice-info',
+				'always_show_on_settings' => false,
+			] );
+		}
+	}
+
+
 	/** Helper methods ******************************************************/
+
+
+	/**
+	 * Determines whether a plugin is installed (not limited to active).
+	 *
+	 * Note: this might not be totally foolproof, in case the plugins have strange paths, but it only provides a minor utility in the context of Memberships.
+	 * Consider making this a framework method if there's more broad need instead.
+	 *
+	 * @since 1.7.5-dev.1
+	 *
+	 * @param string $plugin plugin identifier (usually the main plugin file name)
+	 * @return bool
+	 */
+	public function is_plugin_installed( $plugin ) {
+
+		// bail early if plugin is listed as active already
+		if ( $this->is_plugin_active( $plugin ) ) {
+			return true;
+		}
+
+		// ensures get_plugins() function is available
+		if ( ! function_exists( 'get_plugins' ) && is_readable( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		$is_installed      = false;
+		$installed_plugins = function_exists( 'get_plugins' ) ? get_plugins() : null;
+
+		if ( is_array( $installed_plugins ) ) {
+
+			foreach ( array_keys( $installed_plugins ) as $installed_plugin ) {
+
+				// in case we passed a plugin name including path or if the plugin is a single file plugin
+				if ( $plugin === $installed_plugin ) {
+					$is_installed = true;
+					break;
+				}
+
+				// plugins are normally listed with full path, but we are likely to specify just the file name
+				$installed_plugin = explode( '/', $installed_plugin );
+
+				if ( $plugin === end( $installed_plugin ) ) {
+					$is_installed = true;
+					break;
+				}
+			}
+		}
+
+		return $is_installed;
+	}
 
 
 	/**
@@ -648,7 +1024,20 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 		       // in the plugin's main settings tab...
 		       && ( 'memberships' === $_GET['tab']
 		            // ...OR the plugin's email settings pages
-		            || ( 'email' === $_GET['tab'] && isset( $_GET['section'] ) && Framework\SV_WC_Helper::str_starts_with( $_GET['section'], 'wc_memberships' ) ) );
+		            || ( 'email' === $_GET['tab'] && isset( $_GET['section'] ) && Framework\SV_WC_Helper::str_starts_with( sanitize_text_field( wp_unslash( $_GET['section'] ) ), 'wc_memberships' ) ) );
+	}
+
+
+	/**
+	 * Checks if the Member Directory is available.
+	 *
+	 * @since 1.26.1
+	 *
+	 * @return bool
+	 */
+	public function is_member_directory_enabled() : bool {
+
+		return get_option( 'wc_memberships_enable_member_directory', 'no' ) === 'yes';
 	}
 
 
@@ -664,9 +1053,10 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 */
 	public function add_rewrite_endpoints() {
 
-		$endpoint = wc_memberships_get_members_area_endpoint();
+		$members_endpoint        = wc_memberships_get_members_area_endpoint();
+		$profile_fields_endpoint = wc_memberships_get_profile_fields_area_endpoint();
 
-		if ( ! empty( $endpoint ) ) {
+		if ( $members_endpoint || $profile_fields_endpoint ) {
 
 			$ep_mask = EP_PAGES;
 
@@ -681,7 +1071,14 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 			}
 
 			// add Members Area endpoint
-			add_rewrite_endpoint( $endpoint, $ep_mask );
+			if ( $members_endpoint ) {
+				add_rewrite_endpoint( $members_endpoint, $ep_mask );
+			}
+
+			// add Profile Fields Area endpoint
+			if ( $profile_fields_endpoint ) {
+				add_rewrite_endpoint( $profile_fields_endpoint, $ep_mask );
+			}
 		}
 	}
 
@@ -702,10 +1099,23 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	 */
 	public function add_query_vars( $query_vars ) {
 
+		// this may happen if some third party code triggers 'woocommerce_get_query_vars' before init, when these functions are initialized
+		if ( ! function_exists( 'wc_memberships_get_members_area_query_var' ) || ! function_exists( 'wc_memberships_get_members_area_endpoint' ) ) {
+			return $query_vars;
+		}
+
+		// add Members Area query var
 		$query_var = wc_memberships_get_members_area_query_var();
 
 		if ( ! isset( $query_vars[ $query_var ] ) ) {
 			$query_vars[ $query_var ] = wc_memberships_get_members_area_endpoint();
+		}
+
+		// add Profile Fields Area query var
+		$query_var = wc_memberships_get_profile_fields_area_query_var();
+
+		if ( ! isset( $query_vars[ $query_var ] ) ) {
+			$query_vars[ $query_var ] = wc_memberships_get_profile_fields_area_endpoint();
 		}
 
 		return $query_vars;
@@ -903,7 +1313,7 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 			'start-date'      => array(
 				'name'  => __( 'Start Date (UTC)', 'woocommerce-memberships' ),
 				'value' => $user_membership->get_start_date( 'mysql' ),
-			)
+			),
 		);
 
 		if ( $end_date = $user_membership->get_end_date( 'mysql' ) ) {
@@ -939,37 +1349,66 @@ class WC_Memberships extends Framework\SV_WC_Plugin  {
 	}
 
 
-	/** Deprecated methods ******************************************************/
+	/**
+	 * Sets an internal flag to indicate that a user inactivity query is being performed.
+	 *
+	 * @since 1.23.3-dev.1
+	 *
+	 * @internal
+	 *
+	 * @param mixed|array $user_roles
+	 * @return mixed|array
+	 */
+	public function flag_active_member_user_exclusion_from_query( $user_roles ) {
+
+		self::$doing_user_inactivity_query = true;
+
+		return $user_roles;
+	}
 
 
 	/**
-	 * Backwards compatibility handler for deprecated methods.
+	 * Retains active members when inactive user erasure queries are being run.
 	 *
-	 * TODO remove deprecated methods when they are at least 3 minor versions older (as in x.Y.z semantic versioning) {FN 2017-06-23}
+	 * @since 1.23.3-dev.1
 	 *
-	 * @since 1.6.0
+	 * @internal
 	 *
-	 * @param string $method method called
-	 * @param void|string|array|mixed $args optional argument(s)
-	 * @return null|void|mixed
+	 * @param \WP_User_Query|mixed $user_query
+	 * @return void
 	 */
-	public function __call( $method, $args ) {
+	public function retain_active_members_from_erasure( $user_query ) {
 
-		$deprecated = "WC_Memberships::{$method}()";
-
-		switch ( $method ) {
-
-			/** @deprecated since 1.11.0 - remove by version 1.14.0 */
-			case 'init' :
-			case 'maybe_activate' :
-			case 'deactivate' :
-				_deprecated_function( $deprecated, '1.11.0' );
-				return null;
+		if ( ! self::$doing_user_inactivity_query || ! $user_query instanceof \WP_User_Query ) {
+			return;
 		}
 
-		// you're probably doing it wrong...
-		trigger_error( 'Call to undefined method ' . __CLASS__ . '::' . $method, E_USER_ERROR );
-		return null;
+		/** @var WP_Post[] $active_user_memberships_posts */
+		$active_user_memberships_posts = get_posts( [
+			'post_type'      => 'wc_user_membership',
+			'status'         => ['wcm-active', 'wcm-paused', 'wcm-complimentary', 'wcm-delayed'],
+			'limit'          => -1,
+			'author__not_in' => (array) $user_query->get( 'exclude' ),
+		] );
+
+		$active_member_user_ids = [];
+
+		foreach ( $active_user_memberships_posts as $active_user_membership ) {
+			$active_member_user_ids[] = (int) $active_user_membership->post_author;
+		}
+
+		$active_member_user_ids = array_unique( $active_member_user_ids );
+
+		if ( empty( $active_member_user_ids ) ) {
+			return;
+		}
+
+		$user_query->set( 'exclude', array_merge(
+			(array) $user_query->get( 'exclude' ),
+			$active_member_user_ids
+		) );
+
+		self::$doing_user_inactivity_query = false;
 	}
 
 

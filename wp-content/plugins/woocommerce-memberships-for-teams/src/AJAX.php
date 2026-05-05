@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -100,7 +100,7 @@ class AJAX {
 
 		check_ajax_referer( 'search-teams', 'security' );
 
-		$search_term = (string) wc_clean( Framework\SV_WC_Helper::get_request( 'term' ) );
+		$search_term = (string) wc_clean( Framework\SV_WC_Helper::get_requested_value( 'term' ) );
 		$results     = array();
 
 		if ( ! empty( $search_term ) ) {

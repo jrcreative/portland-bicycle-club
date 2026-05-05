@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2014-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -59,10 +59,10 @@ else :
 				 * @param int $user_id the member ID
 				 */
 				$my_membership_notes_columns = (array) apply_filters( 'wc_memberships_members_area_my_membership_notes_column_names', array(
-					'membership-note-date'    => __( 'Date', 'woocommerce-memberships' ),
-					'membership-note-time'    => __( 'Time', 'woocommerce-memberships' ),
-					'membership-note-author'  => __( 'Author', 'woocommerce-memberships' ),
-					'membership-note-content' => __( 'Note Content', 'woocommerce-memberships' ),
+					'membership-note-date'    => esc_html__( 'Date', 'woocommerce-memberships' ),
+					'membership-note-time'    => esc_html__( 'Time', 'woocommerce-memberships' ),
+					'membership-note-author'  => esc_html__( 'Author', 'woocommerce-memberships' ),
+					'membership-note-content' => esc_html__( 'Note Content', 'woocommerce-memberships' ),
 				), $user_id );
 
 				?>
@@ -81,13 +81,13 @@ else :
 						<?php if ( 'membership-note-date' === $column_id ) : ?>
 
 							<td class="membership-note-date" data-title="<?php echo esc_attr( $column_name ); ?>">
-								<time datetime="<?php echo esc_attr( date( 'Y-m-d', strtotime( $note->comment_date ) ) ); ?>" title="<?php echo esc_attr( strtotime( $note->comment_date ) ); ?>"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $note->comment_date ) ); ?></time>
+								<time datetime="<?php echo esc_attr( date( 'Y-m-d', strtotime( $note->comment_date ) ) ); ?>" title="<?php echo esc_attr( strtotime( $note->comment_date ) ); ?>"><?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $note->comment_date ) ) ); ?></time>
 							</td>
 
 						<?php elseif ( 'membership-note-time' === $column_id ) : ?>
 
 							<td class="membership-note-time" data-title="<?php echo esc_attr( $column_name ); ?>">
-								<time title="<?php echo esc_attr( strtotime( $note->comment_date ) ); ?>"><?php echo esc_html( date( 'g:i a', strtotime( $note->comment_date ) ) . ' ' . $timezone ); ?></time>
+								<time title="<?php echo esc_attr( strtotime( $note->comment_date ) ); ?>"><?php echo esc_html( date( 'g:i a', strtotime( $note->comment_date ) ) . ' ' . esc_html( $timezone ) ); ?></time>
 							</td>
 
 						<?php elseif ( 'membership-note-author' === $column_id ) : ?>

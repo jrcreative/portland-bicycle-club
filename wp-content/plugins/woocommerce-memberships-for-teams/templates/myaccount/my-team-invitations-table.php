@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -63,7 +63,7 @@ $invitations = $results['invitations'];
 
 				?>
 				<?php foreach ( $columns as $column_id => $column_header ) : ?>
-					<th class="<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo $column_header; ?></span></th>
+					<th class="<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo $column_header; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span></th>
 				<?php endforeach; ?>
 			</tr>
 		</thead>
@@ -96,7 +96,7 @@ $invitations = $results['invitations'];
 
 							?>
 							<td class="team-actions order-actions" data-title="<?php echo esc_attr( $column_name ); ?>">
-								<?php echo $teams_area->get_action_links( 'invitations', $team, $invitation ); ?>
+								<?php echo $teams_area->get_action_links( 'invitations', $team, $invitation ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</td>
 
 						<?php else : ?>
@@ -128,7 +128,7 @@ $invitations = $results['invitations'];
 		<tfoot>
 			<tr>
 				<th colspan="<?php echo count( $columns ); ?>">
-					<?php echo $teams_area->get_pagination_links( $team, 'members', $results['total_pages'], $results['current_page'], array( 'show_invitations' => 1 ) ); ?>
+					<?php echo $teams_area->get_pagination_links( $team, 'members', $results['total_pages'], $results['current_page'], array( 'show_invitations' => 1 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</th>
 			</tr>
 		</tfoot>
@@ -147,7 +147,7 @@ $invitations = $results['invitations'];
 		 * @param string $text the text displayed for teams with no pending invitations
 		 * @param \SkyVerge\WooCommerce\Memberships\Teams\Team $team current team instance
 		 */
-		echo (string) apply_filters( 'wc_memberships_for_teams_my_team_invitations_no_invitations_text', __( 'Looks like there are no pending invitations.', 'woocommerce-memberships-for-teams' ), $team );
+		echo wp_kses_post( (string) apply_filters( 'wc_memberships_for_teams_my_team_invitations_no_invitations_text', esc_html__( 'Looks like there are no pending invitations.', 'woocommerce-memberships-for-teams' ), $team ) );
 
 		?>
 	</p>

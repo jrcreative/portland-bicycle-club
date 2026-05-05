@@ -17,14 +17,16 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 /**
  * Renders the join team page.
  *
- * @version 1.0.0
+ * @var \SkyVerge\WooCommerce\Memberships\Teams\Invitation $invitation invitation object
+ *
+ * @version 1.5.5
  * @since 1.0.0
  */
 
@@ -44,7 +46,37 @@ $existing_user_membership     = $team && $current_user ? $team->get_existing_use
 
 <?php if ( ! $team ) : ?>
 
-	<p class="woocommerce-error"><?php esc_html_e( 'Looks like the link you followed is no longer valid. If you were invited to join a team contact the team owner and ask them for a new invitation.', 'woocommerce-memberships-for-teams' ); ?></p>
+	<p class="woocommerce-error">
+		<?php
+
+		// An invalid invitation link
+		$error_message = sprintf(
+			/* translators: Placeholders: %1$s - the noun used to represent a team (singular) */
+			esc_html__( 'Looks like the link you followed is no longer valid. If you were invited to join a %1$s, contact the %1$s owner and ask them for a new invitation.', 'woocommerce-memberships-for-teams' ),
+			esc_html( wc_memberships_for_teams()->get_singular_team_noun() )
+		);
+
+		if ( $current_user ) {
+
+			// invitation is not found
+			$token      = str_replace( 'i_', '', $token );
+			$invitation = $invitation ?: wc_memberships_for_teams_get_invitation( $token );
+
+			// there is already an invitation for the same user and the user accepted it
+			if ( $invitation && $invitation->get_email() === $current_user->user_email && $invitation->has_status( 'accepted' ) ) {
+
+				$error_message = sprintf(
+					/* translators: Placeholders: %1$s - opening <a> HTML link tag, %2$s closing </a> HTML link tag */
+					esc_html__( 'Looks like you already joined the team via this link, %1$sclick here%2$s to go to your account page.', 'woocommerce-memberships-for-teams' ),
+					'<a href="' . esc_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) . '">', '</a>'
+				);
+			}
+		}
+
+		echo ucfirst( $error_message ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		?>
+	</p>
 
 <?php else : ?>
 
@@ -53,7 +85,7 @@ $existing_user_membership     = $team && $current_user ? $team->get_existing_use
 		<p>
 			<?php printf(
 				/* translators: Placeholders: %1$s user display name, %2$s logout url */
-				__( 'Hello %1$s (not %1$s? <a href="%2$s">Log out</a>)', 'woocommerce' ),
+				__( 'Hello %1$s (not %1$s? <a href="%2$s">Log out</a>)', 'woocommerce' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				'<strong>' . esc_html( $current_user->display_name ) . '</strong>',
 				esc_url( $logout_url )
 			); ?>
@@ -68,56 +100,55 @@ $existing_user_membership     = $team && $current_user ? $team->get_existing_use
 	<p>
 		<?php if ( $invitation && $sender = $invitation->get_sender() ) : ?>
 			<?php /* translators: Placeholders: %1$s - inviter name, %2$s - team name */ ?>
-			<?php printf( esc_html__( 'You\'ve been invited by %1$s to join %2$s.', 'woocommerce-memberships-for-teams' ), $sender->display_name, $team->get_name() ); ?>
+			<?php printf( esc_html__( 'You\'ve been invited by %1$s to join %2$s.', 'woocommerce-memberships-for-teams' ), esc_html( $sender->display_name ), esc_html( $team->get_name() ) ); ?>
 		<?php else : ?>
 			<?php /* translators: Placeholders: %s - team name */ ?>
-			<?php printf( esc_html__( "You've been invited to join %s.", 'woocommerce-memberships-for-teams' ), $team->get_name() ); ?>
+			<?php printf( esc_html__( "You've been invited to join %s.", 'woocommerce-memberships-for-teams' ), esc_html( $team->get_name() ) ); ?>
 		<?php endif; ?>
 
-		<?php if ( $team->get_membership_end_date() ) : ?>
-			<?php
-
-			// ensure correct end date is displayed
-			$end_date = $team->get_local_membership_end_date( 'timestamp' );
-
-			if ( $existing_user_membership && $existing_user_membership->get_end_date( 'timestamp' ) > $end_date ) {
-				$end_date = $existing_user_membership->get_end_date( 'timestamp' );
-			}
-
-			?>
+		<?php if ( $end_date = $team->getLocalMembershipEndDateForNewInvite($existing_user_membership) ) : ?>
 			<?php /* translators: Placeholders: %1$s - membership plan name, %2$s - date */ ?>
-			<?php printf( esc_html__( 'This will give you %1$s access until %2$s.', 'woocommerce-memberships-for-teams' ), $team->get_plan()->get_name(), date_i18n( wc_date_format(), $end_date ) ); ?>
+			<?php printf( esc_html__( 'This will give you %1$s access until %2$s.', 'woocommerce-memberships-for-teams' ), esc_html( $team->get_plan()->get_name() ), esc_html( date_i18n( wc_date_format(), $end_date ) ) ); ?>
 		<?php else : ?>
 			<?php /* translators: Placeholders: %s - membership plan name */ ?>
-			<?php printf( esc_html__( 'This will give you %s access.', 'woocommerce-memberships-for-teams' ), $team->get_plan()->get_name() ); ?>
+			<?php printf( esc_html__( 'This will give you %s access.', 'woocommerce-memberships-for-teams' ), esc_html( $team->get_plan()->get_name() ) ); ?>
 		<?php endif; ?>
 
 		<?php if ( $invitation ) : ?>
 			<?php if ( $current_user && $current_user->user_email === $invitation->get_email() ) : ?>
-				<?php esc_html_e( 'Click the button below to join this team.', 'woocommerce-memberships-for-teams' ); ?>
+				<?php echo esc_html( ucfirst( sprintf(
+					/* translators: Placeholder: %s - the noun used to represent a team (singular) */
+					__( 'Click the button below to join this %s.', 'woocommerce-memberships-for-teams' ), wc_memberships_for_teams()->get_singular_team_noun()
+				) ) ); ?>
 			<?php elseif ( ! $current_user && $invitation->get_user() ) : ?>
-				<?php esc_html_e( 'Please log in with your account to join this team.', 'woocommerce-memberships-for-teams' ); ?>
+				<?php echo esc_html( ucfirst( sprintf(
+					/* translators: Placeholder: %s - the noun used to represent a team (singular) */
+					__( 'Please log in with your account to join this %s.', 'woocommerce-memberships-for-teams' ), wc_memberships_for_teams()->get_singular_team_noun()
+				) ) ); ?>
 			<?php endif; ?>
 		<?php endif; ?>
 	</p>
 
 	<?php if ( $invitation && $current_user && ! $current_user_matches_invitee ) : ?>
 		<div class="woocommerce-error">
-			<p><?php printf( esc_html__( 'We sent this invitation to %1$s, but it looks like you are logged in as %2$s', 'woocommerce-memberships-for-teams' ), $invitation->get_email(), $current_user->user_email ); ?></p>
-			<p><?php printf( esc_html__( 'If you want to accept this invitation with your current account, click the button below, otherwise log out and sign up or log in as %s', 'woocommerce-memberships-for-teams' ), $invitation->get_email() ); ?></p>
+			<p><?php printf( esc_html__( 'We sent this invitation to %1$s, but it looks like you are logged in as %2$s', 'woocommerce-memberships-for-teams' ), esc_html( $invitation->get_email() ), esc_html( $current_user->user_email ) ); ?></p>
+			<p><?php printf( esc_html__( 'If you want to accept this invitation with your current account, click the button below, otherwise log out and sign up or log in as %s', 'woocommerce-memberships-for-teams' ), esc_html( $invitation->get_email() ) ); ?></p>
 		</div>
 	<?php elseif ( ! $current_user && ( ! $invitation || ! $invitation->get_user() ) ) : ?>
-		<p><?php esc_html_e( 'Please create an account or log in with an existing account to join this team.', 'woocommerce-memberships-for-teams' ); ?></p>
+		<p><?php echo esc_html( ucfirst( sprintf(
+			/* translators: Placeholder: %s - the noun used to represent a team (singular) */
+			__( 'Please create an account or log in with an existing account to join this %s.', 'woocommerce-memberships-for-teams' ), wc_memberships_for_teams()->get_singular_team_noun()
+		) ) ); ?></p>
 	<?php endif; ?>
 
 	<?php // notify about user membership reassignment ?>
 	<?php if ( ( $current_user && ! $invitation || $current_user && $current_user_matches_invitee ) && $existing_user_membership ) : ?>
 		<?php if ( $current_team = wc_memberships_for_teams()->get_teams_handler_instance()->get_user_membership_team( $existing_user_membership->get_id() ) ) : ?>
 			<?php /* translators: Placeholders: %1$s - current team name, %2$s - membership plan name, %3$s - new team name */ ?>
-			<p class="woocommerce-info"><?php printf( esc_html__( 'You are a member of %1$s, which already gives you access to %2$s. Joining %3$s means you will leave your current team and your existing membership will be moved under new team management.' ), $current_team->get_name(), $team->get_plan()->get_name(), $team->get_name() ); ?></p>
+			<p class="woocommerce-info"><?php printf( esc_html__( 'You are a member of %1$s, which already gives you access to %2$s. Joining %3$s means you will leave your current team and your existing membership will be moved under new team management.', 'woocommerce-memberships-for-teams' ), esc_html( $current_team->get_name() ), esc_html( $team->get_plan()->get_name() ), esc_html( $team->get_name() ) ); ?></p>
 		<?php else : ?>
 			<?php /* translators: Placeholders: %s - membership plan name */ ?>
-			<p class="woocommerce-info"><?php printf( esc_html__( 'Your existing %s membership will be moved under team management.' ), $team->get_plan()->get_name() ); ?></p>
+			<p class="woocommerce-info"><?php printf( esc_html__( 'Your existing %s membership will be moved under team management.', 'woocommerce-memberships-for-teams' ), esc_html( $team->get_plan()->get_name() ) ); ?></p>
 		<?php endif; ?>
 	<?php endif; ?>
 
@@ -125,8 +156,13 @@ $existing_user_membership     = $team && $current_user ? $team->get_existing_use
 
 		<?php if ( $team->is_user_member( $current_user->ID ) ) : ?>
 
-			<?php /* translators: Placeholders: %1$s - opening <a> tag, %2$s - closing </a> tag */ ?>
-			<p class="woocommerce-info"><?php printf( esc_html__( 'You are already a member of this team. %1$sClick here to view your account%2$s.', 'woocommerce-memberships-for-teams' ), '<a href="' . wc_get_page_permalink( 'myaccount' ) . '">', '</a>' ); ?></p>
+			<p class="woocommerce-info"><?php echo ucfirst( sprintf( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				/* translators: Placeholders: %1$s - the noun used to represent a team (singular), %2$s - opening <a> tag, %3$s - closing </a> tag */
+				esc_html__( 'You are already a member of this %1$s. %2$sClick here to view your account%3$s.', 'woocommerce-memberships-for-teams' ),
+				esc_html( wc_memberships_for_teams()->get_singular_team_noun() ),
+				'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">',
+				'</a>'
+			) ); ?></p>
 
 		<?php else : ?>
 
@@ -134,7 +170,11 @@ $existing_user_membership     = $team && $current_user ? $team->get_existing_use
 
 				<?php wp_nonce_field( 'join-team-' . $team->get_id() ); ?>
 
-				<input type="hidden" name="join_team" value="<?php echo esc_attr( $token ); ?>" />
+				<input
+					type="hidden"
+					name="join_team"
+					value="<?php echo esc_attr( $token ); ?>"
+				/>
 
 				<?php
 
@@ -151,10 +191,25 @@ $existing_user_membership     = $team && $current_user ? $team->get_existing_use
 				?>
 
 				<?php if ( $invitation && ! $current_user_matches_invitee ) : ?>
-					<button class="button" type="submit"><?php /* translators: Placeholders: %s - email */ printf( esc_html__( 'Join Team as %s', 'woocommerce-memberships-for-teams' ), $current_user->user_email ); ?></button>
-					<?php /* translators: Placeholders: %1$s - opening <a> tag, %2$s - closing </a> tag */ printf( __( 'Or %1$sLog Out%2$s to create a new account', 'woocommerce-memberships-for-teams' ), '<a href="' . $logout_url . '">', '</a>' ); ?>
+					<button class="woocommerce-Button button" type="submit">
+						<?php
+						/* translators: Placeholders: %s - email */
+						printf( esc_html__( 'Join Team as %s', 'woocommerce-memberships-for-teams' ), esc_html( $current_user->user_email ) );
+						?>
+					</button>
+					<?php /* translators: Placeholders: %1$s - opening <a> tag, %2$s - closing </a> tag */
+					printf( __( 'Or %1$sLog Out%2$s to create a new account', 'woocommerce-memberships-for-teams' ), '<a href="' . esc_url( $logout_url ) . '">', '</a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				<?php else : ?>
-					<button class="button" type="submit"><?php esc_html_e( 'Join Team', 'woocommerce-memberships-for-teams' ); ?></button>
+					<button class="woocommerce-Button button" type="submit">
+						<?php
+						echo esc_html( ucfirst( sprintf(
+							/* translators: Placeholder: %s - the noun used to represent a team (singular) */
+							__( 'Join %s', 'woocommerce-memberships-for-teams' ),
+							ucfirst( wc_memberships_for_teams()->get_singular_team_noun() )
+						) ) );
+						?>
+					</button>
 				<?php endif; ?>
 
 			</form>

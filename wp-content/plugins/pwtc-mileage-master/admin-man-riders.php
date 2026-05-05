@@ -16,6 +16,8 @@ else {
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
 
+    var enable_history = false;
+
 	function populate_users_table(users) {
         $('#rider-edit-section .users-div').empty();
         if (users.length > 0) {
@@ -177,12 +179,17 @@ jQuery(document).ready(function($) {
 		}
 		else {
 			show_rider_section(res, false);
-			if (history.pushState) {
+			if (history.pushState && enable_history) {
 				var state = {
 					'action': 'pwtc_mileage_get_rider',
 					'member_id': res.member_id
 				};
+                //console.log("History length before push is " + history.length);
+                //console.log("History.state before push is " + JSON.stringify(history.state));
+                console.log("Push state call, state is " + JSON.stringify(state));
 				history.pushState(state, '');
+                //console.log("History length after push is " + history.length);
+                //console.log("History.state after push is " + JSON.stringify(history.state));
 			}
         }
         $('body').removeClass('waiting');
@@ -437,8 +444,12 @@ jQuery(document).ready(function($) {
     });
 
     $('#rider-edit-section .back-btn').on('click', function(evt) {
-        if (history.pushState) {
+        if (history.pushState  && enable_history) {
+            //console.log("History length before back button is " + history.length);
+            //console.log("History.state before back button is " + JSON.stringify(history.state));
 			history.back();
+            //console.log("History length after back button is " + history.length);
+            //console.log("History.state after back button is " + JSON.stringify(history.state));
 		}
 		else {
 			return_main_section();
@@ -538,23 +549,25 @@ jQuery(document).ready(function($) {
     <?php } ?>		
     });
 
-    if (history.pushState) {
+    if (history.pushState && enable_history) {
 		$(window).on('popstate', function(evt) {
+            //console.log("History length after popstate event is " + history.length);
+            //console.log("History.state after popstate event is " + JSON.stringify(history.state));
 			var state = evt.originalEvent.state;
 			if (state !== null) {
-				//console.log("Popstate event, state is " + JSON.stringify(state));
+				console.log("Popstate event, state is " + JSON.stringify(state));
 				var action = '<?php echo admin_url('admin-ajax.php'); ?>';
 				$('body').addClass('waiting');
 				$.post(action, state, restore_rider_cb);
 			}
 			else {
-				//console.log("Popstate event, state is null.");
+				console.log("Popstate event, state is null.");
 				return_main_section();
 			}
 		});
 	}
     else {
-        //console.log("history.pushState is not supported");
+        console.log("history.pushState is not supported or disabled");
     }
 
     $("#rider-inspect-section .search-frm input[type='text']").val('');
@@ -596,7 +609,7 @@ if ($running_jobs > 0) {
         </div>
 
         <p><div><button class="add-btn button button-primary button-large">New</button>
-		<span class="add-blk popup-frm initially-hidden">
+		<div class="add-blk popup-frm initially-hidden">
 			<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>ID</span>
                 <input name="memberid" type="text" required/>
@@ -611,7 +624,7 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" value="Create"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		</span></div></p>
+        </div></div></p>
 
         <p><div class="riders-div"></div></p>
     </div>
@@ -622,7 +635,7 @@ if ($running_jobs > 0) {
 		    <h3>Rider <span class="rider-id"></span> - <span class="rider-name"></span></h3>
             <p>This rider expires on <strong><span class="exp-date"></span></strong>.</p> 
             <p><div><button class="modify-btn button button-primary button-large" title="Modify this rider's identity information.">Modify</button>
-		    <span class="modify-blk popup-frm initially-hidden">
+		    <div class="modify-blk popup-frm initially-hidden">
 			<form class="modify-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>First Name</span>
                 <input name="firstname" type="text" required/>
@@ -636,7 +649,7 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" value="Modify"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		    </span></div></p>
+            </div></div></p>
             <p><span class="ridesheet-count"></span></p>
             <p>
                 <button class="delete-btn button button-primary button-large">Delete Rider</button>

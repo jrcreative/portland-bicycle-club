@@ -17,13 +17,15 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\Memberships\Teams\Invitations\Adapters\JsonSerializers\InvitationSerializer;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0\Abilities\Contracts\JsonSerializable;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -32,23 +34,23 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 1.0.0
  */
-class Invitation {
+class Invitation implements JsonSerializable {
 
 
 	/** @var int invitation id */
-	private $id;
+	private int $id;
 
 	/** @var string invitation recipient email */
 	private $email;
 
-	/** @var int team id */
-	private $team_id;
+	/** @var int|null team id */
+	private ?int $team_id;
 
 	/** @var string invitation token */
 	private $token;
 
 	/** @var int invitation sender (user) id */
-	private $sender_id;
+	private int $sender_id;
 
 	/** @var string team member role for the invited user */
 	private $member_role;
@@ -89,11 +91,11 @@ class Invitation {
 			throw new Framework\SV_WC_Plugin_Exception( __( 'Invalid id or post', 'woocommerce-memberships-for-teams' ) );
 		}
 
-		$this->id          = $this->post->ID;
+		$this->id          = (int) $this->post->ID;
 		$this->email       = $this->post->post_title;
-		$this->team_id     = $this->post->post_parent;
+		$this->team_id     = ! empty($this->post->post_parent) ? (int) $this->post->post_parent : null;
 		$this->token       = $this->post->post_password;
-		$this->sender_id   = $this->post->post_author;
+		$this->sender_id   = (int) $this->post->post_author;
 		$this->member_role = $this->post->post_mime_type; // mime type has been repurposed to store the role
 		$this->date        = $this->post->post_date;
 		$this->date_gmt    = $this->post->post_date_gmt;
@@ -108,7 +110,7 @@ class Invitation {
 	 *
 	 * @return int invitation ID
 	 */
-	public function get_id() {
+	public function get_id() : int {
 		return $this->id;
 	}
 
@@ -201,7 +203,7 @@ class Invitation {
 	 *
 	 * @return int|null sender user id or null if not set
 	 */
-	public function get_sender_id() {
+	public function get_sender_id() : int {
 		return $this->sender_id;
 	}
 
@@ -213,7 +215,7 @@ class Invitation {
 	 *
 	 * @return int|null team id or null if not set
 	 */
-	public function get_team_id() {
+	public function get_team_id() : ?int {
 		return $this->team_id;
 	}
 
@@ -250,8 +252,7 @@ class Invitation {
 	/**
 	 * Returns the role to be assigned to the invited user.
 	 *
-	 * TODO: there is a dicrepancy in method names between Invitation::get_member_role() and Team_Member::get_role()
-	 * - my reasoning was that the invitation itself has no role, it's the roel of the would-be member, but I'd levae this opne for discussion {IT 2017-09-27}
+	 * TODO: there is a discrepancy in method names between {@see Invitation::get_member_role()} and {@see Team_Member::get_role()} - my reasoning was that the invitation itself has no role, it's the role of the would-be member, but I'd leave this one for discussion {IT 2017-09-27}
 	 *
 	 * @since 1.0.0
 	 *
@@ -418,10 +419,11 @@ class Invitation {
 	 * @since 1.0.0
 	 *
 	 * @param int|\WP_user $user_id user id or instance
-	 * @return \SkyVerge\WooCommerce\Memberships\Teams\Team_Member|false team member instance or false on failure
+	 * @param bool $add_member whether to add the member to the team upon accepting (default true)
+	 * @return false|Team_Member team member instance or false on failure or when not adding the member directly
 	 * @throws Framework\SV_WC_Plugin_Exception
 	 */
-	public function accept( $user_id ) {
+	public function accept( $user_id, $add_member = true ) {
 
 		if ( ! $this->has_status( 'pending' ) ) {
 			throw new Framework\SV_WC_Plugin_Exception( __( 'Cannot accept this invitation - it may have been revoked or already accepted.', 'woocommerce-memberships-for-teams' ) );
@@ -433,14 +435,13 @@ class Invitation {
 			throw new Framework\SV_WC_Plugin_Exception( __( 'Invalid user', 'woocommerce-memberships-for-teams' ) );
 		}
 
-		$team        = $this->get_team();
-		$team_member = $team->add_member( $user_id, $this->get_member_role() );
+		$team_member = $add_member ? $this->get_team()->add_member( $user_id, $this->get_member_role() ) : false;
 
 		$this->set_status( 'accepted' );
 
 		// record date and user id for history
 		update_post_meta( $this->id, '_accepted_date',    current_time( 'mysql', true ) );
-		update_post_meta( $this->id, '_accepted_user_id', $user_id );
+		update_post_meta( $this->id, '_accepted_user_id', $user->ID );
 
 		return $team_member;
 	}
@@ -463,5 +464,33 @@ class Invitation {
 
 		update_post_meta( $this->id, '_cancelled_date', current_time( 'mysql', true ) );
 	}
+
+
+	/**
+	 * Returns a JSON-serializable representation of this invitation.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	#[\ReturnTypeWillChange]
+	public function jsonSerialize()
+	{
+		return InvitationSerializer::convert($this);
+	}
+
+
+	/**
+	 * Returns the JSON schema describing the shape of {@see jsonSerialize()} output.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function getJsonSchema() : array
+	{
+		return InvitationSerializer::getJsonSchema();
+	}
+
 
 }

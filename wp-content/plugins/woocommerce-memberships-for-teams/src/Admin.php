@@ -17,16 +17,17 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
+/**
 /**
  * Admin class.
  *
@@ -59,6 +60,9 @@ class Admin {
 	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Admin\Membership_Plans the membership plans admin handler */
 	private $membership_plans;
 
+	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Admin\Profile_Fields the profile fields admin handler */
+	private $profile_fields;
+
 	/** @var \stdClass container of meta box classes instances */
 	private $meta_boxes;
 
@@ -70,14 +74,14 @@ class Admin {
 	 */
 	public function __construct() {
 
-		add_action( 'admin_enqueue_scripts',  array( $this, 'enqueue_scripts_styles' ), 15 );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts_styles' ], 15 );
 
 		// highlight WC > Memberships menu items when on Teams screens
 		add_filter( 'parent_file',  array( $this, 'modify_parent_file' ) );
 		add_filter( 'submenu_file', array( $this, 'modify_submenu_file' ) );
 
 		// add teams admin tabs to Memberships screens
-		add_filter( 'wc_memberships_admin_tabs', array( $this, 'add_admin_tabs' ) );
+		add_filter( 'wc_memberships_admin_tabs', [ $this, 'add_admin_tabs' ] );
 
 		// set current tab for Memberships admin pages
 		add_filter( 'wc_memberships_admin_current_tab', array( $this, 'set_current_tab' ) );
@@ -92,11 +96,7 @@ class Admin {
 		add_action( 'admin_notices', array( $this, 'show_admin_messages' ) );
 
 		// set the endpoint slug for Teams Area in My Account
-		if ( Framework\SV_WC_Plugin_Compatibility::is_wc_version_gte( '3.4' ) ) {
-			add_filter( 'woocommerce_settings_pages', array( $this, 'add_my_account_endpoints_options' ) );
-		} else {
-			add_filter( 'woocommerce_account_settings', array( $this, 'add_my_account_endpoints_options' ) );
-		}
+		add_filter( 'woocommerce_settings_pages', [ $this, 'add_my_account_endpoints_options' ] );
 
 		$this->settings         = new Admin\Settings;
 		$this->teams            = new Admin\Teams;
@@ -105,6 +105,11 @@ class Admin {
 		$this->products         = new Admin\Products;
 		$this->user_memberships = new Admin\User_Memberships;
 		$this->membership_plans = new Admin\Membership_Plans;
+
+		// if supported, load the profile fields handler
+		if ( wc_memberships_for_teams()->supports_profile_fields() ) {
+			$this->profile_fields = new Admin\Profile_Fields();
+		}
 	}
 
 
@@ -133,7 +138,7 @@ class Admin {
 
 		$screen = get_current_screen();
 
-		if ( $screen && in_array( $screen->id, $this->get_screen_ids( 'scripts' ), true ) ) {
+		if ( ( $screen && in_array( $screen->id, $this->get_screen_ids( 'scripts' ), true ) ) || wc_memberships_for_teams()->is_plugin_settings() ) {
 
 			$this->enqueue_scripts( $screen );
 			$this->enqueue_styles( $screen );
@@ -152,11 +157,15 @@ class Admin {
 
 		if ( 'wc_memberships_team' === $screen->id ) {
 
-			wp_enqueue_style( 'wc-memberships-for-teams-team-admin', wc_memberships_for_teams()->get_plugin_url() . '/assets/css/admin/wc-memberships-for-teams-team-admin.min.css', array(), Plugin::VERSION );
+			wp_enqueue_style( 'wc-memberships-for-teams-team-admin', wc_memberships_for_teams()->get_plugin_url() . '/assets/css/admin/wc-memberships-for-teams-team-admin.min.css', [], Plugin::VERSION );
 
 		} elseif ( 'wc_user_membership' === $screen->id )  {
 
-			wp_enqueue_style( 'wc-memberships-for-teams-user-memberships-admin', wc_memberships_for_teams()->get_plugin_url() . '/assets/css/admin/wc-memberships-for-teams-user-memberships-admin.min.css', array(), Plugin::VERSION );
+			wp_enqueue_style( 'wc-memberships-for-teams-user-memberships-admin', wc_memberships_for_teams()->get_plugin_url() . '/assets/css/admin/wc-memberships-for-teams-user-memberships-admin.min.css', [], Plugin::VERSION );
+
+		} elseif ( wc_memberships_for_teams()->is_plugin_settings() ) {
+
+			wp_enqueue_style( 'wc-memberships-for-teams-settings', wc_memberships_for_teams()->get_plugin_url() . '/assets/css/admin/wc-memberships-for-teams-settings.min.css', [], Plugin::VERSION );
 		}
 	}
 
@@ -454,6 +463,76 @@ class Admin {
 	public function show_admin_messages() {
 
 		wc_memberships_for_teams()->get_message_handler()->show_messages();
+
+		// adds notices to be displayed on the single team edit screen
+		if ( $this->is_team_edit_screen() ) {
+
+			$team = wc_memberships_for_teams_get_team( Framework\SV_WC_Helper::get_requested_value( 'post' ) );
+
+			if ( $team instanceof Team ) {
+				$this->add_team_edit_screen_notices( $team );
+			}
+		}
+	}
+
+
+	/**
+	 * Adds any admin notices necessary to display on the given team's edit screen.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @param Team $team the team being edited
+	 */
+	private function add_team_edit_screen_notices( Team $team ) {
+
+		// notices for teams with unlimited seats
+		if ( ! $team->get_seat_count() ) {
+
+			$order = $team->get_order();
+
+			// if the latest order is $0 and has no coupons they may have encountered a bug that allowed free renewals
+			if ( $order instanceof \WC_Order
+			     && 0.00 === (float) $order->get_total( 'edit' )
+			     && empty( $order->get_coupons() )
+			) {
+
+				$product = $team->get_product();
+
+				// if the product is > $0 and has per-team pricing
+				if ( $product instanceof \WC_Product
+				     && $product->get_price( 'edit' ) > 0
+				     && ! Product::has_per_member_pricing( $product )
+				) {
+
+					$message = sprintf(
+						/* translators: Placeholders: %1$s - <strong> HTML opening tag, %2$s - </strong> HTML closing tag, %3$s <a> HTML opening tag, %4$s </a> HTML closing tag */
+						__( '%1$sHeads up!%2$s It looks like this team was affected by a previous bug that could allow a $0 renewal. If you would like to ensure team owners are appropriately charged for this renewal, %3$splease click here to read our recommended steps%4$s.', 'woocommerce-memberships-for-teams' ),
+						'<strong>', '</strong>',
+						'<a href="https://docs.woocommerce.com/document/teams-woocommerce-memberships#faq-renewal-bug" target="_blank">', '</a>'
+					);
+
+					wc_memberships_for_teams()->get_admin_notice_handler()->add_admin_notice( $message, 'team-zero-renewal-' . $team->get_id(), [
+						'notice_class'            => 'notice-warning',
+						'dismissible'             => true,
+						'always_show_on_settings' => false,
+					] );
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Determines if we're viewing a team edit screen.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @return bool
+	 */
+	public function is_team_edit_screen() {
+		global $post, $pagenow;
+
+		return 'post.php' === $pagenow && 'wc_memberships_team' === get_post_type( $post );
 	}
 
 
@@ -498,6 +577,19 @@ class Admin {
 		}
 
 		return $new_settings;
+	}
+
+
+	/**
+	 * Gets the profile fields handler instance.
+	 *
+	 * @since 1.4.1
+	 *
+	 * @return \SkyVerge\WooCommerce\Memberships\Teams\Admin\Profile_Fields|null
+	 */
+	public function get_profile_fields_instance() {
+
+		return $this->profile_fields;
 	}
 
 

@@ -1,0 +1,52 @@
+name: Test Build
+
+on:
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  test:
+    name: Test Theme Build
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: |
+          cd wp-content/themes/pbc
+          
+          # Install dependencies (package.json now uses dart-sass)
+          yarn install
+          
+          composer install
+
+      - name: Test build
+        run: |
+          cd wp-content/themes/pbc
+          yarn build
+
+      - name: Build Summary
+        run: |
+          echo "## Build Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Build successful!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- PR: #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.head_ref }}\`" >> $GITHUB_STEP_SUMMARY

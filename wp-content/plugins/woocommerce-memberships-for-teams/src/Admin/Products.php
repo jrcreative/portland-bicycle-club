@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -75,7 +75,7 @@ class Products {
 		$options['wc_memberships_for_teams_has_team_membership'] = array(
 			'id'            => '_wc_memberships_for_teams_has_team_membership',
 			'wrapper_class' => 'show_if_simple show_if_variable',
-			'label'         => __( 'Team Membership', 'woocommerce-pdf-product-vouchers' ),
+			'label'         => __( 'Team Membership', 'woocommerce-memberships-for-teams' ),
 			'description'   => __( 'Team membership products give access to a team membership upon purchase.', 'woocommerce-memberships-for-teams' ),
 			'default'       => 'no',
 		);
@@ -299,12 +299,12 @@ class Products {
 
 		if ( isset( $_POST['variable_post_id'] ) ) {
 
-			$variable_post_id    = $_POST['variable_post_id'];
-			$has_team_membership = isset( $_POST['_wc_memberships_for_teams_variable_has_team_membership'] ) ? $_POST['_wc_memberships_for_teams_variable_has_team_membership'] : array();
-			$min_member_count    = isset( $_POST['_wc_memberships_for_teams_variable_min_member_count'] ) ? $_POST['_wc_memberships_for_teams_variable_min_member_count'] : array();
-			$max_member_count    = isset( $_POST['_wc_memberships_for_teams_variable_max_member_count'] ) ? $_POST['_wc_memberships_for_teams_variable_max_member_count'] : array();
-			$membership_plan     = isset( $_POST['_wc_memberships_for_teams_variable_plan'] ) ? $_POST['_wc_memberships_for_teams_variable_plan'] : array();
-			$max_loop            = max( array_keys( $_POST['variable_post_id'] ) );
+			$variable_post_id    = wc_clean( $_POST['variable_post_id'] );
+			$has_team_membership = isset( $_POST['_wc_memberships_for_teams_variable_has_team_membership'] ) ? wc_clean( $_POST['_wc_memberships_for_teams_variable_has_team_membership'] ) : array();
+			$min_member_count    = isset( $_POST['_wc_memberships_for_teams_variable_min_member_count'] ) ? wc_clean( $_POST['_wc_memberships_for_teams_variable_min_member_count'] ) : array();
+			$max_member_count    = isset( $_POST['_wc_memberships_for_teams_variable_max_member_count'] ) ? wc_clean( $_POST['_wc_memberships_for_teams_variable_max_member_count'] ) : array();
+			$membership_plan     = isset( $_POST['_wc_memberships_for_teams_variable_plan'] ) ? wc_clean( $_POST['_wc_memberships_for_teams_variable_plan'] ) : array();
+			$max_loop            = max( array_keys( $variable_post_id ) );
 
 			for ( $i = 0; $i <= $max_loop; $i++ ) {
 

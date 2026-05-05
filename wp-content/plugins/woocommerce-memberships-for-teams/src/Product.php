@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -45,7 +45,13 @@ class Product {
 	 */
 	public static function get_parent_id( \WC_Product $product ) {
 
-		return (int) ( $parent_id = Framework\SV_WC_Product_Compatibility::get_prop( $product, 'parent_id' ) ) ? $parent_id : Framework\SV_WC_Product_Compatibility::get_prop( $product, 'id' );
+		if ( $parent_id = $product->get_parent_id( 'edit' ) ) {
+			$product_id = $parent_id;
+		} else {
+			$product_id = $product->get_id();
+		}
+
+		return (int) $product_id;
 	}
 
 
@@ -120,10 +126,29 @@ class Product {
 		$plan_id = get_post_meta( $product->get_id(), '_wc_memberships_for_teams_plan', true );
 
 		if ( ! $plan_id && $product->is_type( 'variation' ) ) {
-			$plan_id = get_post_meta( Framework\SV_WC_Product_Compatibility::get_prop( $product, 'parent_id' ), '_wc_memberships_for_teams_plan', true );
+			$plan_id = get_post_meta( $product->get_parent_id( 'edit' ), '_wc_memberships_for_teams_plan', true );
 		}
 
 		return $plan_id ? (int) $plan_id : null;
+	}
+
+
+	/**
+	 * Gets the membership plan for the team product.
+	 *
+	 * @since 1.4.1
+	 *
+	 * @param \WC_Product $product the product instance
+	 * @return \WC_Memberships_Membership_Plan|null
+	 */
+	public static function get_membership_plan( \WC_Product $product ) {
+
+		if ( ! $membership_plan_id = self::get_membership_plan_id( $product ) ) {
+			return null;
+		}
+
+		// wc_memberships_get_membership_plan() returns false if the plan is not found - we return null instead
+		return wc_memberships_get_membership_plan( $membership_plan_id ) ?: null;
 	}
 
 
@@ -141,19 +166,27 @@ class Product {
 			return false;
 		}
 
-		$fields = array(
-			'team_name' => array(
-				'label' => __( 'Team Name', 'woocommerce-memberships-for-teams' ),
+		$fields = [
+			'team_name' => [
+				'label' => ucfirst( sprintf(
+					/* translators: Placeholder: %s - the noun used to represent a team (singular) */
+					__( '%s Name', 'woocommerce-memberships-for-teams' ),
+					ucfirst( wc_memberships_for_teams()->get_singular_team_noun() )
+				) ),
 				'required' => true,
-			),
-		);
+			],
+		];
 
 		if ( 'yes' !== get_option( 'wc_memberships_for_teams_owners_must_take_seat' ) ) {
-			$fields['team_owner_takes_seat'] = array(
+			$fields['team_owner_takes_seat'] = [
 				'type'        => 'checkbox',
 				'label'       => __( 'Take up a seat', 'woocommerce-memberships-for-teams' ),
-				'description' => __( 'Use a seat to add me as a team member', 'woocommerce-memberships-for-teams' ),
-			);
+				'description' => ucfirst( sprintf(
+					/* translators: Placeholder: %s - the noun used to represent a team (singular) */
+					__( 'Use a seat to add me as a %s member', 'woocommerce-memberships-for-teams' ),
+					wc_memberships_for_teams()->get_singular_team_noun()
+				) ),
+			];
 		}
 
 		/**

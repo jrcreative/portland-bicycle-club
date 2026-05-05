@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -341,7 +341,7 @@ class Invitations {
 
 
 	/**
-	 * Returns all invitation statuses.
+	 * Gets all invitation statuses.
 	 *
 	 * @since 1.0.0
 	 *
@@ -349,29 +349,28 @@ class Invitations {
 	 */
 	public function get_invitation_statuses() {
 
-		// TODO: is this a sane prefix? wcmti stands for "woocommerce memberships team invitation" {IT 2017-09-14}
+		// just as 'wcm-' prefix is used in User Memberships statuses, 'wcmti-' stands for "WooCommerce Memberships Team Invitation"
+		$statuses = [
 
-		$statuses = array(
-
-			'wcmti-pending'       => array(
+			'wcmti-pending'   => [
 				'label'       => _x( 'Pending', 'Invitation Status', 'woocommerce-memberships-for-teams' ),
 				/* translators: Pending Invitation(s) */
 				'label_count' => _n_noop( 'Pending <span class="count">(%s)</span>', 'Pending <span class="count">(%s)</span>', 'woocommerce-memberships-for-teams' ),
-			),
+			],
 
-			'wcmti-accepted'       => array(
+			'wcmti-accepted'  => [
 				'label'       => _x( 'Accepted', 'Invitation Status', 'woocommerce-memberships-for-teams' ),
 				/* translators: Accepted Invitation(s) */
 				'label_count' => _n_noop( 'Accepted <span class="count">(%s)</span>', 'Accepted <span class="count">(%s)</span>', 'woocommerce-memberships-for-teams' ),
-			),
+			],
 
-			'wcmti-cancelled'       => array(
+			'wcmti-cancelled' => [
 				'label'       => _x( 'Cancelled', 'Invitation Status', 'woocommerce-memberships-for-teams' ),
 				/* translators: Cancelled Invitation(s) */
 				'label_count' => _n_noop( 'Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'woocommerce-memberships-for-teams' ),
-			),
+			],
 
-		);
+		];
 
 		/**
 		 * Filters invitation statuses.
@@ -380,7 +379,7 @@ class Invitations {
 		 *
 		 * @param array $statuses associative array of statuses and their arguments
 		 */
-		return apply_filters( 'wc_memberships_for_teams_invitation_statuses', $statuses );
+		return (array) apply_filters( 'wc_memberships_for_teams_invitation_statuses', $statuses );
 	}
 
 

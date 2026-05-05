@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 use SkyVerge\WooCommerce\Memberships\Teams\Plugin;
 
 defined( 'ABSPATH' ) or exit;
@@ -61,10 +61,10 @@ class Teams {
 		// filter/sort by custom columns
 		add_filter( 'request', array( $this, 'request_query' ) );
 
-		add_action( 'edit_form_top',     array( $this, 'team_nonce' ) );
-		add_action( 'save_post',         array( $this, 'save' ), 10, 2 );
-		add_action( 'dbx_post_advanced', array( $this, 'load_team' ), 1 );
-		add_action( 'dbx_post_sidebar',  array( $this, 'add_hidden_controls' ) );
+		add_action( 'edit_form_top',    [ $this, 'team_nonce' ] );
+		add_action( 'save_post',        [ $this, 'save' ], 10, 2 );
+		add_action( 'add_meta_boxes',   [ $this, 'load_team' ], 1 );
+		add_action( 'dbx_post_sidebar', [ $this, 'add_hidden_controls' ] );
 
 		add_action( 'add_meta_boxes', array( $this, 'customize_meta_boxes' ), 30 );
 
@@ -127,9 +127,9 @@ class Teams {
 	 * @param \WP_Post $post
 	 * @return array
 	 */
-	public function customize_row_actions( $actions, \WP_Post $post ) {
+	public function customize_row_actions( $actions, $post ) {
 
-		if ( 'wc_memberships_team' === $post->post_type ) {
+		if ( $post instanceof \WP_Post && 'wc_memberships_team' === $post->post_type ) {
 
 			// remove quick edit, permanently delete actions
 			unset( $actions['inline hide-if-no-js'], $actions['delete'] );
@@ -158,7 +158,6 @@ class Teams {
 	}
 
 
-
 	/**
 	 * Customizes post states displayed in teams list table.
 	 *
@@ -170,9 +169,9 @@ class Teams {
 	 * @param \WP_Post $post
 	 * @return array
 	 */
-	public function customize_post_states( $post_states, \WP_Post $post ) {
+	public function customize_post_states( $post_states, $post ) {
 
-		if ( 'wc_memberships_team' === $post->post_type ) {
+		if ( $post instanceof \WP_Post && 'wc_memberships_team' === $post->post_type ) {
 
 			// remove password protected post state
 			unset( $post_states['protected'] );
@@ -202,7 +201,7 @@ class Teams {
 		switch ( $column ) {
 
 			case 'owner':
-				printf( '<strong><a href="%s">%s</a></strong><br>%s', get_edit_user_link( $owner->ID ), $owner->display_name, $owner->user_email );
+				printf( '<strong><a href="%s">%s</a></strong><br>%s', esc_url( get_edit_user_link( $owner->ID ) ), esc_html( $owner->display_name ), esc_html( $owner->user_email ) );
 			break;
 
 			case 'plan':
@@ -211,7 +210,7 @@ class Teams {
 				// but prevents fatal errors on borked installations where the
 				// associated plan disappeared.
 				if ( $plan = $team->get_plan() ) {
-					echo '<a href="' . esc_url( get_edit_post_link( $plan->get_id() ) ) . '">' . $plan->get_name() . '</a>';
+					echo '<a href="' . esc_url( get_edit_post_link( $plan->get_id() ) ) . '">' . esc_html( $plan->get_name() ) . '</a>';
 				} else {
 					echo '-';
 				}
@@ -225,7 +224,7 @@ class Teams {
 				$date = esc_html( date_i18n( $date_format, (int) $created_time ) );
 				$time = esc_html( date_i18n( $time_format, (int) $created_time ) );
 
-				printf( '%1$s %2$s', $date, $time );
+				printf( '%1$s %2$s', esc_html( $date ), esc_html( $time ) );
 
 			break;
 
@@ -234,10 +233,10 @@ class Teams {
 
 				if ( $seat_count = $team->get_seat_count() ) {
 					/* translators: Placeholders: %1$d - a number, %2$d - a number */
-					printf( esc_html__( '%1$d of %2$s seats', 'woocommerce-memberships-for-teams' ), $used_seat_count, $seat_count );
+					printf( esc_html__( '%1$d of %2$s seats', 'woocommerce-memberships-for-teams' ), esc_html( $used_seat_count ), esc_html( $seat_count ) );
 				} else {
 					/* translators: Placeholder: %d - a number */
-					printf( esc_html__( '%d of unlimited seats', 'woocommerce-memberships-for-teams' ), $used_seat_count );
+					printf( esc_html__( '%d of unlimited seats', 'woocommerce-memberships-for-teams' ), esc_html( $used_seat_count ) );
 				}
 			break;
 		}
@@ -395,9 +394,11 @@ class Teams {
 	 * @param array $query_args associative array
 	 * @return int[] array of post IDs
 	 */
-	private function get_teams_ids_by_user( \WP_User $user, array $query_args ) {
+	private function get_teams_ids_by_user( $user, array $query_args ) {
 
-		$user_memberships = wc_memberships_get_user_memberships( $user );
+		if ( $user instanceof \WP_User ) {
+			$user_memberships = wc_memberships_get_user_memberships( $user );
+		}
 
 		// maybe $user it's one of the team members
 		if ( ! empty( $user_memberships ) ) {
@@ -432,12 +433,15 @@ class Teams {
 	/**
 	 * Outputs the team nonce field in team edit screen.
 	 *
+	 * @internal
+	 *
 	 * @since 1.0.0
+	 *
 	 * @param \WP_Post $post the post object
 	 */
-	public function team_nonce( \WP_Post $post ) {
+	public function team_nonce( $post ) {
 
-		if ( ! is_object( $post ) || 'wc_memberships_team' !== $post->post_type ) {
+		if ( ! $post instanceof \WP_Post || 'wc_memberships_team' !== $post->post_type ) {
 			return;
 		}
 
@@ -455,11 +459,10 @@ class Teams {
 	 * @param int $post_id post identifier
 	 * @param \WP_Post $post the post object
 	 */
-	public function save( $post_id, \WP_Post $post ) {
-		global $wpdb;
+	public function save( $post_id, $post ) {
 
 		// $post_id and $post are required
-		if ( empty( $post_id ) || empty( $post ) || $this->saved_meta_boxes ) {
+		if ( empty( $post_id ) || ! $post instanceof \WP_Post || $this->saved_meta_boxes ) {
 			return;
 		}
 
@@ -469,7 +472,7 @@ class Teams {
 		}
 
 		// check the nonce
-		if ( empty( $_POST['wc_memberships_team_meta_nonce'] ) || ! wp_verify_nonce( $_POST['wc_memberships_team_meta_nonce'], 'wc_memberships_team_save_data' ) ) {
+		if ( empty( $_POST['wc_memberships_team_meta_nonce'] ) || ! wp_verify_nonce( wc_clean( $_POST['wc_memberships_team_meta_nonce'] ), 'wc_memberships_team_save_data' ) ) {
 			return;
 		}
 
@@ -526,7 +529,7 @@ class Teams {
 			if ( empty( $plans ) ) {
 
 				wc_memberships_for_teams()->get_admin_instance()->get_message_handler()->add_error( sprintf( __( 'Cannot add team: no membership plans available. %1$sClick here%2$s to add a membership plan.', 'woocommerce-memberships-for-teams' ), '<a href="' . esc_url( admin_url( 'post-new.php?post_type=wc_membership_plan' ) ) . '">', '</a>' ) );
-				wp_redirect( wp_get_referer() ); exit;
+				wp_safe_redirect( wp_get_referer() ); exit;
 			}
 
 			// generate registration key
@@ -602,10 +605,10 @@ class Teams {
 
 		$action = str_replace( 'admin_action_', '', current_action() );
 		$team   = wc_memberships_for_teams_get_team( $id );
-		$users  = ! empty( $_REQUEST['users'] ) ? (array) $_REQUEST['users'] : array();
+		$users  = ! empty( $_REQUEST['users'] ) ? (array) wc_clean( $_REQUEST['users'] ) : array();
 
 		if ( empty( $users ) ) {
-			wp_redirect( wp_get_referer() );
+			wp_safe_redirect( wp_get_referer() );
 			exit;
 		}
 
@@ -665,7 +668,7 @@ class Teams {
 			break;
 		}
 
-		wp_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() );
 		exit;
 	}
 
@@ -686,10 +689,10 @@ class Teams {
 		// get the post
 		$id      = isset( $_REQUEST['post'] ) ? absint( $_REQUEST['post'] ) : '';
 		$team    = wc_memberships_for_teams_get_team( $id );
-		$user_id = ! empty( $_REQUEST['user'] ) ? $_REQUEST['user'] : null;
+		$user_id = ! empty( $_REQUEST['user'] ) ? wc_clean( $_REQUEST['user'] ) : null;
 
 		if ( ! $user_id || ! $team ) {
-			wp_redirect( wp_get_referer() );
+			wp_safe_redirect( wp_get_referer() );
 			exit;
 		}
 
@@ -788,7 +791,7 @@ class Teams {
 			break;
 		}
 
-		wp_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() );
 		exit;
 	}
 

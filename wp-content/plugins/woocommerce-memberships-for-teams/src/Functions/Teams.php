@@ -17,11 +17,11 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -124,4 +124,16 @@ function wc_memberships_for_teams_get_user_membership_team_id( $user_membership_
  */
 function wc_memberships_for_teams_get_user_membership_team( $user_membership_id ) {
 	return wc_memberships_for_teams()->get_teams_handler_instance()->get_user_membership_team( $user_membership_id );
+}
+
+/**
+ * Deletes a team by ID.
+ *
+ * @since 1.8.0
+ *
+ * @param int $team_id team (post) ID
+ * @throws Framework\SV_WC_Plugin_Exception if the team is not found or could not be deleted
+ */
+function wc_memberships_for_teams_delete_team( int $team_id ) : void {
+    wc_memberships_for_teams()->get_teams_handler_instance()->deleteTeam( $team_id );
 }

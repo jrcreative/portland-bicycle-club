@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin\List_Tables;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -111,19 +111,13 @@ class Team_Members extends \WP_List_Table {
 
 			case 'added':
 
-				$added_time = $member->get_added_date( 'timestamp' );
+				$added_time = $member->get_added_date( 'Y-m-d H:i:s' );
 
 				if ( ! $added_time ) {
 					return __( 'N/A', 'woocommerce-memberships-for-teams' );
 				}
 
-				$date_format = wc_date_format();
-				$time_format = wc_time_format();
-
-				$date = esc_html( date_i18n( $date_format, (int) $added_time ) );
-				$time = esc_html( date_i18n( $time_format, (int) $added_time ) );
-
-				return sprintf( '%1$s %2$s', $date, $time );
+				return esc_html( get_date_from_gmt( $added_time, wc_date_format(). ', ' . wc_time_format() ) );
 
 			default :
 
@@ -170,14 +164,14 @@ class Team_Members extends \WP_List_Table {
 		$user_membership = $member->get_user_membership();
 
 		if ( $user_membership ) {
-			$name = '<a href="' . get_edit_post_link( $user_membership->get_id() ) . '">' . $name . '</a>';
+			$name = '<a href="' . esc_url( get_edit_post_link( $user_membership->get_id() ) ) . '">' . esc_html( $name ) . '</a>';
 		}
 
-		echo '<td class="' . $classes . ' member-name ', $data, '>';
+		echo '<td class="' . esc_attr( $classes ) . ' member-name" ' . $data . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<strong>';
-		echo $name;
+		echo $name; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</strong>';
-		echo $this->handle_row_actions( $member, 'name', $primary );
+		echo $this->handle_row_actions( $member, 'name', $primary ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</td>';
 	}
 
@@ -324,8 +318,8 @@ class Team_Members extends \WP_List_Table {
 					$output = ob_get_clean();
 
 					if ( ! empty( $output ) ) {
-						echo $output;
-						submit_button( __( 'Filter' ), '', 'filter_action', false, array( 'id' => 'team-member-query-submit' ) );
+						echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						submit_button( __( 'Filter', 'woocommerce-memberships-for-teams' ), '', 'filter_action', false, [ 'id' => 'team-member-query-submit' ] );
 					}
 				}
 			?>
@@ -351,7 +345,7 @@ class Team_Members extends \WP_List_Table {
 	private function roles_dropdown() {
 
 		$roles         = wc_memberships_for_teams_get_team_member_roles();
-		$selected_role = isset( $_GET['team_member_role'] ) ? $_GET['team_member_role'] : '';
+		$selected_role = isset( $_GET['team_member_role'] ) ? wc_clean( $_GET['team_member_role'] ) : '';
 
 		?>
 		<label for="filter-by-team-member-role" class="screen-reader-text"><?php esc_html_e( 'Filter by team member role', 'woocmmerce-memberships-for-teams'); ?></label>
@@ -391,20 +385,20 @@ class Team_Members extends \WP_List_Table {
 		);
 
 		if ( ! empty( $_REQUEST['s'] ) ) {
-			$args['search'] = $_REQUEST['s'];
+			$args['search'] = wc_clean( $_REQUEST['s'] );
 		}
 
 		if ( ! empty( $_REQUEST['orderby'] ) ) {
-			$args['orderby'] = $_REQUEST['orderby'];
+			$args['orderby'] = wc_clean( $_REQUEST['orderby'] );
 		}
 
 		if ( ! empty( $_REQUEST['order'] ) ) {
-			$args['order'] = $_REQUEST['order'];
+			$args['order'] = wc_clean( $_REQUEST['order'] );
 		}
 
 		// handle role filter
 		if ( ! empty( $_REQUEST['team_member_role'] ) ) {
-			$args['role'] = $_REQUEST['team_member_role'];
+			$args['role'] = wc_clean( $_REQUEST['team_member_role'] );
 		}
 
 		/**

@@ -17,13 +17,13 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Admin\List_Tables;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -166,11 +166,11 @@ class Invitations extends \WP_List_Table {
 	 */
 	protected function _column_name( $invitation, $classes, $data, $primary ) {
 
-		echo '<td class="' . $classes . ' member-name ', $data, '>';
+		echo '<td class="' . esc_attr( $classes ) . ' member-name" ' . $data . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<strong>';
-		echo $invitation->get_name();
+		echo esc_html( $invitation->get_name() );
 		echo '</strong>';
-		echo $this->handle_row_actions( $invitation, 'name', $primary );
+		echo $this->handle_row_actions( $invitation, 'name', $primary ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</td>';
 	}
 
@@ -324,8 +324,8 @@ class Invitations extends \WP_List_Table {
 					$output = ob_get_clean();
 
 					if ( ! empty( $output ) ) {
-						echo $output;
-						submit_button( __( 'Filter' ), '', 'filter_action', false, array( 'id' => 'team-member-query-submit' ) );
+						echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						submit_button( __( 'Filter', 'woocommerce-memberships-for-teams' ), '', 'filter_action', false, array( 'id' => 'team-member-query-submit' ) );
 					}
 				}
 			?>
@@ -351,7 +351,7 @@ class Invitations extends \WP_List_Table {
 	private function roles_dropdown() {
 
 		$roles         = wc_memberships_for_teams_get_team_member_roles();
-		$selected_role = isset( $_GET['team_member_role'] ) ? $_GET['team_member_role'] : '';
+		$selected_role = isset( $_GET['team_member_role'] ) ? wc_clean( $_GET['team_member_role'] ) : '';
 
 		?>
 		<label for="filter-by-team-member-role" class="screen-reader-text"><?php esc_html_e( 'Filter by team member role', 'woocmmerce-memberships-for-teams'); ?></label>
@@ -380,7 +380,7 @@ class Invitations extends \WP_List_Table {
 		$sortable              = array();
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
-		$search    = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ): '';
+		$search    = isset( $_REQUEST['s'] ) ? wc_clean( $_REQUEST['s'] ) : '';
 		$post_type = 'wc_team_invitation';
 		$per_page  = $this->get_items_per_page( 'edit_' . $post_type . '_per_page' );
 
@@ -394,20 +394,20 @@ class Invitations extends \WP_List_Table {
 		);
 
 		if ( ! empty( $_REQUEST['s'] ) ) {
-			$args['s'] = $_REQUEST['s'];
+			$args['s'] = wc_clean( $_REQUEST['s'] );
 		}
 
 		if ( ! empty( $_REQUEST['orderby'] ) ) {
-			$args['orderby'] = $_REQUEST['orderby'];
+			$args['orderby'] = wc_clean( $_REQUEST['orderby'] );
 		}
 
 		if ( ! empty( $_REQUEST['order'] ) ) {
-			$args['order'] = $_REQUEST['order'];
+			$args['order'] = wc_clean( $_REQUEST['order'] );
 		}
 
 		// handle role filter
 		if ( ! empty( $_REQUEST['team_member_role'] ) ) {
-			$args['role'] = $_REQUEST['team_member_role'];
+			$args['role'] = wc_clean( $_REQUEST['team_member_role'] );
 		}
 
 		/**

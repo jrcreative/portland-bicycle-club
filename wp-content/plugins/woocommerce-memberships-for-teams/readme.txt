@@ -1,9 +1,11 @@
 == Teams for WooCommerce Memberships
 Author: skyverge
 Tags: woocommerce, memberships, teams
-Requires at least: 4.6
-Tested up to: 5.1.1
-Requires PHP: 5.3
+Requires at least: 5.6
+Tested up to: 6.9.4
+Requires PHP: 7.4
+License: GPL v3.0
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 See https://docs.woocommerce.com/document/teams-for-woocommerce-memberships/ for full documentation.
 

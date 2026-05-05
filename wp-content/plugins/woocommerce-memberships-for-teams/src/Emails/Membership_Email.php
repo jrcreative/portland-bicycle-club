@@ -17,13 +17,14 @@
  * needs please refer to https://docs.woocommerce.com/document/teams-woocommerce-memberships/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2017-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 namespace SkyVerge\WooCommerce\Memberships\Teams\Emails;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_3_1 as Framework;
+use SkyVerge\WooCommerce\Memberships\Teams\Emails\Traits\CanGetRandomTeamTrait;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_0 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -35,6 +36,8 @@ defined( 'ABSPATH' ) or exit;
  * @since 1.0.0
  */
 abstract class Membership_Email extends \WC_Email {
+	use CanGetRandomTeamTrait;
+	use Framework\Emails\Traits\HasEmailPreviewValuesTrait;
 
 
 	/**
@@ -49,11 +52,12 @@ abstract class Membership_Email extends \WC_Email {
 		ob_start();
 
 		wc_get_template( $this->template_html, array(
-			'team'          => $this->object,
-			'email_heading' => $this->get_heading(),
-			'email'         => $this,
-			'sent_to_admin' => false,
-			'plain_text'    => false
+			'team'               => $this->object,
+			'email_heading'      => $this->get_heading(),
+			'email'              => $this,
+			'additional_content' => $this->get_additional_content(),
+			'sent_to_admin'      => false,
+			'plain_text'         => false
 		) );
 
 		return ob_get_clean();
@@ -72,10 +76,11 @@ abstract class Membership_Email extends \WC_Email {
 		ob_start();
 
 		wc_get_template( $this->template_plain, array(
-			'team'          => $this->object,
-			'email_heading' => $this->get_heading(),
-			'sent_to_admin' => false,
-			'plain_text'    => true
+			'team'               => $this->object,
+			'email_heading'      => $this->get_heading(),
+			'additional_content' => $this->get_additional_content(),
+			'sent_to_admin'      => false,
+			'plain_text'         => true
 		) );
 
 		return ob_get_clean();
@@ -169,6 +174,14 @@ abstract class Membership_Email extends \WC_Email {
 
 		// set the updated fields
 		$this->form_fields = $form_fields;
+	}
+
+	public function setPreviewValues() : void
+	{
+		$this->object = $this->getRandomTeam();
+
+		$this->placeholders['{team_name}'] = $this->object->get_name();
+		$this->placeholders['{membership_plan}'] = $this->object->get_plan()->get_name();
 	}
 
 

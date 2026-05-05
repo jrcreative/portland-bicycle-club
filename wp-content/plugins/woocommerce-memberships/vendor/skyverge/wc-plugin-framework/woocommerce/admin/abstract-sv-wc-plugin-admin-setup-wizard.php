@@ -17,17 +17,18 @@
  * needs please refer to http://www.skyverge.com
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2013-2019, SkyVerge, Inc.
+ * @copyright Copyright (c) 2013-2024, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-namespace SkyVerge\WooCommerce\PluginFramework\v5_4_0\Admin;
+namespace SkyVerge\WooCommerce\PluginFramework\v6_1_1\Admin;
 
 defined( 'ABSPATH' ) or exit;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_4_0 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
 
-if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_4_0\\Admin\\Setup_Wizard' ) ) :
+if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\Admin\\Setup_Wizard' ) ) :
+
 
 /**
  * The plugin Setup Wizard class.
@@ -39,6 +40,7 @@ if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_4_0\\Admin\\S
  *
  * @since 5.2.2
  */
+#[\AllowDynamicProperties]
 abstract class Setup_Wizard {
 
 
@@ -103,7 +105,7 @@ abstract class Setup_Wizard {
 				$this->add_hooks();
 
 				// mark the wizard as complete if specifically requested
-				if ( Framework\SV_WC_Helper::get_request( "wc_{$this->id}_setup_wizard_complete" ) ) {
+				if ( Framework\SV_WC_Helper::get_requested_value( "wc_{$this->id}_setup_wizard_complete" ) ) {
 					$this->complete_setup();
 				}
 			}
@@ -145,9 +147,7 @@ abstract class Setup_Wizard {
 	 */
 	public function add_admin_notices() {
 
-		$current_screen = get_current_screen();
-
-		if ( ( $current_screen && 'plugins' === $current_screen->id ) || $this->get_plugin()->is_plugin_settings() ) {
+		if ( Framework\SV_WC_Helper::is_current_screen( 'plugins' ) || $this->get_plugin()->is_plugin_settings() ) {
 
 			if ( $this->is_complete() && $this->get_documentation_notice_message() ) {
 				$notice_id = "wc_{$this->id}_docs";
@@ -248,8 +248,8 @@ abstract class Setup_Wizard {
 	protected function init_setup() {
 
 		// get a step ID from $_GET
-		$current_step   = sanitize_key( Framework\SV_WC_Helper::get_request( 'step' ) );
-		$current_action = sanitize_key( Framework\SV_WC_Helper::get_request( 'action' ) );
+		$current_step   = sanitize_key( Framework\SV_WC_Helper::get_requested_value( 'step' ) );
+		$current_action = sanitize_key( Framework\SV_WC_Helper::get_requested_value( 'action' ) );
 
 		if ( ! $current_action ) {
 
@@ -297,7 +297,7 @@ abstract class Setup_Wizard {
 	public function render_page() {
 
 		// maybe save and move onto the next step
-		$error_message = Framework\SV_WC_Helper::get_post( 'save_step' ) ? $this->save_step( $this->current_step ) : '';
+		$error_message = Framework\SV_WC_Helper::get_posted_value( 'save_step' ) ? $this->save_step( $this->current_step ) : '';
 
 		$page_title = sprintf(
 			/* translators: Placeholders: %s - plugin name */
@@ -324,7 +324,6 @@ abstract class Setup_Wizard {
 				<?php wp_print_scripts( 'wc-setup' ); ?>
 				<?php do_action( 'admin_print_scripts' ); ?>
 				<?php do_action( 'admin_print_styles' ); ?>
-				<?php do_action( 'admin_head' ); ?>
 			</head>
 			<body class="wc-setup wp-core-ui <?php echo esc_attr( $this->get_slug() ); ?>">
 				<?php $this->render_header(); ?>
@@ -354,7 +353,7 @@ abstract class Setup_Wizard {
 		try {
 
 			// bail early if the nonce is bad
-			if ( ! wp_verify_nonce( Framework\SV_WC_Helper::get_post( 'nonce' ), "wc_{$this->id}_setup_wizard_save" ) ) {
+			if ( ! wp_verify_nonce( Framework\SV_WC_Helper::get_posted_value( 'nonce' ), "wc_{$this->id}_setup_wizard_save" ) ) {
 				throw new Framework\SV_WC_Plugin_Exception( $error_message );
 			}
 
@@ -384,16 +383,19 @@ abstract class Setup_Wizard {
 	 */
 	protected function load_scripts_styles() {
 
+		$fw_version = $this->get_plugin()->get_assets_version();
+		$wc_version = defined( 'WC_VERSION' ) ? WC_VERSION : WC()->version ?? $fw_version;
+
 		// block UI
-		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI.min.js', array( 'jquery' ), '2.70', true );
+		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI.min.js', [ 'jquery' ], '2.70', true );
 
 		// enhanced dropdowns
-		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full.min.js', array( 'jquery' ), '1.0.0' );
-		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select.min.js', array( 'jquery', 'selectWoo' ), $this->get_plugin()->get_version() );
+		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full.min.js', [ 'jquery' ], '1.0.0' );
+		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select.min.js', [ 'jquery', 'selectWoo' ], $wc_version );
 		wp_localize_script(
 			'wc-enhanced-select',
 			'wc_enhanced_select_params',
-			array(
+			[
 				'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce-plugin-framework' ),
 				'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce-plugin-framework' ),
 				'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce-plugin-framework' ),
@@ -407,16 +409,16 @@ abstract class Setup_Wizard {
 				'ajax_url'                  => admin_url( 'admin-ajax.php' ),
 				'search_products_nonce'     => wp_create_nonce( 'search-products' ),
 				'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
-			)
+			]
 		);
 
 		// WooCommerce Setup core styles
-		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), $this->get_plugin()->get_version() );
-		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), $this->get_plugin()->get_version() );
+		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', [], $wc_version );
+		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', [ 'dashicons', 'install' ], $wc_version );
 
 		// framework bundled styles
-		wp_enqueue_style( 'sv-wc-admin-setup', $this->get_plugin()->get_framework_assets_url() . '/css/admin/sv-wc-plugin-admin-setup-wizard.min.css', array( 'wc-setup' ), $this->get_plugin()->get_version() );
-		wp_enqueue_script( 'sv-wc-admin-setup', $this->get_plugin()->get_framework_assets_url() . '/js/admin/sv-wc-plugin-admin-setup-wizard.min.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui' ), $this->get_plugin()->get_version() );
+		wp_enqueue_style( 'sv-wc-admin-setup', $this->get_plugin()->get_framework_assets_url() . '/css/admin/sv-wc-plugin-admin-setup-wizard.min.css', [ 'wc-setup' ], $fw_version );
+		wp_enqueue_script( 'sv-wc-admin-setup', $this->get_plugin()->get_framework_assets_url() . '/js/admin/sv-wc-plugin-admin-setup-wizard.min.js', [ 'jquery', 'wc-enhanced-select', 'jquery-blockui' ], $fw_version );
 	}
 
 
@@ -607,7 +609,17 @@ abstract class Setup_Wizard {
 	protected function render_finished() {
 
 		?>
-		<h1><?php printf( esc_html__( '%s is ready!', 'woocommerce-plugin-framework' ), esc_html( $this->get_plugin()->get_plugin_name() ) ); ?></h1>
+		<h1>
+			<?php
+
+			printf(
+				/* translators: Placeholder: %s - the plugin name */
+				esc_html__( '%s is ready!', 'woocommerce-plugin-framework' ),
+				esc_html( $this->get_plugin()->get_plugin_name()
+			) );
+
+			?>
+		</h1>
 		<?php $this->render_before_next_steps(); ?>
 		<?php $this->render_next_steps(); ?>
 		<?php $this->render_after_next_steps(); ?>
@@ -1007,7 +1019,7 @@ abstract class Setup_Wizard {
 
 		} catch ( Framework\SV_WC_Plugin_Exception $exception ) {
 
-			Framework\SV_WC_Plugin_Compatibility::wc_doing_it_wrong( __METHOD__, $exception->getMessage(), '5.2.2' );
+			wc_doing_it_wrong( __METHOD__, $exception->getMessage(), '5.2.2' );
 
 			return false;
 		}
@@ -1039,7 +1051,7 @@ abstract class Setup_Wizard {
 	 */
 	public function is_setup_page() {
 
-		return is_admin() && $this->get_slug() === Framework\SV_WC_Helper::get_request( 'page' );
+		return is_admin() && $this->get_slug() === Framework\SV_WC_Helper::get_requested_value( 'page' );
 	}
 
 
@@ -1081,7 +1093,7 @@ abstract class Setup_Wizard {
 	 */
 	public function is_finished() {
 
-		return self::ACTION_FINISH === Framework\SV_WC_Helper::get_request( 'action' );
+		return self::ACTION_FINISH === Framework\SV_WC_Helper::get_requested_value( 'action' );
 	}
 
 
@@ -1296,5 +1308,6 @@ abstract class Setup_Wizard {
 
 
 }
+
 
 endif;

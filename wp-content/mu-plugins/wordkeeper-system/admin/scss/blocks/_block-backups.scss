@@ -1,0 +1,150 @@
+.wrap-page-admin-panel{
+	.backups{
+		background: #f1f1f1;
+		padding: 0 30px;
+		.btn {
+			font-weight: normal;
+			font-size: 16px;
+			line-height: 1;
+			padding: 11px 24px;
+			border-radius: 4px;
+			@include media(">=widescreen") {
+				font-size: 18px;
+			}
+			&.button-secondary {
+				border-width: 1px;
+				min-width: 140px;
+			}
+		}
+	}
+	.top-holder {
+		display: flex;
+		flex-wrap: wrap;
+		//align-items: center;
+		align-items: flex-end;
+		justify-content: space-between;
+		padding: 28px 0 18px;
+		.col {
+			width: 100%;
+			@include media(">=desktop") {
+				width: 50%;
+			}
+			&:first-child {
+				padding-right: 20px;
+				.btn {
+					margin-bottom: 10px;
+					@include media(">=widescreen") {
+						margin-bottom: -10px;
+					}
+				}
+			}
+			&:last-child {
+				@include media(">=tablet") {
+					text-align: right;
+				}
+			}
+		}
+	}
+	.form-search-backup,
+	.form-search-redirects {
+		display: flex;
+		justify-content: flex-start;
+		margin-bottom: 17px;
+		@include media(">=tablet") {
+			justify-content: flex-end;
+		}
+		.btn {
+			line-height: 1;
+			margin-left: 10px;
+			height: 41px;
+			padding: 9px 10px;
+		}
+	}
+	input[type='search'] {
+		padding: 5px 15px;
+		min-height: 0;
+		min-width: 120px;
+
+		@include media(">=tablet") {
+			min-width: 202px;
+		}
+	}
+	.info {
+		@include media(">=widescreen") {
+			font-size: 18px;
+		}
+		.num {
+			margin-right: 3px;
+		}
+	}
+	.list-backups {
+		border: 1px solid #c3c4c8;
+		font-weight: normal;
+		font-size: 13px;
+		@include media(">=widescreen") {
+			font-size: 18px;
+		}
+		.row {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			background: #f7f7f7;
+			@include media(">=widescreen") {
+				padding-left: 20px;
+			}
+			&:first-child {
+				display: none;
+				border-bottom: 1px solid #c3c4c8;
+				@include media(">=tablet") {
+					display: flex;
+				}
+				.col {
+					padding: 16px 10px 15px;
+					&:first-child {
+						font-weight: normal;
+					}
+				}
+			}
+			&.title {
+				color: var(--bg-color-btn-primary);
+			}
+			&:nth-child(odd) {
+				background: #fff;
+			}
+		}
+		.btn {
+			min-width: 101px;
+			padding: 11px 21px;
+			margin: 0 20px 10px 0;
+			font-size: 13px;
+			@include media(">=desktop") {
+				min-width: 0;
+			}
+			@include media(">=widescreen") {
+				font-size: 18px;
+			}
+		}
+	}
+	.list-backups,
+	.list-redirects{
+		.col {
+			width: 100%;
+			padding: 20px 10px 10px;
+			span.title {
+				font-weight: normal;
+				display: block;
+				margin-bottom: 5px;
+				color: var(--bg-color-btn-primary);
+				@include media(">=tablet") {
+					display: none;
+				}
+			}
+			@include media(">=tablet") {
+				width: 25%;
+			}
+			&:first-child {
+				font-weight: bold;
+			}
+		}
+	}
+}
