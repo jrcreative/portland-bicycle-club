@@ -35,7 +35,7 @@ jobs:
       url: https://portlandbicycleclub.com
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -208,7 +208,7 @@ jobs:
         run: |
           echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ ${{ job.status }} == 'success' ]; then
+          if [ "${{ job.status }}" == "success" ]; then
             echo "✅ **Production deployment successful!**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
