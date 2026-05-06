@@ -451,12 +451,13 @@ class PwtcMembers_Admin {
 										'to' => esc_html($email['to']),
 										'subject' => esc_html($email['subject']),
 										'message' => $email['message'],
-										'headers' => $esc_headers
+										'headers' => $esc_headers,
+										'member_email' => $member_email
 									);				
 								}
 								else {
 									$status = wp_mail($email['to'], $email['subject'], $email['message'], $email['headers']);
-									if ($member_email == $email_to) {
+									if (stripos($email_to, $member_email) !== false) {
 										if ($status) {
 											$membership->add_note('Membership confirmation email manually sent to this member, send was successful.');
 										}

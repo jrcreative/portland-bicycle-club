@@ -17,8 +17,8 @@ jQuery(document).ready(function($) {
             $('#test-email-section .msg-div').html(res.status);
 		}
 		else {
-            $("#test-email-section .send-frm input[name='member_email']").val(res.to);
-            $("#test-email-section .send-frm input[name='email_to']").val(res.to);
+            $("#test-email-section .send-frm input[name='member_email']").val(res.member_email);
+            $("#test-email-section .send-frm input[name='email_to']").val(res.member_email);
             $('#test-email-section .msg-div').empty();
             $('#test-email-section .msg-div').append('<h3>To:</h3><div>' + res.to + '</div>');
             $('#test-email-section .msg-div').append('<h3>Subject:</h3><div>' + res.subject + '</div>');
@@ -98,7 +98,6 @@ jQuery(document).ready(function($) {
                 <input name="email_to" type="text" required/>
 				<input class="button button-primary" type="submit" value="Send Email"/>
             </form>
-            <span>(Copy of confirmation email will NOT be sent to Membership Secretary.)</span>
         </div>
     </div>
 <?php
