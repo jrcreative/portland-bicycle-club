@@ -364,9 +364,6 @@ class PwtcMembers {
 	}
 
 	public static function email_team_member_callback($team_member, $team, $membership) {
-		if ($team_member->is_team_owner()) {
-			return;
-		}
 		$user_data = $team_member->get_user();
 		$membership_plan = $membership->get_plan();
         if (get_field('send_membership_email', 'option')) {
@@ -1923,6 +1920,7 @@ class PwtcMembers {
 		if (empty($test_email)) {
 			if (get_field('bcc_membership_secretary', 'option')) {
 				$headers[] = 'Bcc: ' . $membersec_email;
+				//$to .= ', ' . $membersec_email;
 			}
 		}
 		return array(
