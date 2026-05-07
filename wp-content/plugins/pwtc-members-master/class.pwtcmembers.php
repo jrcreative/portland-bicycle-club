@@ -438,10 +438,13 @@ class PwtcMembers {
 		$membership_duration = $membership_variations[0]->get_attribute('Membership Type'); // 'One Year' or 'Two Year'
 
 		$current_user = wp_get_current_user();
-		$current_date = current_time('timestamp');
 		if ( $current_user->ID == 0 ) {
 			return;
 		}
+
+		$timezone = new DateTimeZone(pwtc_get_timezone_string());
+		$now_date = new DateTime(null, $timezone);
+		$expire_pad = new DateInterval('P30D');
 
 		$teams = wc_memberships_for_teams_get_teams($current_user->ID); //\SkyVerge\WooCommerce\Memberships\Teams\Team[]
 		if (empty($teams)) {
@@ -453,6 +456,14 @@ class PwtcMembers {
 				$msg = 'You already have multiple individual memberships, please contact the website admin to resolve.';
 				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
 				return;
+			}
+
+			$expiration_date = $memberships[0]->get_local_end_date('timestamp');
+			$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
+			$expire_pad_date->sub($expire_pad);
+			if ($now_date < $expire_pad_date and is_cart()) {
+					$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
+					wc_print_notice($msg, 'notice');
 			}
 
 			if ($membership_duration === 'One Year' and $memberships[0]->get_plan()->get_slug() === 'two-year-membership') {
@@ -468,11 +479,26 @@ class PwtcMembers {
 				return;
 			}
 
-			if ($memberships[0]->is_active() and $membership_type === '') {
+			if ($memberships[0]->is_active() and $membership_type === 'family-membership') {
 				$msg = 'You currently have a individual membership that is still active; you cannot convert it to a family membership until it expires. ';
-				$memberships[0]->is_active() ? $msg .= $wait_to_expire : $msg .= $link_to_delete;
 				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
 				return;
+			}
+
+			if ($membership_type === 'individual-membership') {
+				$renew_link = $memberships[0]->get_renew_membership_url();
+				if ($memberships[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
+					$msg = 'You already have a one-year individual membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+					//is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+					if (is_cart()) wc_print_notice($msg, 'error');
+					return;
+				}
+				else if ($memberships[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
+					$msg = 'You already have a two-year individual membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+					//is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+					if (is_cart()) wc_print_notice($msg, 'error');
+					return;
+				}
 			}
 
 			return;
@@ -486,6 +512,14 @@ class PwtcMembers {
 			$msg = 'You are a member but not the owner of a family membership; you are not allowed to purchase any membership products.';
 			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
 			return;			
+		}
+
+		$expiration_date = $teams[0]->get_local_membership_end_date('timestamp');
+		$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
+		$expire_pad_date->sub($expire_pad);
+		if ($now_date < $expire_pad_date and is_cart()) {
+			$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
+			wc_print_notice($msg, 'notice');
 		}
 
 		if ($membership_type === 'individual-membership') {
@@ -508,9 +542,17 @@ class PwtcMembers {
 			return;
 		}
 
-		if (!$teams[0]->is_membership_expired()) {
-			$msg = 'You currently have a family membership that is still active; you cannot purchase another until it expires.'; 
-			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+		$renew_link = $teams[0]->get_renew_membership_url();
+		if ($teams[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
+			$msg = 'You already have a one-year family membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+			//is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			if (is_cart()) wc_print_notice($msg, 'error');
+			return;
+		}
+		else if ($teams[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
+			$msg = 'You already have a two-year family membership, <a href="'. $renew_link . '">renew it</a> it instead of purchasing a new one.';
+			//is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			if (is_cart()) wc_print_notice($msg, 'error');
 			return;
 		}
 
