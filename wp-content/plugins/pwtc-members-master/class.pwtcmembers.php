@@ -76,11 +76,14 @@ class PwtcMembers {
 		add_filter( 'woocommerce_persistent_cart_enabled', 
 			array('PwtcMembers', 'disable_persistent_cart_callback' ) );
 
-		add_action('woocommerce_before_cart', 
-			array('PwtcMembers', 'validate_checkout_callback' ));
+		add_action('woocommerce_add_to_cart',
+			array('PwtcMembers', 'validate_membership_added_to_cart_callback'), 10, 6);
 
-		add_action('woocommerce_checkout_process', 
-			array('PwtcMembers', 'validate_checkout_callback' ));
+		add_action('woocommerce_before_cart', 
+			array('PwtcMembers', 'validate_cart_callback' ));
+
+//		add_action('woocommerce_checkout_process', 
+//			array('PwtcMembers', 'validate_checkout_callback' ));
 
 		add_filter('wc_memberships_for_teams_team_can_invite_user', 
 			array('PwtcMembers', 'validate_family_invitation_callback'), 10, 4);
@@ -410,6 +413,142 @@ class PwtcMembers {
 		return false;
 	}
 
+	public static function validate_membership_added_to_cart_callback($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data) {
+		$current_user = wp_get_current_user();
+		if ( $current_user->ID == 0 ) {
+			return;
+		}
+		if (!has_term('memberships', 'product_cat', $product_id)) { 
+			return;
+		}
+		$link_to_delete = 'You must first <a href="/delete-membership">delete your expired membership</a> before you can purchase a different one.';
+		$wait_to_expire = 'You must wait for your current membership to expire before you can purchase a different one.';
+		$product = wc_get_product($product_id);
+		$variation = wc_get_product($variation_id);
+		$membership_type = $product->get_slug(); // 'individual-membership' or 'family-membership'
+		$membership_duration = $variation->get_attribute('Membership Type'); // 'One Year' or 'Two Year'
+		$teams = wc_memberships_for_teams_get_teams($current_user->ID); //\SkyVerge\WooCommerce\Memberships\Teams\Team[]
+		if (empty($teams)) {
+			$memberships = wc_memberships_get_user_memberships($current_user->ID); //WC_Memberships_User_Membership[]
+			if (empty($memberships)) {
+				return;
+			}
+			if (count($memberships) > 1) {
+				$msg = 'You already have multiple individual memberships, please contact the website admin to resolve.';
+				throw new Exception($msg);
+			}
+			if ($membership_duration === 'One Year' and $memberships[0]->get_plan()->get_slug() === 'two-year-membership') {
+				$msg = 'You currently have a two year membership; you cannot change to a one year membership. ';
+				$memberships[0]->is_active() ? $msg .= $wait_to_expire : $msg .= $link_to_delete;
+				throw new Exception($msg);
+			}
+			else if ($membership_duration === 'Two Year' and $memberships[0]->get_plan()->get_slug() === 'one-year-membership') {
+				$msg = 'You currently have a one year membership; you cannot change to a two year membership. ';
+				$memberships[0]->is_active() ? $msg .= $wait_to_expire : $msg .= $link_to_delete;
+				throw new Exception($msg);
+			}
+			if ($memberships[0]->is_active() and $membership_type === 'family-membership') {
+				$msg = 'You currently have a individual membership that is still active; you cannot convert it to a family membership until it expires. ';
+				throw new Exception($msg);
+			}
+			if ($membership_type === 'individual-membership') {
+				$renew_link = $memberships[0]->get_renew_membership_url();
+				if ($memberships[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
+					$msg = 'You already have a one-year individual membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+					throw new Exception($msg);
+				}
+				else if ($memberships[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
+					$msg = 'You already have a two-year individual membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+					throw new Exception($msg);
+				}
+			}
+			return;
+		}
+		if (count($teams) > 1) {
+			$msg = 'You already have multiple family memberships, please contact the website admin to resolve.';
+			throw new Exception($msg);
+		}
+		if (!$teams[0]->is_user_owner($current_user->ID)) {
+			$msg = 'You are a member but not the owner of a family membership; you are not allowed to purchase any membership products.';
+			throw new Exception($msg);
+		}
+		if ($membership_type === 'individual-membership') {
+			$msg = 'You currently have a family membership; you cannot change to a individual membership. ';
+			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire; 
+			throw new Exception($msg);
+		}
+		if ($membership_duration === 'One Year' and $teams[0]->get_plan()->get_slug() === 'two-year-membership') {
+			$msg = 'You currently have a two year membership; you cannot change to a one year membership. ';
+			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire;
+			throw new Exception($msg);
+		}
+		else if ($membership_duration === 'Two Year' and $teams[0]->get_plan()->get_slug() === 'one-year-membership') {
+			$msg = 'You currently have a one year membership; you cannot change to a two year membership. ';
+			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire;
+			throw new Exception($msg);
+		}
+		$renew_link = $teams[0]->get_renew_membership_url();
+		if ($teams[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
+			$msg = 'You already have a one-year family membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+			throw new Exception($msg);
+		}
+		else if ($teams[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
+			$msg = 'You already have a two-year family membership, <a href="'. $renew_link . '">renew it</a> it instead of purchasing a new one.';
+			throw new Exception($msg);
+		}
+	}
+
+	public static function validate_cart_callback() {
+		$membership_cnt = 0;
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
+				$product = wc_get_product( $values['product_id'] );
+				if (has_term('memberships', 'product_cat', $product->get_id())) {
+					$membership_cnt++;
+				}
+			}
+		}
+		if ($membership_cnt == 0) {
+			return;
+		}
+		else if ($membership_cnt > 1) {
+			$msg = 'You may not purchase more than one membership product at a time.';
+			wc_print_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
+			return;
+		}
+		$current_user = wp_get_current_user();
+		if ( $current_user->ID == 0 ) {
+			return;
+		}
+		$timezone = new DateTimeZone(pwtc_get_timezone_string());
+		$now_date = new DateTime(null, $timezone);
+		$expire_pad = new DateInterval('P30D');
+		$teams = wc_memberships_for_teams_get_teams($current_user->ID); //\SkyVerge\WooCommerce\Memberships\Teams\Team[]
+		if (empty($teams)) {
+			$memberships = wc_memberships_get_user_memberships($current_user->ID); //WC_Memberships_User_Membership[]
+			if (empty($memberships)) {
+				return;
+			}
+			$expiration_date = $memberships[0]->get_local_end_date('timestamp');
+			$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
+			$expire_pad_date->sub($expire_pad);
+			if ($now_date < $expire_pad_date) {
+				$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
+				wc_print_notice($msg, 'notice');
+			}
+			return;
+		}
+		$expiration_date = $teams[0]->get_local_membership_end_date('timestamp');
+		$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
+		$expire_pad_date->sub($expire_pad);
+		if ($now_date < $expire_pad_date) {
+			$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
+			wc_print_notice($msg, 'notice');
+		}
+		return;
+	}
+
 	public static function validate_checkout_callback() {
 		$link_to_delete = 'You must first <a href="/delete-membership">delete your expired membership</a> before you can purchase a different one.';
 		$wait_to_expire = 'You must wait for your current membership to expire before you can purchase a different one.';
@@ -431,6 +570,7 @@ class PwtcMembers {
 		else if (count($membership_products) > 1) {
 			$msg = 'You may not purchase more than one membership product at a time.';
 			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 			return;
 		}
 
@@ -455,6 +595,7 @@ class PwtcMembers {
 			if (count($memberships) > 1) {
 				$msg = 'You already have multiple individual memberships, please contact the website admin to resolve.';
 				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
 			}
 
@@ -470,18 +611,21 @@ class PwtcMembers {
 				$msg = 'You currently have a two year membership; you cannot change to a one year membership. ';
 				$memberships[0]->is_active() ? $msg .= $wait_to_expire : $msg .= $link_to_delete;
 				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
 			}
 			else if ($membership_duration === 'Two Year' and $memberships[0]->get_plan()->get_slug() === 'one-year-membership') {
 				$msg = 'You currently have a one year membership; you cannot change to a two year membership. ';
 				$memberships[0]->is_active() ? $msg .= $wait_to_expire : $msg .= $link_to_delete;
 				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
 			}
 
 			if ($memberships[0]->is_active() and $membership_type === 'family-membership') {
 				$msg = 'You currently have a individual membership that is still active; you cannot convert it to a family membership until it expires. ';
 				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
 			}
 
@@ -491,12 +635,14 @@ class PwtcMembers {
 					$msg = 'You already have a one-year individual membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
 					//is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
 					if (is_cart()) wc_print_notice($msg, 'error');
+					remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 					return;
 				}
 				else if ($memberships[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
 					$msg = 'You already have a two-year individual membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
 					//is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
 					if (is_cart()) wc_print_notice($msg, 'error');
+					remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 					return;
 				}
 			}
@@ -506,11 +652,13 @@ class PwtcMembers {
 		if (count($teams) > 1) {
 				$msg = 'You already have multiple family memberships, please contact the website admin to resolve.';
 				is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
 		}
 		if (!$teams[0]->is_user_owner($current_user->ID)) {
 			$msg = 'You are a member but not the owner of a family membership; you are not allowed to purchase any membership products.';
 			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 			return;			
 		}
 
@@ -526,6 +674,7 @@ class PwtcMembers {
 			$msg = 'You currently have a family membership; you cannot change to a individual membership. ';
 			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire; 
 			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 			return;	
 		}
 
@@ -533,12 +682,14 @@ class PwtcMembers {
 			$msg = 'You currently have a two year membership; you cannot change to a one year membership. ';
 			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire;
 			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 			return;
 		}
 		else if ($membership_duration === 'Two Year' and $teams[0]->get_plan()->get_slug() === 'one-year-membership') {
 			$msg = 'You currently have a one year membership; you cannot change to a two year membership. ';
 			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire;
 			is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 			return;
 		}
 
@@ -547,12 +698,14 @@ class PwtcMembers {
 			$msg = 'You already have a one-year family membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
 			//is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
 			if (is_cart()) wc_print_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 			return;
 		}
 		else if ($teams[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
 			$msg = 'You already have a two-year family membership, <a href="'. $renew_link . '">renew it</a> it instead of purchasing a new one.';
 			//is_cart() ? wc_print_notice($msg, 'error') : wc_add_notice($msg, 'error');
 			if (is_cart()) wc_print_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 			return;
 		}
 
