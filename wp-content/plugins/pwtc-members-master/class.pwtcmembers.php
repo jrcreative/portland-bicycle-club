@@ -421,7 +421,7 @@ class PwtcMembers {
 		if (!has_term('memberships', 'product_cat', $product_id)) { 
 			return;
 		}
-		$link_to_delete = 'You must first <a href="/delete-membership">delete your expired membership</a> before you can purchase a different one.';
+		$link_to_delete = 'You must first delete your expired membership before you can purchase a different one. <a class="button" href="/delete-membership">Delete</a>';
 		$wait_to_expire = 'You must wait for your current membership to expire before you can purchase a different one.';
 		$product = wc_get_product($product_id);
 		$variation = wc_get_product($variation_id);
@@ -451,6 +451,7 @@ class PwtcMembers {
 				$msg = 'You currently have a individual membership that is still active; you cannot convert it to a family membership until it expires. ';
 				throw new Exception($msg);
 			}
+			/*
 			if ($membership_type === 'individual-membership') {
 				$renew_link = $memberships[0]->get_renew_membership_url();
 				if ($memberships[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
@@ -462,6 +463,7 @@ class PwtcMembers {
 					throw new Exception($msg);
 				}
 			}
+			*/
 			return;
 		}
 		if (count($teams) > 1) {
@@ -487,36 +489,44 @@ class PwtcMembers {
 			$teams[0]->is_membership_expired() ? $msg .= $link_to_delete : $msg .= $wait_to_expire;
 			throw new Exception($msg);
 		}
+		/*
 		$renew_link = $teams[0]->get_renew_membership_url();
 		if ($teams[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
-			$msg = 'You already have a one-year family membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+			$msg = 'You already have a one-year family membership, renew it instead of purchasing a new one. <a class="button" href="'. $renew_link . '">Renew</a>';
 			throw new Exception($msg);
 		}
 		else if ($teams[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
 			$msg = 'You already have a two-year family membership, <a href="'. $renew_link . '">renew it</a> it instead of purchasing a new one.';
 			throw new Exception($msg);
 		}
+		*/
 	}
 
 	public static function validate_cart_callback() {
-		$membership_cnt = 0;
+		$membership_products = [];
+		$membership_variations = [];
 		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 				$product = wc_get_product( $values['product_id'] );
 				if (has_term('memberships', 'product_cat', $product->get_id())) {
-					$membership_cnt++;
+					$membership_products[] = $product;
+					$membership_variations[] = wc_get_product( $values['variation_id'] );
 				}
 			}
 		}
-		if ($membership_cnt == 0) {
+		if (empty($membership_products)) {
 			return;
 		}
-		else if ($membership_cnt > 1) {
+		else if (count($membership_products) > 1) {
 			$msg = 'You may not purchase more than one membership product at a time.';
 			wc_print_notice($msg, 'error');
 			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 			return;
 		}
+
+		$membership_type = $membership_products[0]->get_slug(); // 'individual-membership' or 'family-membership'
+		$membership_duration = $membership_variations[0]->get_attribute('Membership Type'); // 'One Year' or 'Two Year'
+
 		$current_user = wp_get_current_user();
 		if ( $current_user->ID == 0 ) {
 			return;
@@ -537,6 +547,21 @@ class PwtcMembers {
 				$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
 				wc_print_notice($msg, 'notice');
 			}
+			if ($membership_type === 'individual-membership') {
+				$renew_link = $memberships[0]->get_renew_membership_url();
+				if ($memberships[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
+					$msg = 'You already have a one-year individual membership, renew it instead of purchasing a new one. <a class="button" href="'. $renew_link . '">Renew</a>';
+					wc_print_notice($msg, 'error');
+					remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
+					return;
+				}
+				else if ($memberships[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
+					$msg = 'You already have a two-year individual membership, renew it instead of purchasing a new one. <a class="button" href="'. $renew_link . '">Renew</a>';
+					wc_print_notice($msg, 'error');
+					remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
+					return;
+				}
+			}
 			return;
 		}
 		$expiration_date = $teams[0]->get_local_membership_end_date('timestamp');
@@ -545,6 +570,21 @@ class PwtcMembers {
 		if ($now_date < $expire_pad_date) {
 			$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
 			wc_print_notice($msg, 'notice');
+		}
+		if ($membership_type === 'family-membership') {
+			$renew_link = $teams[0]->get_renew_membership_url();
+			if ($teams[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
+				$msg = 'You already have a one-year family membership, renew it instead of purchasing a new one. <a class="button" href="'. $renew_link . '">Renew</a>';
+				wc_print_notice($msg, 'error');
+				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
+				return;
+			}
+			else if ($teams[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
+				$msg = 'You already have a two-year family membership, renew it instead of purchasing a new one. <a class="button" href="'. $renew_link . '">Renew</a>';
+				wc_print_notice($msg, 'error');
+				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
+				return;
+			}
 		}
 		return;
 	}
@@ -1495,7 +1535,7 @@ class PwtcMembers {
 		$memberships = wc_memberships_get_user_memberships($current_user->ID);
 		if (empty($teams)) {
 			if (empty($memberships)) {
-				return '<div class="callout success"><p>You have no membership to delete; you can return to your cart and buy a new one.</p></div>';
+				return '<div class="callout success"><p>You have no membership to delete; you can go to the join page and buy a new one. <a class="button" href="/join-renew">Join</a></p></div>';
 			}
 			if (count($memberships) > 1) {
 				return '<div class="callout alert"><p>You have multiple individual memberships, please notify website admin to resolve</p></div>';
