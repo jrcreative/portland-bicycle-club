@@ -424,14 +424,24 @@ class PwtcMembers {
 		$variation = wc_get_product($variation_id);
 		$membership_type = $product->get_slug(); // 'individual-membership' or 'family-membership'
 		$membership_duration = $variation->get_attribute('Membership Type'); // 'One Year' or 'Two Year'
-		$teams = wc_memberships_for_teams_get_teams($current_user->ID); //\SkyVerge\WooCommerce\Memberships\Teams\Team[]
+		if (function_exists('wc_memberships_for_teams_get_teams')) {
+			$teams = wc_memberships_for_teams_get_teams($current_user->ID);
+		}
+		else {
+			$teams = [];
+		}
 		if (empty($teams)) {
-			$memberships = wc_memberships_get_user_memberships($current_user->ID); //WC_Memberships_User_Membership[]
+			if (function_exists('wc_memberships_get_user_memberships')) {
+				$memberships = wc_memberships_get_user_memberships($current_user->ID);
+			}
+			else {
+				$memberships = [];
+			}
 			if (empty($memberships)) {
 				return;
 			}
 			if (count($memberships) > 1) {
-				$msg = 'You already have multiple individual memberships, please contact the website admin to resolve.';
+				$msg = 'You already have multiple individual memberships, please contact the Membership Secretary to resolve.';
 				throw new Exception($msg);
 			}
 			if ($membership_duration === 'One Year' and $memberships[0]->get_plan()->get_slug() === 'two-year-membership') {
@@ -451,7 +461,7 @@ class PwtcMembers {
 			return;
 		}
 		if (count($teams) > 1) {
-			$msg = 'You already have multiple family memberships, please contact the website admin to resolve.';
+			$msg = 'You already have multiple family memberships, please contact the Membership Secretary to resolve.';
 			throw new Exception($msg);
 		}
 		if (!$teams[0]->is_user_owner($current_user->ID)) {
@@ -506,18 +516,29 @@ class PwtcMembers {
 		}
 		$timezone = new DateTimeZone(pwtc_get_timezone_string());
 		$now_date = new DateTime(null, $timezone);
-		$expire_pad = new DateInterval('P30D');
-		$teams = wc_memberships_for_teams_get_teams($current_user->ID); //\SkyVerge\WooCommerce\Memberships\Teams\Team[]
+		if (function_exists('wc_memberships_for_teams_get_teams')) {
+			$teams = wc_memberships_for_teams_get_teams($current_user->ID);
+		}
+		else {
+			$teams = [];
+		}
 		if (empty($teams)) {
-			$memberships = wc_memberships_get_user_memberships($current_user->ID); //WC_Memberships_User_Membership[]
+			if (function_exists('wc_memberships_get_user_memberships')) {
+				$memberships = wc_memberships_get_user_memberships($current_user->ID);
+			}
+			else {
+				$memberships = [];
+			}
 			if (empty($memberships)) {
 				return;
 			}
+			$days_before = absint(wc_memberships()->get_user_memberships_instance()->get_ending_soon_days());
+			$expire_pad = new DateInterval('P'. $days_before . 'D');
 			$expiration_date = $memberships[0]->get_local_end_date('timestamp');
 			$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
 			$expire_pad_date->sub($expire_pad);
 			if ($now_date < $expire_pad_date) {
-				$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
+				$msg = 'You have more than ' . $days_before . ' days left in your current membership, are you sure that you want to purchase another?';
 				wc_print_notice($msg, 'notice');
 			}
 			if ($membership_type === 'individual-membership') {
@@ -537,11 +558,13 @@ class PwtcMembers {
 			}
 			return;
 		}
+		$days_before = absint(wc_memberships()->get_user_memberships_instance()->get_ending_soon_days());
+		$expire_pad = new DateInterval('P'. $days_before . 'D');
 		$expiration_date = $teams[0]->get_local_membership_end_date('timestamp');
 		$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
 		$expire_pad_date->sub($expire_pad);
 		if ($now_date < $expire_pad_date) {
-			$msg = 'You have more than a month left in your current membership, are you sure that you want to purchase another?';
+			$msg = 'You have more than ' . $days_before . ' days left in your current membership, are you sure that you want to purchase another?';
 			wc_print_notice($msg, 'notice');
 		}
 		if ($membership_type === 'family-membership') {
@@ -562,7 +585,7 @@ class PwtcMembers {
 		return;
 	}
 
-	public static function validate_checkout_callback() {
+	public static function validate_cart_callback_first_version() {
 		$link_to_delete = 'You must first <a href="/delete-membership">delete your expired membership</a> before you can purchase a different one.';
 		$wait_to_expire = 'You must wait for your current membership to expire before you can purchase a different one.';
 
