@@ -486,6 +486,7 @@ class PwtcMembers {
 	}
 
 	public static function validate_cart_callback() {
+		$other_product_cnt = 0;
 		$membership_products = [];
 		$membership_variations = [];
 		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
@@ -495,12 +496,23 @@ class PwtcMembers {
 					$membership_products[] = $product;
 					$membership_variations[] = wc_get_product( $values['variation_id'] );
 				}
+				else {
+					$other_product_cnt++;
+				}
 			}
 		}
 		if (empty($membership_products)) {
 			return;
 		}
-		else if (count($membership_products) > 1) {
+
+		if ($other_product_cnt > 0) {
+			$msg = 'You may not mix membership with non-membership products in your cart.';
+			wc_print_notice($msg, 'error');
+			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
+			return;
+		}
+
+		if (count($membership_products) > 1) {
 			$msg = 'You may not purchase more than one membership product at a time.';
 			wc_print_notice($msg, 'error');
 			remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
@@ -544,13 +556,13 @@ class PwtcMembers {
 			if ($membership_type === 'individual-membership') {
 				$renew_link = $memberships[0]->get_renew_membership_url();
 				if ($memberships[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
-					$msg = 'You already have a one-year individual membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+					$msg = 'You already have a one-year individual membership, <a href="'. $renew_link . '">renew your membership</a> instead of purchasing a new one.';
 					wc_print_notice($msg, 'error');
 					remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 					return;
 				}
 				else if ($memberships[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
-					$msg = 'You already have a two-year individual membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+					$msg = 'You already have a two-year individual membership, <a href="'. $renew_link . '">renew your membership</a> instead of purchasing a new one.';
 					wc_print_notice($msg, 'error');
 					remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 					return;
@@ -570,13 +582,13 @@ class PwtcMembers {
 		if ($membership_type === 'family-membership') {
 			$renew_link = $teams[0]->get_renew_membership_url();
 			if ($teams[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
-				$msg = 'You already have a one-year family membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+				$msg = 'You already have a one-year family membership, <a href="'. $renew_link . '">renew your membership</a> instead of purchasing a new one.';
 				wc_print_notice($msg, 'error');
 				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
 			}
 			else if ($teams[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
-				$msg = 'You already have a two-year family membership, <a href="'. $renew_link . '">renew it</a> instead of purchasing a new one.';
+				$msg = 'You already have a two-year family membership, <a href="'. $renew_link . '">renew your membership</a> instead of purchasing a new one.';
 				wc_print_notice($msg, 'error');
 				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
@@ -1417,6 +1429,7 @@ class PwtcMembers {
 				wc_memberships_for_teams()->get_teams_handler_instance()->maybe_delete_related_data($id);
 				wc_memberships_for_teams()->get_teams_handler_instance()->deleteTeam($id);
 			}
+			wc_empty_cart();
 			wp_redirect(get_permalink(), 303);
 			exit;
 		}
@@ -1434,7 +1447,7 @@ class PwtcMembers {
 			}
 			ob_start();
 			?>
-			<div class="callout success"><p>You may delete your expired individual membership. 
+			<div class="callout success"><p>You may delete your expired individual membership. Your shopping cart will also be emptied.
 				<form method="POST" novalidate>
 					<?php wp_nonce_field('delete-membership-form', 'nonce_field'); ?>
 					<input type="hidden" name="userid" value="<?php echo $current_user->ID; ?>"/>
@@ -1457,7 +1470,7 @@ class PwtcMembers {
 			}
 			ob_start();
 			?>
-			<div class="callout success"><p>You may delete your expired family membership. The memberships of any family members will also be deleted.
+			<div class="callout success"><p>You may delete your expired family membership. The memberships of any family members will also be deleted. Your shopping cart will also be emptied.
 				<form method="POST" novalidate>
 					<?php wp_nonce_field('delete-membership-form', 'nonce_field'); ?>
 					<input type="hidden" name="userid" value="<?php echo $current_user->ID; ?>"/>
