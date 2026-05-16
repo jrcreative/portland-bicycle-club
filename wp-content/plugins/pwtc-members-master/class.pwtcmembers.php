@@ -418,7 +418,9 @@ class PwtcMembers {
 		if (!has_term('memberships', 'product_cat', $product_id)) { 
 			return;
 		}
-		$link_to_delete = 'You must first <a href="/delete-membership">delete your expired membership</a> before you can purchase a different one.';
+		$button_class = wc_wp_theme_get_element_class_name('button') ? ' ' . wc_wp_theme_get_element_class_name('button') : '';
+		$delete_btn = sprintf('<a href="/delete-membership" class="button wc-forward%s">Delete</a>', $button_class); 
+		$link_to_delete = 'You must first delete your expired membership before you can purchase a different one.<br>' . $delete_btn;
 		$wait_to_expire = 'You must wait for your current membership to expire before you can purchase a different one.';
 		$product = wc_get_product($product_id);
 		$variation = wc_get_product($variation_id);
@@ -521,6 +523,7 @@ class PwtcMembers {
 
 		$membership_type = $membership_products[0]->get_slug(); // 'individual-membership' or 'family-membership'
 		$membership_duration = $membership_variations[0]->get_attribute('Membership Type'); // 'One Year' or 'Two Year'
+		$button_class = wc_wp_theme_get_element_class_name('button') ? ' ' . wc_wp_theme_get_element_class_name('button') : '';
 
 		$current_user = wp_get_current_user();
 		if ( $current_user->ID == 0 ) {
@@ -555,14 +558,15 @@ class PwtcMembers {
 			}
 			if ($membership_type === 'individual-membership') {
 				$renew_link = $memberships[0]->get_renew_membership_url();
+				$renew_btn = sprintf('<a href="%s" class="button wc-forward%s">Renew</a>', esc_url($renew_link), $button_class); 
 				if ($memberships[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
-					$msg = 'You already have a one-year individual membership, <a href="'. $renew_link . '">renew your membership</a> instead of purchasing a new one.';
+					$msg = 'You already have a one-year individual membership, renew your membership instead of purchasing a new one.<br>' . $renew_btn;
 					wc_print_notice($msg, 'error');
 					remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 					return;
 				}
 				else if ($memberships[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
-					$msg = 'You already have a two-year individual membership, <a href="'. $renew_link . '">renew your membership</a> instead of purchasing a new one.';
+					$msg = 'You already have a two-year individual membership, renew your membership instead of purchasing a new one.<br>' . $renew_btn;
 					wc_print_notice($msg, 'error');
 					remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 					return;
@@ -581,14 +585,15 @@ class PwtcMembers {
 		}
 		if ($membership_type === 'family-membership') {
 			$renew_link = $teams[0]->get_renew_membership_url();
+			$renew_btn = sprintf('<a href="%s" class="button wc-forward%s">Renew</a>', esc_url($renew_link), $button_class);
 			if ($teams[0]->get_plan()->get_slug() === 'one-year-membership' and $membership_duration === 'One Year') {
-				$msg = 'You already have a one-year family membership, <a href="'. $renew_link . '">renew your membership</a> instead of purchasing a new one.';
+				$msg = 'You already have a one-year family membership, renew your membership instead of purchasing a new one.<br>' . $renew_btn;
 				wc_print_notice($msg, 'error');
 				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
 			}
 			else if ($teams[0]->get_plan()->get_slug() === 'two-year-membership' and $membership_duration === 'Two Year') {
-				$msg = 'You already have a two-year family membership, <a href="'. $renew_link . '">renew your membership</a> instead of purchasing a new one.';
+				$msg = 'You already have a two-year family membership, renew your membership instead of purchasing a new one.</br>' . $renew_btn;
 				wc_print_notice($msg, 'error');
 				remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
 				return;
