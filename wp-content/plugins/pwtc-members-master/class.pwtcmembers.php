@@ -1111,7 +1111,7 @@ class PwtcMembers {
 
 	// Generates the [pwtc_member_renew_nag] shortcode.
 	public static function shortcode_member_renew_nag($atts) {
-		$a = shortcode_atts(array('renewonly' => 'no', 'pad' => '30', 'killmargin' => 'no'), $atts);
+		$a = shortcode_atts(array('renewonly' => 'no', 'pad' => '14', 'killmargin' => 'no'), $atts);
 		$current_user = wp_get_current_user();
 		if ( 0 == $current_user->ID ) {
 			return '';
@@ -1151,95 +1151,179 @@ class PwtcMembers {
 			$expiration_date = $memberships[0]->get_local_end_date('timestamp');
 			$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
 			$expire_pad_date->sub($expire_pad);
-			$team_name = $team->get_name();
-            $renew_msg = 'You can either <a href="' . $renew_link . '">renew your membership</a> or visit the <a href="/home/join-renew/">Join page</a> to see what other membership options are available.';
-			if ($team->is_user_owner($current_user->ID)) {
-				$count = self::count_remaining_memberships('wc_memberships_team', $current_user->ID, $team->get_id());
-				if ($count > 0) {
-					ob_start();
-					?>
-					<div class="callout alert"><p>You own multiple family memberships, please notify website admin to resolve</p></div>		
-					<?php
-					return ob_get_clean();		
-				}
-				else if ($team->is_membership_expired()) {
-					ob_start();
-					?>
-					<div class="callout warning"><p>Your family membership "<?php echo $team_name; ?>" expired on <?php echo date('F j, Y', $expiration_date); ?>. <?php echo $renew_msg; ?></p></div>		
-					<?php
-					return ob_get_clean();
-				}
-				else {
-					if ($a['renewonly'] == 'yes') {
-						return '';
-					}
-					if ($now_date < $expire_pad_date) {
-						$renew_msg = '';
-					}
-					ob_start();
-					?>
-					<div class="callout success"><p>Your family membership "<?php echo $team_name; ?>" will expire on <?php echo date('F j, Y', $expiration_date); ?>. <?php echo $renew_msg; ?></p></div>		
-					<?php
-					return ob_get_clean();
-				}
-			}
-			else {
-				if ($team->is_membership_expired()) {
-					ob_start();
-					?>
-					<div class="callout warning"><p>Your family membership "<?php echo $team_name; ?>" expired on <?php echo date('F j, Y',$expiration_date); ?>, please ask the membership owner to renew</p></div>		
-					<?php
-					return ob_get_clean();	
-				}
-				else {
-					if ($a['renewonly'] == 'yes') {
-						return '';
-					}			
-					ob_start();
-					?>
-					<div class="callout success"><p>Your family membership "<?php echo $team_name; ?>" will expire on <?php echo date('F j, Y',$expiration_date); ?></p></div>		
-					<?php
-					return ob_get_clean();
-				}
-			}
-		}
-		else {
-			$renew_link = $membership->get_renew_membership_url();
-			$expiration_date = $membership->get_local_end_date('timestamp');
-			$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
-			$expire_pad_date->sub($expire_pad);
-			$renew_msg = 'You can either <a href="' . $renew_link . '">renew your membership</a> or visit the <a href="/home/join-renew/">Join page</a> to see what other membership options are available.';
-			if ($membership->is_expired()) {
+			$renew_msg = 'You can either <a href="' . $renew_link . '">renew your membership</a> or visit the <a href="/home/join-renew/">Join</a> page to see what other membership options are available.';
+			if ($memberships[0]->is_expired()) {
 				ob_start();
 				?>
-				<div class="callout warning"><p>Your individual membership expired on <?php echo date('F j, Y', $expiration_date); ?>. <?php echo $renew_msg; ?></p></div>		
+				<div <?php echo $style; ?> class="callout warning"><p>Your individual membership expired on <?php echo date('F j, Y', $expiration_date); ?>. <?php echo $renew_msg; ?></p></div>		
 				<?php
 				return ob_get_clean();
 			}
 			else {
-				if ($a['renewonly'] == 'yes') {
-					return '';
-				}		
-				if ($membership->has_end_date()) {
+				if ($memberships[0]->has_end_date()) {
 					if ($now_date < $expire_pad_date) {
 						$renew_msg = '';
+						if ($a['renewonly'] == 'yes') {
+							return '';
+						}		
+					}
+					else {
+						$renew_msg = $early_renew_prefix . $renew_msg;
 					}
 					ob_start();
 					?>
-					<div class="callout success"><p>Your individual membership will expire on <?php echo date('F j, Y', $expiration_date); ?>. <?php echo $renew_msg; ?></p></div>		
+					<div <?php echo $style; ?> class="callout success"><p>Your individual membership will expire on <?php echo date('F j, Y', $expiration_date); ?>. <?php echo $renew_msg; ?></p></div>		
 					<?php
 					return ob_get_clean();
 				}
 				else {
+					if ($a['renewonly'] == 'yes') {
+						return '';
+					}		
 					ob_start();
 					?>
-					<div class="callout success"><p>Your individual membership will never expire</p></div>		
+					<div <?php echo $style; ?> class="callout success"><p>Your individual membership will never expire.</p></div>		
 					<?php
 					return ob_get_clean();
 				}
 			}
 		}
-	}	
+
+		if (count($teams) > 1) {
+			ob_start();
+			?>
+			<div <?php echo $style; ?> class="callout alert"><p>You own multiple family memberships, please notify the Membership Secretary to resolve this.</p></div>		
+			<?php
+			return ob_get_clean();		
+		}
+		$renew_link = $teams[0]->get_renew_membership_url();
+		$expiration_date = $teams[0]->get_local_membership_end_date('timestamp');
+		$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
+		$expire_pad_date->sub($expire_pad);
+		$team_name = $teams[0]->get_name();
+        $renew_msg = 'You can either <a href="' . $renew_link . '">renew your membership</a> or visit the <a href="/home/join-renew/">Join</a> page to see what other membership options are available.';
+		if ($teams[0]->is_user_owner($current_user->ID)) {
+			if ($teams[0]->is_membership_expired()) {
+				ob_start();
+				?>
+				<div <?php echo $style; ?> class="callout warning"><p>Your family membership expired on <?php echo date('F j, Y', $expiration_date); ?>. <?php echo $renew_msg; ?></p></div>		
+				<?php
+				return ob_get_clean();
+			}
+			else {
+				if ($now_date < $expire_pad_date) {
+					$renew_msg = '';
+					if ($a['renewonly'] == 'yes') {
+						return '';
+					}
+				}
+				else {
+					$renew_msg = $early_renew_prefix . $renew_msg;
+				}
+				ob_start();
+				?>
+				<div <?php echo $style; ?> class="callout success"><p>Your family membership will expire on <?php echo date('F j, Y', $expiration_date); ?>. <?php echo $renew_msg; ?></p></div>		
+				<?php
+				return ob_get_clean();
+			}
+		}
+		else {
+			if ($teams[0]->is_membership_expired()) {
+				ob_start();
+				?>
+				<div <?php echo $style; ?> class="callout warning"><p>Your family membership expired on <?php echo date('F j, Y',$expiration_date); ?>; please ask the owner of family "<?php echo $team_name; ?>" to renew.</p></div>		
+				<?php
+				return ob_get_clean();	
+			}
+			else {
+				if ($a['renewonly'] == 'yes') {
+					return '';
+				}			
+				ob_start();
+				?>
+				<div <?php echo $style; ?> class="callout success"><p>Your family membership will expire on <?php echo date('F j, Y',$expiration_date); ?>.</p></div>		
+				<?php
+				return ob_get_clean();
+			}
+		}
+	}
+
+	// Generates the [pwtc_member_delete_membership] shortcode.
+	public static function shortcode_delete_membership($atts) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return '<div class="callout warning"><p>User not logged in.</p></div>';
+		}
+		if (isset($_POST['pwtc_membership_delete_membership']) and isset($_POST['userid']) and $current_user->ID != 0) {
+			if (!isset($_POST['nonce_field']) or !wp_verify_nonce($_POST['nonce_field'], 'delete-membership-form')) {
+				wp_nonce_ays('');
+			}
+			if (intval($_POST['userid']) !== $current_user->ID) {
+				wp_nonce_ays('');
+			}
+			if (isset($_POST['memberid'])) {
+				$id = intval($_POST['memberid']);
+				wc_memberships()->get_user_memberships_instance()->delete_related_data($id);
+				wc_memberships()->get_user_memberships_instance()->deleteUserMembership($id);
+			}
+			else if (isset($_POST['teamid'])) {
+				$id = intval($_POST['teamid']);
+				wc_memberships_for_teams()->get_teams_handler_instance()->maybe_delete_related_data($id);
+				wc_memberships_for_teams()->get_teams_handler_instance()->deleteTeam($id);
+			}
+			wc_empty_cart();
+			wp_redirect(get_permalink(), 303);
+			exit;
+		}
+		$teams = wc_memberships_for_teams_get_teams($current_user->ID);
+		$memberships = wc_memberships_get_user_memberships($current_user->ID);
+		if (empty($teams)) {
+			if (empty($memberships)) {
+				return '<div class="callout success"><p>You have no membership to delete; you can go to the <a href="/join-renew">Join</a> page and buy a new one.</p></div>';
+			}
+			if (count($memberships) > 1) {
+				return '<div class="callout alert"><p>You have multiple individual memberships, please notify the Membership Secretary to resolve this.</p></div>';
+			}
+			if ($memberships[0]->is_active()) {
+				return '<div class="callout warning"><p>You have an active individual membership; you cannot delete it until it expires.</p></div>';
+			}
+			ob_start();
+			?>
+			<div class="callout success"><p>You may delete your expired individual membership. Your shopping cart will also be emptied.
+				<form method="POST" novalidate>
+					<?php wp_nonce_field('delete-membership-form', 'nonce_field'); ?>
+					<input type="hidden" name="userid" value="<?php echo $current_user->ID; ?>"/>
+					<input type="hidden" name="memberid" value="<?php echo $memberships[0]->get_id(); ?>"/>
+					<button class="button" type="submit" name="pwtc_membership_delete_membership">Delete</button>
+				</form>
+			</p></div>		
+			<?php
+			return ob_get_clean();
+		}
+		else {
+			if (count($teams) > 1) {
+				return '<div class="callout alert"><p>You have multiple family memberships, please notify the Membership Secretary to resolve this.</p></div>';
+			}
+			if (!$teams[0]->is_user_owner($current_user->ID)) {
+				return '<div class="callout warning"><p>You are a member but not the owner of this family membership; you are not allowed to delete it.</p></div>';
+			}
+			if (!$teams[0]->is_membership_expired()) {
+				return '<div class="callout warning"><p>You have an active family membership; you cannot delete it until it expires.</p></div>';
+			}
+			ob_start();
+			?>
+			<div class="callout success"><p>You may delete your expired family membership. The memberships of any family members will also be deleted. Your shopping cart will also be emptied.
+				<form method="POST" novalidate>
+					<?php wp_nonce_field('delete-membership-form', 'nonce_field'); ?>
+					<input type="hidden" name="userid" value="<?php echo $current_user->ID; ?>"/>
+					<input type="hidden" name="teamid" value="<?php echo $teams[0]->get_id(); ?>"/>
+					<button class="button" type="submit" name="pwtc_membership_delete_membership">Delete</button>
+				</form>
+			</p></div>		
+			<?php
+			return ob_get_clean();
+		}
+	}
 
 	// Generates the [pwtc_member_accept_release] shortcode.
 	public static function shortcode_member_accept_release($atts) {
