@@ -1111,7 +1111,8 @@ class PwtcMembers {
 
 	// Generates the [pwtc_member_renew_nag] shortcode.
 	public static function shortcode_member_renew_nag($atts) {
-		$a = shortcode_atts(array('renewonly' => 'no', 'pad' => '14', 'killmargin' => 'no'), $atts);
+		//$a = shortcode_atts(array('renewonly' => 'no', 'pad' => '14', 'killmargin' => 'no'), $atts);
+		$a = shortcode_atts(array('renewonly' => 'no', 'killmargin' => 'no'), $atts);
 		$current_user = wp_get_current_user();
 		if ( 0 == $current_user->ID ) {
 			return '';
@@ -1120,10 +1121,13 @@ class PwtcMembers {
 			return '';
 		}
 		$a['killmargin'] == 'yes' ? $style = 'style="margin: 0 0 0 0"' : $style = '';
-		$early_renew_prefix = 'You are within ' . $a['pad'] . ' days of expiration. ';
+		$days_before = absint(wc_memberships()->get_user_memberships_instance()->get_ending_soon_days());
+		$early_renew_prefix = 'You are within ' . $days_before . ' days of expiration. ';
+		//$early_renew_prefix = 'You are within ' . $a['pad'] . ' days of expiration. ';
 		$timezone = new DateTimeZone(pwtc_get_timezone_string());
 		$now_date = new DateTime(null, $timezone);
-		$expire_pad = new DateInterval('P' . $a['pad'] . 'D');
+		$expire_pad = new DateInterval('P' . $days_before . 'D');
+		//$expire_pad = new DateInterval('P' . $a['pad'] . 'D');
 
 		if (function_exists('wc_memberships_for_teams_get_teams')) {
 			$teams = wc_memberships_for_teams_get_teams($current_user->ID);
@@ -1151,7 +1155,7 @@ class PwtcMembers {
 			$expiration_date = $memberships[0]->get_local_end_date('timestamp');
 			$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
 			$expire_pad_date->sub($expire_pad);
-			$renew_msg = 'You can either <a href="' . $renew_link . '">renew your membership</a> or visit the <a href="/home/join-renew/">Join</a> page to see what other membership options are available.';
+			$renew_msg = 'You can either <a href="' . esc_url($renew_link) . '">renew your membership</a> or visit the <a href="/home/join-renew/">Join</a> page to see what other membership options are available.';
 			if ($memberships[0]->is_expired()) {
 				ob_start();
 				?>
@@ -1201,7 +1205,7 @@ class PwtcMembers {
 		$expire_pad_date = new DateTime('@'.$expiration_date, $timezone);
 		$expire_pad_date->sub($expire_pad);
 		$team_name = $teams[0]->get_name();
-        $renew_msg = 'You can either <a href="' . $renew_link . '">renew your membership</a> or visit the <a href="/home/join-renew/">Join</a> page to see what other membership options are available.';
+        $renew_msg = 'You can either <a href="' . esc_url($renew_link) . '">renew your membership</a> or visit the <a href="/home/join-renew/">Join</a> page to see what other membership options are available.';
 		if ($teams[0]->is_user_owner($current_user->ID)) {
 			if ($teams[0]->is_membership_expired()) {
 				ob_start();
@@ -1275,9 +1279,17 @@ class PwtcMembers {
 			wp_redirect(get_permalink(), 303);
 			exit;
 		}
-		$teams = wc_memberships_for_teams_get_teams($current_user->ID);
-		$memberships = wc_memberships_get_user_memberships($current_user->ID);
+		if (function_exists('wc_memberships_for_teams_get_teams')) {
+			$teams = wc_memberships_for_teams_get_teams($current_user->ID);
+		}
+		else {
+			$teams = [];
+		}
 		if (empty($teams)) {
+			if (!function_exists('wc_memberships_get_user_memberships')) {
+				return '<div class="callout alert"><p>Membership plugins are not enabled.</p></div>';
+			}
+			$memberships = wc_memberships_get_user_memberships($current_user->ID);
 			if (empty($memberships)) {
 				return '<div class="callout success"><p>You have no membership to delete; you can go to the <a href="/join-renew">Join</a> page and buy a new one.</p></div>';
 			}
