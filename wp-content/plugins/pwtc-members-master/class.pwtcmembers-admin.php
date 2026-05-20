@@ -862,61 +862,38 @@ class PwtcMembers_Admin {
 			}
 			else {
 				$detect_only = $_POST['detect_only'] == 'true' ? true : false;
-				$count1 = 0;
-				$count2 = 0;
+				$count = 0;
 				$unchanged = 0;
 				$multicount = 0;
 				$results = PwtcMembers::fetch_users_with_memberships();
 				$users = array();
 				foreach ($results as $item) {
 					$userid = $item[0];
-					$rider_id = get_field('rider_id', 'user_'.$userid);
-					if (!$rider_id) {
-						$rider_id = '';
+					$memberships = wc_memberships_get_user_memberships($userid);
+					if (count($memberships) == 1) {
+						if (pwtc_members_adjust_start_date($memberships[0], $detect_only)) {
+							if ($detect_only) {
+								$member = get_userdata($userid);
+								$rider_id = get_field('rider_id', 'user_'.$userid);
+								$start = $memberships[0]->get_start_date();
+								$item = array(
+									'userid' => $userid,
+									'first_name' => $member->first_name,
+									'last_name' => $member->last_name,
+									'user_email' => $member->user_email,
+									'startdate' => $start,
+									'riderid' => $rider_id
+								);
+								$users[] = $item;
+							}
+							$count++;
+						}
+						else {
+							$unchanged++;
+						}
 					}
-					if (preg_match('/^\d{5}$/', $rider_id) === 1) {
-						$memberships = wc_memberships_get_user_memberships($userid);
-						if (count($memberships) == 1) {
-							$membership = $memberships[0];
-							$y = intval(substr($rider_id, 0, 2));
-							$c = intval(substr(date('Y', current_time('timestamp')), 0, 2));
-							if ($y > 50) {
-								$year = strval((($c - 1) * 100) + $y);
-							}
-							else {
-								$year = strval(($c * 100) + $y);
-							}
-							$start = $membership->get_start_date();
-							if (!$start or strncmp($start, $year, 4) !== 0) {
-								if ($detect_only) {
-									$member = get_userdata($userid);
-									$item = array(
-										'userid' => $userid,
-										'first_name' => $member->first_name,
-										'last_name' => $member->last_name,
-										'user_email' => $member->user_email,
-										'startdate' => $start,
-										'riderid' => $rider_id
-									);
-									$users[] = $item;
-								}
-								else {
-									$membership->set_start_date($year . '-07-01 00:00:00');
-								}
-								if ($y > 50) {
-									$count1++;
-								}
-								else {
-									$count2++;
-								}
-							}
-							else {
-								$unchanged++;
-							}
-						}
-						else if (count($memberships) > 1) {
-							$multicount++;
-						}
+					else if (count($memberships) > 1) {
+						$multicount++;
 					}
 				}
 				if ($detect_only) {
@@ -925,8 +902,7 @@ class PwtcMembers_Admin {
 				else {
 					$action_str = 'adjusted';
 				}
-				$msg = '' . $count1 . ' member mismatches from last century ' . $action_str . 
-					'. ' . $count2 . ' member mismatches from this century ' . $action_str .
+				$msg = '' . $count . ' member start date mismatches ' . $action_str .
 					'. ' . $unchanged . ' members already match and will not be changed.';
 				if ($multicount > 0) {
 					$msg .= ' ' . $multicount . ' users with multiple memberships detected.';
