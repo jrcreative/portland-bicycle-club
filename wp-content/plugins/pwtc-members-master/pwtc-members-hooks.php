@@ -146,10 +146,11 @@ function pwtc_members_adjust_start_date($user_membership, $detect_only=false) {
 			$year = strval(($c * 100) + $y);
 		}
 		$start = $user_membership->get_start_date();
-		if (!$start or strncmp($start, $year, 4) !== 0) {
+		if ($start and strncmp($start, $year, 4) !== 0) {
             if (!$detect_only) {
 			    $user_membership->set_start_date($year . '-07-01 12:00:00');
 			    $user_membership->add_note('PWTC Members plugin modified start date to match rider ID year.');
+			    //$user_membership->add_note('PWTC Members plugin modified start date to match rider ID year. startdate=' . $start . ', riderid=' . $rider_id . ', rideryear=' . $year);
             }
             return true;
 		}
