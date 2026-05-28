@@ -2,7 +2,7 @@
 /**
 Plugin Name: WP Real Media Library
 Plugin URI: http://matthias-web.de
-Description: Organize your wordpress media library in a nice way.
+Description: Organize your wordpress media library in a nice way. WARNING: this plugin has been patched to fix a PHP 8 upgrade error!
 Author: Matthias Günter
 Version: 2.5.5
 Author URI: http://matthias-web.de
