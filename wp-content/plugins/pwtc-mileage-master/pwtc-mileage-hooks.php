@@ -289,6 +289,81 @@ function pwtc_mileage_get_expiration_date($membership) {
     return $exp_date;
 }
 
+function pwtc_mileage_assign_rider_id($user_membership, $update_existing=true) {
+    $log_update_existing = false;
+	$user_id = $user_membership->get_user_id();
+	$user_data = get_userdata($user_id);
+	if (!$user_data) {
+		return;			
+	}
+    //$expdate = pwtc_mileage_get_expiration_date($user_membership);
+    if ($user_membership->has_end_date()) {
+        $datetime = $user_membership->get_local_end_date('mysql', false);
+        $pieces = explode(' ', $datetime);
+        $expdate = $pieces[0];
+    }
+    else {
+        $expdate = '2099-01-01';
+    }
+	$rider_id = get_field('rider_id', 'user_'.$user_id);
+	if ($rider_id) {
+		$rider_id = trim($rider_id);
+	}
+	else {
+		$rider_id = '';
+	}
+	if (empty($rider_id)) {
+		try {
+			$new_rider_id = pwtc_mileage_insert_new_rider(
+					$user_data->last_name, $user_data->first_name, $expdate);
+			update_field('rider_id', $new_rider_id, 'user_'.$user_id);
+			$user_membership->add_note('PWTC Mileage plugin assigned new Rider ID ' . $new_rider_id . ' to this member.');
+		}
+		catch (Exception $e) {
+			$msg = $e->getMessage();
+			$user_membership->add_note('PWTC Mileage plugin error assigning new Rider ID to this member: ' . $msg);
+		}
+	}
+	else if ($update_existing) {
+		try {
+			pwtc_mileage_update_rider(
+				$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
+			if ($log_update_existing) {
+				$user_membership->add_note('PWTC Mileage plugin updated Mileage DB information for Rider ID ' . $rider_id);
+			}
+		}
+		catch (Exception $e) {
+			$msg = $e->getMessage();
+			$user_membership->add_note('PWTC Mileage plugin error updating Mileage DB information for Rider ID ' . $rider_id . ': ' . $msg);
+		}
+	}
+}
+
+function pwtc_mileage_expire_rider($user_id) {
+	$user_data = get_userdata($user_id);
+	if (!$user_data) {
+		return;			
+	}
+    $rider_id = get_field('rider_id', 'user_'.$user_id);
+	if ($rider_id) {
+		$rider_id = trim($rider_id);
+	}
+	else {
+		$rider_id = '';
+	}
+	if (!empty($rider_id)) {
+		$expdate = date('Y-m-d', current_time('timestamp'));
+		try {
+			pwtc_mileage_update_rider(
+			    $rider_id, $user_data->last_name, $user_data->first_name, $expdate);
+		}
+		catch (Exception $e) {
+			$msg = $e->getMessage();
+			pwtc_mileage_write_log('pwtc_mileage_expire_rider: ' . $msg);
+		}
+	}
+}
+
 function pwtc_mileage_lookup_user($rider_id) {
     $query_args = [
         'meta_key' => 'last_name',

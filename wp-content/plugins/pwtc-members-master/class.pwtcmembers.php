@@ -52,23 +52,17 @@ class PwtcMembers {
 		add_action( 'wc_memberships_grant_membership_access_from_purchase', 
 			array( 'PwtcMembers', 'user_membership_granted_callback' ), 10, 2);
 
-		add_action('wc_memberships_user_membership_saved', 
-			array('PwtcMembers', 'membership_created_callback'), 10, 2);
-		add_action('wc_memberships_user_membership_created', 
-			array('PwtcMembers', 'membership_created_callback'), 10, 2);
-		add_action('wc_memberships_user_membership_deleted', 
-			array('PwtcMembers', 'membership_deleted_callback'));
-		add_action('wc_memberships_csv_import_user_membership', 
-			array('PwtcMembers', 'membership_updated_callback'));
-
-		add_action('wc_memberships_for_teams_add_team_member', 
-			array('PwtcMembers', 'adjust_team_member_data_callback' ), 10, 3);
-
 		add_action('wc_memberships_for_teams_add_team_member', 
 			array('PwtcMembers', 'email_team_member_callback' ), 100, 3);
 
-		add_action('wc_memberships_for_teams_team_created', 
-			array('PwtcMembers', 'adjust_team_members_data_callback' ));
+		add_filter( 'wc_memberships_update_member_user_role', 
+			array('PwtcMembers', 'update_member_user_role_callback'));
+
+		add_filter( 'wc_memberships_active_member_default_user_role', 
+			array('PwtcMembers', 'active_member_default_user_role_callback'));
+
+		add_filter( 'wc_memberships_inactive_member_default_user_role', 
+			array('PwtcMembers', 'inactive_member_default_user_role_callback'));
 
 		add_action( 'woocommerce_thankyou', 
 			array('PwtcMembers', 'order_complete_callback' ) );
@@ -264,105 +258,6 @@ class PwtcMembers {
 		}
 	}
 
-	public static function membership_created_callback($membership_plan, $args = array()) {
-		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
-		$user_id = isset($args['user_id']) ? absint($args['user_id']) : null;
-
-		if (!$user_membership_id) {
-			return;
-		}
-		if (!$user_id) {
-			return;
-		}
-
-		$user_membership = wc_memberships_get_user_membership($user_membership_id);
-		if (!$user_membership) {
-			return;			
-		}
-		
-		$user_data = get_userdata($user_id);
-		if (!$user_data) {
-			return;			
-		}
-
-		if ($user_membership->get_status() == 'auto-draft' or $user_membership->get_status() == 'trash') {
-			return;
-		}
-
-		if (!in_array('customer', $user_data->roles)) {
-			$user_data->add_role('customer');
-		}
-
-		if (pwtc_members_is_expired($user_membership)) {
-			if (!in_array('expired_member', $user_data->roles)) {
-				$user_data->add_role('expired_member');
-				$user_membership->add_note('PWTC Members plugin assigned Expired Member role to this member.');
-			}
-			if (in_array('current_member', $user_data->roles)) {
-				$user_data->remove_role('current_member');
-			}
-		}
-		else {
-			if (!in_array('current_member', $user_data->roles)) {
-				$user_data->add_role('current_member');
-				$user_membership->add_note('PWTC Members plugin assigned Current Member role to this member.');
-			}
-			if (in_array('expired_member', $user_data->roles)) {
-				$user_data->remove_role('expired_member');
-			}
-		}
-	}
-
-	public static function membership_updated_callback($user_membership) {
-		$user_id = $user_membership->get_user_id();
-		$user_data = get_userdata($user_id);
-		if (!$user_data) {
-			return;			
-		}
-		if ($user_membership->get_status() == 'auto-draft' or $user_membership->get_status() == 'trash') {
-			return;
-		}
-		if (!in_array('customer', $user_data->roles)) {
-			$user_data->add_role('customer');
-		}
-		if (pwtc_members_is_expired($user_membership)) {
-			if (!in_array('expired_member', $user_data->roles)) {
-				$user_data->add_role('expired_member');
-				$user_membership->add_note('PWTC Members plugin assigned Expired Member role to this member.');
-			}
-			if (in_array('current_member', $user_data->roles)) {
-				$user_data->remove_role('current_member');
-			}
-		}
-		else {
-			if (!in_array('current_member', $user_data->roles)) {
-				$user_data->add_role('current_member');
-				$user_membership->add_note('PWTC Members plugin assigned Current Member role to this member.');
-			}
-			if (in_array('expired_member', $user_data->roles)) {
-				$user_data->remove_role('expired_member');
-			}
-		}
-	}
-
-	public static function membership_deleted_callback($user_membership) {
-		$user_id = $user_membership->get_user_id();
-		$user_data = get_userdata($user_id);
-		if (!$user_data) {
-			return;			
-		}
-
-		$count = self::count_remaining_memberships('wc_user_membership', $user_id, $user_membership->get_id());
-		if ($count == 0) {
-			if (in_array('expired_member', $user_data->roles)) {
-				$user_data->remove_role('expired_member');
-			}
-			if (in_array('current_member', $user_data->roles)) {
-				$user_data->remove_role('current_member');
-			}
-		}
-	}
-
 	public static function email_team_member_callback($team_member, $team, $membership) {
 		$user_data = $team_member->get_user();
 		$membership_plan = $membership->get_plan();
@@ -376,26 +271,29 @@ class PwtcMembers {
 			    $membership->add_note('PWTC Members plugin sent confirmation email to this family member, send failed.');
 		    }
         }
-	}
 
-	public static function adjust_team_member_data_callback($team_member, $team, $user_membership) {
-		$team_end_date = $team->get_membership_end_date('timestamp');
-		$user_membership->set_end_date($team_end_date);
-		if ($team->is_membership_expired()) {
-			$user_membership->update_status('expired');
-		}
-		else {
-			if ($user_membership->is_expired() || $user_membership->is_cancelled()) {
-				$user_membership->update_status('active');
-			}			
+		$count1 = self::fetch_users_with_multi_memberships('wc_user_membership', true, $user_data->ID);
+		$count2 = self::fetch_users_with_multi_memberships('wc_memberships_team', true, $user_data->ID);
+		if ($count1 > 0 or $count2 > 0) {
+			$membership->add_note('PWTC Members plugin detected multiple memberships for this member.');
+			$name = $user_data->first_name . ' ' . $user_data->last_name;
+			self::multi_memberships_email($name);
 		}
 	}
 
-	public static function adjust_team_members_data_callback($team) {
-		$user_memberships = $team->get_user_memberships();
-		foreach ( $user_memberships as $user_membership ) {
-			self::adjust_team_member_data_callback(false, $team, $user_membership);
-		}	
+	// Disable the check that doesn't allow role changes for admin and shop managers.
+	public static function update_member_user_role_callback() {
+		return true;
+	}
+
+	// Make current_member the default role for an active membership.
+	public static function active_member_default_user_role_callback() {
+		return 'current_member';
+	}
+
+	// Make expired_member the default role for an inactive membership.
+	public static function inactive_member_default_user_role_callback() {
+		return 'expired_member';
 	}
 
 	public static function order_complete_callback($order_id) { 
