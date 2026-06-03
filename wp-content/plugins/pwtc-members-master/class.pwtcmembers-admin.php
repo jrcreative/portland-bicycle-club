@@ -46,8 +46,8 @@ class PwtcMembers_Admin {
 		add_action( 'wp_ajax_pwtc_members_show_users', 
 			array( 'PwtcMembers_Admin', 'show_users_callback') );
 
-		add_action( 'wc_memberships_for_teams_process_team_meta', 
-			array( 'PwtcMembers_Admin', 'process_team_meta_callback' ), 999, 2 );
+//		add_action( 'wc_memberships_for_teams_process_team_meta', 
+//			array( 'PwtcMembers_Admin', 'process_team_meta_callback' ), 999, 2 );
 
 	}  
 
@@ -1083,6 +1083,7 @@ class PwtcMembers_Admin {
 		wp_die();		
 	}
 
+	/*
 	public static function process_team_meta_callback( $post_id, \WP_Post $post ) {
 		$team = wc_memberships_for_teams_get_team( $post->ID );
 		if ($team) {
@@ -1092,5 +1093,6 @@ class PwtcMembers_Admin {
 			}	
 		}
 	}
+	*/
 
 }
