@@ -52,6 +52,9 @@ class PwtcMembers {
 		add_action( 'wc_memberships_grant_membership_access_from_purchase', 
 			array( 'PwtcMembers', 'user_membership_granted_callback' ), 10, 2);
 
+		add_action( 'wc_memberships_for_teams_create_team_from_order', 
+			array( 'PwtcMembers', 'team_created_from_order_callback' ), 10, 2);
+
 		add_action('wc_memberships_for_teams_add_team_member', 
 			array('PwtcMembers', 'email_team_member_callback' ), 100, 3);
 
@@ -248,13 +251,35 @@ class PwtcMembers {
 			    $membership->add_note('PWTC Members plugin sent confirmation email to this member, send failed.');
 		    }
         }
-        
+/*        
         $count1 = self::fetch_users_with_multi_memberships('wc_user_membership', true, $user_id);
 		$count2 = self::fetch_users_with_multi_memberships('wc_memberships_team', true, $user_id);
 		if ($count1 > 0 or $count2 > 0) {
 			$membership->add_note('PWTC Members plugin detected multiple memberships for this member.');
 			$name = $user_data->first_name . ' ' . $user_data->last_name;
 			self::multi_memberships_email($name);
+		}
+*/
+	}
+
+	public static function team_created_from_order_callback($team, $args = array()) {
+		if (isset($args['action']) and $args['action'] === 'renew') {
+			if (!get_field('send_membership_email', 'option')) {
+				return;
+			}
+			$user_memberships = $team->get_user_memberships();
+			foreach ( $user_memberships as $user_membership ) {
+				$membership_plan = $user_membership->get_plan();
+				$user_data = $user_membership->get_user();
+		    	$email = self::build_confirmation_email($membership_plan, $user_data, $user_membership);
+				$status = wp_mail($email['to'], $email['subject'], $email['message'], $email['headers']);
+		    	if ($status) {
+			    	$user_membership->add_note('PWTC Members plugin sent confirmation email to this family member, send was successful.');
+		    	}
+		    	else {
+			    	$user_membership->add_note('PWTC Members plugin sent confirmation email to this family member, send failed.');
+		    	}
+			}
 		}
 	}
 
@@ -271,7 +296,7 @@ class PwtcMembers {
 			    $membership->add_note('PWTC Members plugin sent confirmation email to this family member, send failed.');
 		    }
         }
-
+/*
 		$count1 = self::fetch_users_with_multi_memberships('wc_user_membership', true, $user_data->ID);
 		$count2 = self::fetch_users_with_multi_memberships('wc_memberships_team', true, $user_data->ID);
 		if ($count1 > 0 or $count2 > 0) {
@@ -279,6 +304,7 @@ class PwtcMembers {
 			$name = $user_data->first_name . ' ' . $user_data->last_name;
 			self::multi_memberships_email($name);
 		}
+*/
 	}
 
 	// Disable the check that doesn't allow role changes for admin and shop managers.

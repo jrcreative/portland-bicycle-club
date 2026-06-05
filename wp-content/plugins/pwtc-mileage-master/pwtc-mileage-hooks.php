@@ -296,15 +296,7 @@ function pwtc_mileage_assign_rider_id($user_membership, $update_existing=true) {
 	if (!$user_data) {
 		return;			
 	}
-    //$expdate = pwtc_mileage_get_expiration_date($user_membership);
-    if ($user_membership->has_end_date()) {
-        $datetime = $user_membership->get_local_end_date('mysql', false);
-        $pieces = explode(' ', $datetime);
-        $expdate = $pieces[0];
-    }
-    else {
-        $expdate = '2099-01-01';
-    }
+    $expdate = pwtc_mileage_get_expiration_date($user_membership);
 	$rider_id = get_field('rider_id', 'user_'.$user_id);
 	if ($rider_id) {
 		$rider_id = trim($rider_id);

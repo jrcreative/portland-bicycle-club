@@ -89,6 +89,10 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_deleted_callback'));
 			add_action('woocommerce_account_dashboard',
 				array('PwtcMileage', 'add_card_download_callback'));
+			add_action('wc_memberships_for_teams_add_team_member', 
+				array('PwtcMileage', 'adjust_team_member_data_callback' ), 10, 3);
+			add_action('wc_memberships_for_teams_team_created', 
+				array('PwtcMileage', 'adjust_team_members_data_callback' ));
 		}
 
 	}
@@ -127,6 +131,17 @@ class PwtcMileage {
 	public static function membership_deleted_callback($user_membership) {
 		$user_id = $user_membership->get_user_id();
 		pwtc_mileage_expire_rider($user_id);
+	}
+
+	public static function adjust_team_member_data_callback($team_member, $team, $user_membership) {
+		pwtc_mileage_assign_rider_id($user_membership);
+	}
+
+	public static function adjust_team_members_data_callback($team) {
+		$user_memberships = $team->get_user_memberships();
+		foreach ( $user_memberships as $user_membership ) {
+			self::adjust_team_member_data_callback(false, $team, $user_membership);
+		}	
 	}
 
 	public static function add_card_download_callback() {
