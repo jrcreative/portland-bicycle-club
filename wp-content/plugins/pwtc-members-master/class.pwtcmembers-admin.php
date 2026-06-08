@@ -920,94 +920,106 @@ class PwtcMembers_Admin {
 	public static function adjust_family_members_callback() {
 		if (!current_user_can('manage_options')) {
 			$response = array(
-				'status' => 'Adjust failed - user access denied.'
+				'status' => 'Failed - user access denied.'
 			);		
 		}
 		else if (!isset($_POST['nonce']) or !isset($_POST['detect_only'])) {
 			$response = array(
-				'status' => 'Adjust failed - AJAX arguments missing.'
+				'status' => 'Failed - AJAX arguments missing.'
 			);
 		}
 		else {
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_members_adjust_family_members')) {
 				$response = array(
-					'status' => 'Adjust failed - nonce security check failed.'
+					'status' => 'Failed - nonce security check failed.'
 				);
 			}
 			else {
-				$detect_only = $_POST['detect_only'] == 'true' ? true : false;
-				$users = array();
-				$count = 0;
-				$unchanged = 0;
-				$query_args = [
-					'nopaging'    => true,
-					'post_status' => 'any',
-					'post_type' => 'wc_memberships_team',
-				];			
-				$the_query = new WP_Query($query_args);
-				if ( $the_query->have_posts() ) {
-					while ( $the_query->have_posts() ) {
-						$the_query->the_post();
-						$team = wc_memberships_for_teams_get_team( get_the_ID() );
-						if ($team) {
-							$team_end_date = $team->get_membership_end_date('timestamp');
-							$user_memberships = $team->get_user_memberships();
-							foreach ( $user_memberships as $user_membership ) {
-								$user_end_date = $user_membership->get_end_date('timestamp');
-								if ($team_end_date and $user_end_date) {
-									$diff = abs($user_end_date - $team_end_date);
-								}
-								else if (!$team_end_date and $user_end_date) {
-									$diff = 99999;
-								}
-								else if ($team_end_date and !$user_end_date) {
-									$diff = 99999;
+				if (isset($_POST['teamid']) and isset($_POST['userid'])) {
+					$team = wc_memberships_for_teams_get_team(intval($_POST['teamid']));
+					$userid = intval($_POST['userid']);
+					if ($team) {
+						$count = PwtcMembers::sync_team_member_end_times($team, false, $userid);
+						if ($count === 0) {
+							$msg = 'Failed - family member end time not synced with family end time.';
+						}
+						else {
+							$msg = 'Family member end time synced with family end time.';
+						}
+					}
+					else {
+						$count = 0;
+						$msg = 'Failed - family not found for ID ' . $_POST['teamid'] . '.';				
+					}
+					$response = array(
+						'userid' => $userid,
+						'count' => $count,
+						'status' => $msg
+					);
+				}	
+				else {		
+					$detect_only = $_POST['detect_only'] == 'true' ? true : false;
+					$users = array();
+					$count = 0;
+					$query_args = [
+						'nopaging'    => true,
+						'post_status' => 'any',
+						'post_type' => 'wc_memberships_team',
+					];			
+					$the_query = new WP_Query($query_args);
+					if ( $the_query->have_posts() ) {
+						while ( $the_query->have_posts() ) {
+							$the_query->the_post();
+							$team = wc_memberships_for_teams_get_team( get_the_ID() );
+							if ($team) {
+								if ($detect_only) {
+									$team_end_date = $team->get_membership_end_date('timestamp');
+									$user_memberships = $team->get_user_memberships();
+									foreach ( $user_memberships as $user_membership ) {
+										$user_end_date = $user_membership->get_end_date('timestamp');
+										if ($team_end_date and $user_end_date) {
+											$diff = abs($user_end_date - $team_end_date);
+											if ($diff > 86400) {
+												$userid = $user_membership->get_user_id();
+												$member = get_userdata($userid);
+												$enddate = $user_membership->get_local_end_date('mysql', false);
+												$teamend = $team->get_local_membership_end_date('mysql');
+												$item = array(
+													'userid' => $userid,
+													'teamid' => $team->get_id(),
+													'team_name' => $team->get_name(),
+													'first_name' => $member->first_name,
+													'last_name' => $member->last_name,
+													'user_email' => $member->user_email,
+													'end_date' => $enddate,
+													'team_end' => $teamend 
+												);
+												$users[] = $item;
+												$count++;
+											}	
+										}														
+									}
 								}
 								else {
-									$diff = 0;
-								}
-								if ($diff > 86400) {
-									if ($detect_only) {
-										$userid = $user_membership->get_user_id();
-										$member = get_userdata($userid);
-										$enddate = $user_membership->get_local_end_date('mysql', false);
-										$teamend = $team->get_local_membership_end_date('mysql');
-										$item = array(
-											'userid' => $userid,
-											'first_name' => $member->first_name,
-											'last_name' => $member->last_name,
-											'user_email' => $member->user_email,
-											'end_date' => $enddate,
-											'team_end' => $teamend 
-										);
-										$users[] = $item;
-									}
-									else {
-										PwtcMembers::adjust_team_member_data_callback(false, $team, $user_membership);
-									}
-									$count++;
-								}
-								else {
-									$unchanged++;
+									$count += PwtcMembers::sync_team_member_end_times($team);
 								}
 							}
 						}
+						wp_reset_postdata();
 					}
-					wp_reset_postdata();
-				}
-				if ($detect_only) {
-					$action_str = 'detected';
-				}
-				else {
-					$action_str = 'adjusted';
-				}
-				$msg = '' . $count . ' family member mismatches ' . $action_str . 
-					'. ' . $unchanged . ' family members already match and will not be changed.';
-				$response = array(
-					'users' => $users,
-					'status' => $msg
-				);	
+					if ($detect_only) {
+						$action_str = 'detected';
+					}
+					else {
+						$action_str = 'adjusted';
+					}
+					$msg = '' . $count . ' family member mismatches ' . $action_str . '.';
+					$response = array(
+						'users' => $users,
+						'status' => $msg
+					);
+				}	
 			}
 		}
 		echo wp_json_encode($response);

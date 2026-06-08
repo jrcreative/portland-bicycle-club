@@ -14,17 +14,33 @@ jQuery(document).ready(function($) {
 	function populate_end_detect_table(users) {
 		$('#adjust-dates-section .adjust-end-date .msg-div').empty();
         if (users.length > 0) {
+            fixlink = '<a title="Fix the family end time mismatch for this record." class="fix-btn">Fix</a>';
             $('#adjust-dates-section .adjust-end-date .msg-div').append(
-                '<table class="pwtc-members-rwd-table"><tr><th>Email</th><th>First Name</th><th>Last Name</th><th>End Date</th><th>Family End</th></tr></table>');
+                '<table class="pwtc-members-rwd-table"><tr><th>Family</th><th>Email</th><th>First Name</th><th>Last Name</th><th>End Date</th><th>Family End</th><th>Action</th></tr></table>');
             users.forEach(function(item) {
                 $('#adjust-dates-section .adjust-end-date .msg-div table').append(
-                    '<tr userid="' + item.userid + '">' + 
+                    '<tr userid="' + item.userid + '" teamid="' + item.teamid + '">' + 
+                    '<td data-th="Family">' + item.team_name + '</td>' +
                     '<td data-th="Email">' + item.user_email + '</td>' +
                     '<td data-th="First Name">' + item.first_name + '</td>' +
                     '<td data-th="Last Name">' + item.last_name + '</td>' + 
                     '<td data-th="End Date">' + item.end_date + '</td>' +
                     '<td data-th="Family End">' + item.team_end + '</td>' +
+                    '<td data-th="Action">' + fixlink + '</td>' +
                     '</tr>');    
+            });
+            $('#adjust-dates-section .adjust-end-date .msg-div .fix-btn').on('click', function(evt) {
+				evt.preventDefault();
+                var action = $('#adjust-dates-section .adjust-end-date .adjust-frm').attr('action');
+                var data = {
+                    'action': 'pwtc_members_adjust_family_members',
+                    'teamid': $(this).parent().parent().attr('teamid'),
+                    'userid': $(this).parent().parent().attr('userid'),
+                    'nonce': '<?php echo wp_create_nonce('pwtc_members_adjust_family_members'); ?>',
+                    'detect_only': false
+                };
+                $.post(action, data, adjust_end_fix_cb);
+                $(this).parent().html('<i class="fa fa-spinner fa-pulse"></i>');
             });
             $('#adjust-dates-section .adjust-end-date .adjust-frm').show();
         }
@@ -52,6 +68,23 @@ jQuery(document).ready(function($) {
         }
         else {
             $('#adjust-dates-section .adjust-start-date .msg-div').html('No mismatches detected.');
+        }
+    }
+
+    function adjust_end_fix_cb(response) {
+        var res = JSON.parse(response);
+        if (res.userid) {
+            if (res.count > 0) {
+                $("#adjust-dates-section .adjust-end-date .msg-div table tr[userid='" + res.userid + "']").remove();
+            }
+            else {
+                var erroricon = '<i class="fa fa-exclamation-triangle" title="' + res.status + '"></i>';
+                $("#adjust-dates-section .adjust-end-date .msg-div table tr[userid='" + res.userid + "']").find("td[data-th='Action']").html(erroricon);
+            }
+        }
+        else {
+            $('#adjust-dates-section .adjust-end-date .msg-div').html(res.status);
+            $('#adjust-dates-section .adjust-end-date .adjust-frm').hide();
         }
     }
 
@@ -134,14 +167,14 @@ jQuery(document).ready(function($) {
         <p>Detect all members whos expiration date does not match that of the family membership to which they belong.</p>
         <p><div class="msg-div"></div></p>
         <form class="adjust-frm pwtc-members-hidden" action="<?php echo admin_url('admin-ajax.php'); ?>" method="POST">
-            <input type="submit" value="Fix This" class="button button-primary button-large"/>
+            <input type="submit" value="Fix All" class="button button-primary button-large"/>
         </form>
         </div>
         <div class="adjust-start-date">
         <p>Detect all members whos start date does not match the year that their rider ID was issued.</p>
         <p><div class="msg-div"></div></p>
         <form class="adjust-frm pwtc-members-hidden" action="<?php echo admin_url('admin-ajax.php'); ?>" method="POST">
-            <input type="submit" value="Fix This" class="button button-primary button-large"/>
+            <input type="submit" value="Fix All" class="button button-primary button-large"/>
         </form>
         </div>
     </div>
