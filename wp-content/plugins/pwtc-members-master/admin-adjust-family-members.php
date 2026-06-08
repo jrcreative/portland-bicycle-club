@@ -11,12 +11,12 @@ else {
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
 
-	function populate_end_detect_table(users) {
+	function populate_end_detect_table(users, status) {
 		$('#adjust-dates-section .adjust-end-date .msg-div').empty();
         if (users.length > 0) {
             fixlink = '<a title="Fix the family end time mismatch for this record." class="fix-btn">Fix</a>';
             $('#adjust-dates-section .adjust-end-date .msg-div').append(
-                '<table class="pwtc-members-rwd-table"><tr><th>Family</th><th>Email</th><th>First Name</th><th>Last Name</th><th>End Date</th><th>Family End</th><th>Action</th></tr></table>');
+                '<table class="pwtc-members-rwd-table"><tr><th>Family</th><th>Email</th><th>First Name</th><th>Last Name</th><th>End Date</th><th>Family End</th><th>Action</th></tr></table><div>' + status + '</div>');
             users.forEach(function(item) {
                 $('#adjust-dates-section .adjust-end-date .msg-div table').append(
                     '<tr userid="' + item.userid + '" teamid="' + item.teamid + '">' + 
@@ -52,8 +52,9 @@ jQuery(document).ready(function($) {
 	function populate_start_detect_table(users, status) {
 		$('#adjust-dates-section .adjust-start-date .msg-div').empty();
         if (users.length > 0) {
+            fixlink = '<a title="Fix the start time mismatch for this record." class="fix-btn">Fix</a>';
             $('#adjust-dates-section .adjust-start-date .msg-div').append(
-                '<table class="pwtc-members-rwd-table"><tr><th>Email</th><th>First Name</th><th>Last Name</th><th>Rider ID</th><th>Start Date</th></tr></table><div>' + status + '</div>');
+                '<table class="pwtc-members-rwd-table"><tr><th>Email</th><th>First Name</th><th>Last Name</th><th>Rider ID</th><th>Start Date</th><th>Action</th></tr></table><div>' + status + '</div>');
             users.forEach(function(item) {
                 $('#adjust-dates-section .adjust-start-date .msg-div table').append(
                     '<tr userid="' + item.userid + '">' + 
@@ -62,7 +63,20 @@ jQuery(document).ready(function($) {
                     '<td data-th="Last Name">' + item.last_name + '</td>' + 
                     '<td data-th="Rider ID">' + item.riderid + '</td>' +
                     '<td data-th="Start Date">' + item.startdate + '</td>' +
+                    '<td data-th="Action">' + fixlink + '</td>' +
                     '</tr>');    
+            });
+            $('#adjust-dates-section .adjust-start-date .msg-div .fix-btn').on('click', function(evt) {
+				evt.preventDefault();
+                var action = $('#adjust-dates-section .adjust-start-date .adjust-frm').attr('action');
+                var data = {
+                    'action': 'pwtc_members_adjust_member_since_date',
+                    'nonce': '<?php echo wp_create_nonce('pwtc_members_adjust_member_since_date'); ?>',
+                    'userid': $(this).parent().parent().attr('userid'),
+                    'detect_only': false
+                };
+                $.post(action, data, adjust_start_fix_cb);
+                $(this).parent().html('<i class="fa fa-spinner fa-pulse"></i>');
             });
             $('#adjust-dates-section .adjust-start-date .adjust-frm').show();
         }
@@ -88,6 +102,23 @@ jQuery(document).ready(function($) {
         }
     }
 
+    function adjust_start_fix_cb(response) {
+        var res = JSON.parse(response);
+        if (res.userid) {
+            if (res.count > 0) {
+                $("#adjust-dates-section .adjust-start-date .msg-div table tr[userid='" + res.userid + "']").remove();
+            }
+            else {
+                var erroricon = '<i class="fa fa-exclamation-triangle" title="' + res.status + '"></i>';
+                $("#adjust-dates-section .adjust-start-date .msg-div table tr[userid='" + res.userid + "']").find("td[data-th='Action']").html(erroricon);
+            }
+        }
+        else {
+            $('#adjust-dates-section .adjust-start-date .msg-div').html(res.status);
+            $('#adjust-dates-section .adjust-start-date .adjust-frm').hide();
+        }
+    }
+
 	function adjust_end_cb(response) {
         var res = JSON.parse(response);
         $('#adjust-dates-section .adjust-end-date .msg-div').html(res.status);
@@ -97,7 +128,7 @@ jQuery(document).ready(function($) {
 	function detect_end_cb(response) {
         var res = JSON.parse(response);
         if (res.users) {
-            populate_end_detect_table(res.users);
+            populate_end_detect_table(res.users, res.status);
         }
         else {
             $('#adjust-dates-section .adjust-end-date .msg-div').html(res.status);
@@ -164,14 +195,14 @@ jQuery(document).ready(function($) {
 </script>
     <div id="adjust-dates-section">
         <div class="adjust-end-date">
-        <p>Detect all members whos expiration date does not match that of the family membership to which they belong.</p>
+        <p><strong>Detect all members whos expiration date does not match that of the family membership to which they belong.</strong></p>
         <p><div class="msg-div"></div></p>
         <form class="adjust-frm pwtc-members-hidden" action="<?php echo admin_url('admin-ajax.php'); ?>" method="POST">
             <input type="submit" value="Fix All" class="button button-primary button-large"/>
         </form>
         </div>
         <div class="adjust-start-date">
-        <p>Detect all members whos start date does not match the year that their rider ID was issued.</p>
+        <p><strong>Detect all members whos start date does not match the year that their rider ID was issued.</strong></p>
         <p><div class="msg-div"></div></p>
         <form class="adjust-frm pwtc-members-hidden" action="<?php echo admin_url('admin-ajax.php'); ?>" method="POST">
             <input type="submit" value="Fix All" class="button button-primary button-large"/>

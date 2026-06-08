@@ -845,72 +845,96 @@ class PwtcMembers_Admin {
 	public static function adjust_member_since_date_callback() {
 		if (!current_user_can('manage_options')) {
 			$response = array(
-				'status' => 'Adjust failed - user access denied.'
+				'status' => 'Failed - user access denied.'
 			);		
 		}
 		else if (!isset($_POST['nonce']) or !isset($_POST['detect_only'])) {
 			$response = array(
-				'status' => 'Adjust failed - AJAX arguments missing.'
+				'status' => 'Failed - AJAX arguments missing.'
 			);
 		}
 		else {
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_members_adjust_member_since_date')) {
 				$response = array(
-					'status' => 'Adjust failed - nonce security check failed.'
+					'status' => 'Failed - nonce security check failed.'
 				);
 			}
 			else {
-				$detect_only = $_POST['detect_only'] == 'true' ? true : false;
-				$count = 0;
-				$unchanged = 0;
-				$multicount = 0;
-				$results = PwtcMembers::fetch_users_with_memberships();
-				$users = array();
-				foreach ($results as $item) {
-					$userid = $item[0];
+				if (isset($_POST['userid'])) {
+					$userid = intval($_POST['userid']);
 					$memberships = wc_memberships_get_user_memberships($userid);
-					if (count($memberships) == 1) {
-						if (pwtc_members_adjust_start_date($memberships[0], $detect_only)) {
-							if ($detect_only) {
-								$member = get_userdata($userid);
-								$rider_id = get_field('rider_id', 'user_'.$userid);
-								$start = $memberships[0]->get_start_date();
-								$item = array(
-									'userid' => $userid,
-									'first_name' => $member->first_name,
-									'last_name' => $member->last_name,
-									'user_email' => $member->user_email,
-									'startdate' => $start,
-									'riderid' => $rider_id
-								);
-								$users[] = $item;
-							}
-							$count++;
+					if (count($memberships) > 0) {
+						if (pwtc_members_adjust_start_date($memberships[0], false)) {
+							$response = array(
+								'userid' => $userid,
+								'count' => 1,
+								'status' => 'User member start time adjusted to match rider ID year.'
+							);
 						}
 						else {
-							$unchanged++;
+							$response = array(
+								'userid' => $userid,
+								'count' => 0,
+								'status' => 'Failed - user member start time not adjusted to match rider ID year.'
+							);
 						}
 					}
-					else if (count($memberships) > 1) {
-						$multicount++;
+					else {
+						$response = array(
+							'userid' => $userid,
+							'count' => 0,
+							'status' => 'Failed - membership not found for user.'
+						);
 					}
-				}
-				if ($detect_only) {
-					$action_str = 'detected';
-				}
+				} 
 				else {
-					$action_str = 'adjusted';
+					$detect_only = $_POST['detect_only'] == 'true' ? true : false;
+					$count = 0;
+					$multicount = 0;
+					$results = PwtcMembers::fetch_users_with_memberships();
+					$users = array();
+					foreach ($results as $item) {
+						$userid = $item[0];
+						$memberships = wc_memberships_get_user_memberships($userid);
+						if (count($memberships) == 1) {
+							if (pwtc_members_adjust_start_date($memberships[0], $detect_only)) {
+								if ($detect_only) {
+									$member = get_userdata($userid);
+									$rider_id = get_field('rider_id', 'user_'.$userid);
+									$start = $memberships[0]->get_start_date();
+									$item = array(
+										'userid' => $userid,
+										'first_name' => $member->first_name,
+										'last_name' => $member->last_name,
+										'user_email' => $member->user_email,
+										'startdate' => $start,
+										'riderid' => $rider_id
+									);
+									$users[] = $item;
+								}
+								$count++;
+							}
+						}
+						else if (count($memberships) > 1) {
+							$multicount++;
+						}
+					}
+					if ($detect_only) {
+						$action_str = 'detected';
+					}
+					else {
+						$action_str = 'adjusted';
+					}
+					$msg = '' . $count . ' member start date mismatches ' . $action_str . '.';
+					if ($multicount > 0) {
+						$msg .= ' ' . $multicount . ' users with multiple memberships detected.';
+					}
+					$response = array(
+						'users' => $users,
+						'status' => $msg
+					);
 				}
-				$msg = '' . $count . ' member start date mismatches ' . $action_str .
-					'. ' . $unchanged . ' members already match and will not be changed.';
-				if ($multicount > 0) {
-					$msg .= ' ' . $multicount . ' users with multiple memberships detected.';
-				}
-				$response = array(
-					'users' => $users,
-					'status' => $msg
-				);
 			}		
 		}
 		echo wp_json_encode($response);
