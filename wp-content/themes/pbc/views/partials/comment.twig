@@ -1,6 +1,6 @@
 <div class="blog-comment {{comment.comment_type}}" id="blog-comment-{{comment.ID}}">
-    <p><div class="comment-author">{{comment.author.name}} says</div>
-    <div class="comment-content">{{comment.comment_content|wpautop}}</div></p>
+    <p><div class="comment-author"><img src="{{ comment.author.avatar({ size: 50 }) }}"> {{comment.author.name}} says</div>
+    <div class="comment-content">{{comment.comment_content|wpautop}}</div><div><i>{{ comment.date }}</i></div></p>
 
     <section class="comment-box">
         <!-- child comments -->
