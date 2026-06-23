@@ -664,6 +664,10 @@ class PwtcMembers {
 				else {
 					$('#pwtc-member-address-div .address-data').empty();
 					$('#pwtc-member-address-div .contact-data').empty();
+					if (res.avatar) {
+						$('#pwtc-member-address-div .address-data').append(
+							'<div>' + res.avatar + '</div>');
+					}
 					$('#pwtc-member-address-div .address-data').append(
 						'<div>' + res.first_name + ' ' + res.last_name + '</div>');
 					$('#pwtc-member-address-div .address-data').append(
@@ -1699,6 +1703,7 @@ class PwtcMembers {
 					'family' => $family,
 					'valid_member' => $valid_member
 				);
+				$response['avatar'] = get_avatar($userid, 128);
 			}
 		}
 		else {
