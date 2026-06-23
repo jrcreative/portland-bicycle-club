@@ -46,9 +46,11 @@ class PwtcMembers_Admin {
 		add_action( 'wp_ajax_pwtc_members_show_users', 
 			array( 'PwtcMembers_Admin', 'show_users_callback') );
 
-//		add_action( 'wc_memberships_for_teams_process_team_meta', 
-//			array( 'PwtcMembers_Admin', 'process_team_meta_callback' ), 999, 2 );
+		add_action( 'wc_memberships_for_teams_process_team_meta', 
+			array( 'PwtcMembers_Admin', 'process_team_meta_callback' ), 10, 2 );
 
+		add_action( 'wc_memberships_user_membership_saved', 
+			array( 'PwtcMembers_Admin', 'user_membership_saved_callback' ), 10, 2 );
 	}  
 
 	/*************************************************************/
@@ -122,11 +124,25 @@ class PwtcMembers_Admin {
     	$function = array( 'PwtcMembers_Admin', 'page_adjust_families');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
+		$page_title = $plugin_options['plugin_menu_label'] . ' - Expiring Members';
+    	$menu_title = 'Expiring Members';
+    	$menu_slug = 'pwtc_members_expiring_members';
+    	$capability = 'manage_options';
+    	$function = array( 'PwtcMembers_Admin', 'page_expiring_members');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Test Confirmation Email';
     	$menu_title = 'Test Confirm Email';
     	$menu_slug = 'pwtc_members_test_email';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMembers_Admin', 'page_test_email');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
+		$page_title = $plugin_options['plugin_menu_label'] . ' - Plugin Settings';
+    	$menu_title = 'Plugin Settings';
+    	$menu_slug = 'pwtc_members_plugin_settings';
+    	$capability = 'manage_options';
+    	$function = array( 'PwtcMembers_Admin', 'page_plugin_settings');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
         remove_submenu_page($parent_menu_slug, $parent_menu_slug);
@@ -171,10 +187,22 @@ class PwtcMembers_Admin {
 		include('admin-adjust-family-members.php');
 	}
 
+	public static function page_expiring_members() {
+		$plugin_options = PwtcMembers::get_plugin_options();
+		$capability = 'manage_options';
+		include('admin-expiring-members.php');
+	}
+
 	public static function page_test_email() {
 		$plugin_options = PwtcMembers::get_plugin_options();
 		$capability = 'manage_options';
 		include('admin-test-email.php');
+	}
+
+	public static function page_plugin_settings() {
+		$plugin_options = PwtcMembers::get_plugin_options();
+		$capability = 'manage_options';
+		include('admin-plugin-settings.php');
 	}
 
 	public static function download_user_csv() {
@@ -559,9 +587,6 @@ class PwtcMembers_Admin {
 					}
 					else if (count($memberships) == 1) {
 						$membership = $memberships[0];
-						if (!in_array('customer', $user_info->roles)) {
-							$user_info->add_role('customer');
-						}
 						if (pwtc_members_is_expired($membership)) {
 							if (!in_array('expired_member', $user_info->roles)) {
 								$user_info->add_role('expired_member');
@@ -672,23 +697,14 @@ class PwtcMembers_Admin {
 							if (count($memberships) == 1) {
 								$count++;
 								$membership = $memberships[0];
-								if (!in_array('customer', $user_info->roles)) {
-									$user_info->add_role('customer');
-								}
 								if (pwtc_members_is_expired($membership)) {
 									if (!in_array('expired_member', $user_info->roles)) {
 										$user_info->add_role('expired_member');
-									}
-									if (in_array('current_member', $user_info->roles)) {
-										$user_info->remove_role('current_member');
 									}
 								}
 								else {
 									if (!in_array('current_member', $user_info->roles)) {
 										$user_info->add_role('current_member');
-									}
-									if (in_array('expired_member', $user_info->roles)) {
-										$user_info->remove_role('expired_member');
 									}
 								}						
 							}
@@ -737,6 +753,52 @@ class PwtcMembers_Admin {
 		return $invalid_members;
 	}
 	
+	public static function detect_current_members_missing_membership($fix_accounts=false) {
+		$invalid_members = array();
+		$test_users = self::fetch_current_member_role_users();
+		$results = PwtcMembers::fetch_users_with_no_memberships();
+		foreach ($results as $item) {
+			$userid = $item[0];
+			if (in_array($userid, $test_users)) {
+				if ($fix_accounts) {
+					$user_info = get_userdata( $userid ); 
+					if ($user_info) {
+						if (in_array('current_member', $user_info->roles)) {
+							$user_info->remove_role('current_member');
+						}				
+					}	
+				}
+				else {
+					$invalid_members[] = $userid;
+				}
+			}
+		}
+		return $invalid_members;
+	}
+
+	public static function detect_expired_members_missing_membership($fix_accounts=false) {
+		$invalid_members = array();
+		$test_users = self::fetch_expired_member_role_users();
+		$results = PwtcMembers::fetch_users_with_no_memberships();
+		foreach ($results as $item) {
+			$userid = $item[0];
+			if (in_array($userid, $test_users)) {
+				if ($fix_accounts) {
+					$user_info = get_userdata( $userid ); 
+					if ($user_info) {
+						if (in_array('expired_member', $user_info->roles)) {
+							$user_info->remove_role('expired_member');
+						}
+					}	
+				}
+				else {
+					$invalid_members[] = $userid;
+				}
+			}
+		}
+		return $invalid_members;
+	}
+	
 	public static function detect_missing_members($fix_accounts=false) {
 		$missing_members = array();
 		$test_users = self::fetch_nonmember_role_users();
@@ -750,23 +812,14 @@ class PwtcMembers_Admin {
 						$memberships = wc_memberships_get_user_memberships($user_info->ID);
 						if (count($memberships) == 1) {
 							$membership = $memberships[0];
-							if (!in_array('customer', $user_info->roles)) {
-								$user_info->add_role('customer');
-							}
 							if (pwtc_members_is_expired($membership)) {
 								if (!in_array('expired_member', $user_info->roles)) {
 									$user_info->add_role('expired_member');
-								}
-								if (in_array('current_member', $user_info->roles)) {
-									$user_info->remove_role('current_member');
 								}
 							}
 							else {
 								if (!in_array('current_member', $user_info->roles)) {
 									$user_info->add_role('current_member');
-								}
-								if (in_array('expired_member', $user_info->roles)) {
-									$user_info->remove_role('expired_member');
 								}
 							}						
 						}
@@ -791,12 +844,6 @@ class PwtcMembers_Admin {
 					if ($fix_accounts) {
 						$user_info = get_userdata($userid); 
 						if ($user_info) {
-							if (!in_array('customer', $user_info->roles)) {
-								$user_info->add_role('customer');
-							}
-							if (!in_array('expired_member', $user_info->roles)) {
-								$user_info->add_role('expired_member');
-							}
 							if (in_array('current_member', $user_info->roles)) {
 								$user_info->remove_role('current_member');
 							}
@@ -822,12 +869,6 @@ class PwtcMembers_Admin {
 					if ($fix_accounts) {
 						$user_info = get_userdata($userid); 
 						if ($user_info) {
-							if (!in_array('customer', $user_info->roles)) {
-								$user_info->add_role('customer');
-							}
-							if (!in_array('current_member', $user_info->roles)) {
-								$user_info->add_role('current_member');
-							}
 							if (in_array('expired_member', $user_info->roles)) {
 								$user_info->remove_role('expired_member');
 							}
@@ -964,7 +1005,7 @@ class PwtcMembers_Admin {
 					$team = wc_memberships_for_teams_get_team(intval($_POST['teamid']));
 					$userid = intval($_POST['userid']);
 					if ($team) {
-						$count = PwtcMembers::sync_team_member_end_times($team, false, $userid);
+						$count = pwtc_members_sync_team_member_end_times($team, false, $userid);
 						if ($count === 0) {
 							$msg = 'Failed - family member end time not synced with family end time.';
 						}
@@ -1026,7 +1067,7 @@ class PwtcMembers_Admin {
 									}
 								}
 								else {
-									$count += PwtcMembers::sync_team_member_end_times($team);
+									$count += pwtc_members_sync_team_member_end_times($team);
 								}
 							}
 						}
@@ -1119,16 +1160,28 @@ class PwtcMembers_Admin {
 		wp_die();		
 	}
 
-	/*
 	public static function process_team_meta_callback( $post_id, \WP_Post $post ) {
 		$team = wc_memberships_for_teams_get_team( $post->ID );
 		if ($team) {
+			PwtcMembers::sync_team_member_end_times($team);
 			$user_memberships = $team->get_user_memberships();
 			foreach ( $user_memberships as $user_membership ) {
-				PwtcMembers::adjust_team_member_data_callback(false, $team, $user_membership);
+				if (function_exists('pwtc_mileage_assign_rider_id')) {
+					pwtc_mileage_assign_rider_id($user_membership);
+				}
+				PwtcMembers::adjust_member_start_date($user_membership);
 			}	
 		}
 	}
-	*/
+
+	public static function user_membership_saved_callback( $membership_plan, $args) {
+		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
+		if ($user_membership_id) {
+			$user_membership = wc_memberships_get_user_membership($user_membership_id);
+			if ($user_membership) {
+				PwtcMembers::adjust_member_start_date($user_membership);			
+			}
+		}	
+	}
 
 }

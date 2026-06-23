@@ -157,3 +157,31 @@ function pwtc_members_adjust_start_date($user_membership, $detect_only=false) {
 	}
     return false;
 }
+
+
+	function pwtc_members_sync_team_member_end_times($team, $detect_only=false, $userid=0) {
+		$count = 0;
+		$now = current_time('timestamp', true);
+		$team_end = $team->get_membership_end_date('timestamp');
+		foreach ($team->get_user_memberships() as $user_membership) {
+			if ($userid === 0 or $user_membership->get_user_id() === $userid) {
+				$end = $user_membership->get_end_date('timestamp');
+				if ($team_end and $end) {
+					$diff = abs($end - $team_end);
+					if ($diff > 86400) {
+						$count++;
+						if (!$detect_only) {
+							$user_membership->set_end_date($team_end);
+							$user_membership->add_note('PWTC Members plugin synced member end time with team end time.');
+							if ($team_end > $now and $user_membership->is_expired()) {
+								$user_membership->update_status( 'active' );
+							} elseif ($team_end <= $now) {
+								$user_membership->update_status( 'expired' );
+							}
+						}
+					}
+				}
+			}
+		}
+		return $count;
+	}

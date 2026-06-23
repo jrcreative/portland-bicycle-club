@@ -9,28 +9,32 @@ if (!current_user_can($capability)) {
 else {
     if (isset($_POST['_wpnonce'])) {
         if (wp_verify_nonce($_POST['_wpnonce'], 'pwtc_members_fix_invalid_members')) {
-            if (isset($_POST['fix_invalid_members'])) {
-                self::detect_invalid_members(true);
+            if (isset($_POST['fix_invalid_current_members'])) {
+                self::detect_current_members_missing_membership(true);
+            }
+            if (isset($_POST['fix_invalid_expired_members'])) {
+                self::detect_expired_members_missing_membership(true);
             }
         }
     }
     
-    $invalid_members = self::detect_invalid_members();
+    //$invalid_members = self::detect_invalid_members();
+    $invalid_current_members = self::detect_current_members_missing_membership();
+    $invalid_expired_members = self::detect_expired_members_missing_membership();
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
 });
 </script>
     <div id="invalid-members-section">
-        <p>Use this page to detect any user accounts that do not have a membership but are erroneously marked with the <code>current_member</code> or <code>expired_member</code> role. If any are found, you are given the option to fix these records.</p>
-        <?php if (empty($invalid_members)) { ?>
-        <p>No users found with invalid memberships roles.</p>
+        <p><strong>Detect all users without a membership that are erroneously marked with the current member role.</strong></p>
+        <?php if (empty($invalid_current_members)) { ?>
+        <p>No users found with invalid current member role.</p>
         <?php } else { ?>
         <table class="pwtc-members-rwd-table">
-            <caption>Users With Invalid Membership Roles</caption>
             <tr><th>User ID</th><th>Email</th><th>First Name</th><th>Last Name</th><th>Actions</th></tr>
             <?php
-            foreach ($invalid_members as $item) {
+            foreach ($invalid_current_members as $item) {
                 $userid = $item;
                 $user_info = get_userdata( $userid ); 
                 if ($user_info) {
@@ -51,7 +55,39 @@ jQuery(document).ready(function($) {
         <div>
         <form method="POST">
 	        <?php wp_nonce_field('pwtc_members_fix_invalid_members'); ?>
-            <input type="submit" name="fix_invalid_members" value="Fix These User Accounts" class="button button-primary button-large"/>
+            <input type="submit" name="fix_invalid_current_members" value="Fix All" class="button button-primary button-large"/>
+        </form>
+        </div>
+        <?php } ?>
+        <p><strong>Detect all users without a membership that are erroneously marked with the expired member role.</strong></p>
+        <?php if (empty($invalid_expired_members)) { ?>
+        <p>No users found with invalid expired member role.</p>
+        <?php } else { ?>
+        <table class="pwtc-members-rwd-table">
+            <tr><th>User ID</th><th>Email</th><th>First Name</th><th>Last Name</th><th>Actions</th></tr>
+            <?php
+            foreach ($invalid_expired_members as $item) {
+                $userid = $item;
+                $user_info = get_userdata( $userid ); 
+                if ($user_info) {
+                    $edit_url = admin_url('user-edit.php?user_id=' . $userid);       
+            ?>
+			<tr>
+				<td data-th="ID"><?php echo $userid; ?></td>
+				<td data-th="Email"><?php echo $user_info->user_email; ?></td>
+				<td data-th="First"><?php echo $user_info->first_name; ?></td>
+                <td data-th="Last"><?php echo $user_info->last_name; ?></td>
+                <td data-th="Actions"><a title="Edit user account profile." href="<?php echo $edit_url; ?>" target="_blank">Edit</a></td>
+            </tr>
+            <?php 
+                }
+            } 
+            ?>
+        </table>
+        <div>
+        <form method="POST">
+	        <?php wp_nonce_field('pwtc_members_fix_invalid_members'); ?>
+            <input type="submit" name="fix_invalid_expired_members" value="Fix All" class="button button-primary button-large"/>
         </form>
         </div>
         <?php } ?>

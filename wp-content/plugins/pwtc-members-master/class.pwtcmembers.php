@@ -49,14 +49,35 @@ class PwtcMembers {
 		add_action( 'wc_memberships_after_user_membership_member_details',
 			array( 'PwtcMembers', 'after_user_member_details_callback' ) );
 
+		add_action('wc_memberships_user_membership_created', 
+			array('PwtcMembers', 'membership_created_callback'), 10, 2);
+
+		add_action('wc_memberships_user_membership_expired', 
+			array('PwtcMembers', 'membership_expired_callback'));
+
+		add_action('wc_memberships_user_membership_cancelled', 
+			array('PwtcMembers', 'membership_cancelled_callback'));
+
+		add_action('wc_memberships_user_membership_activated', 
+			array('PwtcMembers', 'membership_activated_callback'));
+
+		add_action('wc_memberships_user_membership_deleted', 
+			array('PwtcMembers', 'membership_deleted_callback'));
+
+		add_action('woocommerce_account_dashboard',
+			array('PwtcMembers', 'add_card_download_callback'));
+
 		add_action( 'wc_memberships_grant_membership_access_from_purchase', 
 			array( 'PwtcMembers', 'user_membership_granted_callback' ), 10, 2);
 
 		add_action( 'wc_memberships_for_teams_create_team_from_order', 
 			array( 'PwtcMembers', 'team_created_from_order_callback' ), 10, 2);
 
+		add_action('wc_memberships_for_teams_team_created', 
+			array('PwtcMembers', 'team_created_callback' ));
+
 		add_action('wc_memberships_for_teams_add_team_member', 
-			array('PwtcMembers', 'email_team_member_callback' ), 100, 3);
+			array('PwtcMembers', 'add_member_to_team_callback' ), 10, 3);
 
 		add_filter( 'wc_memberships_update_member_user_role', 
 			array('PwtcMembers', 'update_member_user_role_callback'));
@@ -79,8 +100,8 @@ class PwtcMembers {
 		add_action('woocommerce_before_cart', 
 			array('PwtcMembers', 'validate_cart_callback' ));
 
-		add_filter('wc_memberships_for_teams_team_can_invite_user', 
-			array('PwtcMembers', 'validate_family_invitation_callback'), 10, 4);
+		add_action('wc_memberships_for_teams_before_invite_to_team', 
+			array('PwtcMembers', 'before_invite_to_team_callback'), 10, 3);
 
 		add_action( 'woocommerce_cart_coupon', 
 			array('PwtcMembers', 'empty_cart_button_callback' ));
@@ -219,6 +240,61 @@ class PwtcMembers {
 		<?php
 	}
 
+	public static function membership_created_callback($membership_plan, $args = array()) {
+		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
+
+		if (!$user_membership_id) {
+			return;
+		}
+
+		$user_membership = wc_memberships_get_user_membership($user_membership_id);
+		if (!$user_membership) {
+			return;			
+		}
+
+		if (function_exists('pwtc_mileage_assign_rider_id')) {
+			pwtc_mileage_assign_rider_id($user_membership);
+		}
+		self::adjust_member_start_date($user_membership);
+	}
+
+	public static function membership_expired_callback($membership_id) {
+		$user_membership = wc_memberships_get_user_membership($membership_id);
+		if (!$user_membership) {
+			return;			
+		}
+		if (function_exists('pwtc_mileage_assign_rider_id')) {
+			pwtc_mileage_assign_rider_id($user_membership);
+		}
+	}
+
+	public static function membership_cancelled_callback($user_membership) {
+		if (function_exists('pwtc_mileage_assign_rider_id')) {
+			pwtc_mileage_assign_rider_id($user_membership);
+		}
+	}
+
+	public static function membership_activated_callback($user_membership) {
+		if (function_exists('pwtc_mileage_assign_rider_id')) {
+			pwtc_mileage_assign_rider_id($user_membership);
+		}
+		self::adjust_member_start_date($user_membership);
+	}
+
+	public static function membership_deleted_callback($user_membership) {
+		$user_id = $user_membership->get_user_id();
+		if (function_exists('pwtc_mileage_expire_rider')) {
+			pwtc_mileage_expire_rider($user_id);
+		}
+	}
+
+	public static function add_card_download_callback() {
+	    echo '<p>Make sure your emergency contact information is up to date; <a href="/rider-emergency-contact">edit your emergency contact information.</a></p>';
+		echo '<p>Click the button below to download your rider ID card.';
+		echo do_shortcode('[pwtc_riderid_download]');
+		echo '</p>';
+	}
+
 	public static function user_membership_granted_callback($membership_plan, $args = array()) {
 		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
 		$user_id = isset($args['user_id']) ? absint($args['user_id']) : null;
@@ -264,26 +340,40 @@ class PwtcMembers {
 
 	public static function team_created_from_order_callback($team, $args = array()) {
 		if (isset($args['action']) and $args['action'] === 'renew') {
-			if (!get_field('send_membership_email', 'option')) {
-				return;
-			}
-			$user_memberships = $team->get_user_memberships();
-			foreach ( $user_memberships as $user_membership ) {
-				$membership_plan = $user_membership->get_plan();
-				$user_data = $user_membership->get_user();
-		    	$email = self::build_confirmation_email($membership_plan, $user_data, $user_membership);
-				$status = wp_mail($email['to'], $email['subject'], $email['message'], $email['headers']);
-		    	if ($status) {
-			    	$user_membership->add_note('PWTC Members plugin sent confirmation email to this family member, send was successful.');
-		    	}
-		    	else {
-			    	$user_membership->add_note('PWTC Members plugin sent confirmation email to this family member, send failed.');
-		    	}
+			self::sync_team_member_end_times($team);
+			if (get_field('send_membership_email', 'option')) {
+				$user_memberships = $team->get_user_memberships();
+				foreach ( $user_memberships as $user_membership ) {
+					$membership_plan = $user_membership->get_plan();
+					$user_data = $user_membership->get_user();
+					$email = self::build_confirmation_email($membership_plan, $user_data, $user_membership);
+					$status = wp_mail($email['to'], $email['subject'], $email['message'], $email['headers']);
+					if ($status) {
+						$user_membership->add_note('PWTC Members plugin sent confirmation email to this family member, send was successful.');
+					}
+					else {
+						$user_membership->add_note('PWTC Members plugin sent confirmation email to this family member, send failed.');
+					}
+				}
 			}
 		}
 	}
 
-	public static function email_team_member_callback($team_member, $team, $membership) {
+	public static function team_created_callback($team) {
+		$user_memberships = $team->get_user_memberships();
+		foreach ( $user_memberships as $user_membership ) {
+			if (function_exists('pwtc_mileage_assign_rider_id')) {
+				pwtc_mileage_assign_rider_id($user_membership);
+			}
+			self::adjust_member_start_date($user_membership);
+		}	
+	}
+
+	public static function add_member_to_team_callback($team_member, $team, $membership) {
+		if (function_exists('pwtc_mileage_assign_rider_id')) {
+			pwtc_mileage_assign_rider_id($membership);
+		}
+		self::adjust_member_start_date($membership);
 		$user_data = $team_member->get_user();
 		$membership_plan = $membership->get_plan();
         if (get_field('send_membership_email', 'option')) {
@@ -526,14 +616,15 @@ class PwtcMembers {
 		return;
 	}
 
-	public static function validate_family_invitation_callback($can_be_managed, $user, $team, $role) {
+	public static function before_invite_to_team_callback($email, $role, $team) {
+		$user = get_user_by( 'email', $email );
 		if ( $user ) {
 			$memberships = wc_memberships_get_user_memberships( $user->ID );
 			if ( !empty( $memberships ) ) {
-				return false;
+				$msg = 'User already has a different club membership.';
+				throw new Exception($msg);
 			}
 		}
-		return true;
 	}
 
 	public static function empty_cart_button_callback() {
@@ -1223,6 +1314,9 @@ class PwtcMembers {
 			if ($memberships[0]->is_active()) {
 				return '<div class="callout warning"><p>You have an active individual membership; you cannot delete it until it expires.</p></div>';
 			}
+			if ('yes' !== get_option('pwtc_members_allow_member_deletion', 'no')) {
+				return '<div class="callout warning"><p>You are not allowed to delete your expired individual membership, please contact the Membership Secretary instead.</p></div>';
+			}
 			ob_start();
 			?>
 			<div class="callout success"><p>You may delete your expired individual membership. Your shopping cart will also be emptied.
@@ -1245,6 +1339,9 @@ class PwtcMembers {
 			}
 			if (!$teams[0]->is_membership_expired()) {
 				return '<div class="callout warning"><p>You have an active family membership; you cannot delete it until it expires.</p></div>';
+			}
+			if ('yes' !== get_option('pwtc_members_allow_member_deletion', 'no')) {
+				return '<div class="callout warning"><p>You are not allowed to delete your expired family membership, please contact the Membership Secretary instead.</p></div>';
 			}
 			ob_start();
 			?>
@@ -1758,6 +1855,67 @@ class PwtcMembers {
 		return $results;
 	}
 
+	public static function fetch_expiring_memberships($offset_days) {
+		//$timezone = new DateTimeZone(pwtc_get_timezone_string());
+		$timezone = new DateTimeZone('UTC');
+        $today = new DateTime('now', $timezone);
+		$data['now'] = $today->format('Y-m-d H:i:s');
+		if ($offset_days < 0) {
+			$before = clone $today;
+        	$before->sub(new DateInterval('P' . absint($offset_days) . 'D'));
+			$value = [$before->format('Y-m-d H:i:s'), $today->format('Y-m-d H:i:s')];
+		}
+		else if ($offset_days > 0) {
+			$later = clone $today;
+        	$later->add(new DateInterval('P' . absint($offset_days) . 'D'));
+			$value = [$today->format('Y-m-d H:i:s'), $later->format('Y-m-d H:i:s')];
+		}
+		else {
+			return false;
+		}
+        $query = new WP_Query([
+            'posts_per_page' => -1,
+            'post_type' => 'wc_user_membership',
+            'meta_query' => [
+                [
+                    'key' => '_end_date',
+                    'value' => $value,
+                    'compare' => 'BETWEEN',
+                    'type' => 'DATETIME'
+                ],
+            ],
+            'orderby' => ['_end_date' => 'ASC'],
+        ]);
+		$members = [];
+		while($query->have_posts()){
+            $query->the_post();
+			$membership = new WC_Memberships_User_Membership(get_the_ID());
+			$user = $membership->get_user();
+			$teamid = 0;
+			$teamname = '';
+			if (function_exists('wc_memberships_for_teams_get_user_membership_team')) {
+				$team = wc_memberships_for_teams_get_user_membership_team($membership->get_id());
+				if ($team) {
+					$teamid = $team->get_id();
+					$teamname = $team->get_name();
+				}
+			}
+			$members[] = [
+				'member_id' => $membership->get_id(),
+				'user_id' => $user->ID,
+				'email' => $user->user_email,
+				'name' => $user->first_name . ' ' . $user->last_name,
+				'status' => $membership->get_status(),
+				'end_date' => $membership->get_end_date(),
+				'team_id' => $teamid,
+				'team_name' => $teamname,
+			];
+			wp_reset_query();
+        }
+		$data['members'] = $members;
+		return $data;
+	}
+
 	public static function build_confirmation_email($membership_plan, $user_data, $membership, $test_email = '') {
 		$member_email = $user_data->user_email;
 		$member_name = $user_data->first_name . ' ' . $user_data->last_name;
@@ -1928,31 +2086,16 @@ EOT;
 		return wp_mail($email, $subject , $message, $headers);
 	}
 
-	public static function sync_team_member_end_times($team, $detect_only=false, $userid=0) {
-		$count = 0;
-		$now = current_time('timestamp', true);
-		$team_end = $team->get_membership_end_date('timestamp');
-		foreach ($team->get_user_memberships() as $user_membership) {
-			if ($userid === 0 or $user_membership->get_user_id() === $userid) {
-				$end = $user_membership->get_end_date('timestamp');
-				if ($team_end and $end) {
-					$diff = abs($end - $team_end);
-					if ($diff > 86400) {
-						$count++;
-						if (!$detect_only) {
-							$user_membership->set_end_date($team_end);
-							$user_membership->add_note('PWTC Members plugin synced member end time with team end time.');
-							if ($team_end > $now and $user_membership->is_expired()) {
-								$user_membership->update_status( 'active' );
-							} elseif ($team_end <= $now) {
-								$user_membership->update_status( 'expired' );
-							}
-						}
-					}
-				}
-			}
+	public static function adjust_member_start_date($membership) {
+		if ('yes' === get_option('pwtc_members_sync_start_times', 'no')) {
+			pwtc_members_adjust_start_date($membership);
 		}
-		return $count;
+	}
+
+	public static function sync_team_member_end_times($team) {
+		if ('yes' === get_option('pwtc_members_sync_end_times', 'no')) {
+			pwtc_members_sync_team_member_end_times($team);
+		}
 	}
 
 	/*************************************************************/
