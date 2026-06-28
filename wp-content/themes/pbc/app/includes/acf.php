@@ -1090,6 +1090,39 @@ if( function_exists('acf_add_local_field_group') ):
         'title' => 'Post',
         'fields' => array (
             array (
+                'key' => 'field_display_post_author',
+                'label' => 'Display Post Author Name, Avatar and Post Date',
+                'name' => 'display_post_author',
+                'type' => 'true_false',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array (
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'message' => '',
+                'default_value' => 0,
+            ),
+            array (
+                'key' => 'field_filter_post_content',
+                'label' => 'Strip Out Unallowed HTML Markup from Post Content',
+                'name' => 'filter_post_content',
+                'type' => 'true_false',
+                'instructions' => 'Only the following HTML markup is allowed: &lt;a&gt;, &lt;br&gt;, &lt;em&gt;, &lt;strong&gt; and &lt;p&gt;;
+                    all others will be stripped out when this post is viewed.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array (
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'message' => '',
+                'default_value' => 0,
+            ),
+            array (
                 'key' => 'field_57a915ba2d010',
                 'label' => 'Format',
                 'name' => 'format',

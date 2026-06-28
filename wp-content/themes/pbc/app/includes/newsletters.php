@@ -12,6 +12,7 @@ add_action('init', function(){
             'editor',
             'thumbnail',
             'excerpt',
+            'author',
         ]
     ]);
 });

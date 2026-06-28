@@ -1,4 +1,4 @@
-<a href="{{ post.link }}" {% if not image %}class="icon"{% endif %}>
+<a href="{{ post.link }}" {% if not image and not post.get_field('display_post_author') %}class="icon"{% endif %}>
     {% if post.thumbnail %}
         <img src="{{ post.thumbnail.src|resize(280, 280) }}"
             srcset="{{ post.thumbnail.src|resize(280, 280)|retina(1) }} 1x,
@@ -7,6 +7,8 @@
             {{ post.thumbnail.src|resize(280, 280)|retina(4) }}  4x"
              alt="{{ post.thumbnail.alt }}"
         >
+    {% elseif post.get_field('display_post_author') %}
+        {{ fn('get_avatar', post.author.id, 280) }}
     {% elseif post.get_field('format') == "news" %}
         <i class="fa fa-newspaper-o"></i>
     {% elseif post.get_field('format') == "meeting" %}
@@ -28,5 +30,7 @@
 <h5><a href="{{ post.link }}">{{ post.title }}</a></h5>
 {% if post.post_type == 'newsletter' %}
     <h6>{{ post.date }}</h6>
+{% elseif post.get_field('display_post_author') %}
+    <h6>{{ post.author.name }} <span>&bull;</span> {{ post.date }}</h6>
 {% endif %}
 <p>{{ post.preview }}</p>

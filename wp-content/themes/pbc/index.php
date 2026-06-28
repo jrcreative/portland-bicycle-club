@@ -112,9 +112,25 @@ if(is_singular())
             include __DIR__ . '/resources/single-ride_template.php';
             return;
         }
+        elseif(get_post_type() == "newsletter")
+        {
+            $template = 'pages/newsletter.html.twig';
+        }
         else
         {
-            $template = 'one-column.html.twig';
+            $template = 'pages/post.html.twig';
+            $context['display_post_author'] = get_field('display_post_author');
+            $context['filter_post_content'] = get_field('filter_post_content');
+            $context['allowed_html_tags'] = array(
+                'a' => array(
+                    'href' => array(),
+                    'title' => array(),
+                ),
+                'br' => array(),
+                'em' => array(),
+                'strong' => array(),
+                'p' => array(),
+            );
             $context['comments'] = comments_open();
         }
     }
