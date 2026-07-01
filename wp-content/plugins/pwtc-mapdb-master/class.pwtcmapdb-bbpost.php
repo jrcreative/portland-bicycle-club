@@ -67,7 +67,7 @@ class PwtcMapdb_BBPost {
 
     // Generates the [pwtc_mapdb_edit_bbpost] shortcode.
 	public static function shortcode_edit_bbpost($atts, $content) {
-		$a = shortcode_atts(array('use_return' => 'no', 'email' => 'no', 'moderator' => 'mark_hartel@hotmail.com'), $atts);
+		$a = shortcode_atts(array('use_return' => 'no', 'email' => 'no', 'moderator' => 'webmaster@portlandbicyclingclub.com'), $atts);
 		$use_return = $a['use_return'] == 'yes';
 		$allow_email = $a['email'] == 'yes';
 		$moderator_email = $a['moderator'];
@@ -118,6 +118,35 @@ class PwtcMapdb_BBPost {
 				'return' => urlencode($return),
 				'op' => 'revert_draft',
 				'email' => $email
+			), get_permalink()), 303);
+            
+			exit;
+		}
+		else if (isset($_POST['postid']) and isset($_POST['preview']) and $current_user->ID != 0) {
+			if (!isset($_POST['nonce_field']) or !wp_verify_nonce($_POST['nonce_field'], 'bbpost-edit-form')) {
+				wp_nonce_ays('');
+			}
+						
+			$postid = intval($_POST['postid']);
+
+			wp_redirect(add_query_arg(array(
+				'post' => $postid,
+				'return' => urlencode($return),
+				'preview' => 'yes'
+			), get_permalink()), 303);
+            
+			exit;
+		}
+		else if (isset($_POST['postid']) and isset($_POST['edit']) and $current_user->ID != 0) {
+			if (!isset($_POST['nonce_field']) or !wp_verify_nonce($_POST['nonce_field'], 'bbpost-edit-form')) {
+				wp_nonce_ays('');
+			}
+						
+			$postid = intval($_POST['postid']);
+
+			wp_redirect(add_query_arg(array(
+				'post' => $postid,
+				'return' => urlencode($return)
 			), get_permalink()), 303);
             
 			exit;
@@ -301,6 +330,20 @@ class PwtcMapdb_BBPost {
 		}
 
 		if ($postid != 0) {
+			if (isset($_GET['preview'])) {
+				$allowed_html_tags = [
+                	'a' => [
+                	    'href' => array(),
+					],
+                	'br' => [],
+                	'em' => [],
+                	'strong' => [],
+                	'p' => [],
+				];
+				ob_start();
+				include('bbpost-preview-form.php');
+				return ob_get_clean();
+			}
 			if ($status == 'publish') {
 				return $return_to_bbpost . '<div class="callout small warning"><p>Bulletin board post "' . $bbpost_title . '" is published so you cannot edit it.</p></div>';
 			}

@@ -11,8 +11,40 @@
             $('#pwtc-mapdb-edit-bbpost-div .errmsg').html('<div class="callout small warning"><p>' + msg + '</p></div>');
         }
 
+        function show_warning2(msg) {
+            $('#pwtc-mapdb-edit-bbpost-div .errmsg2').html('<div class="callout small warning">' + msg + '</div>');
+        }
+
         function show_waiting() {
             $('#pwtc-mapdb-edit-bbpost-div .errmsg').html('<div class="callout small"><i class="fa fa-spinner fa-pulse"></i> please wait...</div>');
+        }
+
+        function insert_tag(startTag, endTag) {
+            $('#pwtc-mapdb-edit-bbpost-div form textarea').each(function() {
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const oldText = this.value;
+
+                const prefix = oldText.substring(0, start);
+                const inserted = startTag + oldText.substring(start, end) + endTag;
+                const suffix = oldText.substring(end);
+
+                this.value = `${prefix}${inserted}${suffix}`;
+
+                const newStart = start + startTag.length;
+                const newEnd = end + startTag.length;
+
+                this.setSelectionRange(newStart, newEnd);
+                this.focus();
+            });
+        }
+
+        function is_text_selected() {
+            var selected = false;
+            $('#pwtc-mapdb-edit-bbpost-div form textarea').each(function() {
+                selected = this.selectionEnd > this.selectionStart;
+            });
+            return selected;
         }
 
         $('#pwtc-mapdb-edit-bbpost-div form').on('keypress', function(evt) {
@@ -32,6 +64,49 @@
             } 
         });	
 
+        $('#pwtc-mapdb-edit-bbpost-div form .bold-btn').on('click', function(evt) { 
+            if (is_text_selected()) {
+                $('#pwtc-mapdb-edit-bbpost-div .errmsg2').empty();
+                is_dirty = true;
+                insert_tag("<strong>", "</strong>");
+            }
+            else {
+                show_warning2('First select the text that you want to make bold.');
+            }
+            evt.preventDefault();
+        });
+
+        $('#pwtc-mapdb-edit-bbpost-div form .italic-btn').on('click', function(evt) { 
+            if (is_text_selected()) {
+                $('#pwtc-mapdb-edit-bbpost-div .errmsg2').empty();
+                is_dirty = true;
+                insert_tag("<em>", "</em>");
+            }
+            else {
+                show_warning2('First select the text that you want to italicize.');
+            }
+            evt.preventDefault();
+        });
+
+        $('#pwtc-mapdb-edit-bbpost-div form .url-btn').on('click', function(evt) { 
+            if (is_text_selected()) {
+                $('#pwtc-mapdb-edit-bbpost-div .errmsg2').empty();
+                is_dirty = true;
+                insert_tag('<a href="">', "</a>");
+            }
+            else {
+                show_warning2('First select the text that you want to turn into a link.');
+            }
+            evt.preventDefault();
+        });
+
+        $('#pwtc-mapdb-edit-bbpost-div input[name="preview"]').on('click', function(evt) { 
+            if (is_dirty) {
+                show_warning('You have unsaved changes; you must save them before you can preview this post.');
+                evt.preventDefault();
+            }
+        });
+
         $('#pwtc-mapdb-edit-bbpost-div input[name="title"]').on('input', function() {
             is_dirty = true;
             $(this).removeClass('indicate-error');
@@ -42,14 +117,14 @@
             $('#pwtc-mapdb-edit-bbpost-div textarea').removeClass('indicate-error');
 
             if ($('#pwtc-mapdb-edit-bbpost-div input[name="title"]').val().trim().length == 0) {
-                show_warning('The <strong>ride title</strong> cannot be blank.');
+                show_warning('The <strong>post title</strong> cannot be blank.');
                 $('#pwtc-mapdb-edit-bbpost-div input[name="title"]').addClass('indicate-error');
                 evt.preventDefault();
                 return;
             }
 
             if ($('#pwtc-mapdb-edit-bbpost-div textarea[name="content"]').val().trim().length == 0) {
-                show_warning('The <strong>content</strong> cannot be blank.');
+                show_warning('The <strong>post content</strong> cannot be blank.');
                 $('#pwtc-mapdb-edit-bbpost-div textarea[name="content"]').addClass('indicate-error');
                 evt.preventDefault();
                 return;
@@ -161,14 +236,21 @@
                     <input type="hidden" name="postid" value="<?php echo $postid; ?>"/>
                     <input type="hidden" name="post_status" value="<?php echo $status; ?>"/>
                 </label>
-                <p class="help-text">TBD</p>
+                <p class="help-text">Please keep your post titles short and concise.</p>
             </div>
             <div class="row column">
                 <label>Post Content
                     <textarea name="content" rows="10"><?php echo $content; ?></textarea>
                 </label>
+                <div class="errmsg2"></div>
+                <div class="tiny dark button-group">
+                    <button class="bold-btn button">Bold</button>
+                    <button class="italic-btn button">Italic</button>
+                    <button class="url-btn button">URL</button>
+                </div>
 		        <p class="help-text">
-                    Only the following HTML markup is allowed: &lt;a&gt;, &lt;br&gt;, &lt;em&gt;, &lt;strong&gt; and &lt;p&gt;;
+                    Use the above buttons to insert allowed HTML markup around highlighted text. 
+                    Only the following HTML markup is allowed: &lt;a&gt;, &lt;em&gt; and &lt;strong&gt;;
                     all others will be stripped out when this post is viewed.
                 </p>
             </div>
@@ -178,6 +260,7 @@
                 <button class="dark button float-left" type="submit">Save Draft</button>
             <?php } else if ($status == 'draft') { ?>
                 <div class="button-group float-left">
+                    <input class="dark button" name="preview" value="Preview" type="submit"/>
                     <input class="dark button" name="draft" value="Update" type="submit"/>
                     <?php if (!$is_moderator) { ?>
                     <input class="dark button" name="pending" value="Submit for Review" type="submit"/>
@@ -187,12 +270,14 @@
                 </div>
             <?php } else if ($status == 'pending') { ?>
                 <div class="button-group float-left">
+                    <input class="dark button" name="preview" value="Preview" type="submit"/>
                     <input class="dark button" name="pending" value="Update" type="submit"/>
                     <input class="dark button" name="publish" value="Publish" type="submit"/>
                     <input class="dark button" name="draft" value="Reject" type="submit"/>
                 </div>
             <?php } else { ?>
                 <div class="button-group float-left">
+                    <input class="dark button" name="preview" value="Preview" type="submit"/>
                     <input class="dark button" name="publish" value="Update" type="submit"/>
                     <input class="dark button" name="draft" value="Unpublish" type="submit"/>
                 </div>
