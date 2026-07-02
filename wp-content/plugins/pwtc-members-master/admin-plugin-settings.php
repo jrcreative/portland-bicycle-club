@@ -27,11 +27,18 @@ else {
             else {
                 update_option('pwtc_members_allow_member_deletion', 'no');
             }
+            if (isset($_POST['auto_complete_orders'])) {
+                update_option('pwtc_members_auto_complete_orders', 'yes');
+            }
+            else {
+                update_option('pwtc_members_auto_complete_orders', 'no');
+            }
         }
     }
     $sync_start_times = 'yes' === get_option('pwtc_members_sync_start_times', 'no');
     $sync_end_times = 'yes' === get_option('pwtc_members_sync_end_times', 'no');
     $allow_member_deletion = 'yes' === get_option('pwtc_members_allow_member_deletion', 'no');
+    $auto_complete_orders = 'yes' === get_option('pwtc_members_auto_complete_orders', 'no');
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
@@ -52,6 +59,10 @@ jQuery(document).ready(function($) {
             <p>
                 <input type="checkbox" id="allow_member_deletion" name="allow_member_deletion" <?php echo $allow_member_deletion ? 'checked' : ''; ?>/>
                 <label for="allow_member_deletion">Allow users to delete their expired membership</label>
+            </p>
+            <p>
+                <input type="checkbox" id="auto_complete_orders" name="auto_complete_orders" <?php echo $auto_complete_orders ? 'checked' : ''; ?>/>
+                <label for="auto_complete_orders">Automatically complete orders whose status is processing</label>
             </p>
             <p>
                 <input type="submit" value="Save" class="button button-primary" />
