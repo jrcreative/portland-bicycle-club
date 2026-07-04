@@ -24,6 +24,7 @@ class PwtcMapdb_BBPost {
 		add_shortcode('pwtc_mapdb_delete_bbpost', array( 'PwtcMapdb_BBPost', 'shortcode_delete_bbpost'));
 		add_shortcode('pwtc_mapdb_new_bbpost_link', array('PwtcMapdb_BBPost', 'shortcode_new_bbpost_link'));
 		add_shortcode('pwtc_mapdb_manage_bbposts', array('PwtcMapdb_BBPost', 'shortcode_manage_bbposts'));
+		add_shortcode('pwtc_mapdb_forum_topic_links', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_links'));
     }
 
 	public static function load_javascripts() {
@@ -333,8 +334,19 @@ class PwtcMapdb_BBPost {
 			}
 		}
 	
-		//$categories = get_terms(array('taxonomy' => 'category'));
+		$enable_categories = true;
 		$categories = [];
+		if ($enable_categories) {
+			$topics_id = get_cat_ID ('Topics');
+			if ($topics_id > 0) {
+				$categories = get_categories([ 
+					'hide_empty' => false, 
+					'orderby' => 'name',
+					'order' => 'ASC',
+					'parent' => $topics_id,
+				]);
+			}
+		}
 
 		if ($postid != 0) {
 			$post_cats = wp_get_post_categories($postid);
@@ -547,6 +559,36 @@ class PwtcMapdb_BBPost {
 		include('manage-bbposts-form.php');
 		return ob_get_clean();
 	}	
+
+	// Generates the [pwtc_mapdb_forum_topic_links] shortcode.
+	public static function shortcode_forum_topic_links($atts) {
+		$output = '';
+		$current_user = wp_get_current_user();
+		if ( 0 !== $current_user->ID ) {
+			$topics_id = get_cat_ID ('Topics');
+			if ($topics_id > 0) {
+				$categories = get_categories([ 
+					'hide_empty' => true, 
+					'orderby' => 'name',
+					'order' => 'ASC',
+					'parent' => $topics_id,
+				]);
+				if (!empty($categories)) {
+					$output .= '<label>Forum Topics</label><div class="small button-group">';
+					foreach($categories as $category) {
+						$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
+							esc_url( get_category_link( $category->term_id ) ),
+							esc_attr( sprintf('View all posts under %s topic', $category->name ) ),
+							esc_html( $category->name )
+						);
+						$output .= $category_link;
+					}
+					$output .= '</div>';
+				}
+			}
+		}
+		return $output;
+	}
 
 	public static function bbpost_submitted_email($postid, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));

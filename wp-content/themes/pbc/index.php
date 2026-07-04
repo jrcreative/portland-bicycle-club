@@ -145,7 +145,6 @@ elseif(get_post_type() == 'newsletter')
 {
     $template = 'pages/archive.html.twig';
     $context['title'] = 'Newsletter Articles';
-    if($context['title'] == "Archives") { $context['title'] = "Newsletters"; }
     // Timber 2.0: Use Timber::get_posts() instead of new PostQuery()
     $context['posts'] = Timber::get_posts();
     $context['comments'] = comments_open();
@@ -154,7 +153,12 @@ else
 {
     $template = 'pages/archive.html.twig';
     $context['title'] = get_the_archive_title();
-    if($context['title'] == "Archives") { $context['title'] = "News"; }
+    if($context['title'] === "Archives") { 
+        $context['title'] = "News"; 
+    }elseif(str_starts_with($context['title'], 'Category: ')) {
+        $context['title'] = str_replace('Category: ', '', $context['title']);
+        $context['topic'] = $context['title'];
+    }
     // Timber 2.0: Use Timber::get_posts() instead of new PostQuery()
     $context['posts'] = Timber::get_posts();
 }

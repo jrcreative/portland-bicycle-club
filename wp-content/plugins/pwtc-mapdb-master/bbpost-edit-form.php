@@ -115,7 +115,7 @@
             $(this).removeClass('indicate-error');
         });
 
-        $('#pwtc-mapdb-edit-bbpost-div input[type="checkbox"]').change(function() {
+        $('#pwtc-mapdb-edit-bbpost-div input[type="radio"]').change(function() {
             is_dirty = true;
 	        $('#pwtc-mapdb-edit-bbpost-div .categories-fst').removeClass('indicate-error');
         });
@@ -142,7 +142,7 @@
             <?php if ( !empty($categories) ) { ?>
             var categories_empty = $('#pwtc-mapdb-edit-bbpost-div input[name="categories[]"]:checked').length == 0;
             if (categories_empty) {
-                show_warning('You must choose at least one <strong>post category</strong>.');
+                show_warning('You must choose a <strong>forum topic</strong>.');
                 $('#pwtc-mapdb-edit-bbpost-div .categories-fst').addClass('indicate-error');
                 evt.preventDefault();
                 return;						
@@ -276,11 +276,12 @@
             <?php if ( !empty($categories) ) { ?>
             <div class="row column">
                 <fieldset class="categories-fst">
-                    <legend>Post Categories</legend>
+                    <legend>Forum Topic</legend>
                     <?php foreach($categories as $category) { ?>
-                    <span><input type="checkbox" name="categories[]" value="<?php echo $category->term_id; ?>" id="<?php echo $category->slug; ?>" <?php echo in_array($category->term_id, $post_cats) ? 'checked': ''; ?>><label for="<?php echo $category->slug; ?>"><?php echo $category->name; ?></label></span>
+                    <span><input type="radio" name="categories[]" value="<?php echo $category->term_id; ?>" id="<?php echo $category->slug; ?>" <?php echo in_array($category->term_id, $post_cats) ? 'checked': ''; ?>><label for="<?php echo $category->slug; ?>"><?php echo $category->name; ?></label></span>
                     <?php } ?>
                 </fieldset>
+                <p class="help-text">Choose the forum topic under which you want your post to appear.</p>
             </div>
             <?php } ?>
             <div class="row column errmsg"></div>
