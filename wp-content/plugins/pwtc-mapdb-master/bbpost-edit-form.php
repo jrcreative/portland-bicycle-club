@@ -56,8 +56,6 @@
         });	
 
         $('#pwtc-mapdb-edit-bbpost-div form textarea').on('keypress', function(evt) {
-            is_dirty = true;
-            $(this).removeClass('indicate-error');
             var keyPressed = evt.keyCode || evt.which; 
             if (keyPressed === 13) { 
                 evt.stopPropagation(); 
@@ -107,14 +105,25 @@
             }
         });
 
-        $('#pwtc-mapdb-edit-bbpost-div input[name="title"]').on('input', function() {
+        $('#pwtc-mapdb-edit-bbpost-div input[name="title"]').on('change', function() {
             is_dirty = true;
             $(this).removeClass('indicate-error');
+        });
+
+        $('#pwtc-mapdb-edit-bbpost-div form textarea').on('change', function() {
+            is_dirty = true;
+            $(this).removeClass('indicate-error');
+        });
+
+        $('#pwtc-mapdb-edit-bbpost-div input[type="checkbox"]').change(function() {
+            is_dirty = true;
+	        $('#pwtc-mapdb-edit-bbpost-div .categories-fst').removeClass('indicate-error');
         });
 
         $('#pwtc-mapdb-edit-bbpost-div form').on('submit', function(evt) {
             $('#pwtc-mapdb-edit-bbpost-div input').removeClass('indicate-error');
             $('#pwtc-mapdb-edit-bbpost-div textarea').removeClass('indicate-error');
+            $('#pwtc-mapdb-edit-bbpost-div .categories-fst').removeClass('indicate-error');
 
             if ($('#pwtc-mapdb-edit-bbpost-div input[name="title"]').val().trim().length == 0) {
                 show_warning('The <strong>post title</strong> cannot be blank.');
@@ -129,6 +138,16 @@
                 evt.preventDefault();
                 return;
             }
+
+            <?php if ( !empty($categories) ) { ?>
+            var categories_empty = $('#pwtc-mapdb-edit-bbpost-div input[name="categories[]"]:checked').length == 0;
+            if (categories_empty) {
+                show_warning('You must choose at least one <strong>post category</strong>.');
+                $('#pwtc-mapdb-edit-bbpost-div .categories-fst').addClass('indicate-error');
+                evt.preventDefault();
+                return;						
+            }
+            <?php } ?>
 
             is_dirty = false;
             show_waiting();
@@ -254,6 +273,16 @@
                     all others will be stripped out when this post is viewed.
                 </p>
             </div>
+            <?php if ( !empty($categories) ) { ?>
+            <div class="row column">
+                <fieldset class="categories-fst">
+                    <legend>Post Categories</legend>
+                    <?php foreach($categories as $category) { ?>
+                    <span><input type="checkbox" name="categories[]" value="<?php echo $category->term_id; ?>" id="<?php echo $category->slug; ?>" <?php echo in_array($category->term_id, $post_cats) ? 'checked': ''; ?>><label for="<?php echo $category->slug; ?>"><?php echo $category->name; ?></label></span>
+                    <?php } ?>
+                </fieldset>
+            </div>
+            <?php } ?>
             <div class="row column errmsg"></div>
             <div class="row column clearfix">
             <?php if ($postid == 0) { ?>

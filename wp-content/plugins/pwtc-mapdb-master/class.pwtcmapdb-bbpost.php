@@ -229,6 +229,10 @@ class PwtcMapdb_BBPost {
 				}
 			}
 
+			if (isset($_POST['categories'])) {
+				wp_set_post_categories($postid, $_POST['categories']);
+			}
+
 			update_field('field_display_post_author', true, $postid);
 			update_field('field_filter_post_content', true, $postid);
 
@@ -327,6 +331,16 @@ class PwtcMapdb_BBPost {
 				$name = $info->first_name . ' ' . $info->last_name;	
 				return $return_to_bbpost . '<div class="callout small warning"><p>Bulletin board post "' . $bbpost_title . '" is currently being edited by ' . $name . '. </p></div>';
 			}
+		}
+	
+		//$categories = get_terms(array('taxonomy' => 'category'));
+		$categories = [];
+
+		if ($postid != 0) {
+			$post_cats = wp_get_post_categories($postid);
+		}
+		else {
+			$post_cats = [];
 		}
 
 		if ($postid != 0) {
