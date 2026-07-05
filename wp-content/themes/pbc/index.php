@@ -154,7 +154,8 @@ else
     $template = 'pages/archive.html.twig';
     $context['title'] = get_the_archive_title();
     if($context['title'] === "Archives") { 
-        $context['title'] = "News"; 
+        $context['title'] = "Forum"; 
+        $context['forum'] = "top";
     }elseif(str_starts_with($context['title'], 'Category: ')) {
         $context['title'] = str_replace('Category: ', '', $context['title']);
         $context['topic'] = $context['title'];

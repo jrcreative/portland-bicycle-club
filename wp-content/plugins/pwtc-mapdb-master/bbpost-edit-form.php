@@ -196,29 +196,29 @@
     <div class="callout small success">
         <p>
         <?php if ($operation == 'update_draft') { ?>
-        The draft bulletin board post was updated.
+        The draft forum post was updated.
         <?php } else if ($operation == 'submit_review') { ?>
-        The draft bulletin board post was submitted for review.
+        The draft forum post was submitted for review.
         <?php } else if ($operation == 'update_pending') { ?>
-        The pending bulletin board post was updated.
+        The pending forum post was updated.
         <?php } else if ($operation == 'published_draft') { ?>
-        The draft bulletin board post was published.
+        The draft forum post was published.
         <?php } else if ($operation == 'published') { ?>
-        The pending bulletin board post was published
+        The pending forum post was published
         <?php if ($email_status == 'yes') { ?> and the author notified by email
         <?php } else if ($email_status == 'failed') { ?> but failed to notify author by email<?php } ?>.
         <?php } else if ($operation == 'rejected') { ?>
-        The pending bulletin board post was rejected
+        The pending forum post was rejected
         <?php if ($email_status == 'yes') { ?> and the author notified by email
         <?php } else if ($email_status == 'failed') { ?> but failed to notify author by email<?php } ?>.
         <?php } else if ($operation == 'update_published') { ?>
-        The published bulletin board post was updated.
+        The published forum post was updated.
         <?php } else if ($operation == 'unpublished') { ?>
-        The published bulletin board post was unpublished.
+        The published forum post was unpublished.
         <?php } else if ($operation == 'insert') { ?>
-        The first draft of bulletin board post post was saved.
+        The first draft of forum post post was saved.
         <?php } else if ($operation == 'revert_draft') { ?>
-        The bulletin board post was reverted to draft
+        The forum post was reverted to draft
         <?php if ($email_status == 'yes') { ?> and the moderator notified by email
         <?php } else if ($email_status == 'failed') { ?> but failed to notify moderator by email<?php } ?>.
         <?php } ?>
@@ -228,7 +228,7 @@
     <div>
         <p>
     <?php if ($postid != 0) { ?>
-        This bulletin board post was authored by 
+        This forum post was authored by 
         <?php if ($author != $current_user->ID) { 
             echo '<a href="' . esc_url('mailto:' . $author_email) . '">' . $author_name . '</a>';
         } else { 
@@ -239,10 +239,10 @@
         <?php } else if ($status == 'pending') { ?>
         pending review by a moderator. It can be updated, published or rejected using the buttons at the bottom of the form.
         <?php } else if ($status == 'publish') { ?>
-        published and on the bulletin board. It can be updated or unpublished using the buttons at the bottom of the form.
+        published and on the forum. It can be updated or unpublished using the buttons at the bottom of the form.
         <?php } ?>
     <?php } else { ?>
-        This is a new bulletin board post, fill out the form below and press the save button at the bottom of the form.
+        This is a new forum post, fill out the form below and press the save button at the bottom of the form.
     <?php } ?>
         </p>
     </div>
@@ -277,7 +277,9 @@
             <div class="row column">
                 <fieldset class="categories-fst">
                     <legend>Forum Topic</legend>
-                    <?php foreach($categories as $category) { ?>
+                    <?php foreach($categories as $category) { 
+                        if ($category->slug === 'top-talks') continue;
+                    ?>
                     <span><input type="radio" name="categories[]" value="<?php echo $category->term_id; ?>" id="<?php echo $category->slug; ?>" <?php echo in_array($category->term_id, $post_cats) ? 'checked': ''; ?>><label for="<?php echo $category->slug; ?>"><?php echo $category->name; ?></label></span>
                     <?php } ?>
                 </fieldset>

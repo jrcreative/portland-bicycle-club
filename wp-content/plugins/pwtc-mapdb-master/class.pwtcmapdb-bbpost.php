@@ -25,6 +25,7 @@ class PwtcMapdb_BBPost {
 		add_shortcode('pwtc_mapdb_new_bbpost_link', array('PwtcMapdb_BBPost', 'shortcode_new_bbpost_link'));
 		add_shortcode('pwtc_mapdb_manage_bbposts', array('PwtcMapdb_BBPost', 'shortcode_manage_bbposts'));
 		add_shortcode('pwtc_mapdb_forum_topic_links', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_links'));
+		add_shortcode('pwtc_mapdb_forum_topic_desc', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_desc'));
     }
 
 	public static function load_javascripts() {
@@ -278,11 +279,11 @@ class PwtcMapdb_BBPost {
 		}
 
         if (0 == $current_user->ID) {
-			return $return_to_bbpost . '<div class="callout small alert"><p>You must be logged in to submit bulletin board posts.</p></div>';
+			return $return_to_bbpost . '<div class="callout small alert"><p>You must be logged in to submit forum posts.</p></div>';
 		}
 
 		if (!$is_active_member) {
-			return $return_to_bbpost . '<div class="callout small warning"><p>You must have an active membership to submit bulletin board posts.</p></div>';
+			return $return_to_bbpost . '<div class="callout small warning"><p>You must have an active membership to submit forum posts.</p></div>';
 		}
 
 		if ($postid != 0) {
@@ -321,16 +322,16 @@ class PwtcMapdb_BBPost {
 		if ($postid != 0) {
 			$filter_post_content = get_field('filter_post_content', $postid);
 			if (!$filter_post_content) {
-				return $return_to_bbpost . '<div class="callout small warning"><p>Bulletin board post "' . $bbpost_title . '" must use limited HTML markup in order to edit.</p></div>';
+				return $return_to_bbpost . '<div class="callout small warning"><p>Forum post "' . $bbpost_title . '" must use limited HTML markup in order to edit.</p></div>';
 			}
 			if ($author != $current_user->ID) {
-				return $return_to_bbpost . '<div class="callout small warning"><p>You must be the author of bulletin board post "' . $bbpost_title . '" to edit it.</p></div>';
+				return $return_to_bbpost . '<div class="callout small warning"><p>You must be the author of forum post "' . $bbpost_title . '" to edit it.</p></div>';
 			}
 			$lock_user = self::check_post_lock($postid);
 		    if ($lock_user) {
 				$info = get_userdata($lock_user);
 				$name = $info->first_name . ' ' . $info->last_name;	
-				return $return_to_bbpost . '<div class="callout small warning"><p>Bulletin board post "' . $bbpost_title . '" is currently being edited by ' . $name . '. </p></div>';
+				return $return_to_bbpost . '<div class="callout small warning"><p>Forum post "' . $bbpost_title . '" is currently being edited by ' . $name . '. </p></div>';
 			}
 		}
 	
@@ -371,7 +372,7 @@ class PwtcMapdb_BBPost {
 				return ob_get_clean();
 			}
 			if ($status == 'publish') {
-				return $return_to_bbpost . '<div class="callout small warning"><p>Bulletin board post "' . $bbpost_title . '" is published so you cannot edit it.</p></div>';
+				return $return_to_bbpost . '<div class="callout small warning"><p>Forum post "' . $bbpost_title . '" is published so you cannot edit it.</p></div>';
 			}
 			else if ($status == 'pending') {
 				ob_start();
@@ -469,7 +470,7 @@ class PwtcMapdb_BBPost {
 		$postid = intval($_GET['post']);
 		
 		if (0 == $current_user->ID) {
-			return $return_to_bbpost . '<div class="callout small alert"><p>You must be logged in to delete bulletin board posts.</p></div>';
+			return $return_to_bbpost . '<div class="callout small alert"><p>You must be logged in to delete forum posts.</p></div>';
 		}
 
 		$bbpost_title = esc_html(get_the_title($postid));
@@ -479,18 +480,18 @@ class PwtcMapdb_BBPost {
 		$status = $post->post_status;
 
 		if (!$is_active_member) {
-			return $return_to_bbpost . '<div class="callout small warning"><p>You must have an active membership to delete bulletin board posts.</p></div>';
+			return $return_to_bbpost . '<div class="callout small warning"><p>You must have an active membership to delete forum posts.</p></div>';
 		}
 
 		if ($status == 'publish') {
-			return $return_to_bbpost . '<div class="callout small warning"><p>Bulletin board post "' . $bbpost_title . '" is published so you cannot delete it.</p></div>';
+			return $return_to_bbpost . '<div class="callout small warning"><p>Forum post "' . $bbpost_title . '" is published so you cannot delete it.</p></div>';
 		}
 		else if ($status == 'pending') {
-			return $return_to_bbpost . '<div class="callout small warning"><p>Bulletin board post "' . $bbpost_title . '" is pending review so you cannot delete it.</p></div>';
+			return $return_to_bbpost . '<div class="callout small warning"><p>Forum post "' . $bbpost_title . '" is pending review so you cannot delete it.</p></div>';
 		}
 
 		if ($author != $current_user->ID) {
-			return $return_to_bbpost . '<div class="callout small warning"><p>You must be the author of bulletin board post "' . $bbpost_title . '" to delete it.</p></div>';
+			return $return_to_bbpost . '<div class="callout small warning"><p>You must be the author of forum post "' . $bbpost_title . '" to delete it.</p></div>';
 		}
 
 		$deleted = false;
@@ -499,7 +500,7 @@ class PwtcMapdb_BBPost {
 			if ($lock_user) {
 				$info = get_userdata($lock_user);
 				$name = $info->first_name . ' ' . $info->last_name;	
-				return $return_to_bbpost . '<div class="callout small warning"><p>Bulletin board post "' . $bbpost_title . '" is currently being edited by ' . $name . '.</p></div>';
+				return $return_to_bbpost . '<div class="callout small warning"><p>Forum post "' . $bbpost_title . '" is currently being edited by ' . $name . '.</p></div>';
 			}
 			self::set_post_lock($postid);
 		}
@@ -519,7 +520,7 @@ class PwtcMapdb_BBPost {
 		$return_uri = $_SERVER['REQUEST_URI'];
 
 		if (empty($content)) {
-				$content = 'new bulletin board post';
+				$content = 'new forum post';
 		}
 		$new_link = self::new_bbpost_link($return_uri);
 		
@@ -531,7 +532,7 @@ class PwtcMapdb_BBPost {
 		$current_user = wp_get_current_user();
 
 		if ( 0 == $current_user->ID ) {
-			return '<div class="callout small warning"><p>Please <a href="/wp-login.php">log in</a> to view the bulletin board posts that you have created.</p></div>';
+			return '<div class="callout small warning"><p>Please <a href="/wp-login.php">log in</a> to view the forum posts that you have created.</p></div>';
 		}
 
 		$user_info = get_userdata($current_user->ID);
@@ -539,7 +540,7 @@ class PwtcMapdb_BBPost {
 		$is_active_member = in_array('current_member', $user_info->roles);
 
 		if (!$is_active_member) {
-			return '<div class="callout small warning"><p>You must have an active membership to view the bulletin board posts that you have created.</p></div>';
+			return '<div class="callout small warning"><p>You must have an active membership to view the forum posts that you have created.</p></div>';
 		}
 
 		$author_name = $user_info->first_name . ' ' . $user_info->last_name;
@@ -578,7 +579,7 @@ class PwtcMapdb_BBPost {
 					foreach($categories as $category) {
 						$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
 							esc_url( get_category_link( $category->term_id ) ),
-							esc_attr( sprintf('View all posts under %s topic', $category->name ) ),
+							esc_attr( sprintf('View all posts under forum topic %s', $category->name ) ),
 							esc_html( $category->name )
 						);
 						$output .= $category_link;
@@ -590,11 +591,27 @@ class PwtcMapdb_BBPost {
 		return $output;
 	}
 
+	// Generates the [pwtc_mapdb_forum_topic_desc] shortcode.
+	public static function shortcode_forum_topic_desc($atts) {
+		$a = shortcode_atts(array('topic' => ''), $atts);
+		$output = '';
+		if (!empty($a['topic'])) {
+			$topic_id = get_cat_ID($a['topic']);
+			if ($topic_id > 0) {
+				$desc = category_description($topic_id);
+				if (!empty($desc)) {
+					$output = '<div>' . $desc . '</div>';
+				}
+			}
+		}
+		return $output;
+	}
+
 	public static function bbpost_submitted_email($postid, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));
 		$post_url = get_permalink($postid);
 		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
-		$subject = 'Bulletin Board Post Submitted for Review';
+		$subject = 'Forum Post Submitted for Review';
 		$message = <<<EOT
 The following post has been submitted for moderator review:<br>
 $post_link.<br>
@@ -607,7 +624,7 @@ EOT;
 	
 	public static function bbpost_unsubmitted_email($postid, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));
-		$subject = 'Bulletin Board Post Unsubmitted';
+		$subject = 'Forum Post Unsubmitted';
 		$message = <<<EOT
 The author has reverted the following post back to draft:<br>
 $post_title.<br>
@@ -664,7 +681,7 @@ EOT;
 		}
 
 		if (get_post_type($post) != 'post') {
-			return '<div class="callout small alert"><p>Post ' . $postid . ' is not a bulletin board post.</p></div>';
+			return '<div class="callout small alert"><p>Post ' . $postid . ' is not a forum post.</p></div>';
 		}
 
 		$post_status = get_post_status($post);
@@ -672,11 +689,11 @@ EOT;
 		if ($post_status != 'publish' and $post_status != 'draft' and $post_status != 'pending') {
 			if ($post_status == 'trash') {
 				if (!$ignore_trash) {
-					return '<div class="callout small alert"><p>Bulletin board post ' . $postid . ' has been deleted.</p></div>';
+					return '<div class="callout small alert"><p>Forum post ' . $postid . ' has been deleted.</p></div>';
 				}
 			}
 			else {
-				return '<div class="callout small alert"><p>Bulletin board post ' . $postid . ' is not draft, pending or published. Its current status is "' . $post_status . '"</p></div>';
+				return '<div class="callout small alert"><p>Forum post ' . $postid . ' is not draft, pending or published. Its current status is "' . $post_status . '"</p></div>';
 			}
 		}
 
