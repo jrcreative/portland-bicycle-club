@@ -17,13 +17,9 @@
                     {{ fn('get_avatar', post.author.id, 50) }}
                     <span> {{ post.author.name }}<span> <span>&bull;</span>
                 {% endif %}
-                {% if user %}
-                    <span> <a href="{{ post.link }}">{{ post.title }}</a></span>
-                {% else %}
-                    <span> {{ post.title }}</span>
-                {% endif %}
+                <span> <a href="{{ post.link }}">{{ post.title }}</a></span>
                 {% if user and post.comments and post.comments|length > 0 %} 
-	                <span> <i class="fa fa-comment"></i> {{ post.comments|length }}</span>
+	                <span> <i class="fa fa-comments"></i> {{ post.comments|length }}</span>
                 {% endif %}
             </h6></div>
         {% if loop.last %}

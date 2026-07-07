@@ -48,6 +48,12 @@ if(is_singular())
                         'after' => '1 week ago',
                     ]],
                 ];
+                if (!is_user_logged_in() and function_exists('pwtc_mapdb_get_topic_category_ids')) {
+                    $categories = pwtc_mapdb_get_topic_category_ids();
+                    if (!empty($categories)) {
+                        $query_args['category__not_in'] = $categories;
+                    }
+                }          
                 // Timber 2.0: get_posts() with query array directly
                 $context['news'] = Timber::get_posts($query_args);
             }
