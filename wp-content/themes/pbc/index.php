@@ -41,13 +41,15 @@ if(is_singular())
         while(have_rows('content_rows')) {
             the_row();
             if(get_row_layout() == "news") {
+                $query_args = [
+                    'posts_per_page' => -1,
+                    'date_query' => [[
+                        'column' => 'post_date_gmt',
+                        'after' => '1 week ago',
+                    ]],
+                ];
                 // Timber 2.0: get_posts() with query array directly
-                $context['news'] = Timber::get_posts([
-                    'posts_per_page' => 8,
-                    'orderby' => array(
-                        'date' => 'DESC'
-                    )
-                ]);
+                $context['news'] = Timber::get_posts($query_args);
             }
             elseif(get_row_layout() == "rides")
             {
@@ -161,7 +163,20 @@ else
         $context['topic'] = $context['title'];
     }
     // Timber 2.0: Use Timber::get_posts() instead of new PostQuery()
-    $context['posts'] = Timber::get_posts();
+    if (is_user_logged_in() or !function_exists('pwtc_mapdb_get_topic_category_ids')) {
+        $context['posts'] = Timber::get_posts();
+    }
+    else {
+        $categories = pwtc_mapdb_get_topic_category_ids();
+        if (!empty($categories)) {
+            $context['posts'] = Timber::get_posts([
+                'category__not_in' => $categories,
+            ], [ 'merge_default' => true ]);
+        }
+        else {
+            $context['posts'] = Timber::get_posts();
+        }
+    }
 }
 
 Timber::render($template, $context);

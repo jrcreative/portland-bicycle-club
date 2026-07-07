@@ -607,6 +607,25 @@ class PwtcMapdb_BBPost {
 		return $output;
 	}
 
+	public static function get_topic_category_ids() {
+		$output = [];
+		$topics_id = get_cat_ID ('Topics');
+		if ($topics_id > 0) {
+			$categories = get_categories([ 
+				'hide_empty' => false, 
+				'orderby' => 'name',
+				'order' => 'ASC',
+				'parent' => $topics_id,
+			]);
+			if (!empty($categories)) {
+				foreach($categories as $category) {
+					$output[] = $category->term_id;
+				}
+			}
+		}
+		return $output;
+	}
+
 	public static function bbpost_submitted_email($postid, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));
 		$post_url = get_permalink($postid);
