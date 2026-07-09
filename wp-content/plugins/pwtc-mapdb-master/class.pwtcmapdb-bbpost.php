@@ -26,6 +26,7 @@ class PwtcMapdb_BBPost {
 		add_shortcode('pwtc_mapdb_manage_bbposts', array('PwtcMapdb_BBPost', 'shortcode_manage_bbposts'));
 		add_shortcode('pwtc_mapdb_forum_topic_links', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_links'));
 		add_shortcode('pwtc_mapdb_forum_topic_desc', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_desc'));
+		add_shortcode('pwtc_mapdb_forum_count_icon', array('PwtcMapdb_BBPost', 'shortcode_forum_count_icon'));
     }
 
 	public static function load_javascripts() {
@@ -603,6 +604,48 @@ class PwtcMapdb_BBPost {
 					$output = '<div>' . $desc . '</div>';
 				}
 			}
+		}
+		return $output;
+	}
+
+	// Generates the [pwtc_mapdb_forum_count_icon] shortcode.
+	public static function shortcode_forum_count_icon($atts) {
+		$a = shortcode_atts(array('after' => '', 'style' => ''), $atts);
+		$output = '';
+		$query_args = [
+			'nopaging' => true,
+			'cache_results' => false,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'fields' => 'ids',
+			'posts_per_page' => -1,
+			'category__in' => self::get_topic_category_ids(),
+		];
+		if (!empty($a['after'])) {
+			$query_args['date_query'] = [
+				'relation' => 'OR',
+				[
+                    'column' => 'post_date_gmt',
+                    'after' => $a['after'],
+				],
+				[
+                    'column' => 'post_modified_gmt',
+                    'after' => $a['after'],
+				],
+			];
+			$title = ' member posts added or modified since ' . $a['after'] . '.';
+		}
+		else {
+			$title = ' member posts total.';
+		}
+		$results = new WP_Query($query_args);
+		if ($results->found_posts > 0) {
+			$title = '' . $results->found_posts . $title;
+			$output .= '<span';
+			if (!empty($a['style'])) {
+				$output .= ' style="' . $a['style'] . '"';
+			}
+			$output .= ' class="label primary" title="' . $title . '"><i class="fa fa-sticky-note"></i> ' . $results->found_posts . '</span>';	
 		}
 		return $output;
 	}

@@ -40,7 +40,11 @@
             <div class="bottom clearfix">
 
                 <ul class="vertical menu">
-                    <li><a href="{{ site.url }}" class="title float-left"><img src="/android-chrome-192x192.png" alt="" style="width: 64px;"></a></li>
+                    <li><a href="{{ site.url }}" class="title float-left"><img src="/android-chrome-192x192.png" alt="" style="width: 64px;"></a>
+                    {% apply shortcodes %}
+                        [pwtc_mapdb_forum_count_icon after="1 week ago" style="color: white;"]
+                    {% endapply %}
+                    </li>
                 </ul>
                 <ul class="dropdown menu hide-for-small-only float-right" data-dropdown-menu data-close-on-click-inside="false">
                     {% for item in primary_menu.items %}
@@ -63,7 +67,11 @@
         <!-- mobile menu title bar -->
         <div class="title-bar hide-for-medium" data-hide-for="medium">
             <div class="title-bar-left">
-                <div class="title-bar-title"><a href="{{ site.url }}"><img src="/android-chrome-192x192.png" alt="" style="width: 32px;"></a></div>
+                <div class="title-bar-title"><a href="{{ site.url }}"><img src="/android-chrome-192x192.png" alt="" style="width: 32px;"></a>
+                {% apply shortcodes %}
+                    [pwtc_mapdb_forum_count_icon after="1 week ago" style="color: white;"]
+                {% endapply %}
+                </div>
             </div>
             <div class="title-bar-right">
                 {% if user %}

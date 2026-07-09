@@ -41,12 +41,20 @@ if(is_singular())
         while(have_rows('content_rows')) {
             the_row();
             if(get_row_layout() == "news") {
+                $after = '1 week ago';
                 $query_args = [
                     'posts_per_page' => -1,
-                    'date_query' => [[
-                        'column' => 'post_date_gmt',
-                        'after' => '1 week ago',
-                    ]],
+                    'date_query' => [				
+                        'relation' => 'OR',
+				        [
+                            'column' => 'post_date_gmt',
+                            'after' => $after,
+				        ],
+				        [
+                            'column' => 'post_modified_gmt',
+                            'after' => $after,
+				        ],
+                    ],
                 ];
                 if (!is_user_logged_in() and function_exists('pwtc_mapdb_get_topic_category_ids')) {
                     $categories = pwtc_mapdb_get_topic_category_ids();
