@@ -41,7 +41,7 @@ if(is_singular())
         while(have_rows('content_rows')) {
             the_row();
             if(get_row_layout() == "news") {
-                $after = '1 week ago';
+                $after = apply_filters('pwtc_recent_posts_after', '1 day ago');
                 $query_args = [
                     'posts_per_page' => -1,
                     'date_query' => [				
@@ -56,14 +56,13 @@ if(is_singular())
 				        ],
                     ],
                 ];
-                if (!is_user_logged_in() and function_exists('pwtc_mapdb_get_topic_category_ids')) {
-                    $categories = pwtc_mapdb_get_topic_category_ids();
-                    if (!empty($categories)) {
-                        $query_args['category__not_in'] = $categories;
-                    }
-                }          
+                $exclude_categories = apply_filters('pwtc_category_exclude_list', []);
+                if (!empty($exclude_categories)) {
+                    $query_args['category__not_in'] = $exclude_categories;
+                }
                 // Timber 2.0: get_posts() with query array directly
                 $context['news'] = Timber::get_posts($query_args);
+                $context['after'] = $after;
             }
             elseif(get_row_layout() == "rides")
             {
@@ -169,27 +168,24 @@ else
 {
     $template = 'pages/archive.html.twig';
     $context['title'] = get_the_archive_title();
-    if($context['title'] === "Archives") { 
-        $context['title'] = "Forum"; 
-        $context['forum'] = "top";
-    }elseif(str_starts_with($context['title'], 'Category: ')) {
-        $context['title'] = str_replace('Category: ', '', $context['title']);
-        $context['topic'] = $context['title'];
+    if (is_category()) {
+        $context['title'] = single_cat_title('', false);
+        $context['desc'] = category_description();
+    }
+    else {
+        $context['title'] = "Forum";
+        $topics = apply_filters('pwtc_category_button_links', '');
+        if (!empty($topics)) {
+            $context['topics'] = $topics;
+        }
     }
     // Timber 2.0: Use Timber::get_posts() instead of new PostQuery()
-    if (is_user_logged_in() or !function_exists('pwtc_mapdb_get_topic_category_ids')) {
+    $exclude_categories = apply_filters('pwtc_category_exclude_list', []);
+    if (empty($exclude_categories)) {
         $context['posts'] = Timber::get_posts();
     }
     else {
-        $categories = pwtc_mapdb_get_topic_category_ids();
-        if (!empty($categories)) {
-            $context['posts'] = Timber::get_posts([
-                'category__not_in' => $categories,
-            ], [ 'merge_default' => true ]);
-        }
-        else {
-            $context['posts'] = Timber::get_posts();
-        }
+        $context['posts'] = Timber::get_posts(['category__not_in' => $exclude_categories], ['merge_default' => true]);
     }
 }
 

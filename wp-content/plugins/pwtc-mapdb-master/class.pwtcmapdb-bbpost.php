@@ -19,14 +19,18 @@ class PwtcMapdb_BBPost {
 		add_action('wp_enqueue_scripts', array('PwtcMapdb_BBPost', 'load_javascripts'));
 
 		add_filter('heartbeat_received', array('PwtcMapdb_BBPost', 'refresh_post_lock'), 10, 3);
+		add_filter('pwtc_header_indicator_icons', array('PwtcMapdb_BBPost', 'header_indicator_icons_callback'));
+		add_filter('pwtc_category_exclude_list', array('PwtcMapdb_BBPost', 'category_exclude_list_callback'));
+		add_filter('pwtc_recent_posts_after', array('PwtcMapdb_BBPost', 'recent_posts_after_callback'));
+		add_filter('pwtc_category_button_links', array('PwtcMapdb_BBPost', 'category_button_links_callback'));
 
         add_shortcode('pwtc_mapdb_edit_bbpost', array('PwtcMapdb_BBPost', 'shortcode_edit_bbpost'));
 		add_shortcode('pwtc_mapdb_delete_bbpost', array( 'PwtcMapdb_BBPost', 'shortcode_delete_bbpost'));
 		add_shortcode('pwtc_mapdb_new_bbpost_link', array('PwtcMapdb_BBPost', 'shortcode_new_bbpost_link'));
 		add_shortcode('pwtc_mapdb_manage_bbposts', array('PwtcMapdb_BBPost', 'shortcode_manage_bbposts'));
-		add_shortcode('pwtc_mapdb_forum_topic_links', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_links'));
-		add_shortcode('pwtc_mapdb_forum_topic_desc', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_desc'));
-		add_shortcode('pwtc_mapdb_forum_count_icon', array('PwtcMapdb_BBPost', 'shortcode_forum_count_icon'));
+		//add_shortcode('pwtc_mapdb_forum_topic_links', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_links'));
+		//add_shortcode('pwtc_mapdb_forum_topic_desc', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_desc'));
+		//add_shortcode('pwtc_mapdb_forum_count_icon', array('PwtcMapdb_BBPost', 'shortcode_forum_count_icon'));
     }
 
 	public static function load_javascripts() {
@@ -66,6 +70,75 @@ class PwtcMapdb_BBPost {
 		}	
 
 		return $response;
+	}
+
+	public static function header_indicator_icons_callback($output) {
+		$after = '1 week ago';
+		$style = 'color: white;';
+		$query_args = [
+			'nopaging' => true,
+			'cache_results' => false,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'fields' => 'ids',
+			'posts_per_page' => -1,
+			'category__in' => self::get_topic_category_ids(),
+			'date_query' => [
+				'relation' => 'OR',
+				[
+                    'column' => 'post_date_gmt',
+                    'after' => $after,
+				],
+				[
+                    'column' => 'post_modified_gmt',
+                    'after' => $after,
+				],
+			],
+		];
+		$results = new WP_Query($query_args);
+		if ($results->found_posts > 0) {
+			$title = '' . $results->found_posts . ' member posts added or modified since ' . $after . '.';
+			$output .= '<span style="' . $style . '" class="label primary" title="' . $title . '"><i class="fa fa-sticky-note"></i> ' . $results->found_posts . '</span>';	
+		}
+		return $output;
+	}
+
+	public static function category_exclude_list_callback($exclude_list) {
+		$current_user = wp_get_current_user();
+		if (0 === $current_user->ID) {
+			$exclude_list = array_merge($exclude_list, self::get_topic_category_ids());
+		}
+		return $exclude_list;
+	}
+
+	public static function recent_posts_after_callback($after) {
+		return '1 week ago';
+	}
+
+	public static function category_button_links_callback($output) {
+		$current_user = wp_get_current_user();
+		if ( 0 !== $current_user->ID ) {
+			$topics_id = get_cat_ID ('Topics');
+			if ($topics_id > 0) {
+				$categories = get_categories([ 
+					'hide_empty' => true, 
+					'orderby' => 'name',
+					'order' => 'ASC',
+					'parent' => $topics_id,
+				]);
+				if (!empty($categories)) {
+					foreach($categories as $category) {
+						$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
+							esc_url( get_category_link( $category->term_id ) ),
+							esc_attr( sprintf('View all posts under forum topic %s', $category->name ) ),
+							esc_html( $category->name )
+						);
+						$output .= $category_link;
+					}
+				}
+			}
+		}		
+		return $output;
 	}
 
     // Generates the [pwtc_mapdb_edit_bbpost] shortcode.
@@ -562,7 +635,7 @@ class PwtcMapdb_BBPost {
 		return ob_get_clean();
 	}	
 
-	// Generates the [pwtc_mapdb_forum_topic_links] shortcode.
+	// Generates the [pwtc_mapdb_forum_topic_links] shortcode.  Delete!
 	public static function shortcode_forum_topic_links($atts) {
 		$output = '';
 		$current_user = wp_get_current_user();
@@ -592,7 +665,7 @@ class PwtcMapdb_BBPost {
 		return $output;
 	}
 
-	// Generates the [pwtc_mapdb_forum_topic_desc] shortcode.
+	// Generates the [pwtc_mapdb_forum_topic_desc] shortcode. Delete!
 	public static function shortcode_forum_topic_desc($atts) {
 		$a = shortcode_atts(array('topic' => ''), $atts);
 		$output = '';
@@ -608,7 +681,7 @@ class PwtcMapdb_BBPost {
 		return $output;
 	}
 
-	// Generates the [pwtc_mapdb_forum_count_icon] shortcode.
+	// Generates the [pwtc_mapdb_forum_count_icon] shortcode.  Delete!
 	public static function shortcode_forum_count_icon($atts) {
 		$a = shortcode_atts(array('after' => '', 'style' => ''), $atts);
 		$output = '';

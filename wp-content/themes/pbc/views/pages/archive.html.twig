@@ -5,14 +5,12 @@
                 <div class="grid-x grid-padding-x">
                     <div class="cell title"><h1>{% if title is defined %}{{ title }}{% endif %}</h1></div>
                     <div class="cell">
-                        {% if topic is defined %}
-                            {% apply shortcodes %}
-                                [pwtc_mapdb_forum_topic_desc topic="{{ topic }}"]
-                            {% endapply %}
-                        {% elseif forum is defined %}
-                            {% apply shortcodes %}
-                                [pwtc_mapdb_forum_topic_links]
-                            {% endapply %}
+                        {% if desc is defined %}
+                            {{ desc }}
+                        {% elseif topics is defined %}
+                            <label>Topics</label><div class="button-group">
+                                {{ topics }}
+                            </div>
                         {% endif %}
                     </div>
                 </div>

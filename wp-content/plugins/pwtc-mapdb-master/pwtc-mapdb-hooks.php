@@ -143,6 +143,7 @@ function pwtc_mapdb_get_template_metadata() {
     return $result;
 }  
 
-function pwtc_mapdb_get_topic_category_ids() {
-    return PwtcMapdb_BBPost::get_topic_category_ids();
-}
+// Delete!
+//function pwtc_mapdb_get_topic_category_ids() {
+//    return PwtcMapdb_BBPost::get_topic_category_ids();
+//}
