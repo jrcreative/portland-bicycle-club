@@ -12,12 +12,29 @@ class PwtcMapdb_Admin {
     // Initializes plugin WordPress hooks.
     private static function init_hooks() {
         self::$initiated = true;
-        add_action('admin_action_pwtc_copy_post_as_draft', array('PwtcMapdb_Admin', 'copy_post_as_draft'));
-        add_filter('post_row_actions', array('PwtcMapdb_Admin', 'copy_post_link'), 10, 2);
-        add_filter('page_row_actions', array('PwtcMapdb_Admin', 'copy_post_link'), 10, 2);
-        add_action('post_submitbox_misc_actions', array('PwtcMapdb_Admin', 'copy_page_custom_button'));
-	add_action('wp_before_admin_bar_render', array('PwtcMapdb_Admin', 'admin_bar_link'));
+        add_action('admin_menu', array('PwtcMapdb_Admin', 'plugin_menu'));
+        if ('yes' === get_option('pwtc_mapdb_enable_post_copy', 'no')) {
+            add_action('admin_action_pwtc_copy_post_as_draft', array('PwtcMapdb_Admin', 'copy_post_as_draft'));
+            add_filter('post_row_actions', array('PwtcMapdb_Admin', 'copy_post_link'), 10, 2);
+            add_filter('page_row_actions', array('PwtcMapdb_Admin', 'copy_post_link'), 10, 2);
+            add_action('post_submitbox_misc_actions', array('PwtcMapdb_Admin', 'copy_page_custom_button'));
+	        add_action('wp_before_admin_bar_render', array('PwtcMapdb_Admin', 'admin_bar_link'));
+        }
     }
+
+    public static function plugin_menu() {
+        $page_title = 'PWTC Map DB Plugin - Settings';
+    	$menu_title = 'PWTC MapDB';
+    	$menu_slug = 'pwtc_mapdb_plugin_settings';
+    	$capability = 'manage_options';
+    	$function = array('PwtcMapdb_Admin', 'page_plugin_settings');
+		add_submenu_page('options-general.php', $page_title, $menu_title, $capability, $menu_slug, $function);
+    }
+
+	public static function page_plugin_settings() {
+		$capability = 'manage_options';
+		include('admin-plugin-settings.php');
+	}
 
     public static function copy_page_custom_button() {
         global $post;

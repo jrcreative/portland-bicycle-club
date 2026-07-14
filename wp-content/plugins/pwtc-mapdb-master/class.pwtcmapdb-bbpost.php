@@ -28,9 +28,6 @@ class PwtcMapdb_BBPost {
 		add_shortcode('pwtc_mapdb_delete_bbpost', array( 'PwtcMapdb_BBPost', 'shortcode_delete_bbpost'));
 		add_shortcode('pwtc_mapdb_new_bbpost_link', array('PwtcMapdb_BBPost', 'shortcode_new_bbpost_link'));
 		add_shortcode('pwtc_mapdb_manage_bbposts', array('PwtcMapdb_BBPost', 'shortcode_manage_bbposts'));
-		//add_shortcode('pwtc_mapdb_forum_topic_links', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_links'));
-		//add_shortcode('pwtc_mapdb_forum_topic_desc', array('PwtcMapdb_BBPost', 'shortcode_forum_topic_desc'));
-		//add_shortcode('pwtc_mapdb_forum_count_icon', array('PwtcMapdb_BBPost', 'shortcode_forum_count_icon'));
     }
 
 	public static function load_javascripts() {
@@ -73,7 +70,7 @@ class PwtcMapdb_BBPost {
 	}
 
 	public static function header_indicator_icons_callback($output) {
-		$after = '1 week ago';
+		$after = get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
 		$style = 'color: white;';
 		$query_args = [
 			'nopaging' => true,
@@ -112,13 +109,13 @@ class PwtcMapdb_BBPost {
 	}
 
 	public static function recent_posts_after_callback($after) {
-		return '1 week ago';
+		return get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
 	}
 
 	public static function category_button_links_callback($output) {
 		$current_user = wp_get_current_user();
 		if ( 0 !== $current_user->ID ) {
-			$topics_id = get_cat_ID ('Topics');
+			$topics_id = get_cat_ID (get_option('pwtc_mapdb_topics_parent_category_name', ''));
 			if ($topics_id > 0) {
 				$categories = get_categories([ 
 					'hide_empty' => true, 
@@ -143,10 +140,11 @@ class PwtcMapdb_BBPost {
 
     // Generates the [pwtc_mapdb_edit_bbpost] shortcode.
 	public static function shortcode_edit_bbpost($atts, $content) {
-		$a = shortcode_atts(array('use_return' => 'no', 'email' => 'no', 'moderator' => 'webmaster@portlandbicyclingclub.com'), $atts);
+		$a = shortcode_atts(array('use_return' => 'no'), $atts);
 		$use_return = $a['use_return'] == 'yes';
-		$allow_email = $a['email'] == 'yes';
-		$moderator_email = $a['moderator'];
+
+		$allow_email = ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no'));
+		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
 
         $is_moderator = false;
 		$is_active_member = false;
@@ -412,7 +410,7 @@ class PwtcMapdb_BBPost {
 		$enable_categories = true;
 		$categories = [];
 		if ($enable_categories) {
-			$topics_id = get_cat_ID ('Topics');
+			$topics_id = get_cat_ID (get_option('pwtc_mapdb_topics_parent_category_name', ''));
 			if ($topics_id > 0) {
 				$categories = get_categories([ 
 					'hide_empty' => false, 
@@ -635,97 +633,9 @@ class PwtcMapdb_BBPost {
 		return ob_get_clean();
 	}	
 
-	// Generates the [pwtc_mapdb_forum_topic_links] shortcode.  Delete!
-	public static function shortcode_forum_topic_links($atts) {
-		$output = '';
-		$current_user = wp_get_current_user();
-		if ( 0 !== $current_user->ID ) {
-			$topics_id = get_cat_ID ('Topics');
-			if ($topics_id > 0) {
-				$categories = get_categories([ 
-					'hide_empty' => true, 
-					'orderby' => 'name',
-					'order' => 'ASC',
-					'parent' => $topics_id,
-				]);
-				if (!empty($categories)) {
-					$output .= '<label>Forum Topics</label><div class="small button-group">';
-					foreach($categories as $category) {
-						$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
-							esc_url( get_category_link( $category->term_id ) ),
-							esc_attr( sprintf('View all posts under forum topic %s', $category->name ) ),
-							esc_html( $category->name )
-						);
-						$output .= $category_link;
-					}
-					$output .= '</div>';
-				}
-			}
-		}
-		return $output;
-	}
-
-	// Generates the [pwtc_mapdb_forum_topic_desc] shortcode. Delete!
-	public static function shortcode_forum_topic_desc($atts) {
-		$a = shortcode_atts(array('topic' => ''), $atts);
-		$output = '';
-		if (!empty($a['topic'])) {
-			$topic_id = get_cat_ID($a['topic']);
-			if ($topic_id > 0) {
-				$desc = category_description($topic_id);
-				if (!empty($desc)) {
-					$output = '<div>' . $desc . '</div>';
-				}
-			}
-		}
-		return $output;
-	}
-
-	// Generates the [pwtc_mapdb_forum_count_icon] shortcode.  Delete!
-	public static function shortcode_forum_count_icon($atts) {
-		$a = shortcode_atts(array('after' => '', 'style' => ''), $atts);
-		$output = '';
-		$query_args = [
-			'nopaging' => true,
-			'cache_results' => false,
-			'update_post_meta_cache' => false,
-			'update_post_term_cache' => false,
-			'fields' => 'ids',
-			'posts_per_page' => -1,
-			'category__in' => self::get_topic_category_ids(),
-		];
-		if (!empty($a['after'])) {
-			$query_args['date_query'] = [
-				'relation' => 'OR',
-				[
-                    'column' => 'post_date_gmt',
-                    'after' => $a['after'],
-				],
-				[
-                    'column' => 'post_modified_gmt',
-                    'after' => $a['after'],
-				],
-			];
-			$title = ' member posts added or modified since ' . $a['after'] . '.';
-		}
-		else {
-			$title = ' member posts total.';
-		}
-		$results = new WP_Query($query_args);
-		if ($results->found_posts > 0) {
-			$title = '' . $results->found_posts . $title;
-			$output .= '<span';
-			if (!empty($a['style'])) {
-				$output .= ' style="' . $a['style'] . '"';
-			}
-			$output .= ' class="label primary" title="' . $title . '"><i class="fa fa-sticky-note"></i> ' . $results->found_posts . '</span>';	
-		}
-		return $output;
-	}
-
 	public static function get_topic_category_ids() {
 		$output = [];
-		$topics_id = get_cat_ID ('Topics');
+		$topics_id = get_cat_ID (get_option('pwtc_mapdb_topics_parent_category_name', ''));
 		if ($topics_id > 0) {
 			$categories = get_categories([ 
 				'hide_empty' => false, 
