@@ -36,6 +36,12 @@ else {
                     $email_error_msg = '<span style="color: red;">blank email address was not valid</span>';
                 }
             }
+            if (isset($_POST['modified_time_update'])) {
+                update_option('pwtc_mapdb_modified_time_update', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_modified_time_update', 'no');
+            }
             if (isset($_POST['enable_post_copy'])) {
                 update_option('pwtc_mapdb_enable_post_copy', 'yes');
             }
@@ -49,6 +55,7 @@ else {
     $post_moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
     $send_post_submit_email = 'yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no');
     $enable_post_copy = 'yes' === get_option('pwtc_mapdb_enable_post_copy', 'no');
+    $modified_time_update = 'yes' === get_option('pwtc_mapdb_modified_time_update', 'no');
 ?>
     <div id="mapdb-settings-section">
         <form method="POST">
@@ -71,6 +78,10 @@ else {
                 <label for="post_moderator_email">Email address of the post moderator</label>
                 <input type="text" id="post_moderator_email" name="post_moderator_email" value="<?php echo $post_moderator_email; ?>"/>
                 <?php echo $email_error_msg; ?>
+            </p>
+            <p>
+                <input type="checkbox" id="modified_time_update" name="modified_time_update" <?php echo $modified_time_update ? 'checked' : ''; ?>/>
+                <label for="modified_time_update">Update post modified time when a new comment is approved</label>
             </p>
             <h3>General</h3>
             <p>

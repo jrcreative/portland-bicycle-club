@@ -18,6 +18,16 @@ class PwtcMapdb_BBPost {
         self::$initiated = true;
 		add_action('wp_enqueue_scripts', array('PwtcMapdb_BBPost', 'load_javascripts'));
 
+		if ('yes' === get_option('pwtc_mapdb_modified_time_update', 'no')) {
+			add_action('comment_post', array('PwtcMapdb_BBPost', 'comment_update_post_modified_time_callback1'), 10, 2);
+			add_action('transition_comment_status', array('PwtcMapdb_BBPost', 'comment_update_post_modified_time_callback2'), 10, 3);
+		}
+		/*
+		if ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no')) {
+			add_action('comment_post', array('PwtcMapdb_BBPost', 'comment_send_submission_email_callback'), 10, 2);
+		}
+		*/
+
 		add_filter('heartbeat_received', array('PwtcMapdb_BBPost', 'refresh_post_lock'), 10, 3);
 		add_filter('pwtc_header_indicator_icons', array('PwtcMapdb_BBPost', 'header_indicator_icons_callback'));
 		add_filter('pwtc_category_exclude_list', array('PwtcMapdb_BBPost', 'category_exclude_list_callback'));
@@ -136,6 +146,49 @@ class PwtcMapdb_BBPost {
 			}
 		}		
 		return $output;
+	}
+
+	public static function comment_update_post_modified_time_callback1($comment_id, $comment_approved) {
+		if ( !$comment_approved ) {
+			return;
+		}
+		$comment = get_comment( $comment_id );
+		$post_id = $comment->comment_post_ID;
+		if ($post_id === 0) {
+			return;
+		}
+		wp_update_post([ 'ID' => $post_id ]);
+	}
+
+	public static function comment_update_post_modified_time_callback2($new_status, $old_status, $comment) {
+		if ( $new_status !== 'approved' ) {
+			return;
+		}
+		$post_id = $comment->comment_post_ID;
+		if ($post_id === 0) {
+			return;
+		}
+		wp_update_post([ 'ID' => $post_id ]);
+	}
+
+	public static function comment_send_submission_email_callback($comment_id, $comment_approved) {
+		if ( $comment_approved ) {
+			return;
+		}
+		$comment = get_comment( $comment_id );
+		$post_id = $comment->comment_post_ID;
+		if ($post_id === 0) {
+			return;
+		}
+		$posts = get_posts([
+			'ID' => $post_id,
+			'category__in' => self::get_topic_category_ids(),
+		]);
+		if (empty($posts)) {
+			return;
+		}
+		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
+		self::comment_submitted_email($post_id, $moderator_email);
 	}
 
     // Generates the [pwtc_mapdb_edit_bbpost] shortcode.
@@ -661,6 +714,21 @@ class PwtcMapdb_BBPost {
 The following post has been submitted for moderator review:<br>
 $post_link.<br>
 To review this post, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Make any changes that you see fit and publish the post or reject (return it to draft.)<br>
+Do not reply to this email!<br>
+EOT;
+		$headers = ['Content-type: text/html'];
+		return wp_mail($moderator_email, $subject , $message, $headers);
+	}
+
+	public static function comment_submitted_email($postid, $moderator_email) {
+		$post_title = esc_html(get_the_title($postid));
+		$post_url = get_permalink($postid);
+		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
+		$subject = 'Comment to Forum Post Submitted for Review';
+		$message = <<<EOT
+A comment to the following post has been submitted for moderator review:<br>
+$post_link.<br>
+To review this comment, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link.<br>
 Do not reply to this email!<br>
 EOT;
 		$headers = ['Content-type: text/html'];
