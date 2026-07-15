@@ -33,28 +33,55 @@ else {
             else {
                 update_option('pwtc_members_auto_complete_orders', 'no');
             }
+            if (isset($_POST['complete_virtual_orders'])) {
+                update_option('pwtc_members_complete_virtual_orders', 'yes');
+            }
+            else {
+                update_option('pwtc_members_complete_virtual_orders', 'no');
+            }
+            if (isset($_POST['remove_edit_profile'])) {
+                update_option('pwtc_members_remove_edit_profile', 'yes');
+            }
+            else {
+                update_option('pwtc_members_remove_edit_profile', 'no');
+            }
+            if (isset($_POST['prevent_invalid_purchase'])) {
+                update_option('pwtc_members_prevent_invalid_purchase', 'yes');
+            }
+            else {
+                update_option('pwtc_members_prevent_invalid_purchase', 'no');
+            }
+            if (isset($_POST['log_mileage_update'])) {
+                update_option('pwtc_members_log_mileage_update', 'yes');
+            }
+            else {
+                update_option('pwtc_members_log_mileage_update', 'no');
+            }
         }
     }
     $sync_start_times = 'yes' === get_option('pwtc_members_sync_start_times', 'no');
     $sync_end_times = 'yes' === get_option('pwtc_members_sync_end_times', 'no');
     $allow_member_deletion = 'yes' === get_option('pwtc_members_allow_member_deletion', 'no');
     $auto_complete_orders = 'yes' === get_option('pwtc_members_auto_complete_orders', 'no');
+    $complete_virtual_orders = 'yes' === get_option('pwtc_members_complete_virtual_orders', 'no');
+    $remove_edit_profile = 'yes' === get_option('pwtc_members_remove_edit_profile', 'no');
+    $prevent_invalid_purchase = 'yes' === get_option('pwtc_members_prevent_invalid_purchase', 'no');
+    $log_mileage_update = 'yes' === get_option('pwtc_members_log_mileage_update', 'no');
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
 });
 </script>
     <div id="members-settings-section">
-        <p><strong>Use this page to adjust the settings for the PWTC Members plugin.</strong></p>
         <form method="POST">
 	        <?php wp_nonce_field('pwtc_members_submit_settings'); ?>
             <p>
                 <input type="checkbox" id="sync_start_times" name="sync_start_times" <?php echo $sync_start_times ? 'checked' : ''; ?>/>
-                <label for="sync_start_times">Sync member start times to rider ID year</label>
+                <label for="sync_start_times">Synchronize member start dates to their rider ID issue year</label>
             </p>
             <p>
                 <input type="checkbox" id="sync_end_times" name="sync_end_times" <?php echo $sync_end_times ? 'checked' : ''; ?>/>
-                <label for="sync_end_times">Sync member end times to parent team end time</label>
+                <label for="sync_end_times">Synchronize individual member expiration dates to their parent team expiration date</label>
             </p>
             <p>
                 <input type="checkbox" id="allow_member_deletion" name="allow_member_deletion" <?php echo $allow_member_deletion ? 'checked' : ''; ?>/>
@@ -63,6 +90,22 @@ jQuery(document).ready(function($) {
             <p>
                 <input type="checkbox" id="auto_complete_orders" name="auto_complete_orders" <?php echo $auto_complete_orders ? 'checked' : ''; ?>/>
                 <label for="auto_complete_orders">Automatically complete orders whose status is processing</label>
+            </p>
+            <p>
+                <input type="checkbox" id="complete_virtual_orders" name="complete_virtual_orders" <?php echo $complete_virtual_orders ? 'checked' : ''; ?>/>
+                <label for="complete_virtual_orders">Allow products that are virtual but not downloadable to complete orders automatically</label>
+            </p>
+            <p>
+                <input type="checkbox" id="remove_edit_profile" name="remove_edit_profile" <?php echo $remove_edit_profile ? 'checked' : ''; ?>/>
+                <label for="remove_edit_profile">Remove edit profile option from admin desktop for non-administrators</label>
+            </p>
+            <p>
+                <input type="checkbox" id="prevent_invalid_purchase" name="prevent_invalid_purchase" <?php echo $prevent_invalid_purchase ? 'checked' : ''; ?>/>
+                <label for="prevent_invalid_purchase">Prevent invalid purchase scenarios when buying club memberships</label>
+            </p>
+            <p>
+                <input type="checkbox" id="log_mileage_update" name="log_mileage_update" <?php echo $log_mileage_update ? 'checked' : ''; ?>/>
+                <label for="log_mileage_update">Log when rider info updates in the mileage datebase occur</label>
             </p>
             <p>
                 <input type="submit" value="Save" class="button button-primary" />

@@ -21,10 +21,11 @@ class PwtcMembers {
 		add_action( 'wp_enqueue_scripts', 
 			array( 'PwtcMembers', 'load_report_scripts' ) );
 
-		add_action( 'wp_before_admin_bar_render',
-			array( 'PwtcMembers', 'before_admin_bar_render_callback' ) ); 
-
-		add_action( 'admin_init', array( 'PwtcMembers', 'admin_init_callback' ) );
+		if ('yes' === get_option('pwtc_members_remove_edit_profile', 'no')) {
+			add_action( 'wp_before_admin_bar_render',
+				array( 'PwtcMembers', 'before_admin_bar_render_callback' ) ); 
+			add_action( 'admin_init', array( 'PwtcMembers', 'admin_init_callback' ) );
+		}
 
 		/* Register woocommerce customization callbacks */
 
@@ -93,14 +94,20 @@ class PwtcMembers {
 				array('PwtcMembers', 'order_complete_callback' ) );
 		}
 
+		if ('yes' === get_option('pwtc_members_complete_virtual_orders', 'no')) {
+			add_filter( 'woocommerce_order_item_needs_processing', 
+				array('PwtcMembers', 'order_item_needs_processing_callback'), 10, 3);
+		}
+
 		add_filter( 'woocommerce_persistent_cart_enabled', 
 			array('PwtcMembers', 'disable_persistent_cart_callback' ) );
 
-		add_action('woocommerce_add_to_cart',
-			array('PwtcMembers', 'validate_membership_added_to_cart_callback'), 10, 6);
-
-		add_action('woocommerce_before_cart', 
-			array('PwtcMembers', 'validate_cart_callback' ));
+		if ('yes' === get_option('pwtc_members_prevent_invalid_purchase', 'no')) {
+			add_action('woocommerce_add_to_cart',
+				array('PwtcMembers', 'validate_membership_added_to_cart_callback'), 10, 6);
+			add_action('woocommerce_before_cart', 
+				array('PwtcMembers', 'validate_cart_callback' ));
+		}
 
 		add_action('wc_memberships_for_teams_before_invite_to_team', 
 			array('PwtcMembers', 'before_invite_to_team_callback'), 10, 3);
@@ -254,9 +261,7 @@ class PwtcMembers {
 			return;			
 		}
 
-		if (function_exists('pwtc_mileage_assign_rider_id')) {
-			pwtc_mileage_assign_rider_id($user_membership);
-		}
+		self::assign_rider_id($user_membership);
 		self::adjust_member_start_date($user_membership);
 	}
 
@@ -265,21 +270,15 @@ class PwtcMembers {
 		if (!$user_membership) {
 			return;			
 		}
-		if (function_exists('pwtc_mileage_assign_rider_id')) {
-			pwtc_mileage_assign_rider_id($user_membership);
-		}
+		self::assign_rider_id($user_membership);
 	}
 
 	public static function membership_cancelled_callback($user_membership) {
-		if (function_exists('pwtc_mileage_assign_rider_id')) {
-			pwtc_mileage_assign_rider_id($user_membership);
-		}
+		self::assign_rider_id($user_membership);
 	}
 
 	public static function membership_activated_callback($user_membership) {
-		if (function_exists('pwtc_mileage_assign_rider_id')) {
-			pwtc_mileage_assign_rider_id($user_membership);
-		}
+		self::assign_rider_id($user_membership);
 		self::adjust_member_start_date($user_membership);
 	}
 
@@ -364,17 +363,13 @@ class PwtcMembers {
 	public static function team_created_callback($team) {
 		$user_memberships = $team->get_user_memberships();
 		foreach ( $user_memberships as $user_membership ) {
-			if (function_exists('pwtc_mileage_assign_rider_id')) {
-				pwtc_mileage_assign_rider_id($user_membership);
-			}
+			self::assign_rider_id($user_membership);
 			self::adjust_member_start_date($user_membership);
 		}	
 	}
 
 	public static function add_member_to_team_callback($team_member, $team, $membership) {
-		if (function_exists('pwtc_mileage_assign_rider_id')) {
-			pwtc_mileage_assign_rider_id($membership);
-		}
+		self::assign_rider_id($membership);
 		self::adjust_member_start_date($membership);
 		$user_data = $team_member->get_user();
 		$membership_plan = $membership->get_plan();
@@ -422,6 +417,13 @@ class PwtcMembers {
 		if ($order->get_status() === 'processing') {
 			$order->update_status('completed', 'PWTC Members plugin updated order status from processing to completed.');
 		}	
+	}
+
+	public static function order_item_needs_processing_callback($needs_processing, $product, $order_id) {
+		if ($needs_processing) {
+			$needs_processing = ! $product->is_virtual();
+		}
+		return $needs_processing;
 	}
 
 	public static function disable_persistent_cart_callback() { 
@@ -2104,6 +2106,13 @@ EOT;
 	public static function sync_team_member_end_times($team) {
 		if ('yes' === get_option('pwtc_members_sync_end_times', 'no')) {
 			pwtc_members_sync_team_member_end_times($team);
+		}
+	}
+
+	public static function assign_rider_id($membership) {
+		if (function_exists('pwtc_mileage_assign_rider_id')) {
+			$log_update = 'yes' === get_option('pwtc_members_log_mileage_update', 'no');
+			pwtc_mileage_assign_rider_id($membership, true, $log_update);
 		}
 	}
 

@@ -289,8 +289,7 @@ function pwtc_mileage_get_expiration_date($membership) {
     return $exp_date;
 }
 
-function pwtc_mileage_assign_rider_id($user_membership, $update_existing=true) {
-    $log_update_existing = false;
+function pwtc_mileage_assign_rider_id($user_membership, $update_existing=true, $log_update_existing=false) {
 	$user_id = $user_membership->get_user_id();
 	$user_data = get_userdata($user_id);
 	if (!$user_data) {

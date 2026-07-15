@@ -138,12 +138,12 @@ class PwtcMembers_Admin {
     	$function = array( 'PwtcMembers_Admin', 'page_test_email');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-		$page_title = $plugin_options['plugin_menu_label'] . ' - Plugin Settings';
-    	$menu_title = 'Plugin Settings';
+		$page_title = 'PWTC Members Plugin - Settings';
+    	$menu_title = 'PWTC Members';
     	$menu_slug = 'pwtc_members_plugin_settings';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMembers_Admin', 'page_plugin_settings');
-		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+		add_submenu_page('options-general.php', $page_title, $menu_title, $capability, $menu_slug, $function);
 
         remove_submenu_page($parent_menu_slug, $parent_menu_slug);
     }
@@ -1166,9 +1166,7 @@ class PwtcMembers_Admin {
 			PwtcMembers::sync_team_member_end_times($team);
 			$user_memberships = $team->get_user_memberships();
 			foreach ( $user_memberships as $user_membership ) {
-				if (function_exists('pwtc_mileage_assign_rider_id')) {
-					pwtc_mileage_assign_rider_id($user_membership);
-				}
+				PwtcMembers::assign_rider_id($user_membership);
 				PwtcMembers::adjust_member_start_date($user_membership);
 			}	
 		}
