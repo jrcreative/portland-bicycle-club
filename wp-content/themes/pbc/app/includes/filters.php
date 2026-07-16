@@ -28,3 +28,22 @@ add_filter('login_redirect', function ($redirect_to, $request, $user) {
         return $redirect_to;
     }
 }, 999999, 3);
+
+add_action( 'pre_get_posts', function ($query) {
+    if ( ! is_admin() && $query->is_main_query() ) {
+        if ($query->is_search && get_field('exclude_page_search', 'option')) {
+            $query->set( 'meta_query', [
+                'relation' => 'OR',
+                [
+                    'key' => 'exclude_page_from_search',
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key' => 'exclude_page_from_search',
+                    'value' => '1',
+                    'compare' => '!=',
+                ],
+            ] );
+        }
+    }
+});

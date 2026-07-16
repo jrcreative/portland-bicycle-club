@@ -1087,14 +1087,14 @@ if( function_exists('acf_add_local_field_group') ):
 
     acf_add_local_field_group(array (
         'key' => 'group_57a915b6da5d2',
-        'title' => 'Post',
+        'title' => 'Additional Post Attributes',
         'fields' => array (
             array (
                 'key' => 'field_display_post_author',
                 'label' => 'Display Post Author Name, Avatar and Post Date',
                 'name' => 'display_post_author',
                 'type' => 'true_false',
-                'instructions' => '',
+                'instructions' => "Display the author's name, avatar and post date when this post is viewed.",
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array (
@@ -1111,7 +1111,7 @@ if( function_exists('acf_add_local_field_group') ):
                 'name' => 'filter_post_content',
                 'type' => 'true_false',
                 'instructions' => 'Only the following HTML markup is allowed: &lt;a&gt;, &lt;br&gt;, &lt;em&gt;, &lt;strong&gt; and &lt;p&gt;;
-                    all others will be stripped out when this post is viewed.',
+                    all others will be stripped out when this post is viewed. This option is for posts submitted by club members, who use a simplified editor.',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array (
@@ -1247,6 +1247,51 @@ if( function_exists('acf_add_local_field_group') ):
                     'param' => 'post_type',
                     'operator' => '==',
                     'value' => 'post',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'acf_after_title',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'hide_on_screen' => '',
+        'active' => 1,
+        'description' => '',
+    ));
+
+    acf_add_local_field_group(array (
+        'key' => 'group_additional_page_attrs',
+        'title' => 'Additional Page Attributes',
+        'fields' => array (
+            array (
+                'key' => 'field_exclude_page_from_search',
+                'label' => 'Exclude This Page From Search',
+                'name' => 'exclude_page_from_search',
+                'type' => 'true_false',
+                'instructions' => 'When selected this page will be excluded from the Wordpress search results.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array (
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'message' => '',
+                'default_value' => 0,
+            ),
+        ),
+        'location' => array (
+            array (
+                array (
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'page',
+                ),
+                array (
+                    'param' => 'page_template',
+                    'operator' => '!=',
+                    'value' => 'default',
                 ),
             ),
         ),
@@ -2447,6 +2492,21 @@ if( function_exists('acf_add_local_field_group') ):
                 ),
                 'default_value' => '',
                 'placeholder' => '',
+            ),
+            array (
+                'key' => 'field_exclude_page_search',
+                'label' => 'Allow Page Exclusion From Search Results',
+                'name' => 'exclude_page_search',
+                'type' => 'true_false',
+                'instructions' => 'Pages can be selected individually to be excluded from the Wordpress search results.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array (
+                        'width' => '',
+                        'class' => '',
+                        'id' => '',
+                ),
+                'default_value' => 0,
             ),
         ),
         'location' => array (
