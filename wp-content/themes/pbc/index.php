@@ -146,7 +146,6 @@ if(is_singular())
                 'strong' => array(),
                 'p' => array(),
             );
-            $context['comments'] = comments_open();
         }
     }
 }
@@ -162,7 +161,6 @@ elseif(get_post_type() == 'newsletter')
     $context['title'] = 'Newsletter Articles';
     // Timber 2.0: Use Timber::get_posts() instead of new PostQuery()
     $context['posts'] = Timber::get_posts();
-    $context['comments'] = comments_open();
 }
 else
 {

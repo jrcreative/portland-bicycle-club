@@ -22,11 +22,9 @@ class PwtcMapdb_BBPost {
 			add_action('comment_post', array('PwtcMapdb_BBPost', 'comment_update_post_modified_time_callback1'), 10, 2);
 			add_action('transition_comment_status', array('PwtcMapdb_BBPost', 'comment_update_post_modified_time_callback2'), 10, 3);
 		}
-		/*
 		if ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no')) {
 			add_action('comment_post', array('PwtcMapdb_BBPost', 'comment_send_submission_email_callback'), 10, 2);
 		}
-		*/
 
 		add_filter('heartbeat_received', array('PwtcMapdb_BBPost', 'refresh_post_lock'), 10, 3);
 		add_filter('pwtc_header_indicator_icons', array('PwtcMapdb_BBPost', 'header_indicator_icons_callback'));
@@ -711,10 +709,7 @@ class PwtcMapdb_BBPost {
 		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
 		$subject = 'Forum Post Submitted for Review';
 		$message = <<<EOT
-The following post has been submitted for moderator review:<br>
-$post_link.<br>
-To review this post, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Make any changes that you see fit and publish the post or reject (return it to draft.)<br>
-Do not reply to this email!<br>
+Forum post $post_link has been submitted for moderator review. To review this post, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Make any changes that you see fit and publish the post or reject (return it to draft). Do not reply to this email!
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);
@@ -726,10 +721,7 @@ EOT;
 		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
 		$subject = 'Comment to Forum Post Submitted for Review';
 		$message = <<<EOT
-A comment to the following post has been submitted for moderator review:<br>
-$post_link.<br>
-To review this comment, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link.<br>
-Do not reply to this email!<br>
+A comment to forum post $post_link has been submitted for moderator review. To review this comment, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Do not reply to this email!<br>
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);
@@ -739,10 +731,7 @@ EOT;
 		$post_title = esc_html(get_the_title($postid));
 		$subject = 'Forum Post Unsubmitted';
 		$message = <<<EOT
-The author has reverted the following post back to draft:<br>
-$post_title.<br>
-Ignore the previous review request email and do not review this post.<br>
-Do not reply to this email!<br>
+The author has reverted forum post $post_title back to draft. Ignore the previous review request email and do not review this post. Do not reply to this email!
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);

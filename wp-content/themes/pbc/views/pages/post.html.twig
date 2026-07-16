@@ -14,7 +14,7 @@
                 {% else %}
                     {{ post.content }}
                 {% endif %}
-                {% if comments is defined and comments and user and post.post_status == 'publish' %}
+                {% if user and post.post_status == 'publish' %}
                     <div class="comment-box">
                         <!-- comments -->
                         <div class="comments">
