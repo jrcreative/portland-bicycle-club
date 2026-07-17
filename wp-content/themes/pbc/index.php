@@ -134,6 +134,7 @@ if(is_singular())
         else
         {
             $template = 'pages/post.html.twig';
+            $context['comments'] = apply_filters('pwtc_allow_post_comments', false);
             $context['display_post_author'] = get_field('display_post_author');
             $context['filter_post_content'] = get_field('filter_post_content');
             $context['allowed_html_tags'] = array(

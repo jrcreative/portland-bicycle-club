@@ -31,6 +31,7 @@ class PwtcMapdb_BBPost {
 		add_filter('pwtc_category_exclude_list', array('PwtcMapdb_BBPost', 'category_exclude_list_callback'));
 		add_filter('pwtc_recent_posts_after', array('PwtcMapdb_BBPost', 'recent_posts_after_callback'));
 		add_filter('pwtc_category_button_links', array('PwtcMapdb_BBPost', 'category_button_links_callback'));
+		add_filter('pwtc_allow_post_comments', array('PwtcMapdb_BBPost', 'allow_post_comments_callback'));
 
         add_shortcode('pwtc_mapdb_edit_bbpost', array('PwtcMapdb_BBPost', 'shortcode_edit_bbpost'));
 		add_shortcode('pwtc_mapdb_delete_bbpost', array( 'PwtcMapdb_BBPost', 'shortcode_delete_bbpost'));
@@ -165,6 +166,17 @@ class PwtcMapdb_BBPost {
 		return $output;
 	}
 
+	public static function allow_post_comments_callback($allowed) {
+		$current_user = wp_get_current_user();
+		if ( 0 !== $current_user->ID ) {	
+			$user_info = get_userdata($current_user->ID);
+			if ($user_info) {
+				$allowed = in_array('current_member', $user_info->roles);
+			}
+		}	
+		return $allowed;
+	}
+
 	public static function comment_update_post_modified_time_callback1($comment_id, $comment_approved) {
 		if ( !$comment_approved ) {
 			return;
@@ -197,6 +209,7 @@ class PwtcMapdb_BBPost {
 		if ($post_id === 0) {
 			return;
 		}
+		/*
 		$posts = get_posts([
 			'ID' => $post_id,
 			'category__in' => self::get_topic_category_ids(),
@@ -204,6 +217,7 @@ class PwtcMapdb_BBPost {
 		if (empty($posts)) {
 			return;
 		}
+		*/
 		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
 		self::comment_submitted_email($post_id, $moderator_email);
 	}
@@ -726,9 +740,9 @@ class PwtcMapdb_BBPost {
 		$post_title = esc_html(get_the_title($postid));
 		$post_url = get_permalink($postid);
 		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
-		$subject = 'Forum Post Submitted for Review';
+		$subject = 'PBC Post Submitted for Review';
 		$message = <<<EOT
-Forum post $post_link has been submitted for moderator review. To review this post, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Make any changes that you see fit and publish the post or reject (return it to draft). Do not reply to this email!
+Portland Bicycling Club post $post_link has been submitted for moderator review. To review this post, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Make any changes that you see fit and publish the post or reject (return it to draft). Do not reply to this email!
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);
@@ -738,9 +752,9 @@ EOT;
 		$post_title = esc_html(get_the_title($postid));
 		$post_url = get_permalink($postid);
 		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
-		$subject = 'Comment to Forum Post Submitted for Review';
+		$subject = 'Comment to PBC Post Submitted for Review';
 		$message = <<<EOT
-A comment to forum post $post_link has been submitted for moderator review. To review this comment, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Do not reply to this email!<br>
+A comment to Portland Bicycling Club post $post_link has been submitted for moderator review. To review this comment, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Do not reply to this email!<br>
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);
@@ -748,9 +762,9 @@ EOT;
 	
 	public static function bbpost_unsubmitted_email($postid, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));
-		$subject = 'Forum Post Unsubmitted';
+		$subject = 'PBC Post Unsubmitted';
 		$message = <<<EOT
-The author has reverted forum post $post_title back to draft. Ignore the previous review request email and do not review this post. Do not reply to this email!
+The author has reverted Portland Bicycling Club post $post_title back to draft. Ignore the previous review request email and do not review this post. Do not reply to this email!
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);

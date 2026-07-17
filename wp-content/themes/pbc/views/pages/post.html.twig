@@ -29,7 +29,9 @@
                         </div>
 
                         {% if post.comment_status == "closed" %}
-                            <p> comments for this post are closed </p>
+                            <p>Comments for this post are closed.</p>
+                        {% elseif comments is defined and not comments %}
+                            <p>You are not allowed to comment on this post.</p>
                         {% else %}
                             <!-- comment form -->
                             {% include "partials/comment-form.twig" %}
