@@ -123,6 +123,25 @@ class PwtcMapdb_BBPost {
 	public static function category_button_links_callback($output) {
 		$current_user = wp_get_current_user();
 		if ( 0 !== $current_user->ID ) {
+			$topics_id = get_cat_ID (get_option('pwtc_mapdb_admin_topics_parent_category_name', ''));
+			if ($topics_id > 0) {
+				$categories = get_categories([ 
+					'hide_empty' => true, 
+					'orderby' => 'name',
+					'order' => 'ASC',
+					'parent' => $topics_id,
+				]);
+				if (!empty($categories)) {
+					foreach($categories as $category) {
+						$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
+							esc_url( get_category_link( $category->term_id ) ),
+							esc_attr( sprintf('View all posts under topic %s', $category->name ) ),
+							esc_html( $category->name )
+						);
+						$output .= $category_link;
+					}
+				}
+			}	
 			$topics_id = get_cat_ID (get_option('pwtc_mapdb_topics_parent_category_name', ''));
 			if ($topics_id > 0) {
 				$categories = get_categories([ 
@@ -135,7 +154,7 @@ class PwtcMapdb_BBPost {
 					foreach($categories as $category) {
 						$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
 							esc_url( get_category_link( $category->term_id ) ),
-							esc_attr( sprintf('View all posts under forum topic %s', $category->name ) ),
+							esc_attr( sprintf('View all posts under topic %s', $category->name ) ),
 							esc_html( $category->name )
 						);
 						$output .= $category_link;

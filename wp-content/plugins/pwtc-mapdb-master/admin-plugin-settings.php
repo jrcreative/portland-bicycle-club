@@ -19,6 +19,9 @@ else {
                     $after_error_msg = '<span style="color: red;">entry <code>' . trim($_POST['after']) . '</code> was not valid</span>';
                 }
             }
+            if (isset($_POST['admin_topics'])) {
+                update_option('pwtc_mapdb_admin_topics_parent_category_name', trim($_POST['admin_topics']));
+            }
             if (isset($_POST['topics'])) {
                 update_option('pwtc_mapdb_topics_parent_category_name', trim($_POST['topics']));
             }
@@ -51,6 +54,7 @@ else {
         }
     }
     $after = get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
+    $admin_topics = get_option('pwtc_mapdb_admin_topics_parent_category_name', '');
     $topics = get_option('pwtc_mapdb_topics_parent_category_name', '');
     $post_moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
     $send_post_submit_email = 'yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no');
@@ -67,7 +71,11 @@ else {
                 <?php echo $after_error_msg; ?>
             </p>
             <p>
-                <label for="topics">Name of post category that contains topics</label>
+                <label for="admin_topics">Name of post category that contains administrator topics</label>
+                <input type="text" id="admin_topics" name="admin_topics" value="<?php echo $admin_topics; ?>"/>
+            </p>
+            <p>
+                <label for="topics">Name of post category that contains member topics</label>
                 <input type="text" id="topics" name="topics" value="<?php echo $topics; ?>"/>
             </p>
             <p>
