@@ -159,7 +159,7 @@ elseif(get_post_type() == 'scheduled_rides')
 elseif(get_post_type() == 'newsletter')
 {
     $template = 'pages/archive.html.twig';
-    $context['title'] = 'Newsletter Articles';
+    $context['title'] = 'Newsletters';
     // Timber 2.0: Use Timber::get_posts() instead of new PostQuery()
     $context['posts'] = Timber::get_posts();
 }
@@ -172,7 +172,7 @@ else
         $context['desc'] = category_description();
     }
     else {
-        $context['title'] = "Forum";
+        $context['title'] = "Posts";
         $topics = apply_filters('pwtc_category_button_links', '');
         if (!empty($topics)) {
             $context['topics'] = $topics;

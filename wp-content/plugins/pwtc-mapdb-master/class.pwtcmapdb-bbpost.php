@@ -141,6 +141,7 @@ class PwtcMapdb_BBPost {
 						);
 						$output .= $category_link;
 					}
+					$output .= '<span style="padding: 0px 10px;"></span>';
 				}
 			}	
 			$topics_id = get_cat_ID (get_option('pwtc_mapdb_topics_parent_category_name', ''));
