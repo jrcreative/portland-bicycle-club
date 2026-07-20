@@ -1911,8 +1911,8 @@ class PwtcMileage_Admin {
 
 		remove_submenu_page($parent_menu_slug, $parent_menu_slug);
 
-		$page_title = $plugin_options['plugin_menu_label'] . ' - Settings';
-    	$menu_title = $plugin_options['plugin_menu_label'];
+		$page_title = 'PWTC Mileage Plugin - Settings';
+    	$menu_title = 'PWTC Mileage';
     	$menu_slug = 'pwtc_mileage_settings';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMileage_Admin', 'page_manage_settings');

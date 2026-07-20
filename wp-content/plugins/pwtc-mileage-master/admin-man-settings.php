@@ -31,7 +31,6 @@ if (count($error_msgs) > 0) {
 <?php
 }
 ?>
-	<p>Use this page to adjust the settings for the PWTC Mileage plugin.</p>
 	<form class="stacked-form" method="POST">
 		<?php wp_nonce_field('pwtc_mileage_settings'); ?>
 		<span>Plugin Menu Label</span>
