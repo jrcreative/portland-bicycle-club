@@ -230,6 +230,7 @@ class PwtcMapdb_BBPost {
 
 		$allow_email = ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no'));
 		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
+		$max_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
 
         $is_moderator = false;
 		$is_active_member = false;
@@ -445,7 +446,12 @@ class PwtcMapdb_BBPost {
 
 		if ($postid != 0) {
 			$post = get_post($postid);
-            $title = $post->post_title;
+			if ($max_title_len > 0) {
+				$title = substr($post->post_title, 0, $max_title_len);
+			} 
+			else {
+            	$title = $post->post_title;
+			}
             $author = $post->post_author;
             $status = $post->post_status;
 			$content = $post->post_content;

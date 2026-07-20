@@ -11,6 +11,9 @@ else {
     $email_error_msg = '';
     if (isset($_POST['_wpnonce'])) {
         if (wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mapdb_submit_settings')) {
+            if (isset($_POST['max_post_title_len'])) {
+                update_option('pwtc_mapdb_post_title_max_len', absint($_POST['max_post_title_len']));
+            }
             if (isset($_POST['after'])) {
                 if (strtotime(trim($_POST['after']))) {
                     update_option('pwtc_mapdb_recent_post_time_cutoff', trim($_POST['after']));
@@ -53,6 +56,7 @@ else {
             }
         }
     }
+    $max_post_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
     $after = get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
     $admin_topics = get_option('pwtc_mapdb_admin_topics_parent_category_name', '');
     $topics = get_option('pwtc_mapdb_topics_parent_category_name', '');
@@ -65,6 +69,10 @@ else {
         <form method="POST">
 	        <?php wp_nonce_field('pwtc_mapdb_submit_settings'); ?>
             <h3>Forum Posts</h3>
+            <p>
+                <label for="max_post_title_len">Maximum character length for post title</label>
+                <input type="number" id="max_post_title_len" name="max_post_title_len" value="<?php echo $max_post_title_len; ?>"/>
+            </p>
             <p>
                 <label for="after">Time cutoff for recent posts</label>
                 <input type="text" id="after" name="after" value="<?php echo $after; ?>"/>
