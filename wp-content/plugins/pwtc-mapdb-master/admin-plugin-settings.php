@@ -14,6 +14,12 @@ else {
             if (isset($_POST['max_post_title_len'])) {
                 update_option('pwtc_mapdb_post_title_max_len', absint($_POST['max_post_title_len']));
             }
+            if (isset($_POST['post_title_char_check'])) {
+                update_option('pwtc_mapdb_post_title_char_check', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_post_title_char_check', 'no');
+            }
             if (isset($_POST['after'])) {
                 if (strtotime(trim($_POST['after']))) {
                     update_option('pwtc_mapdb_recent_post_time_cutoff', trim($_POST['after']));
@@ -57,6 +63,7 @@ else {
         }
     }
     $max_post_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
+    $post_title_char_check = 'yes' === get_option('pwtc_mapdb_post_title_char_check', 'no');
     $after = get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
     $admin_topics = get_option('pwtc_mapdb_admin_topics_parent_category_name', '');
     $topics = get_option('pwtc_mapdb_topics_parent_category_name', '');
@@ -72,6 +79,10 @@ else {
             <p>
                 <label for="max_post_title_len">Maximum character length for post title</label>
                 <input type="number" id="max_post_title_len" name="max_post_title_len" value="<?php echo $max_post_title_len; ?>"/>
+            </p>
+            <p>
+                <input type="checkbox" id="post_title_char_check" name="post_title_char_check" <?php echo $post_title_char_check ? 'checked' : ''; ?>/>
+                <label for="post_title_char_check">Disallow certain characters in the post title</label>
             </p>
             <p>
                 <label for="after">Time cutoff for recent posts</label>

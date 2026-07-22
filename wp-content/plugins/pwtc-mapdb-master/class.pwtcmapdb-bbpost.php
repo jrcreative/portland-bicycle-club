@@ -228,6 +228,7 @@ class PwtcMapdb_BBPost {
 		$a = shortcode_atts(array('use_return' => 'no'), $atts);
 		$use_return = $a['use_return'] == 'yes';
 
+		$title_char_check = ('yes' === get_option('pwtc_mapdb_post_title_char_check', 'no'));
 		$allow_email = ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no'));
 		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
 		$max_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);

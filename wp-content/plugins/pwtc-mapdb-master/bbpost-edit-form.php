@@ -132,6 +132,17 @@
                 return;
             }
 
+            <?php if ( $title_char_check ) { ?>
+            var titlergx = /[\x3C\x3E\x22\\]/;    // <,>,",\
+            //var titlergx = /[^a-zA-Z0-9'"&\x2D\x25\x3F\x21\s]/;     // -,%,?,!
+            if (titlergx.test($('#pwtc-mapdb-edit-bbpost-div input[name="title"]').val().trim())) {
+                show_warning('Detected invalid characters in <strong>post title</strong>. The following characters are not allowed: left/right angle bracket, double quote or backslash.');
+                $('#pwtc-mapdb-edit-bbpost-div input[name="title"]').addClass('indicate-error');
+                evt.preventDefault();
+                return;
+            }
+            <?php } ?>
+
             if ($('#pwtc-mapdb-edit-bbpost-div textarea[name="content"]').val().trim().length == 0) {
                 show_warning('The <strong>post content</strong> cannot be blank.');
                 $('#pwtc-mapdb-edit-bbpost-div textarea[name="content"]').addClass('indicate-error');
