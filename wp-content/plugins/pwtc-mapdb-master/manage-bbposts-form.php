@@ -38,9 +38,9 @@
     ?>
         </tbody>
     </table>
-    <p class="help-text">These bulletin board posts were authored by <?php echo $author_name; ?>.</p>
+    <p class="help-text">These forum posts were authored by <?php echo $author_name; ?>.</p>
     <?php } else { ?>
-    <div class="callout small"><p>No draft or pending bulletin board posts authored by <?php echo $author_name; ?> found.</p></div>
+    <div class="callout small"><p>No draft or pending forum posts authored by <?php echo $author_name; ?> found.</p></div>
     <?php } ?>
 </div>
 <?php 

@@ -28,7 +28,7 @@
             if ( data['pwtc-refresh-post-lock'] ) {
                 var received = data['pwtc-refresh-post-lock'];
                 if ( received.lock_error ) {
-                    $('#pwtc-mapdb-delete-bbpost-div').html('<div class="callout small alert">You cannot delete bulletin board post "<?php echo $bbpost_title; ?>". ' + received.lock_error.text + '</div>');
+                    $('#pwtc-mapdb-delete-bbpost-div').html('<div class="callout small alert">You cannot delete forum post "<?php echo $bbpost_title; ?>". ' + received.lock_error.text + '</div>');
                 } 
                 else if ( received.new_lock ) {
                 }
@@ -49,16 +49,16 @@
 <?php if ($deleted) { ?>
         <input type="hidden" name="undo_delete" value="yes"/>
         <div class="callout small success">
-            <p>This bulletin board post has been successfully deleted.</p>
+            <p>This forum post has been successfully deleted.</p>
         </div>
         <div class="row column">
-            <p>Did you delete this bulletin board post by mistake? If so, <a class="revert-action">undo the deletion.</a></p>
+            <p>Did you delete this forum post by mistake? If so, <a class="revert-action">undo the deletion.</a></p>
         </div>
 <?php } else { ?>
         <input type="hidden" name="delete_bbpost" value="yes"/>
         <div class="callout">
             <div class="row column">
-                <p>To delete bulletin board post "<?php echo $bbpost_title; ?>", press the delete button below.</p>
+                <p>To delete forum post "<?php echo $bbpost_title; ?>", press the delete button below.</p>
             </div>
             <div class="row column errmsg"></div>
             <div class="row column clearfix">

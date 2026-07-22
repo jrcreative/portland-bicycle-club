@@ -12,10 +12,10 @@
 <div id='pwtc-mapdb-edit-bbpost-div'>
     <?php echo $return_to_bbpost; ?>
     <div class="callout small success">
-        <p>The draft bulletin board post "<?php echo $bbpost_title; ?>" was submitted for review<?php if ($email_status == 'yes') { ?> and the moderator notified by email<?php } else if ($email_status == 'failed') { ?> but failed to notify moderator by email<?php } ?>.</p>
+        <p>The draft forum post "<?php echo $bbpost_title; ?>" was submitted for review<?php if ($email_status == 'yes') { ?> and the moderator notified by email<?php } else if ($email_status == 'failed') { ?> but failed to notify moderator by email<?php } ?>.</p>
     </div>
     <div class="row column">
-        <p>Did you submit this bulletin board post by mistake? If so, <a class="revert-action">undo the submission.</a></p>
+        <p>Did you submit this forum post by mistake? If so, <a class="revert-action">undo the submission.</a></p>
     </div>
     <form method="POST">
         <?php wp_nonce_field('bbpost-edit-form', 'nonce_field'); ?>

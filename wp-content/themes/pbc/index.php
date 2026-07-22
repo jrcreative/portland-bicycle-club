@@ -170,9 +170,10 @@ else
     if (is_category()) {
         $context['title'] = single_cat_title('', false);
         $context['desc'] = category_description();
+        $context['return_url'] = '/news';
     }
     else {
-        $context['title'] = "Posts";
+        $context['title'] = "Forum Posts";
         $topics = apply_filters('pwtc_category_button_links', '');
         if (!empty($topics)) {
             $context['topics'] = $topics;

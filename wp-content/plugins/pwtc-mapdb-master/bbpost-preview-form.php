@@ -16,7 +16,7 @@
     <div>
         <p>
     <?php if ($postid != 0) { ?>
-        This bulletin board post was authored by 
+        This forum post was authored by 
         <?php if ($author != $current_user->ID) { 
             echo '<a href="' . esc_url('mailto:' . $author_email) . '">' . $author_name . '</a>';
         } else { 
@@ -27,7 +27,7 @@
         <?php } else if ($status == 'pending') { ?>
         pending review by a moderator.
         <?php } else if ($status == 'publish') { ?>
-        published and on the bulletin board.
+        published and on the forum.
         <?php } ?>
     <?php } ?>
         </p>
