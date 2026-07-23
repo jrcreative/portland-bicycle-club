@@ -750,7 +750,11 @@ class PwtcMapdb_BBPost {
 		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
 		$subject = 'PBC Post Submitted for Review';
 		$message = <<<EOT
-Portland Bicycling Club post $post_link has been submitted for moderator review. To review this post, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Make any changes that you see fit and publish the post or reject (return it to draft). Do not reply to this email!
+The Portland Bicycling Club post $post_link has been submitted for moderator review. 
+To review this post, use a browser to log in to your club account and open the post by clicking its link. 
+Once the post opens, you can edit it (you must have administrator rights) by clicking the <em>Edit Post</em> link at the top of the page. 
+After the editor opens, you may make any changes that you see fit and publish the post or reject (return it to draft). 
+Do not reply to this email!
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);
@@ -762,7 +766,11 @@ EOT;
 		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
 		$subject = 'Comment to PBC Post Submitted for Review';
 		$message = <<<EOT
-A comment to Portland Bicycling Club post $post_link has been submitted for moderator review. To review this comment, use a browser to log in to your club account (you must be a moderator) and open the post by clicking its link. Do not reply to this email!<br>
+A comment to the Portland Bicycling Club post $post_link has been submitted for moderator review.
+To review this comment, use a browser to log in to your club account and open the post by clicking its link. 
+Once the post opens, you can edit it (you must have administrator rights) by clicking the <em>Edit Post</em> link at the top of the page.
+After the editor opens, scroll down to the <em>Comments</em> section; here you can review and approve the comment.
+Do not reply to this email!
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);
@@ -772,7 +780,9 @@ EOT;
 		$post_title = esc_html(get_the_title($postid));
 		$subject = 'PBC Post Unsubmitted';
 		$message = <<<EOT
-The author has reverted Portland Bicycling Club post $post_title back to draft. Ignore the previous review request email and do not review this post. Do not reply to this email!
+The author has reverted the Portland Bicycling Club post $post_title back to draft. 
+Ignore the previous review request email and do not review this post. 
+Do not reply to this email!
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);
