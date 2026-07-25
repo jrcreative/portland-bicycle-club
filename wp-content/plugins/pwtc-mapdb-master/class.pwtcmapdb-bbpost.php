@@ -25,6 +25,13 @@ class PwtcMapdb_BBPost {
 		if ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no')) {
 			add_action('comment_post', array('PwtcMapdb_BBPost', 'comment_send_submission_email_callback'), 10, 2);
 		}
+		if ('yes' === get_option('pwtc_mapdb_restrict_feed_output', 'no')) {
+			add_action('pre_get_posts', array('PwtcMapdb_BBPost', 'pre_get_feed_posts_callback'));
+			add_action('do_feed_rdf', array('PwtcMapdb_BBPost', 'protect_comments_feed_callback'), 0);
+			add_action('do_feed_rss', array('PwtcMapdb_BBPost', 'protect_comments_feed_callback'), 0);
+			add_action('do_feed_rss2', array('PwtcMapdb_BBPost', 'protect_comments_feed_callback'), 0);
+			add_action('do_feed_atom', array('PwtcMapdb_BBPost', 'protect_comments_feed_callback'), 0);
+		}
 
 		add_filter('heartbeat_received', array('PwtcMapdb_BBPost', 'refresh_post_lock'), 10, 3);
 		add_filter('pwtc_header_indicator_icons', array('PwtcMapdb_BBPost', 'header_indicator_icons_callback'));
@@ -78,7 +85,24 @@ class PwtcMapdb_BBPost {
 		return $response;
 	}
 
+	public static function pre_get_feed_posts_callback($query) {
+    	if ($query->is_feed() && !is_admin()) {
+        	$exclude_categories = apply_filters('pwtc_category_exclude_list', []);
+        	if (!empty($exclude_categories)) {
+            	$query->set('category__not_in', $exclude_categories);
+        	}
+		}
+	}
+
+	public static function protect_comments_feed_callback($is_comment_feed) {
+    	if (!is_user_logged_in() and $is_comment_feed) {
+       		wp_die('You must be logged in to access this comment feed.', 'Feed Protected', array('response' => 403));
+    	}
+	}
+
 	public static function header_indicator_icons_callback($output) {
+		$cat_ids = self::get_topic_category_ids(get_option('pwtc_mapdb_topics_parent_category_name', ''));
+		$cat_ids = array_merge($cat_ids, self::get_topic_category_ids(get_option('pwtc_mapdb_admin_topics_parent_category_name', '')));
 		$after = get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
 		$style = 'color: white;';
 		$query_args = [
@@ -88,7 +112,7 @@ class PwtcMapdb_BBPost {
 			'update_post_term_cache' => false,
 			'fields' => 'ids',
 			'posts_per_page' => -1,
-			'category__in' => self::get_topic_category_ids(),
+			'category__in' => $cat_ids,
 			'date_query' => [
 				'relation' => 'OR',
 				[
@@ -112,7 +136,10 @@ class PwtcMapdb_BBPost {
 	public static function category_exclude_list_callback($exclude_list) {
 		$current_user = wp_get_current_user();
 		if (0 === $current_user->ID) {
-			$exclude_list = array_merge($exclude_list, self::get_topic_category_ids());
+			$exclude_list = array_merge($exclude_list, 
+				self::get_topic_category_ids(get_option('pwtc_mapdb_topics_parent_category_name', '')));
+			$exclude_list = array_merge($exclude_list, 
+				self::get_topic_category_ids(get_option('pwtc_mapdb_admin_topics_parent_category_name', '')));
 		}
 		return $exclude_list;
 	}
@@ -124,46 +151,19 @@ class PwtcMapdb_BBPost {
 	public static function category_button_links_callback($output) {
 		$current_user = wp_get_current_user();
 		if ( 0 !== $current_user->ID ) {
-			$topics_id = get_cat_ID (get_option('pwtc_mapdb_admin_topics_parent_category_name', ''));
-			if ($topics_id > 0) {
-				$categories = get_categories([ 
-					'hide_empty' => true, 
-					'orderby' => 'name',
-					'order' => 'ASC',
-					'parent' => $topics_id,
-				]);
-				if (!empty($categories)) {
-					foreach($categories as $category) {
-						$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
-							esc_url( get_category_link( $category->term_id ) ),
-							esc_attr( sprintf('View all posts under topic %s', $category->name ) ),
-							esc_html( $category->name )
-						);
-						$output .= $category_link;
-					}
-					$output .= '<span style="padding: 0px 10px;"></span>';
-				}
-			}	
-			$topics_id = get_cat_ID (get_option('pwtc_mapdb_topics_parent_category_name', ''));
-			if ($topics_id > 0) {
-				$categories = get_categories([ 
-					'hide_empty' => true, 
-					'orderby' => 'name',
-					'order' => 'ASC',
-					'parent' => $topics_id,
-				]);
-				if (!empty($categories)) {
-					foreach($categories as $category) {
-						$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
-							esc_url( get_category_link( $category->term_id ) ),
-							esc_attr( sprintf('View all posts under topic %s', $category->name ) ),
-							esc_html( $category->name )
-						);
-						$output .= $category_link;
-					}
-				}
+			$admin = self::get_topic_button_links(get_option('pwtc_mapdb_admin_topics_parent_category_name', ''));
+			if (!empty($admin)) {
+				$output .= $admin;
+				$output .= '<span style="padding: 0px 10px;"></span>';
 			}
-		}		
+			$member = self::get_topic_button_links(get_option('pwtc_mapdb_topics_parent_category_name', ''));
+			if (!empty($member)) {
+				$output .= $member;
+				$output .= '<span style="padding: 0px 10px;"></span>';
+			}
+			$public = self::get_topic_button_links(get_option('pwtc_mapdb_public_topics_parent_category_name', ''));
+			$output .= $public;
+		}					
 		return $output;
 	}
 
@@ -725,9 +725,33 @@ class PwtcMapdb_BBPost {
 		return ob_get_clean();
 	}	
 
-	public static function get_topic_category_ids() {
+	public static function get_topic_button_links($parent_category_name) {
+		$output = '';
+		$topics_id = get_cat_ID($parent_category_name);
+		if ($topics_id > 0) {
+			$categories = get_categories([ 
+				'hide_empty' => true, 
+				'orderby' => 'name',
+				'order' => 'ASC',
+				'parent' => $topics_id,
+			]);
+			if (!empty($categories)) {
+				foreach($categories as $category) {
+					$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
+						esc_url( get_category_link( $category->term_id ) ),
+						esc_attr( sprintf('View all posts under topic %s', $category->name ) ),
+						esc_html( $category->name )
+					);
+					$output .= $category_link;
+				}
+			}
+		}
+		return $output;
+	}
+
+	public static function get_topic_category_ids($parent_category_name) {
 		$output = [];
-		$topics_id = get_cat_ID (get_option('pwtc_mapdb_topics_parent_category_name', ''));
+		$topics_id = get_cat_ID($parent_category_name);
 		if ($topics_id > 0) {
 			$categories = get_categories([ 
 				'hide_empty' => false, 

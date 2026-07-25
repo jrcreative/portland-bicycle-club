@@ -28,6 +28,9 @@ else {
                     $after_error_msg = '<span style="color: red;">entry <code>' . trim($_POST['after']) . '</code> was not valid</span>';
                 }
             }
+            if (isset($_POST['public_topics'])) {
+                update_option('pwtc_mapdb_public_topics_parent_category_name', trim($_POST['public_topics']));
+            }
             if (isset($_POST['admin_topics'])) {
                 update_option('pwtc_mapdb_admin_topics_parent_category_name', trim($_POST['admin_topics']));
             }
@@ -54,6 +57,12 @@ else {
             else {
                 update_option('pwtc_mapdb_modified_time_update', 'no');
             }
+            if (isset($_POST['restrict_feed_output'])) {
+                update_option('pwtc_mapdb_restrict_feed_output', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_restrict_feed_output', 'no');
+            }
             if (isset($_POST['enable_post_copy'])) {
                 update_option('pwtc_mapdb_enable_post_copy', 'yes');
             }
@@ -65,12 +74,14 @@ else {
     $max_post_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
     $post_title_char_check = 'yes' === get_option('pwtc_mapdb_post_title_char_check', 'no');
     $after = get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
+    $public_topics = get_option('pwtc_mapdb_public_topics_parent_category_name', '');
     $admin_topics = get_option('pwtc_mapdb_admin_topics_parent_category_name', '');
     $topics = get_option('pwtc_mapdb_topics_parent_category_name', '');
     $post_moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
     $send_post_submit_email = 'yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no');
     $enable_post_copy = 'yes' === get_option('pwtc_mapdb_enable_post_copy', 'no');
     $modified_time_update = 'yes' === get_option('pwtc_mapdb_modified_time_update', 'no');
+    $restrict_feed_output = 'yes' === get_option('pwtc_mapdb_restrict_feed_output', 'no');
 ?>
     <div id="mapdb-settings-section">
         <form method="POST">
@@ -88,6 +99,10 @@ else {
                 <label for="after">Time cutoff for recent posts</label>
                 <input type="text" id="after" name="after" value="<?php echo $after; ?>"/>
                 <?php echo $after_error_msg; ?>
+            </p>
+            <p>
+                <label for="public_topics">Name of post category that contains public topics</label>
+                <input type="text" id="public_topics" name="public_topics" value="<?php echo $public_topics; ?>"/>
             </p>
             <p>
                 <label for="admin_topics">Name of post category that contains administrator topics</label>
@@ -109,6 +124,10 @@ else {
             <p>
                 <input type="checkbox" id="modified_time_update" name="modified_time_update" <?php echo $modified_time_update ? 'checked' : ''; ?>/>
                 <label for="modified_time_update">Update post modified time when a new comment is approved</label>
+            </p>
+            <p>
+                <input type="checkbox" id="restrict_feed_output" name="restrict_feed_output" <?php echo $restrict_feed_output ? 'checked' : ''; ?>/>
+                <label for="restrict_feed_output">Restrict RSS feed output when user not logged in</label>
             </p>
             <h3>General</h3>
             <p>
