@@ -2502,7 +2502,22 @@ if( function_exists('acf_add_local_field_group') ):
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array (
-                        'width' => '',
+                        'width' => '50',
+                        'class' => '',
+                        'id' => '',
+                ),
+                'default_value' => 0,
+            ),
+            array (
+                'key' => 'field_logged_in_to_search',
+                'label' => 'Must Be Logged In To Search',
+                'name' => 'logged_in_to_search',
+                'type' => 'true_false',
+                'instructions' => 'You must be logged in to the website to search it.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array (
+                        'width' => '50',
                         'class' => '',
                         'id' => '',
                 ),
