@@ -37,6 +37,12 @@ else {
             if (isset($_POST['topics'])) {
                 update_option('pwtc_mapdb_topics_parent_category_name', trim($_POST['topics']));
             }
+            if (isset($_POST['force_comment_moderation'])) {
+                update_option('pwtc_mapdb_force_comment_moderation', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_force_comment_moderation', 'no');
+            }
             if (isset($_POST['send_post_submit_email'])) {
                 update_option('pwtc_mapdb_send_post_submit_email', 'yes');
             }
@@ -79,6 +85,7 @@ else {
     $topics = get_option('pwtc_mapdb_topics_parent_category_name', '');
     $post_moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
     $send_post_submit_email = 'yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no');
+    $force_comment_moderation = 'yes' === get_option('pwtc_mapdb_force_comment_moderation', 'no');
     $enable_post_copy = 'yes' === get_option('pwtc_mapdb_enable_post_copy', 'no');
     $modified_time_update = 'yes' === get_option('pwtc_mapdb_modified_time_update', 'no');
     $restrict_feed_output = 'yes' === get_option('pwtc_mapdb_restrict_feed_output', 'no');
@@ -114,12 +121,16 @@ else {
             </p>
             <p>
                 <input type="checkbox" id="send_post_submit_email" name="send_post_submit_email" <?php echo $send_post_submit_email ? 'checked' : ''; ?>/>
-                <label for="send_post_submit_email">Send notification email to moderator when a post is submitted</label>
+                <label for="send_post_submit_email">Send notification email to moderator when a post or comment is submitted</label>
             </p>
             <p>
                 <label for="post_moderator_email">Email address of the post moderator</label>
                 <input type="text" id="post_moderator_email" name="post_moderator_email" value="<?php echo $post_moderator_email; ?>"/>
                 <?php echo $email_error_msg; ?>
+            </p>
+            <p>
+                <input type="checkbox" id="force_comment_moderation" name="force_comment_moderation" <?php echo $force_comment_moderation ? 'checked' : ''; ?>/>
+                <label for="force_comment_moderation">Force all post comments to moderation</label>
             </p>
             <p>
                 <input type="checkbox" id="modified_time_update" name="modified_time_update" <?php echo $modified_time_update ? 'checked' : ''; ?>/>

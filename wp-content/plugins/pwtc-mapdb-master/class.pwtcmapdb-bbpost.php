@@ -40,6 +40,10 @@ class PwtcMapdb_BBPost {
 		add_filter('pwtc_category_button_links', array('PwtcMapdb_BBPost', 'category_button_links_callback'));
 		add_filter('pwtc_allow_post_comments', array('PwtcMapdb_BBPost', 'allow_post_comments_callback'));
 
+		if ('yes' === get_option('pwtc_mapdb_force_comment_moderation', 'no')) {
+			add_filter('pre_comment_approved', array('PwtcMapdb_BBPost', 'force_comment_moderation_callback'), 9999);
+		}
+
         add_shortcode('pwtc_mapdb_edit_bbpost', array('PwtcMapdb_BBPost', 'shortcode_edit_bbpost'));
 		add_shortcode('pwtc_mapdb_delete_bbpost', array( 'PwtcMapdb_BBPost', 'shortcode_delete_bbpost'));
 		add_shortcode('pwtc_mapdb_new_bbpost_link', array('PwtcMapdb_BBPost', 'shortcode_new_bbpost_link'));
@@ -221,6 +225,13 @@ class PwtcMapdb_BBPost {
 		*/
 		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
 		self::comment_submitted_email($post_id, $moderator_email);
+	}
+
+	public static function force_comment_moderation_callback($approved) {
+		if ($approved === 1) {
+			$approved = 0;
+		}
+		return $approved;
 	}
 
     // Generates the [pwtc_mapdb_edit_bbpost] shortcode.
