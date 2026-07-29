@@ -288,10 +288,11 @@
             <div class="row column">
                 <fieldset class="categories-fst">
                     <legend>Forum Topic</legend>
-                    <?php foreach($categories as $category) { 
-                        if ($category->slug === 'top-talks') continue;
-                    ?>
-                    <span><input type="radio" name="categories[]" value="<?php echo $category->term_id; ?>" id="<?php echo $category->slug; ?>" <?php echo in_array($category->term_id, $post_cats) ? 'checked': ''; ?>><label for="<?php echo $category->slug; ?>"><?php echo $category->name; ?></label></span>
+                    <?php foreach($categories as $category) { ?>
+                    <div>
+                        <input type="radio" name="categories[]" value="<?php echo $category->term_id; ?>" id="<?php echo $category->slug; ?>" <?php echo in_array($category->term_id, $post_cats) ? 'checked': ''; ?>>
+                        <label data-tooltip title="<?php echo esc_attr($category->description); ?>" for="<?php echo $category->slug; ?>"><?php echo $category->name; ?></label>
+                    </div>
                     <?php } ?>
                 </fieldset>
                 <p class="help-text">Choose the forum topic under which you want your post to appear.</p>
