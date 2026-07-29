@@ -32,6 +32,7 @@ class PwtcMapdb_BBPost {
 			add_action('do_feed_rss2', array('PwtcMapdb_BBPost', 'protect_comments_feed_callback'), 0);
 			add_action('do_feed_atom', array('PwtcMapdb_BBPost', 'protect_comments_feed_callback'), 0);
 		}
+		add_action('template_redirect', array('PwtcMapdb_BBPost', 'disallow_loading_posts_callback'));
 
 		add_filter('heartbeat_received', array('PwtcMapdb_BBPost', 'refresh_post_lock'), 10, 3);
 		add_filter('pwtc_header_indicator_icons', array('PwtcMapdb_BBPost', 'header_indicator_icons_callback'));
@@ -93,7 +94,13 @@ class PwtcMapdb_BBPost {
     	if ($query->is_feed() && !is_admin()) {
         	$exclude_categories = apply_filters('pwtc_category_exclude_list', []);
         	if (!empty($exclude_categories)) {
-            	$query->set('category__not_in', $exclude_categories);
+				$cat_query = $query->get('category__not_in');
+				if (!is_array($cat_query) || empty($cat_query) ) {
+            		$query->set('category__not_in', $exclude_categories);
+				}
+				else {
+					$query->set('category__not_in', array_merge($cat_query, $exclude_categories));
+				}
         	}
 		}
 	}
@@ -102,6 +109,23 @@ class PwtcMapdb_BBPost {
     	if (!is_user_logged_in() and $is_comment_feed) {
        		wp_die('You must be logged in to access this comment feed.', 'Feed Protected', array('response' => 403));
     	}
+	}
+
+	public static function disallow_loading_posts_callback() {
+		if (is_single() and get_post_type() == "post") { 
+			$exclude_categories = apply_filters('pwtc_category_exclude_list', []);
+        	if (!empty($exclude_categories)) {
+				$categories = get_the_category();
+				if (!empty($categories)) {
+					foreach( $categories as $category ) {
+						if (in_array($category->term_id, $exclude_categories)) {
+							wp_die('You are not allowed access to this post.', 403);
+						}
+					}
+
+				}
+			}
+		}
 	}
 
 	public static function header_indicator_icons_callback($output) {
