@@ -39,7 +39,7 @@
     <div class="row column">
         <form class="sort-frm" method="POST" novalidate>
             <input type="hidden" name="map_status" value="<?php echo $map_status; ?>">
-            <input type="hidden" name="map_title" value="<?php echo stripslashes($map_title); ?>">
+            <input type="hidden" name="map_title" value="<?php echo esc_attr(stripslashes($map_title)); ?>">
             <input type="hidden" name="map_type" value="<?php echo $map_type; ?>">
             <input type="hidden" name="map_distance" value="<?php echo $map_distance; ?>">
             <input type="hidden" name="map_terrain" value="<?php echo $map_terrain; ?>">
@@ -77,7 +77,7 @@
                     <?php } ?>
                         <div class="small-12 medium-4 columns">
                             <label>Map Title 
-                                <input type="text" name="map_title" value="<?php echo stripslashes($map_title); ?>">
+                                <input type="text" name="map_title" value="<?php echo esc_attr(stripslashes($map_title)); ?>">
                             </label>
                         </div>
                         <div class="small-12 medium-2 columns">
@@ -195,7 +195,7 @@
     <?php if ($warn) { ?>
     <form class="load-more-frm" method="POST">
         <input type="hidden" name="map_status" value="<?php echo $map_status; ?>">
-        <input type="hidden" name="map_title" value="<?php echo stripslashes($map_title); ?>">
+        <input type="hidden" name="map_title" value="<?php echo esc_attr(stripslashes($map_title)); ?>">
         <input type="hidden" name="map_type" value="<?php echo $map_type; ?>">
         <input type="hidden" name="map_distance" value="<?php echo $map_distance; ?>">
         <input type="hidden" name="map_terrain" value="<?php echo $map_terrain; ?>">

@@ -28,7 +28,7 @@
                     <div class="row">
                         <div class="small-12 medium-6 columns">
                             <label>Rider Name 
-                                <input type="text" name="rider_name" value="<?php echo stripslashes($rider_name); ?>">
+                                <input type="text" name="rider_name" value="<?php echo esc_attr(stripslashes($rider_name)); ?>">
                             </label>
                         </div>
                         <div class="small-12 medium-6 columns">
@@ -97,7 +97,7 @@
     </table>
     <?php if ($warn) { ?>
     <form class="load-more-frm" method="POST">
-        <input type="hidden" name="rider_name" value="<?php echo stripslashes($rider_name); ?>">
+        <input type="hidden" name="rider_name" value="<?php echo esc_attr(stripslashes($rider_name)); ?>">
         <input type="hidden" name="rider_id" value="<?php echo $rider_id; ?>">
         <div class="row column errmsg"></div>
         <?php echo PwtcMapdb::output_pagination_html($limit, $offset, $total); ?>
