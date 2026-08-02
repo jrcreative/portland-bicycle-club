@@ -147,6 +147,15 @@ if(is_singular())
                 'strong' => array(),
                 'p' => array(),
             );
+            $format = get_field('format');
+            if ($format === 'gallery') {
+                $context['images'] = get_field('images');
+                $context['callout_label'] = 'Image Gallery:';
+            }
+            else if ($format === 'documents') {
+                $context['documents'] = get_field('documents');
+                $context['callout_label'] = 'Attached Documents:';
+            }
         }
     }
 }

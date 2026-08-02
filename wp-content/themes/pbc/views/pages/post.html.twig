@@ -14,6 +14,29 @@
                 {% else %}
                     {{ post.content }}
                 {% endif %}
+                {% if images is defined %}
+                    <div class="callout">
+                        <h5>{{ callout_label }}</h5>
+                        <div class="slick text-center">
+                        {% for image in images %}
+                            <div>
+                                <img src="{{ image.image.sizes.mobile_slider }}" class="hide-for-medium" alt="">
+                                <img src="{{ image.image.sizes.desktop_slider }}" class="hide-for-small-only" alt="">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if documents is defined %}
+                    <div class="callout">
+                        <h5>{{ callout_label }}</h5>
+                        {% for document in documents %}
+                            <div>
+                                <a href="{{ document.document.url }}">{{ document.document.filename }}</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 {% if user and post.post_status == 'publish' %}
                     <div class="comment-box">
                         <!-- comments -->

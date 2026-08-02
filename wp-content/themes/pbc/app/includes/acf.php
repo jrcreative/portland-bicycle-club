@@ -1127,7 +1127,7 @@ if( function_exists('acf_add_local_field_group') ):
                 'label' => 'Format',
                 'name' => 'format',
                 'type' => 'select',
-                'instructions' => '',
+                'instructions' => 'Choose a format for the post. Blog has just content, Gallery adds an image slideshow gallery and Documents adds a list of downloadable documents.',
                 'required' => 1,
                 'conditional_logic' => 0,
                 'wrapper' => array (
@@ -1137,9 +1137,8 @@ if( function_exists('acf_add_local_field_group') ):
                 ),
                 'choices' => array (
                     'blog' => 'Blog',
-                    'meeting' => 'Meeting Minutes',
-                    'news' => 'Newsletter',
                     'gallery' => 'Gallery',
+                    'documents' => 'Documents',
                 ),
                 'default_value' => array (
                     0 => 'blog',
@@ -1154,11 +1153,59 @@ if( function_exists('acf_add_local_field_group') ):
                 'return_format' => 'value',
             ),
             array (
+                'key' => 'field_post_documents',
+                'label' => 'Documents',
+                'name' => 'documents',
+                'type' => 'repeater',
+                'instructions' => 'Add the documents that you want in your document list.',
+                'required' => 0,
+                'conditional_logic' => array (
+                    array (
+                        array (
+                            'field' => 'field_57a915ba2d010',
+                            'operator' => '==',
+                            'value' => 'documents',
+                        ),
+                    ),
+                ),
+                'wrapper' => array (
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'collapsed' => '',
+                'min' => 1,
+                'max' => '',
+                'layout' => 'table',
+                'button_label' => 'Add Row',
+                'sub_fields' => array (
+                    array (
+                        'key' => 'field_post_document',
+                        'label' => 'Document',
+                        'name' => 'document',
+                        'type' => 'file',
+                        'instructions' => 'Specify the PDF file that you wish to attach as your document.',
+                        'required' => 1,
+                        'conditional_logic' => 0,
+                        'wrapper' => array (
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'return_format' => 'array',
+                        'library' => 'all',
+                        'min_size' => '',
+                        'max_size' => '',
+                        'mime_types' => 'pdf',
+                    ),
+                ),
+            ),
+            array (
                 'key' => 'field_57a9168f1c326',
                 'label' => 'Images',
                 'name' => 'images',
                 'type' => 'repeater',
-                'instructions' => '',
+                'instructions' => 'Add the images that you want in your slideshow gallery.',
                 'required' => 0,
                 'conditional_logic' => array (
                     array (
@@ -1175,7 +1222,7 @@ if( function_exists('acf_add_local_field_group') ):
                     'id' => '',
                 ),
                 'collapsed' => '',
-                'min' => 2,
+                'min' => 1,
                 'max' => '',
                 'layout' => 'table',
                 'button_label' => 'Add Row',
@@ -1205,40 +1252,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'mime_types' => '',
                     ),
                 ),
-            ),
-            array (
-                'key' => 'field_57a917521c328',
-                'label' => 'File',
-                'name' => 'file',
-                'type' => 'file',
-                'instructions' => '',
-                'required' => 1,
-                'conditional_logic' => array (
-                    array (
-                        array (
-                            'field' => 'field_57a915ba2d010',
-                            'operator' => '==',
-                            'value' => 'meeting',
-                        ),
-                    ),
-                    array (
-                        array (
-                            'field' => 'field_57a915ba2d010',
-                            'operator' => '==',
-                            'value' => 'news',
-                        ),
-                    ),
-                ),
-                'wrapper' => array (
-                    'width' => '',
-                    'class' => '',
-                    'id' => '',
-                ),
-                'return_format' => 'array',
-                'library' => 'all',
-                'min_size' => '',
-                'max_size' => '',
-                'mime_types' => '',
             ),
         ),
         'location' => array (

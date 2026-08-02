@@ -9,12 +9,10 @@
         >
     {% elseif post.get_field('display_post_author') %}
         {{ fn('get_avatar', post.author.id, 280) }}
-    {% elseif post.get_field('format') == "news" %}
-        <i class="fa fa-newspaper-o"></i>
-    {% elseif post.get_field('format') == "meeting" %}
-        <i class="fa fa-clipboard"></i>
     {% elseif post.get_field('format') == "gallery" %}
         <i class="fa fa-picture-o"></i>
+    {% elseif post.get_field('format') == "documents" %}
+        <i class="fa fa-file-text"></i>
     {% elseif post.post_type == 'ride_template' %}
         <i class="fa fa-bicycle"></i>
     {% elseif post.post_type == 'scheduled_rides' %}
