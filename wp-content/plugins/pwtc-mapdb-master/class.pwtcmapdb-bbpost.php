@@ -537,14 +537,15 @@ class PwtcMapdb_BBPost {
 		$enable_categories = true;
 		$categories = [];
 		if ($enable_categories) {
-			$topics_id = get_cat_ID (get_option('pwtc_mapdb_topics_parent_category_name', ''));
-			if ($topics_id > 0) {
-				$categories = get_categories([ 
-					'hide_empty' => false, 
-					'orderby' => 'name',
-					'order' => 'ASC',
-					'parent' => $topics_id,
-				]);
+			if ($is_moderator) {
+				$admin_cats = self::get_topic_choices(get_option('pwtc_mapdb_admin_topics_parent_category_name', ''));
+				$categories = array_merge($categories, $admin_cats);
+			}
+			$member_cats = self::get_topic_choices(get_option('pwtc_mapdb_topics_parent_category_name', ''));
+			$categories = array_merge($categories, $member_cats);
+			if ($is_moderator) {
+				$public_cats = self::get_topic_choices(get_option('pwtc_mapdb_public_topics_parent_category_name', ''));
+				$categories = array_merge($categories, $public_cats);
 			}
 		}
 
@@ -759,6 +760,20 @@ class PwtcMapdb_BBPost {
 		include('manage-bbposts-form.php');
 		return ob_get_clean();
 	}	
+
+	public static function get_topic_choices($parent_category_name) {
+		$categories = [];
+		$topics_id = get_cat_ID($parent_category_name);
+		if ($topics_id > 0) {
+			$categories = get_categories([ 
+				'hide_empty' => false, 
+				'orderby' => 'name',
+				'order' => 'ASC',
+				'parent' => $topics_id,
+			]);
+		}
+		return $categories;
+	}
 
 	public static function get_topic_button_links($parent_category_name) {
 		$output = '';
