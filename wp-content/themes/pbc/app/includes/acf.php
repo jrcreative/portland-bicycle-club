@@ -2536,6 +2536,27 @@ if( function_exists('acf_add_local_field_group') ):
                 ),
                 'default_value' => 0,
             ),
+            array (
+                'key' => 'field_roles_to_access_admin_bar',
+                'label' => 'Roles Allowed To Access Admin Bar',
+                'name' => 'roles_to_access_admin_bar',
+                'type' => 'text',
+                'instructions' => 'Separate multiple role names with a space.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array (
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => '',
+                'prepend' => '',
+                'append' => '',
+                'maxlength' => '',
+                'readonly' => 0,
+                'disabled' => 0,
+            ),
         ),
         'location' => array (
             array (
