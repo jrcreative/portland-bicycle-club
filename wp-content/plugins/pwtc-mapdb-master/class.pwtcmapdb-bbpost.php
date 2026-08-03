@@ -2,10 +2,6 @@
 
 class PwtcMapdb_BBPost {
 
-	public const EDIT_BBPOST_URI = '/edit-bbpost';
-	public const SUBMIT_BBPOST_URI = '/submit-bbpost';
-	public const DELETE_BBPOST_URI = '/delete-bbpost';
-	
     private static $initiated = false;
 
     public static function init() {
@@ -52,8 +48,11 @@ class PwtcMapdb_BBPost {
     }
 
 	public static function load_javascripts() {
+		$edit_bbpost_path = get_option('pwtc_mapdb_edit_forum_post_path', '/');
+		$submit_bbpost_path = get_option('pwtc_mapdb_submit_forum_post_path', '/');
+		$delete_bbpost_path = get_option('pwtc_mapdb_delete_forum_post_path', '/');
 		$link = get_the_permalink();
-		if ($link and (strpos($link, self::DELETE_BBPOST_URI)!==false or strpos($link, self::EDIT_BBPOST_URI)!==false or strpos($link, self::SUBMIT_BBPOST_URI)!==false)) {
+		if ($link and (strpos($link, $delete_bbpost_path)!==false or strpos($link, $edit_bbpost_path)!==false or strpos($link, $submit_bbpost_path)!==false)) {
 			wp_enqueue_script('heartbeat');
 		}
 	}
@@ -863,7 +862,7 @@ EOT;
 	}
 
 	public static function delete_bbpost_link($postid, $return=false) {
-		$uri = self::DELETE_BBPOST_URI;
+		$uri = get_option('pwtc_mapdb_delete_forum_post_path', '/');
 		$uri .= '?post=' . $postid;
 		if ($return) {
 			$uri .= '&return=' . urlencode($return);
@@ -872,7 +871,7 @@ EOT;
 	}
 
 	public static function new_bbpost_link($return=false) {
-		$uri = self::SUBMIT_BBPOST_URI;
+		$uri = get_option('pwtc_mapdb_submit_forum_post_path', '/');
 		if ($return) {
 			$uri .= '?return=' . urlencode($return);
 		}
@@ -880,7 +879,7 @@ EOT;
 	}
 
 	public static function edit_bbpost_link($postid, $return=false) {
-		$uri = self::EDIT_BBPOST_URI;
+		$uri = get_option('pwtc_mapdb_edit_forum_post_path', '/');
 		$uri .= '?post=' . $postid;
 		if ($return) {
 			$uri .= '&return=' . urlencode($return);

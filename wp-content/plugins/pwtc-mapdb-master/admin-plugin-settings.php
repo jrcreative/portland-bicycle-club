@@ -75,6 +75,15 @@ else {
             else {
                 update_option('pwtc_mapdb_enable_post_copy', 'no');
             }
+            if (isset($_POST['edit_forum_post_path'])) {
+                update_option('pwtc_mapdb_edit_forum_post_path', trim($_POST['edit_forum_post_path']));
+            }
+            if (isset($_POST['submit_forum_post_path'])) {
+                update_option('pwtc_mapdb_submit_forum_post_path', trim($_POST['submit_forum_post_path']));
+            }
+            if (isset($_POST['delete_forum_post_path'])) {
+                update_option('pwtc_mapdb_delete_forum_post_path', trim($_POST['delete_forum_post_path']));
+            }
         }
     }
     $max_post_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
@@ -89,6 +98,9 @@ else {
     $enable_post_copy = 'yes' === get_option('pwtc_mapdb_enable_post_copy', 'no');
     $modified_time_update = 'yes' === get_option('pwtc_mapdb_modified_time_update', 'no');
     $restrict_feed_output = 'yes' === get_option('pwtc_mapdb_restrict_feed_output', 'no');
+    $edit_forum_post_path = get_option('pwtc_mapdb_edit_forum_post_path', '/');
+    $submit_forum_post_path = get_option('pwtc_mapdb_submit_forum_post_path', '/');
+    $delete_forum_post_path = get_option('pwtc_mapdb_delete_forum_post_path', '/');
 ?>
     <div id="mapdb-settings-section">
         <form method="POST">
@@ -139,6 +151,18 @@ else {
             <p>
                 <input type="checkbox" id="restrict_feed_output" name="restrict_feed_output" <?php echo $restrict_feed_output ? 'checked' : ''; ?>/>
                 <label for="restrict_feed_output">Restrict RSS feed output when user not logged in</label>
+            </p>
+            <p>
+                <label for="edit_forum_post_path">URL pathname of forum post edit page</label>
+                <input type="text" id="edit_forum_post_path" name="edit_forum_post_path" value="<?php echo $edit_forum_post_path; ?>"/>
+            </p>
+            <p>
+                <label for="submit_forum_post_path">URL pathname of forum post submit page</label>
+                <input type="text" id="submit_forum_post_path" name="submit_forum_post_path" value="<?php echo $submit_forum_post_path; ?>"/>
+            </p>
+            <p>
+                <label for="delete_forum_post_path">URL pathname of forum post delete page</label>
+                <input type="text" id="delete_forum_post_path" name="delete_forum_post_path" value="<?php echo $delete_forum_post_path; ?>"/>
             </p>
             <h3>General</h3>
             <p>
