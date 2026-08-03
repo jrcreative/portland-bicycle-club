@@ -439,7 +439,8 @@ class PwtcMembers {
 			return;
 		}
 		$button_class = wc_wp_theme_get_element_class_name('button') ? ' ' . wc_wp_theme_get_element_class_name('button') : '';
-		$delete_btn = sprintf('<a href="/delete-membership" class="button wc-forward%s">Delete</a>', $button_class); 
+		$delete_membership_path = get_option('pwtc_members_delete_membership_path', '/');
+		$delete_btn = sprintf('<a href="%s" class="button wc-forward%s">Delete</a>', $delete_membership_path, $button_class); 
 		$link_to_delete = 'You must first delete your expired membership before you can purchase a different one.<br>' . $delete_btn;
 		$wait_to_expire = 'You must wait for your current membership to expire before you can purchase a different one.';
 		$product = wc_get_product($product_id);
