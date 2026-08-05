@@ -5,7 +5,7 @@ add_action('acf/init', function() {
             'page_title' 	=> 'Theme General Settings',
             'menu_title' 	=> 'Theme Settings',
             'menu_slug' 	=> 'theme-general-settings',
-            'capability' 	=> 'edit_posts',
+            'capability' 	=> 'manage_options',
             'redirect' 	=> false
         ));
     }
