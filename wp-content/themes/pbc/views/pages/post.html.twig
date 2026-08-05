@@ -20,8 +20,7 @@
                         <div class="slick text-center">
                         {% for image in images %}
                             <div>
-                                <img src="{{ image.image.sizes.mobile_slider }}" class="hide-for-medium" alt="">
-                                <img src="{{ image.image.sizes.desktop_slider }}" class="hide-for-small-only" alt="">
+                                <img src="{{ image.image.url }}" alt="{{ image.image.alt }}">
                             </div>
                         {% endfor %}
                         </div>
