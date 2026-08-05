@@ -57,6 +57,9 @@ class PwtcMapdb_Admin {
 	
     public static function admin_bar_link() {
         global $wp_admin_bar, $post;
+        if (!current_user_can('edit_posts') and !current_user_can('edit_rides')) {
+            return;
+        }
         $post_status = 'draft';
         $current_object = get_queried_object();
         if (empty($current_object)) {
