@@ -166,22 +166,16 @@ class PwtcMembers {
 
 	public static function before_admin_bar_render_callback() {
 		global $wp_admin_bar;
-		$current_user = wp_get_current_user();
-		if ( $current_user->ID > 0 ) {
-			if (!in_array('administrator', $current_user->roles)) {
-				$wp_admin_bar->remove_menu('edit-profile');
-			}
+		if (!current_user_can('manage_options')) {
+			$wp_admin_bar->remove_menu('user-info');
 		}	
 	}
 
 	public static function admin_init_callback() {
-		$current_user = wp_get_current_user();
-		if ( $current_user->ID > 0 ) {
-			if (!in_array('administrator', $current_user->roles)) {
-					  remove_submenu_page('users.php', 'profile.php');
-					  remove_menu_page('profile.php');
-			}
-		}	
+		if (!current_user_can('manage_options')) {
+			remove_submenu_page('users.php', 'profile.php');
+			remove_menu_page('profile.php');
+		}
 	}
 
 	/*************************************************************/
