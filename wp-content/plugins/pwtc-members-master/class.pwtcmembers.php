@@ -149,6 +149,9 @@ class PwtcMembers {
 		add_action( 'wp_ajax_pwtc_member_lookup', 
 			array( 'PwtcMembers', 'member_lookup_callback') );
 
+		add_action( 'wp_ajax_pwtc_member_fetch_avatar', 
+			array( 'PwtcMembers', 'member_fetch_avatar_callback') );
+
 		add_action( 'wp_ajax_pwtc_member_fetch_address', 
 			array( 'PwtcMembers', 'member_fetch_address_callback') );
 
@@ -654,6 +657,23 @@ class PwtcMembers {
 	<script type="text/javascript">
 		jQuery(document).ready(function($) { 
 
+			function display_user_avatar_cb(response) {
+				$('#pwtc-member-wait-div').foundation('close');
+				var res = JSON.parse(response);
+				if (res.error) {
+					$("#pwtc-member-error-div .error-msg").html(res.error);
+					$('#pwtc-member-error-div').foundation('open');
+				}
+				else {
+					$('#pwtc-member-avatar-div .address-data').empty();
+					$('#pwtc-member-avatar-div .address-data').append(
+						'<div>' + res.avatar + '</div>');
+					$('#pwtc-member-avatar-div .address-data').append(
+						'<div>' + res.first_name + ' ' + res.last_name + '</div>');
+					$('#pwtc-member-avatar-div').foundation('open');
+				}
+			}
+
 			<?php if ($can_view_address) { ?>
 			function display_user_address_cb(response) {
 				$('#pwtc-member-wait-div').foundation('close');
@@ -713,6 +733,7 @@ class PwtcMembers {
 				members.forEach(function(item) {
 					var data = '<tr userid="' + item.ID + '">' +
 					'<td data-th="Name">' + item.first_name + ' ' + item.last_name + 
+					' <a class="view_avatar" title="View member avatar."><i class="fa fa-user"></i></a>' +
 					(item.is_expired ? ' <i class="fa fa-exclamation-triangle" title="Membership Expired"></i>' : '') +
 					(item.is_ride_leader ? ' <i class="fa fa-bicycle" title="Ride Leader"></i>' : '') + '</td>' + 
 					'<td data-th="Email">' + item.email + '</td>' +
@@ -724,6 +745,18 @@ class PwtcMembers {
 					<?php } ?>
 					'</tr>';
 					$('#pwtc-member-list-div table').append(data);    
+				});
+				$('#pwtc-member-list-div table .view_avatar').on('click', function(e) {
+					var userid = $(this).parent().parent().attr('userid');
+					var action = "<?php echo admin_url('admin-ajax.php'); ?>";
+					var data = {
+						'action': 'pwtc_member_fetch_avatar',
+						'userid': userid,
+						'size': 400
+					};
+					$.post(action, data, display_user_avatar_cb);
+					$('#pwtc-member-wait-div .wait-message').html('Loading member avatar.');
+					$('#pwtc-member-wait-div').foundation('open');
 				});
 				<?php if ($can_view_address) { ?>
 				$('#pwtc-member-list-div table .view_address').on('click', function(e) {
@@ -861,7 +894,6 @@ class PwtcMembers {
 			load_members_table('search');
 		});
 	</script>
-	<?php if ($can_view_address) { ?>
 	<div id="pwtc-member-error-div" class="small reveal" data-close-on-click="false" data-v-offset="100" data-reveal>
 		<form class="profile-frm">
 		    <div class="row column">
@@ -878,6 +910,19 @@ class PwtcMembers {
 			<p class="wait-message"></p>
 		</div>
 	</div>
+	<div id="pwtc-member-avatar-div" class="small reveal" data-close-on-click="false" data-v-offset="100" data-reveal>
+		<form class="profile-frm">
+			<div class="row column">
+				<div class="callout primary">
+					<p class="address-data"></p>
+				</div>
+			</div>
+			<div class="row column clearfix">
+				<input class="accent button float-left" type="button" value="Close" data-close/>
+			</div>
+		</form>
+	</div>
+	<?php if ($can_view_address) { ?>
 	<div id="pwtc-member-address-div" class="small reveal" data-close-on-click="false" data-v-offset="100" data-reveal>
 		<form class="profile-frm">
 			<div class="row column">
@@ -1643,6 +1688,36 @@ class PwtcMembers {
 		return $query_args;
 	}
 
+	public static function member_fetch_avatar_callback() {
+		if (isset($_POST['userid']) and isset($_POST['size'])) {
+			$userid = intval($_POST['userid']);
+			$size = intval($_POST['size']);
+			$member_info = get_userdata($userid);
+			if ($member_info === false) {
+				$response = array(
+					'userid' => $userid,
+					'error' => 'Address fetch failed - user ID ' . $userid . ' not valid.'
+				);
+			}
+			else {
+				$response = array(
+					'userid' => $userid,
+					'first_name' => $member_info->first_name,
+					'last_name' => $member_info->last_name,
+					'valid_member' => $valid_member
+				);
+				$response['avatar'] = get_avatar($userid, $size);
+			}
+		}
+		else {
+			$response = array(
+				'error' => 'Address fetch failed - AJAX arguments missing.'
+			);		
+		}
+		echo wp_json_encode($response);
+        wp_die();
+	}
+
 	public static function member_fetch_address_callback() {
 		if (!current_user_can('manage_options')) {
 			$response = array(
@@ -1704,7 +1779,7 @@ class PwtcMembers {
 					'family' => $family,
 					'valid_member' => $valid_member
 				);
-				$response['avatar'] = get_avatar($userid, 128);
+				//$response['avatar'] = get_avatar($userid, 128);
 			}
 		}
 		else {
