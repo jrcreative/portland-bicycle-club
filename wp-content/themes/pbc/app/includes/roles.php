@@ -35,6 +35,7 @@ add_action('init', function() {
     }
     $ride_captain_role->add_cap('read');
 
+    /*
     $editor_role = get_role('editor');
     $additional_editor_roles = [
         'delete_others_rides',
@@ -51,6 +52,7 @@ add_action('init', function() {
     foreach ($additional_editor_roles as $role) {
         $editor_role->add_cap($role);
     }
+    */
 
     $admin_role = get_role('administrator');
     $additional_admin_roles = [
