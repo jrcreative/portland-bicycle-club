@@ -752,7 +752,7 @@ class PwtcMembers {
 					var data = {
 						'action': 'pwtc_member_fetch_avatar',
 						'userid': userid,
-						'size': 400
+						'size': <?php echo get_option('pwtc_members_size_member_avatar', 100); ?>
 					};
 					$.post(action, data, display_user_avatar_cb);
 					$('#pwtc-member-wait-div .wait-message').html('Loading member avatar.');

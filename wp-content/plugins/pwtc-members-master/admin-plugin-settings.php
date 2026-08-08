@@ -9,6 +9,9 @@ if (!current_user_can($capability)) {
 else {
     if (isset($_POST['_wpnonce'])) {
         if (wp_verify_nonce($_POST['_wpnonce'], 'pwtc_members_submit_settings')) {
+            if (isset($_POST['size_member_avatar'])) {
+                update_option('pwtc_members_size_member_avatar', absint($_POST['size_member_avatar']));
+            }
             if (isset($_POST['sync_start_times'])) {
                 update_option('pwtc_members_sync_start_times', 'yes');
             }
@@ -62,6 +65,7 @@ else {
             }
         }
     }
+    $size_member_avatar = get_option('pwtc_members_size_member_avatar', 100);
     $sync_start_times = 'yes' === get_option('pwtc_members_sync_start_times', 'no');
     $sync_end_times = 'yes' === get_option('pwtc_members_sync_end_times', 'no');
     $allow_member_deletion = 'yes' === get_option('pwtc_members_allow_member_deletion', 'no');
@@ -79,6 +83,10 @@ jQuery(document).ready(function($) {
     <div id="members-settings-section">
         <form method="POST">
 	        <?php wp_nonce_field('pwtc_members_submit_settings'); ?>
+            <p>
+                <label for="size_member_avatar">Size of the member avatar shown in the membership directory.</label>
+                <input type="number" step="10" min="100" max="500" id="size_member_avatar" name="size_member_avatar" value="<?php echo $size_member_avatar; ?>"/>
+            </p>
             <p>
                 <input type="checkbox" id="sync_start_times" name="sync_start_times" <?php echo $sync_start_times ? 'checked' : ''; ?>/>
                 <label for="sync_start_times">Synchronize member start dates to their rider ID issue year</label>
