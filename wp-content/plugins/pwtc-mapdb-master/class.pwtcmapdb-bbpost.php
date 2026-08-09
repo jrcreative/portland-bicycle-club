@@ -262,10 +262,18 @@ class PwtcMapdb_BBPost {
 		$a = shortcode_atts(array('use_return' => 'no'), $atts);
 		$use_return = $a['use_return'] == 'yes';
 
-		$title_char_check = ('yes' === get_option('pwtc_mapdb_post_title_char_check', 'no'));
 		$allow_email = ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no'));
 		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
 		$max_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
+		$title_disallowed_chars = get_option('pwtc_mapdb_post_title_disallowed_chars', '');
+		if (!empty($title_disallowed_chars)) {
+			$ascii = explode(' ', $title_disallowed_chars);
+			$title_disallowed_chars = '[';
+			foreach ( $ascii as $code ) {
+				$title_disallowed_chars .= '\\x' . $code;
+			}
+			$title_disallowed_chars .= ']';
+		}
 
         $is_moderator = false;
 		$is_active_member = false;

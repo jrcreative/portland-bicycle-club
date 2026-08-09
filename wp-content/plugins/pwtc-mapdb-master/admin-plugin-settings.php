@@ -14,11 +14,8 @@ else {
             if (isset($_POST['max_post_title_len'])) {
                 update_option('pwtc_mapdb_post_title_max_len', absint($_POST['max_post_title_len']));
             }
-            if (isset($_POST['post_title_char_check'])) {
-                update_option('pwtc_mapdb_post_title_char_check', 'yes');
-            }
-            else {
-                update_option('pwtc_mapdb_post_title_char_check', 'no');
+            if (isset($_POST['post_title_disallowed_chars'])) {
+                update_option('pwtc_mapdb_post_title_disallowed_chars', trim($_POST['post_title_disallowed_chars']));
             }
             if (isset($_POST['after'])) {
                 if (strtotime(trim($_POST['after']))) {
@@ -87,7 +84,7 @@ else {
         }
     }
     $max_post_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
-    $post_title_char_check = 'yes' === get_option('pwtc_mapdb_post_title_char_check', 'no');
+    $post_title_disallowed_chars = get_option('pwtc_mapdb_post_title_disallowed_chars', '');
     $after = get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
     $public_topics = get_option('pwtc_mapdb_public_topics_parent_category_name', '');
     $admin_topics = get_option('pwtc_mapdb_admin_topics_parent_category_name', '');
@@ -111,8 +108,8 @@ else {
                 <input type="number" id="max_post_title_len" name="max_post_title_len" value="<?php echo $max_post_title_len; ?>"/>
             </p>
             <p>
-                <input type="checkbox" id="post_title_char_check" name="post_title_char_check" <?php echo $post_title_char_check ? 'checked' : ''; ?>/>
-                <label for="post_title_char_check">Disallow certain characters in the post title</label>
+                <label for="post_title_disallowed_chars">Hex ascii code for disallowed characters in post title (delimit by a space)</label>
+                <input type="text" id="post_title_disallowed_chars" name="post_title_disallowed_chars" value="<?php echo $post_title_disallowed_chars; ?>"/>
             </p>
             <p>
                 <label for="after">Time cutoff for recent posts</label>

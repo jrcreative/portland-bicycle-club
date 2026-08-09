@@ -132,11 +132,13 @@
                 return;
             }
 
-            <?php if ( $title_char_check ) { ?>
-            var titlergx = /[\x3C\x3E\x22\\]/;    // <,>,",\
+            <?php if ( !empty($title_disallowed_chars) ) { ?>
+            var titlergx = /<?php echo $title_disallowed_chars; ?>/;
+            //var titlergx = /[\x3C\x3E\x22\\]/;    // <,>,",\
             //var titlergx = /[^a-zA-Z0-9'"&\x2D\x25\x3F\x21\s]/;     // -,%,?,!
-            if (titlergx.test($('#pwtc-mapdb-edit-bbpost-div input[name="title"]').val().trim())) {
-                show_warning('Detected invalid characters in <strong>post title</strong>. The following characters are not allowed: left/right angle bracket, double quote or backslash.');
+            //if (titlergx.test($('#pwtc-mapdb-edit-bbpost-div input[name="title"]').val().trim())) {
+            if ((array = titlergx.exec($('#pwtc-mapdb-edit-bbpost-div input[name="title"]').val().trim())) !== null) {
+                show_warning('Detected invalid characters in <strong>post title</strong>; the invalid character is "' + array[0] + '"');
                 $('#pwtc-mapdb-edit-bbpost-div input[name="title"]').addClass('indicate-error');
                 evt.preventDefault();
                 return;
