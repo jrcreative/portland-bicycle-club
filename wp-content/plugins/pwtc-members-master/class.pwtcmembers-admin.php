@@ -2,6 +2,8 @@
 
 class PwtcMembers_Admin {
 
+	public const ACCESS_CAPABILITY = 'manage_woocommerce';
+
     private static $initiated = false;
 
 	public static function init() {
@@ -73,7 +75,7 @@ class PwtcMembers_Admin {
 
     	$page_title = $plugin_options['plugin_menu_label'];
     	$menu_title = $plugin_options['plugin_menu_label'];
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$parent_menu_slug = 'pwtc_members_menu';
     	$function = array( 'PwtcMembers_Admin', 'plugin_menu_page');
     	$icon_url = '';
@@ -83,14 +85,14 @@ class PwtcMembers_Admin {
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Lookup Users';
     	$menu_title = 'Lookup Users';
     	$menu_slug = 'pwtc_members_lookup_users';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_lookup_users');
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
         $page_title = $plugin_options['plugin_menu_label'] . ' - Export Users';
     	$menu_title = 'Export Users';
     	$menu_slug = 'pwtc_members_export_users';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_export_users');
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 		add_action('load-' . $page, array('PwtcMembers_Admin','download_user_csv'));
@@ -98,21 +100,21 @@ class PwtcMembers_Admin {
         $page_title = $plugin_options['plugin_menu_label'] . ' - Multiple Memberships';
     	$menu_title = 'Multi Members';
     	$menu_slug = 'pwtc_members_multiple';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_multi_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Invalid Membership Roles';
     	$menu_title = 'Invalid Members';
     	$menu_slug = 'pwtc_members_invalid';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_invalid_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Missing Membership Roles';
     	$menu_title = 'Missing Members';
     	$menu_slug = 'pwtc_members_missing';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_missing_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
@@ -120,21 +122,21 @@ class PwtcMembers_Admin {
 		$menu_title = '
 		Adjust Dates';
     	$menu_slug = 'pwtc_members_adjust_families';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_adjust_families');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Expiring Members';
     	$menu_title = 'Expiring Members';
     	$menu_slug = 'pwtc_members_expiring_members';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_expiring_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Test Confirmation Email';
     	$menu_title = 'Test Confirm Email';
     	$menu_slug = 'pwtc_members_test_email';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_test_email');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
@@ -153,49 +155,49 @@ class PwtcMembers_Admin {
 
 	public static function page_lookup_users() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-lookup-users.php');
 	}
 
     public static function page_export_users() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-export-users.php');
 	}
 
     public static function page_multi_members() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-multi-members.php');
 	}
 
 	public static function page_invalid_members() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-invalid-members.php');
 	}
 
 	public static function page_missing_members() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-missing-members.php');
 	}
 
 	public static function page_adjust_families() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-adjust-family-members.php');
 	}
 
 	public static function page_expiring_members() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-expiring-members.php');
 	}
 
 	public static function page_test_email() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-test-email.php');
 	}
 
@@ -206,7 +208,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function download_user_csv() {
-		if (current_user_can('manage_options')) {
+		if (current_user_can(self::ACCESS_CAPABILITY)) {
 			if (isset($_POST['includes']) and isset($_POST['excludes']) and isset($_POST['riderid']) and isset($_POST['nameset']) and isset($_POST['file'])) {
 				if (!empty($_POST['file'])) {
 					$details = isset($_POST['details']) and $_POST['details'] == 'true' ? true : false;
@@ -415,7 +417,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function send_test_email_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'status' => 'Confirmation email test failed - user access denied.'
 			);		
@@ -556,7 +558,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function fix_user_roles_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'error' => 'Fix failed - user access denied.'
 			);		
@@ -620,7 +622,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function fix_invalid_members_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'status' => 'Fix failed - user access denied.'
 			);		
@@ -666,7 +668,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function fix_missing_members_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can('self::ACCESS_CAPABILITY')) {
 			$response = array(
 				'status' => 'Fix failed - user access denied.'
 			);		
@@ -884,7 +886,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function adjust_member_since_date_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'status' => 'Failed - user access denied.'
 			);		
@@ -983,7 +985,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function adjust_family_members_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'status' => 'Failed - user access denied.'
 			);		
@@ -1092,7 +1094,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function lookup_users_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'error' => 'User lookup failed - user access denied.'
 			);
@@ -1122,7 +1124,7 @@ class PwtcMembers_Admin {
 	}	
 
 	public static function show_users_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'error' => 'User show failed - user access denied.'
 			);

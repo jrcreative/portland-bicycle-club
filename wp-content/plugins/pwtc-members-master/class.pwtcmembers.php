@@ -2,6 +2,8 @@
 
 class PwtcMembers {
 
+	public const ACCESS_CAPABILITY = 'manage_woocommerce';
+
     private static $initiated = false;
 
 	public static function init() {
@@ -647,7 +649,7 @@ class PwtcMembers {
 			return '<div class="callout small warning"><p>Please log in to view the member directory.</p></div>';
 		}
 		else {
-			$can_view_address = current_user_can('manage_options');
+			$can_view_address = current_user_can(self::ACCESS_CAPABILITY);
 			$can_view_leaders = false;
 			if ($can_view_address) {
 				$a['privacy'] = 'off';
@@ -1719,7 +1721,7 @@ class PwtcMembers {
 	}
 
 	public static function member_fetch_address_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'error' => 'Address fetch failed - user access denied.'
 			);		
@@ -2087,7 +2089,7 @@ class PwtcMembers {
 	}
 
 	public static function lookup_user_memberships($memberid, $lastname = '', $firstname = '', $email = '', $exact = true) {
-		$add_edit_link = current_user_can('manage_options');
+		$add_edit_link = current_user_can(self::ACCESS_CAPABILITY);
 		$users = array();
 		$profiles = pwtc_members_lookup_user($memberid, $lastname, $firstname, $email, $exact);
 		foreach ($profiles as $profile) {
