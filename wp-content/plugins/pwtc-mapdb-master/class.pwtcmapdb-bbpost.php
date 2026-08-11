@@ -540,27 +540,19 @@ class PwtcMapdb_BBPost {
 				return $return_to_bbpost . '<div class="callout small warning"><p>Forum post "' . $bbpost_title . '" is currently being edited by ' . $name . '. </p></div>';
 			}
 		}
-	
-		$enable_categories = true;
-		$categories = [];
-		if ($enable_categories) {
-			if ($is_moderator) {
-				$admin_cats = self::get_topic_choices(get_option('pwtc_mapdb_admin_topics_parent_category_name', ''));
-				$categories = array_merge($categories, $admin_cats);
-			}
-			$member_cats = self::get_topic_choices(get_option('pwtc_mapdb_topics_parent_category_name', ''));
-			$categories = array_merge($categories, $member_cats);
-			if ($is_moderator) {
-				$public_cats = self::get_topic_choices(get_option('pwtc_mapdb_public_topics_parent_category_name', ''));
-				$categories = array_merge($categories, $public_cats);
-			}
-		}
 
 		if ($postid != 0) {
 			$post_cats = wp_get_post_categories($postid);
 		}
 		else {
 			$post_cats = [];
+		}
+
+		if ($is_moderator) {
+			$categories = self::get_category_select_tree($post_cats);
+		}
+		else {
+			$categories = self::get_topic_choices(get_option('pwtc_mapdb_topics_parent_category_name', ''));
 		}
 
 		if ($postid != 0) {
@@ -780,6 +772,38 @@ class PwtcMapdb_BBPost {
 			]);
 		}
 		return $categories;
+	}
+
+	public static function get_category_select_tree($post_cats, $category=null, $output='') {
+		$categories = get_categories([ 
+			'hide_empty' => false, 
+			'orderby' => 'name',
+			'order' => 'ASC',
+			'parent' => ($category !== null ? $category->term_id : 0),
+		]);
+		if (empty($categories)) {
+			if ($category !== null) {
+				$tooltip = '';
+				if (!empty($category->description)) {
+					$tooltip = ' data-tooltip title="' . esc_attr($category->description) . '"';
+				}
+				$output .= '<li><input type="radio" name="categories[]" value="' . $category->term_id . '" id="' . 
+					$category->slug . '" ' . (in_array($category->term_id, $post_cats) ? 'checked': '') . 
+					'><label' . $tooltip . ' for="' . $category->slug . '">' . $category->name . '</label></li>';
+			}
+		}
+		else {
+			if ($category !== null) {
+				$output .= '<li>' . $category->name . '<ul style="list-style: none;">';
+			}
+			foreach ($categories as $cat) {
+				$output = self::get_category_select_tree($post_cats, $cat, $output);
+			}	
+			if ($category !== null) {
+				$output .= '</ul></li>';
+			}
+		}
+		return $output;
 	}
 
 	public static function get_topic_button_links($parent_category_name) {

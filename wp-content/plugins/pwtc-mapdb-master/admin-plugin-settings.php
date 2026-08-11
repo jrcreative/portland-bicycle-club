@@ -40,6 +40,12 @@ else {
             else {
                 update_option('pwtc_mapdb_force_comment_moderation', 'no');
             }
+            if (isset($_POST['radiobtn_category_select'])) {
+                update_option('pwtc_mapdb_radiobtn_category_select', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_radiobtn_category_select', 'no');
+            }
             if (isset($_POST['send_post_submit_email'])) {
                 update_option('pwtc_mapdb_send_post_submit_email', 'yes');
             }
@@ -90,6 +96,7 @@ else {
     $admin_topics = get_option('pwtc_mapdb_admin_topics_parent_category_name', '');
     $topics = get_option('pwtc_mapdb_topics_parent_category_name', '');
     $post_moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
+    $radiobtn_category_select = 'yes' === get_option('pwtc_mapdb_radiobtn_category_select', 'no');
     $send_post_submit_email = 'yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no');
     $force_comment_moderation = 'yes' === get_option('pwtc_mapdb_force_comment_moderation', 'no');
     $enable_post_copy = 'yes' === get_option('pwtc_mapdb_enable_post_copy', 'no');
@@ -127,6 +134,10 @@ else {
             <p>
                 <label for="topics">Name of post category that contains member topics</label>
                 <input type="text" id="topics" name="topics" value="<?php echo $topics; ?>"/>
+            </p>
+            <p>
+                <input type="checkbox" id="radiobtn_category_select" name="radiobtn_category_select" <?php echo $radiobtn_category_select ? 'checked' : ''; ?>/>
+                <label for="radiobtn_category_select">Use radio button category selection in post editor</label>
             </p>
             <p>
                 <input type="checkbox" id="send_post_submit_email" name="send_post_submit_email" <?php echo $send_post_submit_email ? 'checked' : ''; ?>/>
