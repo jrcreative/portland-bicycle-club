@@ -234,6 +234,7 @@ class PwtcMapdb_BBPost {
 		}
 		$comment = get_comment( $comment_id );
 		$post_id = $comment->comment_post_ID;
+		$author_id = $comment->user_id;
 		if ($post_id === 0) {
 			return;
 		}
@@ -247,7 +248,7 @@ class PwtcMapdb_BBPost {
 		}
 		*/
 		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
-		self::comment_submitted_email($post_id, $moderator_email);
+		self::comment_submitted_email($post_id, $author_id, $moderator_email);
 	}
 
 	public static function force_comment_moderation_callback($approved) {
@@ -852,12 +853,16 @@ class PwtcMapdb_BBPost {
 	public static function bbpost_submitted_email($postid, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));
 		$post_url = get_permalink($postid);
-		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
+		$author_id = get_post_field('post_author', $postid);
+		$author_email = get_the_author_meta('user_email', $author_id);
+		$post_author = get_the_author_meta('first_name', $author_id) . ' ' . get_the_author_meta('last_name', $author_id);
+		$author_link = '<a href="' . esc_url('mailto:'.$author_email) . '">' . $post_author . '</a>';
+		$post_link = '<a href="' . esc_url($post_url) . '">' . $post_title . '</a>';
 		$subject = 'PBC Post Submitted for Review';
 		$message = <<<EOT
-The Portland Bicycling Club post $post_link has been submitted for moderator review. 
+The Portland Bicycling Club post $post_link has been submitted by $author_link for moderator review. 
 To review this post, use a browser to log in to your club account and open the post by clicking its link. 
-Once the post opens, you can edit it (you must have administrator rights) by clicking the <em>Edit Post</em> link at the top of the page. 
+Once the post opens, you can edit it (you must have moderator rights) by clicking the <em>Edit Post</em> link at the top of the page. 
 After the editor opens, you may make any changes that you see fit and publish the post or reject (return it to draft). 
 Do not reply to this email!
 EOT;
@@ -865,15 +870,18 @@ EOT;
 		return wp_mail($moderator_email, $subject , $message, $headers);
 	}
 
-	public static function comment_submitted_email($postid, $moderator_email) {
+	public static function comment_submitted_email($postid, $author_id, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));
+		$author_email = get_the_author_meta('user_email', $author_id);
+		$author_name = get_the_author_meta('first_name', $author_id) . ' ' . get_the_author_meta('last_name', $author_id);
+		$author_link = '<a href="' . esc_url('mailto:'.$author_email) . '">' . $author_name . '</a>';
 		$post_url = get_permalink($postid);
-		$post_link = '<a href="' . $post_url . '">' . $post_title . '</a>';
+		$post_link = '<a href="' . esc_url($post_url) . '">' . $post_title . '</a>';
 		$subject = 'Comment to PBC Post Submitted for Review';
 		$message = <<<EOT
-A comment to the Portland Bicycling Club post $post_link has been submitted for moderator review.
+A comment to the Portland Bicycling Club post $post_link has been submitted by $author_link for moderator review.
 To review this comment, use a browser to log in to your club account and open the post by clicking its link. 
-Once the post opens, you can edit it (you must have administrator rights) by clicking the <em>Edit Post</em> link at the top of the page.
+Once the post opens, you can edit it (you must have moderator rights) by clicking the <em>Edit Post</em> link at the top of the page.
 After the editor opens, scroll down to the <em>Comments</em> section; here you can review and approve the comment.
 Do not reply to this email!
 EOT;
