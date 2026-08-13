@@ -2350,7 +2350,7 @@ if( function_exists('acf_add_local_field_group') ):
         'fields' => array (
             array (
                 'key' => 'field_membership_captain_name',
-                'label' => 'Membership Captain Name',
+                'label' => 'Membership Secretary Name',
                 'name' => 'membership_captain_name',
                 'type' => 'text',
                 'instructions' => '',
@@ -2366,7 +2366,7 @@ if( function_exists('acf_add_local_field_group') ):
             ),
             array (
                 'key' => 'field_membership_captain_email',
-                'label' => 'Membership Captain Email',
+                'label' => 'Membership Secretary Email',
                 'name' => 'membership_captain_email',
                 'type' => 'text',
                 'instructions' => '',
@@ -2381,27 +2381,11 @@ if( function_exists('acf_add_local_field_group') ):
                 'placeholder' => '',
             ),
             array (
-                'key' => 'field_membership_renewal_link',
-                'label' => 'Membership Renewal Link',
-                'name' => 'membership_renewal_link',
-                'type' => 'text',
-                'instructions' => '',
-                'required' => 1,
-                'conditional_logic' => 0,
-                'wrapper' => array (
-                    'width' => '',
-                    'class' => '',
-                    'id' => '',
-                ),
-                'default_value' => '',
-                'placeholder' => '',
-            ),
-            array (
                 'key' => 'field_580dc27b7fcb8',
                 'label' => 'Ride Calandar Content',
                 'name' => 'ride_calandar_content',
                 'type' => 'wysiwyg',
-                'instructions' => '',
+                'instructions' => 'This content will be inserted at the top of the Ride Calendar page.',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array (
