@@ -1,0 +1,57 @@
+name: Test Production Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test SSH Connection
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        env:
+          PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          if [ -z "$PROD_HOST" ]; then
+            echo "❌ PRODUCTION_SERVER_HOST secret is not set"
+            exit 1
+          fi
+          ssh-keyscan -p 2222 -H $PROD_HOST >> ~/.ssh/known_hosts 2>&1 || {
+            echo "Warning: ssh-keyscan failed, disabling strict host checking"
+            echo "Host *" >> ~/.ssh/config
+            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+          }
+
+      - name: Test connection (read-only)
+        env:
+          PROD_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PROD_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
+          PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
+        run: |
+          for s in PROD_USER PROD_HOST PROD_PATH; do
+            [ -z "${!s}" ] && echo "❌ secret for $s is empty" && exit 1
+          done
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "
+            echo '✓ SSH connection successful'
+            echo 'Server:' \$(hostname)
+            echo 'rsync:' \$(command -v rsync || echo '❌ rsync NOT installed')
+            if [ -d '${PROD_PATH}' ]; then
+              echo '✓ Deploy path exists: ${PROD_PATH}'
+              ls -la '${PROD_PATH}' | head -15
+              [ -w '${PROD_PATH}' ] && echo '✓ Deploy path is writable' || echo '❌ Deploy path NOT writable'
+            else
+              echo '❌ Deploy path does not exist: ${PROD_PATH}'
+              exit 1
+            fi
+          "
