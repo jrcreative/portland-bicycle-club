@@ -91,11 +91,6 @@ class PwtcMembers {
 		add_filter( 'wc_memberships_inactive_member_default_user_role', 
 			array('PwtcMembers', 'inactive_member_default_user_role_callback'));
 
-		if ('yes' === get_option('pwtc_members_auto_complete_orders', 'no')) {
-			add_action( 'woocommerce_thankyou', 
-				array('PwtcMembers', 'order_complete_callback' ) );
-		}
-
 		if ('yes' === get_option('pwtc_members_complete_virtual_orders', 'no')) {
 			add_filter( 'woocommerce_order_item_needs_processing', 
 				array('PwtcMembers', 'order_item_needs_processing_callback'), 10, 3);
@@ -406,16 +401,6 @@ class PwtcMembers {
 	// Make expired_member the default role for an inactive membership.
 	public static function inactive_member_default_user_role_callback() {
 		return 'expired_member';
-	}
-
-	public static function order_complete_callback($order_id) { 
-		if ( !$order_id ) {
-			return;
-		}
-		$order = wc_get_order( $order_id );
-		if ($order->get_status() === 'processing') {
-			$order->update_status('completed', 'PWTC Members plugin updated order status from processing to completed.');
-		}	
 	}
 
 	public static function order_item_needs_processing_callback($needs_processing, $product, $order_id) {

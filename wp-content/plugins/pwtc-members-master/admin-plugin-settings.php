@@ -33,12 +33,6 @@ else {
             if (isset($_POST['delete_membership_path'])) {
                 update_option('pwtc_members_delete_membership_path', trim($_POST['delete_membership_path']));
             }
-            if (isset($_POST['auto_complete_orders'])) {
-                update_option('pwtc_members_auto_complete_orders', 'yes');
-            }
-            else {
-                update_option('pwtc_members_auto_complete_orders', 'no');
-            }
             if (isset($_POST['complete_virtual_orders'])) {
                 update_option('pwtc_members_complete_virtual_orders', 'yes');
             }
@@ -70,7 +64,6 @@ else {
     $sync_end_times = 'yes' === get_option('pwtc_members_sync_end_times', 'no');
     $allow_member_deletion = 'yes' === get_option('pwtc_members_allow_member_deletion', 'no');
     $delete_membership_path = get_option('pwtc_members_delete_membership_path', '/');
-    $auto_complete_orders = 'yes' === get_option('pwtc_members_auto_complete_orders', 'no');
     $complete_virtual_orders = 'yes' === get_option('pwtc_members_complete_virtual_orders', 'no');
     $remove_edit_profile = 'yes' === get_option('pwtc_members_remove_edit_profile', 'no');
     $prevent_invalid_purchase = 'yes' === get_option('pwtc_members_prevent_invalid_purchase', 'no');
@@ -102,10 +95,6 @@ jQuery(document).ready(function($) {
             <p>
                 <label for="delete_membership_path">URL pathname of membership delete page</label>
                 <input type="text" id="delete_membership_path" name="delete_membership_path" value="<?php echo $delete_membership_path; ?>"/>
-            </p>
-            <p>
-                <input type="checkbox" id="auto_complete_orders" name="auto_complete_orders" <?php echo $auto_complete_orders ? 'checked' : ''; ?>/>
-                <label for="auto_complete_orders">Automatically complete orders whose status is processing</label>
             </p>
             <p>
                 <input type="checkbox" id="complete_virtual_orders" name="complete_virtual_orders" <?php echo $complete_virtual_orders ? 'checked' : ''; ?>/>
