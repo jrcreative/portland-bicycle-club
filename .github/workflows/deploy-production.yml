@@ -146,6 +146,8 @@ jobs:
             --exclude='wp-content/themes/*/resources/assets/' \
             --exclude='wp-content/themes/*/tests/' \
             --exclude='wp-content/themes/*/.cache-loader/' \
+            --exclude='wp-content/mu-plugins/' \
+            --exclude='wp-content/plugins/wordkeeper*' \
             --exclude='wp-content/uploads/' \
             --exclude='wp-content/cache/' \
             --exclude='wp-content/backups/' \
