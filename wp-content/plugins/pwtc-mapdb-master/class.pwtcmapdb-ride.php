@@ -777,9 +777,16 @@ class PwtcMapdb_Ride {
 		}
 
 		if ($postid != 0) {
-			$distance = get_field(PwtcMapdb::RIDE_LENGTH, $postid);
-			$max_distance = get_field(PwtcMapdb::RIDE_MAX_LENGTH, $postid);
-			$ride_terrain = get_field(PwtcMapdb::RIDE_TERRAIN, $postid);
+			if ($attach_maps) {
+				$distance = get_actual_ride_length($postid);
+				$max_distance = get_actual_ride_maxlength($postid);
+				$ride_terrain = get_actual_ride_terrain($postid);
+			}
+			else {
+				$distance = get_field(PwtcMapdb::RIDE_LENGTH, $postid);
+				$max_distance = get_field(PwtcMapdb::RIDE_MAX_LENGTH, $postid);
+				$ride_terrain = get_field(PwtcMapdb::RIDE_TERRAIN, $postid);
+			}
 			$maps_obj = get_field(PwtcMapdb::RIDE_MAPS, $postid);
 			$maps = [];
 			foreach ($maps_obj as $map) {

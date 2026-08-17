@@ -17,8 +17,8 @@ jQuery(document).ready(function($) {
             $('#test-email-section .msg-div').html(res.status);
 		}
 		else {
-            $("#test-email-section .send-frm input[name='member_email']").val(res.to);
-            $("#test-email-section .send-frm input[name='email_to']").val(res.to);
+            $("#test-email-section .send-frm input[name='member_email']").val(res.member_email);
+            $("#test-email-section .send-frm input[name='email_to']").val(res.member_email);
             $('#test-email-section .msg-div').empty();
             $('#test-email-section .msg-div').append('<h3>To:</h3><div>' + res.to + '</div>');
             $('#test-email-section .msg-div').append('<h3>Subject:</h3><div>' + res.subject + '</div>');
@@ -82,7 +82,7 @@ jQuery(document).ready(function($) {
 });
 </script>
     <div id="test-email-section">
-        <p>Use this page to test the membership confirmation email mechanism. You may show the email contents and then manually send it to the member or a third-party. (This email is automatically sent to a user after they purchase a membership product.) To configure the email contents, go to the <a target="_blank" href="<?php echo admin_url('admin.php?page=theme-general-settings'); ?>">Theme Settings</a> admin page.</p>
+        <p>Use this page to test the membership confirmation email mechanism. You may show the email contents and then manually send it to the member or a third-party. (This email is automatically sent to a user after they purchase a membership product.)
         <div class="pwtc-members-search-sec">
             <form class="pwtc-members-stacked-form email-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="POST">
                 <span>Member Email</span>
@@ -98,7 +98,6 @@ jQuery(document).ready(function($) {
                 <input name="email_to" type="text" required/>
 				<input class="button button-primary" type="submit" value="Send Email"/>
             </form>
-            <span>(Copy of confirmation email will NOT be sent to Membership Secretary.)</span>
         </div>
     </div>
 <?php

@@ -3,7 +3,7 @@
     <section class="main-section">
         <div class="row column">
 
-            {{ SP.ACF.get_field('ride_calandar_content', 'option') }}
+            {{ options.ride_calandar_content }}
 
             <h1 class="text-center">Rides -&nbsp;{{ month_current }}&nbsp;{{ year_current }}</h1>
             <p class="help-text">(as of&nbsp; {{ today }})</p>
@@ -20,13 +20,13 @@
                 </div>
             {% endblock %}
 
-            <ul class="accordion rides-filter-container" data-accordion data-allow-all-closed="true">
+            <ul class="accordion" data-accordion data-allow-all-closed="true">
                 <li class="accordion-item" data-accordion-item>
                     <a href="#" class="accordion-title"><i class="fa fa-search"></i> Search</a>
                     <div class="accordion-content" data-tab-content>
                         <form>
                             <input type="hidden" name="month" value="{{ args.month }}">
-                            <div class="rides-filter">
+                            <div>
                                 <div class="row">
                                     <div class="medium-12 columns">
                                         <label>Title
@@ -39,27 +39,27 @@
                                         <label>Terrain
                                             <select name="terrain">
                                                 <option value="0" {% if not args.terrain %}selected{% endif %}>Any</option>
-                                                <option value="a" {% if args.terrain == 'a' %}selected{% endif %}>Flat</option>
-                                                <option value="b" {% if args.terrain == 'b' %}selected{% endif %}>Mostly Flat</option>
-                                                <option value="c" {% if args.terrain == 'c' %}selected{% endif %}>Small Hills</option>
-                                                <option value="d" {% if args.terrain == 'd' %}selected{% endif %}>Large Hills</option>
-                                                <option value="e" {% if args.terrain == 'e' %}selected{% endif %}>Mountainous</option>
+                                                <option value="a" {% if args.terrain == 'a' %}selected{% endif %}>A (flat)</option>
+                                                <option value="b" {% if args.terrain == 'b' %}selected{% endif %}>B (mostly flat)</option>
+                                                <option value="c" {% if args.terrain == 'c' %}selected{% endif %}>C (small hills)</option>
+                                                <option value="d" {% if args.terrain == 'd' %}selected{% endif %}>D (large hills)</option>
+                                                <option value="e" {% if args.terrain == 'e' %}selected{% endif %}>E (mountainous)</option>
                                             </select>
                                         </label>
                                     </div>
                                     <div class="small-12 medium-4 columns">
-                                        <label>Speed
+                                        <label>Pace
                                             <select name="speed">
                                                 <option value="0" {% if not args.speed %}selected{% endif %}>Any</option>
-                                                <option value="slow" {% if args.speed == 'slow' %}selected{% endif %}>10-13 mph</option>
-                                                <option value="leisurely" {% if args.speed == 'leisurely' %}selected{% endif %}>13-15 mph</option>
-                                                <option value="moderate" {% if args.speed == 'moderate' %}selected{% endif %}>15-17 mph</option>
-                                                <option value="fast" {% if args.speed == 'fast' %}selected{% endif %}>&gt; 18 mph</option>
+                                                <option value="slow" {% if args.speed == 'slow' %}selected{% endif %}>Slow (8-13 mph)</option>
+                                                <option value="leisurely" {% if args.speed == 'leisurely' %}selected{% endif %}>Intermediate (13-15 mph)</option>
+                                                <option value="moderate" {% if args.speed == 'moderate' %}selected{% endif %}>Brisk (15-17 mph)</option>
+                                                <option value="fast" {% if args.speed == 'fast' %}selected{% endif %}>Fast (18+ mph)</option>
                                             </select>
                                         </label>
                                     </div>
                                     <div class="small-12 medium-4 columns">
-                                        <label>Length
+                                        <label>Distance
                                             <select name="length">
                                                 <option value="0" {% if not args.length %}selected{% endif %}>Any</option>
                                                 <option value="1" {% if args.length == '1' %}selected{% endif %}>0-25 miles</option>
@@ -72,7 +72,7 @@
                                     </div>
                                 </div>
                                 <div class="row column">
-                                    <input type="Submit" class="accent button" value="Apply">
+                                    <input type="Submit" class="dark button" value="Apply">
                                 </div>
                             </div>
                         </form>

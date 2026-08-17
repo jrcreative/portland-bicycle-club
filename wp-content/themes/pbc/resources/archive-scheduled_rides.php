@@ -217,10 +217,11 @@ if ($daily_view) {
         $length = intval($_GET['length']);
         // Map filter values to length ranges (in miles)
         $length_ranges = [
-            1 => ['min' => 0, 'max' => 2, 'compare' => 'BETWEEN'],
-            2 => ['min' => 2, 'max' => 5, 'compare' => 'BETWEEN'],
-            3 => ['min' => 5, 'max' => 10, 'compare' => 'BETWEEN'],
-            4 => ['min' => 10, 'max' => null, 'compare' => '>'],
+            1 => ['min' => 0, 'max' => 25, 'compare' => 'BETWEEN'],
+            2 => ['min' => 25, 'max' => 50, 'compare' => 'BETWEEN'],
+            3 => ['min' => 50, 'max' => 75, 'compare' => 'BETWEEN'],
+            4 => ['min' => 75, 'max' => 100, 'compare' => 'BETWEEN'],
+            5 => ['min' => 100, 'max' => null, 'compare' => '>'],
         ];
         
         if (isset($length_ranges[$length])) {

@@ -504,14 +504,18 @@
         });	
 
         $('#pwtc-mapdb-edit-ride-div form textarea').on('keypress', function(evt) {
-            is_dirty = true;
             var keyPressed = evt.keyCode || evt.which; 
             if (keyPressed === 13) { 
                 evt.stopPropagation(); 
             } 
         });	
 
-        $('#pwtc-mapdb-edit-ride-div input[name="title"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="title"]').on('change', function() {
+            is_dirty = true;
+            $(this).removeClass('indicate-error');
+        });
+
+        $('#pwtc-mapdb-edit-ride-div textarea[name="description"]').on('change', function() {
             is_dirty = true;
             $(this).removeClass('indicate-error');
         });
@@ -526,12 +530,12 @@
 	    $(this).removeClass('indicate-error');
         });
 
-        $('#pwtc-mapdb-edit-ride-div input[name="distance"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="distance"]').on('change', function() {
             is_dirty = true;
 	    $(this).removeClass('indicate-error');
         });
 
-        $('#pwtc-mapdb-edit-ride-div input[name="max_distance"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="max_distance"]').on('change', function() {
             is_dirty = true;
 	    $(this).removeClass('indicate-error');
         });
@@ -582,33 +586,33 @@
             is_dirty = true;
         });
 
-        $('#pwtc-mapdb-edit-ride-div input[name="signup_cutoff"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="signup_cutoff"]').on('change', function() {
             is_dirty = true;
             $(this).removeClass('indicate-error');
         });
 
-        $('#pwtc-mapdb-edit-ride-div input[name="signup_limit"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="signup_limit"]').on('change', function() {
             is_dirty = true;
             $(this).removeClass('indicate-error');
         });
 
-        $('#pwtc-mapdb-edit-ride-div input[name="start_location_comment"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="start_location_comment"]').on('change', function() {
             is_dirty = true;
         });
         
-        $('#pwtc-mapdb-edit-ride-div input[name="start_address"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="start_address"]').on('change', function() {
             is_dirty = true;
 	    $(this).removeClass('indicate-error');
         });
         
     <?php if ($set_coords) { ?>
 
-        $('#pwtc-mapdb-edit-ride-div input[name="start_lat"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="start_lat"]').on('change', function() {
             is_dirty = true;
 	    $(this).removeClass('indicate-error');
         });
 
-        $('#pwtc-mapdb-edit-ride-div input[name="start_lng"]').on('input', function() {
+        $('#pwtc-mapdb-edit-ride-div input[name="start_lng"]').on('change', function() {
             is_dirty = true;
 	    $(this).removeClass('indicate-error');
         });

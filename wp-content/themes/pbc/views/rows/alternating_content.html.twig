@@ -27,7 +27,7 @@
         <div class="row column text-center">
             {% if row.external_url %}
                 <a href="{{ row.button_url }}" target="_blank" class="large {{ row.button_style }} button">
-                    {{ SP.ACF.get_sub_field('button_text') }}
+                    {{ row.button_text }}
                 </a>
             {% else %}
                 <a href="{{ row.page_url }}" class="large {{ row.button_style }} button">

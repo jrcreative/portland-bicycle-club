@@ -4,6 +4,22 @@
             <div class="grid-container">
                 <div class="grid-x grid-padding-x">
                     <div class="cell title"><h1>{% if title is defined %}{{ title }}{% endif %}</h1></div>
+                    <div class="cell">
+                        {% if desc is defined %}
+                            {{ desc }}
+                        {% elseif topics is defined %}
+                            <label>Topics</label><div class="button-group">
+                                {{ topics }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% if return_url is defined %}
+                    <div class="cell">
+                        <div class="button-group">
+                            <a class="button" href="{{ return_url }}"><i class="fa fa-angle-left" aria-hidden="true"></i> Back</a>
+                        </div>
+                    </div>
+                {% endif %}
                 </div>
                 <div class="grid-x grid-padding-x small-up-1 medium-up-2 large-up-4">
                     {% for post in posts %}

@@ -50,7 +50,7 @@
     <div class="row column">
         <form class="sort-frm" method="POST" novalidate>
             <input type="hidden" name="ride_status" value="<?php echo $ride_status; ?>">
-            <input type="hidden" name="ride_title" value="<?php echo stripslashes($ride_title); ?>">
+            <input type="hidden" name="ride_title" value="<?php echo esc_attr(stripslashes($ride_title)); ?>">
             <input type="hidden" name="ride_leader" value="<?php echo $ride_leader; ?>">
             <input type="hidden" name="ride_month" value="<?php echo $ride_month; ?>">
             <input type="hidden" name="offset" value="0">
@@ -88,7 +88,7 @@
                     <?php } ?>
                         <div class="small-12 medium-4 columns">
                             <label>Ride Title 
-                                <input type="text" name="ride_title" value="<?php echo stripslashes($ride_title); ?>">
+                                <input type="text" name="ride_title" value="<?php echo esc_attr(stripslashes($ride_title)); ?>">
                             </label>
                         </div>
                         <div class="small-12 medium-3 columns">
@@ -191,7 +191,7 @@
     <?php if ($warn) { ?>
     <form class="load-more-frm" method="POST">
         <input type="hidden" name="ride_status" value="<?php echo $ride_status; ?>">
-        <input type="hidden" name="ride_title" value="<?php echo stripslashes($ride_title); ?>">
+        <input type="hidden" name="ride_title" value="<?php echo esc_attr(stripslashes($ride_title)); ?>">
         <input type="hidden" name="ride_leader" value="<?php echo $ride_leader; ?>">
         <input type="hidden" name="ride_month" value="<?php echo $ride_month; ?>">
         <input type="hidden" name="sort_by" value="<?php echo $sort_by; ?>">

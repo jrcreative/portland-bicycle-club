@@ -25,7 +25,7 @@ if ( function_exists('acf_add_local_field_group') ) {
                 'label' => 'Bcc Membership Secretary',
                 'name' => 'bcc_membership_secretary',
                 'type' => 'true_false',
-                'instructions' => '',
+                'instructions' => 'Select to send bcc copy of membership confirmation email to the membership secretary.',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array (

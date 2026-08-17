@@ -11,6 +11,25 @@ add_filter('woocommerce_locate_template', function($template, $template_name, $t
 }, 10, 3);
 
 add_action('init', function() {
+
+    add_filter('woocommerce_disable_admin_bar', function() {
+        if ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) {
+            return false;
+        }
+        $roles = trim(get_field('roles_to_access_admin_bar', 'option'));
+        if (!empty($roles)) {
+            $roles = explode(' ', $roles);
+            $user = wp_get_current_user();
+            foreach ( $roles as $role ) {
+                if (in_array($role, (array) $user->roles)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    });
+
+    /*
     add_filter('woocommerce_disable_admin_bar', function(){
         $user = wp_get_current_user();
         if (
@@ -55,6 +74,7 @@ add_action('init', function() {
 
         return $prevent_access;
     });
+    */
 
     add_action( 'woocommerce_checkout_fields', function ($fields = []) {
         if (get_option('woocommerce_registration_generate_password') == 'no') {
