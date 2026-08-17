@@ -26,6 +26,7 @@ add_action('login_enqueue_scripts', function () {
     body.login div#login form#loginform { background-color: $box_color; }
     body.login div#login form#loginform p { color: $text_color; }
     body.login div#login form#loginform p label { color: $text_color; }
+    body.login div#login form#loginform div label { color: $text_color; }
     body.login div#login form#loginform input { color: $box_color; }
     body.login div#login form#loginform input#user_login { color: $input_color; }
     body.login div#login form#loginform input#user_pass { color: $input_color; }

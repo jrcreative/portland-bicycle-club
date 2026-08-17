@@ -12,12 +12,36 @@ class PwtcMapdb_Admin {
     // Initializes plugin WordPress hooks.
     private static function init_hooks() {
         self::$initiated = true;
-        add_action('admin_action_pwtc_copy_post_as_draft', array('PwtcMapdb_Admin', 'copy_post_as_draft'));
-        add_filter('post_row_actions', array('PwtcMapdb_Admin', 'copy_post_link'), 10, 2);
-        add_filter('page_row_actions', array('PwtcMapdb_Admin', 'copy_post_link'), 10, 2);
-        add_action('post_submitbox_misc_actions', array('PwtcMapdb_Admin', 'copy_page_custom_button'));
-	add_action('wp_before_admin_bar_render', array('PwtcMapdb_Admin', 'admin_bar_link'));
+        add_action('admin_menu', array('PwtcMapdb_Admin', 'plugin_menu'));
+
+        if ('yes' === get_option('pwtc_mapdb_enable_post_copy', 'no')) {
+            add_action('admin_action_pwtc_copy_post_as_draft', array('PwtcMapdb_Admin', 'copy_post_as_draft'));
+            add_filter('post_row_actions', array('PwtcMapdb_Admin', 'copy_post_link'), 10, 2);
+            add_filter('page_row_actions', array('PwtcMapdb_Admin', 'copy_post_link'), 10, 2);
+            add_action('post_submitbox_misc_actions', array('PwtcMapdb_Admin', 'copy_page_custom_button'));
+	        add_action('wp_before_admin_bar_render', array('PwtcMapdb_Admin', 'admin_bar_link'));
+        }
+
+        if ('yes' === get_option('pwtc_mapdb_radiobtn_category_select', 'no')) {
+            $taxonomy = get_taxonomy('category');
+            $taxonomy->meta_box_cb = array('PwtcMapdb_Admin', 'post_categories_meta_box_callback');
+            $taxonomy->meta_box_sanitize_cb = 'taxonomy_meta_box_sanitize_cb_checkboxes';
+        }
     }
+
+    public static function plugin_menu() {
+        $page_title = 'PWTC Map DB Plugin - Settings';
+    	$menu_title = 'PWTC MapDB';
+    	$menu_slug = 'pwtc_mapdb_plugin_settings';
+    	$capability = 'manage_options';
+    	$function = array('PwtcMapdb_Admin', 'page_plugin_settings');
+		add_submenu_page('options-general.php', $page_title, $menu_title, $capability, $menu_slug, $function);
+    }
+
+	public static function page_plugin_settings() {
+		$capability = 'manage_options';
+		include('admin-plugin-settings.php');
+	}
 
     public static function copy_page_custom_button() {
         global $post;
@@ -40,6 +64,9 @@ class PwtcMapdb_Admin {
 	
     public static function admin_bar_link() {
         global $wp_admin_bar, $post;
+        if (!current_user_can('edit_posts') and !current_user_can('edit_rides')) {
+            return;
+        }
         $post_status = 'draft';
         $current_object = get_queried_object();
         if (empty($current_object)) {
@@ -142,4 +169,52 @@ class PwtcMapdb_Admin {
             wp_die('Security check issue, Please try again.');
         }
     }
+
+    public static function post_categories_meta_box_callback( $post, $box ) {
+        $defaults = array( 'taxonomy' => 'category' );
+        if ( ! isset( $box['args'] ) || ! is_array( $box['args'] ) ) {
+            $args = array();
+        } else {
+            $args = $box['args'];
+        }
+        $parsed_args = wp_parse_args( $args, $defaults );
+        $tax_name    = esc_attr( $parsed_args['taxonomy'] );
+        $taxonomy    = get_taxonomy( $parsed_args['taxonomy'] );
+        $post_cats = wp_get_post_categories($post->ID);
+        ?>
+            <div id="taxonomy-<?php echo $tax_name; ?>" class="categorydiv">
+                <ul id="<?php echo $tax_name; ?>checklist" data-wp-lists="list:<?php echo $tax_name; ?>" class="categorychecklist form-no-clear">
+                    <?php echo self::get_category_select_tree($post_cats); ?>
+                </ul>
+            </div>
+        <?php
+    }
+
+	public static function get_category_select_tree($post_cats, $category=null, $output='') {
+		$categories = get_categories([ 
+			'hide_empty' => false, 
+			'orderby' => 'name',
+			'order' => 'ASC',
+			'parent' => ($category !== null ? $category->term_id : 0),
+		]);
+		if (empty($categories)) {
+            if ($category !== null) {
+			    $output .= '<li><label class="selectit"><input value="' . $category->term_id . 
+                    '" type="radio" name="post_category[]" ' . (in_array($category->term_id, $post_cats) ? 'checked': '') . 
+                    '/>' . $category->name . '</label></li>';
+            }
+		}
+		else {
+            if ($category !== null) {
+                $output .= '<li><label>' . $category->name . '</label><ul class="children">';
+            }
+            foreach ($categories as $cat) {
+				$output = self::get_category_select_tree($post_cats, $cat, $output);
+			}	
+            if ($category !== null) {
+			    $output .= '</ul></li>';
+            }
+		}
+		return $output;
+	}
 }

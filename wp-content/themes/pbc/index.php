@@ -41,13 +41,28 @@ if(is_singular())
         while(have_rows('content_rows')) {
             the_row();
             if(get_row_layout() == "news") {
+                $after = apply_filters('pwtc_recent_posts_after', '1 day ago');
+                $query_args = [
+                    'posts_per_page' => -1,
+                    'date_query' => [				
+                        'relation' => 'OR',
+				        [
+                            'column' => 'post_date_gmt',
+                            'after' => $after,
+				        ],
+				        [
+                            'column' => 'post_modified_gmt',
+                            'after' => $after,
+				        ],
+                    ],
+                ];
+                $exclude_categories = apply_filters('pwtc_category_exclude_list', []);
+                if (!empty($exclude_categories)) {
+                    $query_args['category__not_in'] = $exclude_categories;
+                }
                 // Timber 2.0: get_posts() with query array directly
-                $context['news'] = Timber::get_posts([
-                    'posts_per_page' => 8,
-                    'orderby' => array(
-                        'date' => 'DESC'
-                    )
-                ]);
+                $context['news'] = Timber::get_posts($query_args);
+                $context['after'] = $after;
             }
             elseif(get_row_layout() == "rides")
             {
@@ -112,10 +127,35 @@ if(is_singular())
             include __DIR__ . '/resources/single-ride_template.php';
             return;
         }
+        elseif(get_post_type() == "newsletter")
+        {
+            $template = 'pages/newsletter.html.twig';
+        }
         else
         {
-            $template = 'two-column.html.twig';
-            $context['comments'] = comments_open();
+            $template = 'pages/post.html.twig';
+            $context['comments'] = apply_filters('pwtc_allow_post_comments', false);
+            $context['display_post_author'] = get_field('display_post_author');
+            $context['filter_post_content'] = get_field('filter_post_content');
+            $context['allowed_html_tags'] = array(
+                'a' => array(
+                    'href' => array(),
+                    'title' => array(),
+                ),
+                'br' => array(),
+                'em' => array(),
+                'strong' => array(),
+                'p' => array(),
+            );
+            $format = get_field('format');
+            if ($format === 'gallery') {
+                $context['images'] = get_field('images');
+                $context['callout_label'] = 'Image Gallery:';
+            }
+            else if ($format === 'documents') {
+                $context['documents'] = get_field('documents');
+                $context['callout_label'] = 'Attached Documents:';
+            }
         }
     }
 }
@@ -128,19 +168,34 @@ elseif(get_post_type() == 'scheduled_rides')
 elseif(get_post_type() == 'newsletter')
 {
     $template = 'pages/archive.html.twig';
-    $context['title'] = 'Newsletter Articles';
-    if($context['title'] == "Archives") { $context['title'] = "Newsletters"; }
+    $context['title'] = 'Newsletters';
     // Timber 2.0: Use Timber::get_posts() instead of new PostQuery()
     $context['posts'] = Timber::get_posts();
-    $context['comments'] = comments_open();
 }
 else
 {
     $template = 'pages/archive.html.twig';
     $context['title'] = get_the_archive_title();
-    if($context['title'] == "Archives") { $context['title'] = "News"; }
+    if (is_category()) {
+        $context['title'] = single_cat_title('', false);
+        $context['desc'] = category_description();
+        $context['return_url'] = '/news';
+    }
+    else {
+        $context['title'] = "Forum Posts";
+        $topics = apply_filters('pwtc_category_button_links', '');
+        if (!empty($topics)) {
+            $context['topics'] = $topics;
+        }
+    }
     // Timber 2.0: Use Timber::get_posts() instead of new PostQuery()
-    $context['posts'] = Timber::get_posts();
+    $exclude_categories = apply_filters('pwtc_category_exclude_list', []);
+    if (empty($exclude_categories)) {
+        $context['posts'] = Timber::get_posts();
+    }
+    else {
+        $context['posts'] = Timber::get_posts(['category__not_in' => $exclude_categories], ['merge_default' => true]);
+    }
 }
 
 Timber::render($template, $context);

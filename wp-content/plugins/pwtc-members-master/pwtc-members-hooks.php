@@ -129,3 +129,59 @@ function pwtc_members_lookup_user($rider_id, $lastname = '', $firstname = '', $e
     $results = $user_query->get_results();
     return $results;
 }
+
+function pwtc_members_adjust_start_date($user_membership, $detect_only=false) {
+    $user_id = $user_membership->get_user_id();
+    $rider_id = get_field('rider_id', 'user_'.$user_id);
+	if (!$rider_id or empty(trim($rider_id))) {
+		return false;
+	}
+	if (preg_match('/^\d{5}$/', $rider_id) === 1) {
+		$y = intval(substr($rider_id, 0, 2));
+		$c = intval(substr(date('Y', current_time('timestamp')), 0, 2));
+		if ($y > 50) {
+			$year = strval((($c - 1) * 100) + $y);
+		}
+		else {
+			$year = strval(($c * 100) + $y);
+		}
+		$start = $user_membership->get_start_date();
+		if ($start and strncmp($start, $year, 4) !== 0) {
+            if (!$detect_only) {
+			    $user_membership->set_start_date($year . '-07-01 12:00:00');
+			    $user_membership->add_note('PWTC Members plugin modified start date to match rider ID year.');
+			    //$user_membership->add_note('PWTC Members plugin modified start date to match rider ID year. startdate=' . $start . ', riderid=' . $rider_id . ', rideryear=' . $year);
+            }
+            return true;
+		}
+	}
+    return false;
+}
+
+
+	function pwtc_members_sync_team_member_end_times($team, $detect_only=false, $userid=0) {
+		$count = 0;
+		$now = current_time('timestamp', true);
+		$team_end = $team->get_membership_end_date('timestamp');
+		foreach ($team->get_user_memberships() as $user_membership) {
+			if ($userid === 0 or $user_membership->get_user_id() === $userid) {
+				$end = $user_membership->get_end_date('timestamp');
+				if ($team_end and $end) {
+					$diff = abs($end - $team_end);
+					if ($diff > 86400) {
+						$count++;
+						if (!$detect_only) {
+							$user_membership->set_end_date($team_end);
+							$user_membership->add_note('PWTC Members plugin synced member end time with team end time.');
+							if ($team_end > $now and $user_membership->is_expired()) {
+								$user_membership->update_status( 'active' );
+							} elseif ($team_end <= $now) {
+								$user_membership->update_status( 'expired' );
+							}
+						}
+					}
+				}
+			}
+		}
+		return $count;
+	}

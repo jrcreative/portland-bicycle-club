@@ -1,15 +1,58 @@
 <section class="news">
-    <div class="row column">
-        <h2>{% if row.title is defined %}{{ row.title }}{% else %}News{% endif %}</h2>
-    </div>
-    <div class="row small-up-1 medium-up-2 large-up-4">
-        {% for article in news %}
-            <div class="column{% if loop.index > 4 %} hide-for-small-only{% endif %}">
-                {% include 'teasers/post.html.twig' with {'post': article} only %}
+    <div class="grid-container">
+        <div class="grid-x grid-padding-x">
+            <div class="cell title">
+                <h2>Recent Posts</h2>
             </div>
-        {% endfor %}
-    </div>
-    <div class="row column text-center">
-        <a href="{{ function('get_post_type_archive_link', 'post') }}" class="large primary button">Read More</a>
+            <div class="cell">
+                <p class="help-text">These posts were added or modified since {{ after }}.{% if not user %} Posts from members are excluded; you need to log in to see those.{% endif %}</p>
+            </div>
+        </div>
+        <div class="grid-x grid-padding-x grid-padding-y small-up-1 medium-up-2 large-up-3">
+    {% for post in news %}
+            <div class="cell">
+                <div class="float-left" style="margin-right: 5px;">
+        {% if post.thumbnail %}
+                    <img src="{{ post.thumbnail.src|resize(50, 50) }}"
+                    srcset="{{ post.thumbnail.src|resize(50, 50)|retina(1) }} 1x,
+                    {{ post.thumbnail.src|resize(50, 50)|retina(2) }}  2x,
+                    {{ post.thumbnail.src|resize(50, 50)|retina(3) }}  3x,
+                    {{ post.thumbnail.src|resize(50, 50)|retina(4) }}  4x"
+                    alt="{{ post.thumbnail.alt }}">
+        {% elseif post.get_field('display_post_author') %}
+                    {{ fn('get_avatar', post.author.id, 50) }}
+        {% endif %}
+                </div>
+                <div>
+        {% if post.get_field('display_post_author') %}
+                    <span> {{ post.author.name }}<span> <span>&bull;</span>
+        {% endif %}
+                    <span> <a href="{{ post.link }}">{{ post.title }}</a></span>
+        {% if user and post.comments and post.comments|length > 0 %} 
+	                <span> <i class="fa fa-comments"></i> {{ post.comments|length }}</span>
+        {% endif %}
+                </div>
+            </div>
+        {% if loop.last %}
+        </div>
+        <div class="grid-x grid-padding-x">
+            <div class="cell text-center">
+                <a href="{{ function('get_post_type_archive_link', 'post') }}" class="large dark button">More Posts</a>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        </div>
+        <div class="grid-x grid-padding-x">
+            <div class="cell">
+                <h4>There were no posts added or modified recently. Please check the forum for previous posts.</h4>
+            </div>
+        </div>
+        <div class="grid-x grid-padding-x">
+            <div class="cell text-center">
+                <a href="{{ function('get_post_type_archive_link', 'post') }}" class="large dark button">Forum</a>
+            </div>
+        </div>
+    {% endfor %}
     </div>
 </section>

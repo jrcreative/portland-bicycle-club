@@ -1,6 +1,6 @@
 <section class="rides">
     <div class="row column">
-        <h2>Rides</h2>
+        <h2>Upcoming Rides</h2>
 	<p class="help-text">(as of&nbsp; {{ today }})</p>
     </div>
     {% for ride in rides %}
@@ -22,6 +22,11 @@
                 </div>
             </div>
         </div>
+        {% if loop.last %}
+        <div class="row column text-center">
+            <a href="{{ function('get_post_type_archive_link', 'scheduled_rides') }}" class="large dark button">More Rides</a>
+        </div>
+        {% endif %}
     {% else %}
         <div class="date">
             <div class="row column">
@@ -32,9 +37,4 @@
             <a href="{{ function('get_post_type_archive_link', 'scheduled_rides') }}" class="large dark button">Ride Calendar</a>
         </div>
     {% endfor %}
-    {% if rides %}
-        <div class="row column text-center">
-            <a href="{{ function('get_post_type_archive_link', 'scheduled_rides') }}" class="large dark button">More Rides</a>
-        </div>
-    {% endif %}
 </section>

@@ -4,6 +4,7 @@ add_action('init', function() {
     add_role('expired_member', 'Expired Member', ['read' => false]);
     add_role('ride_leader', 'Ride Leader', ['read' => true]);
     add_role('ride_captain', 'Ride Captain', ['read' => true]);
+    add_role('qr_editor', 'QR Editor', ['read' => true]);
 
     $ride_captain_role = get_role('ride_captain');
     $additional_ride_captain_roles = [
@@ -35,6 +36,25 @@ add_action('init', function() {
     }
     $ride_captain_role->add_cap('read');
 
+    $qr_editor_roal = get_role('qr_editor');
+    $additional_qr_editor_roles = [
+        'delete_others_newsletters',
+        'delete_private_newsletters',
+        'delete_published_newsletters',
+        'delete_newsletters',
+        'edit_others_newsletters',
+        'edit_private_newsletters',
+        'edit_published_newsletters',
+        'edit_newsletters',
+        'publish_newsletters',
+        'read_private_newsletters',
+        'upload_files',
+    ];
+    foreach ($additional_qr_editor_roles as $role) {
+        $qr_editor_roal->add_cap($role);
+    }
+
+    /*
     $editor_role = get_role('editor');
     $additional_editor_roles = [
         'delete_others_rides',
@@ -51,6 +71,7 @@ add_action('init', function() {
     foreach ($additional_editor_roles as $role) {
         $editor_role->add_cap($role);
     }
+    */
 
     $admin_role = get_role('administrator');
     $additional_admin_roles = [

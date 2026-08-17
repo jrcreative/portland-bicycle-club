@@ -30,12 +30,11 @@ jQuery(document).ready(function($) {
 });
 </script>
     <div id="missing-members-section">
-        <p>Use this page to detect any user accounts that have a membership but are missing the proper <code>current_member</code> or <code>expired_member</code> role. If any are found, you are given the option to fix these records.</p>
+        <p><strong>Detect all active or expired members that are erroneously missing a membership role.</strong></p>
         <?php if (empty($missing_members)) { ?>
-        <p>No users found with missing memberships roles.</p>
+        <p>No active or expired members found with missing membership role.</p>
         <?php } else { ?>
         <table class="pwtc-members-rwd-table">
-            <caption>Users With Missing Membership Roles</caption>
             <tr><th>User ID</th><th>Email</th><th>First Name</th><th>Last Name</th><th>Actions</th></tr>
             <?php
             foreach ($missing_members as $item) {
@@ -59,16 +58,15 @@ jQuery(document).ready(function($) {
         <div>
         <form method="POST">
             <?php wp_nonce_field('pwtc_members_fix_missing_members'); ?>
-            <input type="submit" name="fix_missing_members" value="Fix These User Accounts" class="button button-primary button-large"/>
+            <input type="submit" name="fix_missing_members" value="Fix All" class="button button-primary button-large"/>
         </form>
         </div>
         <?php } ?>
-	    <hr>
+	    <p><strong>Detect all expired members that erroneously have the current member role.</strong></p>
         <?php if (empty($invalid_current_members)) { ?>
-        <p>No users found with incorrect current membership roles.</p>
+        <p>No expired members found with invalid current member role.</p>
         <?php } else { ?>
         <table class="pwtc-members-rwd-table">
-            <caption>Users With Incorrect Current Membership Roles</caption>
             <tr><th>User ID</th><th>Email</th><th>First Name</th><th>Last Name</th><th>Actions</th></tr>
             <?php
             foreach ($invalid_current_members as $item) {
@@ -92,16 +90,15 @@ jQuery(document).ready(function($) {
         <div>
         <form method="POST">
             <?php wp_nonce_field('pwtc_members_fix_missing_members'); ?>
-            <input type="submit" name="fix_invalid_current" value="Fix These User Accounts" class="button button-primary button-large"/>
+            <input type="submit" name="fix_invalid_current" value="Fix All" class="button button-primary button-large"/>
         </form>
         </div>
         <?php } ?>
-        <hr>
+        <p><strong>Detect all active members that erroneously have the expired member role.</strong></p>
         <?php if (empty($invalid_expired_members)) { ?>
-        <p>No users found with incorrect expired membership roles.</p>
+        <p>No active members found with invalid expired member role.</p>
         <?php } else { ?>
         <table class="pwtc-members-rwd-table">
-            <caption>Users With Incorrect Expired Membership Roles</caption>
             <tr><th>User ID</th><th>Email</th><th>First Name</th><th>Last Name</th><th>Actions</th></tr>
             <?php
             foreach ($invalid_expired_members as $item) {
@@ -125,7 +122,7 @@ jQuery(document).ready(function($) {
         <div>
         <form method="POST">
             <?php wp_nonce_field('pwtc_members_fix_missing_members'); ?>
-            <input type="submit" name="fix_invalid_expired" value="Fix These User Accounts" class="button button-primary button-large"/>
+            <input type="submit" name="fix_invalid_expired" value="Fix All" class="button button-primary button-large"/>
         </form>
         </div>
         <?php } ?>

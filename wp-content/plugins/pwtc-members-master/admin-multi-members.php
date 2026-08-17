@@ -11,12 +11,11 @@ else {
     $results2 = PwtcMembers::fetch_users_with_multi_memberships('wc_memberships_team');
 ?>
     <div>
-        <p>Use this page to detect all user accounts that have multiple memberships. Any such accounts should be corrected by the membership secretary to have only one membership.</p>
+        <p><strong>Detect all users that erroneously have multiple memberships.</strong></p>
         <?php if (empty($results)) { ?>
         <p>No users found with multiple memberships.</p>
         <?php } else { ?>
         <table class="pwtc-members-rwd-table">
-            <caption>Users With Multiple Memberships</caption>
             <tr><th>User ID</th><th>Email</th><th>First Name</th><th>Last Name</th><th>Actions</th></tr>
             <?php
             foreach ($results as $item) {
@@ -37,13 +36,13 @@ else {
             } 
             ?>
         </table>
+        <p>This must be fixed by the membership secretary.</p>
         <?php } ?>
-        <hr>
+        <p><strong>Detect all users that erroneously own multiple family memberships.</strong></p>
         <?php if (empty($results2)) { ?>
         <p>No users found owning multiple family memberships.</p>
         <?php } else { ?>
         <table class="pwtc-members-rwd-table">
-            <caption>Users Owning Multiple Family Memberships</caption>
             <tr><th>User ID</th><th>Email</th><th>First Name</th><th>Last Name</th><th>Actions</th></tr>
             <?php
             foreach ($results2 as $item) {
@@ -64,6 +63,7 @@ else {
             } 
             ?>
         </table>
+        <p>This must be fixed by the membership secretary.</p>
         <?php } ?>
     </div>
 <?php

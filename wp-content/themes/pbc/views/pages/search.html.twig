@@ -3,12 +3,30 @@
         <section class="news">
             <div class="grid-container">
                 <div class="grid-x grid-padding-x">
-                    <div class="cell title"><h1>{% if title is defined %}{{ title }}{% endif %}</h1><p>Searching for "{{ query }}"</p></div>
+                    <div class="cell title"><h1>{% if title is defined %}{{ title }}{% endif %}</h1></div>
                 </div>
-                <div class="grid-x grid-padding-x small-up-1 medium-up-2 large-up-4">
+                <div class="grid-x grid-padding-x">
+                    <div class="cell">
+                        <div class="callout">Tips to refine your search<ul>
+                            <li>Multiple words will include posts that match each word. Eg, <code>pillow sofa</code> will return posts containing "pillow" or "sofa".</li>
+                            <li>Prepending a word with a hyphen will exclude posts matching that word. Eg, <code>pillow -sofa</code> will return posts containing "pillow" but not "sofa".</li>
+                            <li>To search for a phrase, enclose it with double quotes. Eg, <code>"to be or not to be"</code> will return posts containing that exact phrase.</li>
+                        </ul></div>                  
+                    </div>
+                </div>
+                <div class="grid-x grid-padding-x">
+                    <div class="cell">
+                        <h5>Searching for <code>{{ query }}</code> in pages, posts and newsletter articles:</h5>
+                    </div>
+                </div>
+                <div class="grid-x grid-padding-x grid-padding-y small-up-1 medium-up-2 large-up-4">
                     {% for post in posts %}
                         <div class="cell">
                             {% include 'teasers/post.html.twig' %}
+                        </div>
+                    {% else %}
+                        <div class="cell">
+                            <h5>No matches found.</h5>
                         </div>
                     {% endfor %}
                 </div>

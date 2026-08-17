@@ -19,22 +19,24 @@
                             </ul>
                         </li>
                     </ul>
-                    <div class="float-right" style="padding-top:6px">
+                    <div class="float-right" style="margin-top:6px">
+                        <form method="get" action="{{ site.url }}">
+                            <div class="input-group">
+		                        <input class="input-group-field" type="search" name="s" value="" placeholder="Enter search text..." required />
+                                <div class="input-group-button">
+                                    <button type="submit" class="clear button" style="border:0"><i class="fa fa-search" aria-hidden="true"></i></button>
+                                </div>
+	                        </div> 
+	                    </form>
+	                </div>
                 {% else %}
                     <ul class="login-menu menu float-right">
                         <li><a href="{{ function('wp_login_url') }}" class="tiny primary hollow button">Login</a></li>
                     </ul>
-                    <div class="float-right" style="padding-top:20px">
+                    <div class="float-right" style="margin-top:25px">
+                        {{ fn('apply_filters', 'pwtc_header_indicator_icons', '') }}
+                    </div>
                 {% endif %}
-                    <form method="get" action="{{ site.url }}">
-                        <div class="input-group">
-		                    <input class="input-group-field" type="search" name="s" value="" placeholder="Enter search text..." required />
-                            <div class="input-group-button">
-                                <button type="submit" class="clear button" style="border:0"><i class="fa fa-search" aria-hidden="true"></i></button>
-                            </div>
-	                    </div> 
-	                </form>
-	            </div>
             </div>
             <!-- bottom row -->
             <div class="bottom clearfix">
@@ -67,7 +69,7 @@
             </div>
             <div class="title-bar-right">
                 {% if user %}
-                    <ul class="dropdown menu float-left" data-dropdown-menu data-close-on-click-inside="false">
+                    <ul class="dropdown menu" data-dropdown-menu data-close-on-click-inside="false">
                         <li>
                             <a class="mobile-account-menu">
                                 {{ avatar }}
@@ -82,6 +84,7 @@
                         </li>
                     </ul>
                 {% else %}
+                    {{ fn('apply_filters', 'pwtc_header_indicator_icons', '') }}
                     <a href="{{ function('wp_login_url') }}" class="tiny hollow button">Login</a>
                 {% endif %}
                 <span data-responsive-toggle="mobile-menu"><button class="menu-icon" type="button" data-toggle></button></span>

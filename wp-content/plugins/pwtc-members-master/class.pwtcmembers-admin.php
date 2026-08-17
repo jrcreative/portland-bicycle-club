@@ -2,6 +2,8 @@
 
 class PwtcMembers_Admin {
 
+	public const ACCESS_CAPABILITY = 'manage_woocommerce';
+
     private static $initiated = false;
 
 	public static function init() {
@@ -47,8 +49,10 @@ class PwtcMembers_Admin {
 			array( 'PwtcMembers_Admin', 'show_users_callback') );
 
 		add_action( 'wc_memberships_for_teams_process_team_meta', 
-			array( 'PwtcMembers_Admin', 'process_team_meta_callback' ), 999, 2 );
+			array( 'PwtcMembers_Admin', 'process_team_meta_callback' ), 10, 2 );
 
+		add_action( 'wc_memberships_user_membership_saved', 
+			array( 'PwtcMembers_Admin', 'user_membership_saved_callback' ), 10, 2 );
 	}  
 
 	/*************************************************************/
@@ -71,7 +75,7 @@ class PwtcMembers_Admin {
 
     	$page_title = $plugin_options['plugin_menu_label'];
     	$menu_title = $plugin_options['plugin_menu_label'];
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$parent_menu_slug = 'pwtc_members_menu';
     	$function = array( 'PwtcMembers_Admin', 'plugin_menu_page');
     	$icon_url = '';
@@ -81,14 +85,14 @@ class PwtcMembers_Admin {
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Lookup Users';
     	$menu_title = 'Lookup Users';
     	$menu_slug = 'pwtc_members_lookup_users';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_lookup_users');
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
         $page_title = $plugin_options['plugin_menu_label'] . ' - Export Users';
     	$menu_title = 'Export Users';
     	$menu_slug = 'pwtc_members_export_users';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_export_users');
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 		add_action('load-' . $page, array('PwtcMembers_Admin','download_user_csv'));
@@ -96,21 +100,21 @@ class PwtcMembers_Admin {
         $page_title = $plugin_options['plugin_menu_label'] . ' - Multiple Memberships';
     	$menu_title = 'Multi Members';
     	$menu_slug = 'pwtc_members_multiple';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_multi_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Invalid Membership Roles';
     	$menu_title = 'Invalid Members';
     	$menu_slug = 'pwtc_members_invalid';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_invalid_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Missing Membership Roles';
     	$menu_title = 'Missing Members';
     	$menu_slug = 'pwtc_members_missing';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_missing_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
@@ -118,16 +122,30 @@ class PwtcMembers_Admin {
 		$menu_title = '
 		Adjust Dates';
     	$menu_slug = 'pwtc_members_adjust_families';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_adjust_families');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
+		$page_title = $plugin_options['plugin_menu_label'] . ' - Expiring Members';
+    	$menu_title = 'Expiring Members';
+    	$menu_slug = 'pwtc_members_expiring_members';
+    	$capability = self::ACCESS_CAPABILITY;
+    	$function = array( 'PwtcMembers_Admin', 'page_expiring_members');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Test Confirmation Email';
     	$menu_title = 'Test Confirm Email';
     	$menu_slug = 'pwtc_members_test_email';
-    	$capability = 'manage_options';
+    	$capability = self::ACCESS_CAPABILITY;
     	$function = array( 'PwtcMembers_Admin', 'page_test_email');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
+		$page_title = 'PWTC Members Plugin - Settings';
+    	$menu_title = 'PWTC Members';
+    	$menu_slug = 'pwtc_members_plugin_settings';
+    	$capability = 'manage_options';
+    	$function = array( 'PwtcMembers_Admin', 'page_plugin_settings');
+		add_submenu_page('options-general.php', $page_title, $menu_title, $capability, $menu_slug, $function);
 
         remove_submenu_page($parent_menu_slug, $parent_menu_slug);
     }
@@ -137,48 +155,60 @@ class PwtcMembers_Admin {
 
 	public static function page_lookup_users() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-lookup-users.php');
 	}
 
     public static function page_export_users() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-export-users.php');
 	}
 
     public static function page_multi_members() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-multi-members.php');
 	}
 
 	public static function page_invalid_members() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-invalid-members.php');
 	}
 
 	public static function page_missing_members() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-missing-members.php');
 	}
 
 	public static function page_adjust_families() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-adjust-family-members.php');
+	}
+
+	public static function page_expiring_members() {
+		$plugin_options = PwtcMembers::get_plugin_options();
+		$capability = self::ACCESS_CAPABILITY;
+		include('admin-expiring-members.php');
 	}
 
 	public static function page_test_email() {
 		$plugin_options = PwtcMembers::get_plugin_options();
-		$capability = 'manage_options';
+		$capability = self::ACCESS_CAPABILITY;
 		include('admin-test-email.php');
 	}
 
+	public static function page_plugin_settings() {
+		$plugin_options = PwtcMembers::get_plugin_options();
+		$capability = 'manage_options';
+		include('admin-plugin-settings.php');
+	}
+
 	public static function download_user_csv() {
-		if (current_user_can('manage_options')) {
+		if (current_user_can(self::ACCESS_CAPABILITY)) {
 			if (isset($_POST['includes']) and isset($_POST['excludes']) and isset($_POST['riderid']) and isset($_POST['nameset']) and isset($_POST['file'])) {
 				if (!empty($_POST['file'])) {
 					$details = isset($_POST['details']) and $_POST['details'] == 'true' ? true : false;
@@ -387,7 +417,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function send_test_email_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'status' => 'Confirmation email test failed - user access denied.'
 			);		
@@ -451,12 +481,13 @@ class PwtcMembers_Admin {
 										'to' => esc_html($email['to']),
 										'subject' => esc_html($email['subject']),
 										'message' => $email['message'],
-										'headers' => $esc_headers
+										'headers' => $esc_headers,
+										'member_email' => $member_email
 									);				
 								}
 								else {
 									$status = wp_mail($email['to'], $email['subject'], $email['message'], $email['headers']);
-									if ($member_email == $email_to) {
+									if (stripos($email_to, $member_email) !== false) {
 										if ($status) {
 											$membership->add_note('Membership confirmation email manually sent to this member, send was successful.');
 										}
@@ -527,7 +558,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function fix_user_roles_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'error' => 'Fix failed - user access denied.'
 			);		
@@ -558,9 +589,6 @@ class PwtcMembers_Admin {
 					}
 					else if (count($memberships) == 1) {
 						$membership = $memberships[0];
-						if (!in_array('customer', $user_info->roles)) {
-							$user_info->add_role('customer');
-						}
 						if (pwtc_members_is_expired($membership)) {
 							if (!in_array('expired_member', $user_info->roles)) {
 								$user_info->add_role('expired_member');
@@ -594,7 +622,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function fix_invalid_members_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'status' => 'Fix failed - user access denied.'
 			);		
@@ -640,7 +668,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function fix_missing_members_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can('self::ACCESS_CAPABILITY')) {
 			$response = array(
 				'status' => 'Fix failed - user access denied.'
 			);		
@@ -671,23 +699,14 @@ class PwtcMembers_Admin {
 							if (count($memberships) == 1) {
 								$count++;
 								$membership = $memberships[0];
-								if (!in_array('customer', $user_info->roles)) {
-									$user_info->add_role('customer');
-								}
 								if (pwtc_members_is_expired($membership)) {
 									if (!in_array('expired_member', $user_info->roles)) {
 										$user_info->add_role('expired_member');
-									}
-									if (in_array('current_member', $user_info->roles)) {
-										$user_info->remove_role('current_member');
 									}
 								}
 								else {
 									if (!in_array('current_member', $user_info->roles)) {
 										$user_info->add_role('current_member');
-									}
-									if (in_array('expired_member', $user_info->roles)) {
-										$user_info->remove_role('expired_member');
 									}
 								}						
 							}
@@ -736,6 +755,52 @@ class PwtcMembers_Admin {
 		return $invalid_members;
 	}
 	
+	public static function detect_current_members_missing_membership($fix_accounts=false) {
+		$invalid_members = array();
+		$test_users = self::fetch_current_member_role_users();
+		$results = PwtcMembers::fetch_users_with_no_memberships();
+		foreach ($results as $item) {
+			$userid = $item[0];
+			if (in_array($userid, $test_users)) {
+				if ($fix_accounts) {
+					$user_info = get_userdata( $userid ); 
+					if ($user_info) {
+						if (in_array('current_member', $user_info->roles)) {
+							$user_info->remove_role('current_member');
+						}				
+					}	
+				}
+				else {
+					$invalid_members[] = $userid;
+				}
+			}
+		}
+		return $invalid_members;
+	}
+
+	public static function detect_expired_members_missing_membership($fix_accounts=false) {
+		$invalid_members = array();
+		$test_users = self::fetch_expired_member_role_users();
+		$results = PwtcMembers::fetch_users_with_no_memberships();
+		foreach ($results as $item) {
+			$userid = $item[0];
+			if (in_array($userid, $test_users)) {
+				if ($fix_accounts) {
+					$user_info = get_userdata( $userid ); 
+					if ($user_info) {
+						if (in_array('expired_member', $user_info->roles)) {
+							$user_info->remove_role('expired_member');
+						}
+					}	
+				}
+				else {
+					$invalid_members[] = $userid;
+				}
+			}
+		}
+		return $invalid_members;
+	}
+	
 	public static function detect_missing_members($fix_accounts=false) {
 		$missing_members = array();
 		$test_users = self::fetch_nonmember_role_users();
@@ -749,23 +814,14 @@ class PwtcMembers_Admin {
 						$memberships = wc_memberships_get_user_memberships($user_info->ID);
 						if (count($memberships) == 1) {
 							$membership = $memberships[0];
-							if (!in_array('customer', $user_info->roles)) {
-								$user_info->add_role('customer');
-							}
 							if (pwtc_members_is_expired($membership)) {
 								if (!in_array('expired_member', $user_info->roles)) {
 									$user_info->add_role('expired_member');
-								}
-								if (in_array('current_member', $user_info->roles)) {
-									$user_info->remove_role('current_member');
 								}
 							}
 							else {
 								if (!in_array('current_member', $user_info->roles)) {
 									$user_info->add_role('current_member');
-								}
-								if (in_array('expired_member', $user_info->roles)) {
-									$user_info->remove_role('expired_member');
 								}
 							}						
 						}
@@ -790,12 +846,6 @@ class PwtcMembers_Admin {
 					if ($fix_accounts) {
 						$user_info = get_userdata($userid); 
 						if ($user_info) {
-							if (!in_array('customer', $user_info->roles)) {
-								$user_info->add_role('customer');
-							}
-							if (!in_array('expired_member', $user_info->roles)) {
-								$user_info->add_role('expired_member');
-							}
 							if (in_array('current_member', $user_info->roles)) {
 								$user_info->remove_role('current_member');
 							}
@@ -821,12 +871,6 @@ class PwtcMembers_Admin {
 					if ($fix_accounts) {
 						$user_info = get_userdata($userid); 
 						if ($user_info) {
-							if (!in_array('customer', $user_info->roles)) {
-								$user_info->add_role('customer');
-							}
-							if (!in_array('current_member', $user_info->roles)) {
-								$user_info->add_role('current_member');
-							}
 							if (in_array('expired_member', $user_info->roles)) {
 								$user_info->remove_role('expired_member');
 							}
@@ -842,53 +886,66 @@ class PwtcMembers_Admin {
 	}
 
 	public static function adjust_member_since_date_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
-				'status' => 'Adjust failed - user access denied.'
+				'status' => 'Failed - user access denied.'
 			);		
 		}
 		else if (!isset($_POST['nonce']) or !isset($_POST['detect_only'])) {
 			$response = array(
-				'status' => 'Adjust failed - AJAX arguments missing.'
+				'status' => 'Failed - AJAX arguments missing.'
 			);
 		}
 		else {
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_members_adjust_member_since_date')) {
 				$response = array(
-					'status' => 'Adjust failed - nonce security check failed.'
+					'status' => 'Failed - nonce security check failed.'
 				);
 			}
 			else {
-				$detect_only = $_POST['detect_only'] == 'true' ? true : false;
-				$count1 = 0;
-				$count2 = 0;
-				$unchanged = 0;
-				$multicount = 0;
-				$results = PwtcMembers::fetch_users_with_memberships();
-				$users = array();
-				foreach ($results as $item) {
-					$userid = $item[0];
-					$rider_id = get_field('rider_id', 'user_'.$userid);
-					if (!$rider_id) {
-						$rider_id = '';
+				if (isset($_POST['userid'])) {
+					$userid = intval($_POST['userid']);
+					$memberships = wc_memberships_get_user_memberships($userid);
+					if (count($memberships) > 0) {
+						if (pwtc_members_adjust_start_date($memberships[0], false)) {
+							$response = array(
+								'userid' => $userid,
+								'count' => 1,
+								'status' => 'User member start time adjusted to match rider ID year.'
+							);
+						}
+						else {
+							$response = array(
+								'userid' => $userid,
+								'count' => 0,
+								'status' => 'Failed - user member start time not adjusted to match rider ID year.'
+							);
+						}
 					}
-					if (preg_match('/^\d{5}$/', $rider_id) === 1) {
+					else {
+						$response = array(
+							'userid' => $userid,
+							'count' => 0,
+							'status' => 'Failed - membership not found for user.'
+						);
+					}
+				} 
+				else {
+					$detect_only = $_POST['detect_only'] == 'true' ? true : false;
+					$count = 0;
+					$multicount = 0;
+					$results = PwtcMembers::fetch_users_with_memberships();
+					$users = array();
+					foreach ($results as $item) {
+						$userid = $item[0];
 						$memberships = wc_memberships_get_user_memberships($userid);
 						if (count($memberships) == 1) {
-							$membership = $memberships[0];
-							$y = intval(substr($rider_id, 0, 2));
-							$c = intval(substr(date('Y', current_time('timestamp')), 0, 2));
-							if ($y > 50) {
-								$year = strval((($c - 1) * 100) + $y);
-							}
-							else {
-								$year = strval(($c * 100) + $y);
-							}
-							$start = $membership->get_start_date();
-							if (!$start or strncmp($start, $year, 4) !== 0) {
+							if (pwtc_members_adjust_start_date($memberships[0], $detect_only)) {
 								if ($detect_only) {
 									$member = get_userdata($userid);
+									$rider_id = get_field('rider_id', 'user_'.$userid);
+									$start = $memberships[0]->get_start_date();
 									$item = array(
 										'userid' => $userid,
 										'first_name' => $member->first_name,
@@ -899,41 +956,28 @@ class PwtcMembers_Admin {
 									);
 									$users[] = $item;
 								}
-								else {
-									$membership->set_start_date($year . '-07-01 00:00:00');
-								}
-								if ($y > 50) {
-									$count1++;
-								}
-								else {
-									$count2++;
-								}
-							}
-							else {
-								$unchanged++;
+								$count++;
 							}
 						}
 						else if (count($memberships) > 1) {
 							$multicount++;
 						}
 					}
+					if ($detect_only) {
+						$action_str = 'detected';
+					}
+					else {
+						$action_str = 'adjusted';
+					}
+					$msg = '' . $count . ' member start date mismatches ' . $action_str . '.';
+					if ($multicount > 0) {
+						$msg .= ' ' . $multicount . ' users with multiple memberships detected.';
+					}
+					$response = array(
+						'users' => $users,
+						'status' => $msg
+					);
 				}
-				if ($detect_only) {
-					$action_str = 'detected';
-				}
-				else {
-					$action_str = 'adjusted';
-				}
-				$msg = '' . $count1 . ' member mismatches from last century ' . $action_str . 
-					'. ' . $count2 . ' member mismatches from this century ' . $action_str .
-					'. ' . $unchanged . ' members already match and will not be changed.';
-				if ($multicount > 0) {
-					$msg .= ' ' . $multicount . ' users with multiple memberships detected.';
-				}
-				$response = array(
-					'users' => $users,
-					'status' => $msg
-				);
 			}		
 		}
 		echo wp_json_encode($response);
@@ -941,96 +985,108 @@ class PwtcMembers_Admin {
 	}
 
 	public static function adjust_family_members_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
-				'status' => 'Adjust failed - user access denied.'
+				'status' => 'Failed - user access denied.'
 			);		
 		}
 		else if (!isset($_POST['nonce']) or !isset($_POST['detect_only'])) {
 			$response = array(
-				'status' => 'Adjust failed - AJAX arguments missing.'
+				'status' => 'Failed - AJAX arguments missing.'
 			);
 		}
 		else {
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_members_adjust_family_members')) {
 				$response = array(
-					'status' => 'Adjust failed - nonce security check failed.'
+					'status' => 'Failed - nonce security check failed.'
 				);
 			}
 			else {
-				$detect_only = $_POST['detect_only'] == 'true' ? true : false;
-				$users = array();
-				$count = 0;
-				$unchanged = 0;
-				$query_args = [
-					'nopaging'    => true,
-					'post_status' => 'any',
-					'post_type' => 'wc_memberships_team',
-				];			
-				$the_query = new WP_Query($query_args);
-				if ( $the_query->have_posts() ) {
-					while ( $the_query->have_posts() ) {
-						$the_query->the_post();
-						$team = wc_memberships_for_teams_get_team( get_the_ID() );
-						if ($team) {
-							$team_end_date = $team->get_membership_end_date('timestamp');
-							$user_memberships = $team->get_user_memberships();
-							foreach ( $user_memberships as $user_membership ) {
-								$user_end_date = $user_membership->get_end_date('timestamp');
-								if ($team_end_date and $user_end_date) {
-									$diff = abs($user_end_date - $team_end_date);
-								}
-								else if (!$team_end_date and $user_end_date) {
-									$diff = 99999;
-								}
-								else if ($team_end_date and !$user_end_date) {
-									$diff = 99999;
+				if (isset($_POST['teamid']) and isset($_POST['userid'])) {
+					$team = wc_memberships_for_teams_get_team(intval($_POST['teamid']));
+					$userid = intval($_POST['userid']);
+					if ($team) {
+						$count = pwtc_members_sync_team_member_end_times($team, false, $userid);
+						if ($count === 0) {
+							$msg = 'Failed - family member end time not synced with family end time.';
+						}
+						else {
+							$msg = 'Family member end time synced with family end time.';
+						}
+					}
+					else {
+						$count = 0;
+						$msg = 'Failed - family not found for ID ' . $_POST['teamid'] . '.';				
+					}
+					$response = array(
+						'userid' => $userid,
+						'count' => $count,
+						'status' => $msg
+					);
+				}	
+				else {		
+					$detect_only = $_POST['detect_only'] == 'true' ? true : false;
+					$users = array();
+					$count = 0;
+					$query_args = [
+						'nopaging'    => true,
+						'post_status' => 'any',
+						'post_type' => 'wc_memberships_team',
+					];			
+					$the_query = new WP_Query($query_args);
+					if ( $the_query->have_posts() ) {
+						while ( $the_query->have_posts() ) {
+							$the_query->the_post();
+							$team = wc_memberships_for_teams_get_team( get_the_ID() );
+							if ($team) {
+								if ($detect_only) {
+									$team_end_date = $team->get_membership_end_date('timestamp');
+									$user_memberships = $team->get_user_memberships();
+									foreach ( $user_memberships as $user_membership ) {
+										$user_end_date = $user_membership->get_end_date('timestamp');
+										if ($team_end_date and $user_end_date) {
+											$diff = abs($user_end_date - $team_end_date);
+											if ($diff > 86400) {
+												$userid = $user_membership->get_user_id();
+												$member = get_userdata($userid);
+												$enddate = $user_membership->get_local_end_date('mysql', false);
+												$teamend = $team->get_local_membership_end_date('mysql');
+												$item = array(
+													'userid' => $userid,
+													'teamid' => $team->get_id(),
+													'team_name' => $team->get_name(),
+													'first_name' => $member->first_name,
+													'last_name' => $member->last_name,
+													'user_email' => $member->user_email,
+													'end_date' => $enddate,
+													'team_end' => $teamend 
+												);
+												$users[] = $item;
+												$count++;
+											}	
+										}														
+									}
 								}
 								else {
-									$diff = 0;
-								}
-								if ($diff > 86400) {
-									if ($detect_only) {
-										$userid = $user_membership->get_user_id();
-										$member = get_userdata($userid);
-										$enddate = $user_membership->get_local_end_date('mysql', false);
-										$teamend = $team->get_local_membership_end_date('mysql');
-										$item = array(
-											'userid' => $userid,
-											'first_name' => $member->first_name,
-											'last_name' => $member->last_name,
-											'user_email' => $member->user_email,
-											'end_date' => $enddate,
-											'team_end' => $teamend 
-										);
-										$users[] = $item;
-									}
-									else {
-										PwtcMembers::adjust_team_member_data_callback(false, $team, $user_membership);
-									}
-									$count++;
-								}
-								else {
-									$unchanged++;
+									$count += pwtc_members_sync_team_member_end_times($team);
 								}
 							}
 						}
+						wp_reset_postdata();
 					}
-					wp_reset_postdata();
-				}
-				if ($detect_only) {
-					$action_str = 'detected';
-				}
-				else {
-					$action_str = 'adjusted';
-				}
-				$msg = '' . $count . ' family member mismatches ' . $action_str . 
-					'. ' . $unchanged . ' family members already match and will not be changed.';
-				$response = array(
-					'users' => $users,
-					'status' => $msg
-				);	
+					if ($detect_only) {
+						$action_str = 'detected';
+					}
+					else {
+						$action_str = 'adjusted';
+					}
+					$msg = '' . $count . ' family member mismatches ' . $action_str . '.';
+					$response = array(
+						'users' => $users,
+						'status' => $msg
+					);
+				}	
 			}
 		}
 		echo wp_json_encode($response);
@@ -1038,7 +1094,7 @@ class PwtcMembers_Admin {
 	}
 
 	public static function lookup_users_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'error' => 'User lookup failed - user access denied.'
 			);
@@ -1068,7 +1124,7 @@ class PwtcMembers_Admin {
 	}	
 
 	public static function show_users_callback() {
-		if (!current_user_can('manage_options')) {
+		if (!current_user_can(self::ACCESS_CAPABILITY)) {
 			$response = array(
 				'error' => 'User show failed - user access denied.'
 			);
@@ -1109,11 +1165,23 @@ class PwtcMembers_Admin {
 	public static function process_team_meta_callback( $post_id, \WP_Post $post ) {
 		$team = wc_memberships_for_teams_get_team( $post->ID );
 		if ($team) {
+			PwtcMembers::sync_team_member_end_times($team);
 			$user_memberships = $team->get_user_memberships();
 			foreach ( $user_memberships as $user_membership ) {
-				PwtcMembers::adjust_team_member_data_callback(false, $team, $user_membership);
+				PwtcMembers::assign_rider_id($user_membership);
+				PwtcMembers::adjust_member_start_date($user_membership);
 			}	
 		}
+	}
+
+	public static function user_membership_saved_callback( $membership_plan, $args) {
+		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
+		if ($user_membership_id) {
+			$user_membership = wc_memberships_get_user_membership($user_membership_id);
+			if ($user_membership) {
+				PwtcMembers::adjust_member_start_date($user_membership);			
+			}
+		}	
 	}
 
 }

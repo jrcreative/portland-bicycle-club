@@ -141,4 +141,4 @@ function pwtc_mapdb_get_template_metadata() {
         $result['edit_template_url'] = esc_url(PwtcMapdb_Ride::EDIT_TEMPLATE_URI.'?post='.$postid.'&return='.urlencode($return_uri));
     }
     return $result;
-}   
+}  
