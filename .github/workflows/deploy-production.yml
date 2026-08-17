@@ -115,8 +115,9 @@ jobs:
           PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
         run: |
           BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S).tar.gz"
-          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc wp-content/plugins --exclude='node_modules' --exclude='*.log' || mkdir -p ../backups && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc"
-          echo "Backup created: ${BACKUP_NAME}"
+          # backups live inside the deploy path (parent dir is root-owned); rsync already excludes wp-content/backups/
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && mkdir -p wp-content/backups && tar -czf wp-content/backups/${BACKUP_NAME} --exclude='node_modules' --exclude='*.log' wp-content/themes/pbc wp-content/plugins"
+          echo "Backup created: wp-content/backups/${BACKUP_NAME}"
 
       - name: Verify plugin vendor directories before deploy
         run: |

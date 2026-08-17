@@ -256,13 +256,13 @@ If you see errors like `Failed to open stream: No such file or directory` mentio
 
 If deployment fails or issues occur:
 
-1. **Automatic Backup**: Each production deployment creates a backup in `../backups/`
+1. **Automatic Backup**: Each production deployment creates a backup in `wp-content/backups/`
 
 2. **Manual Rollback**:
    ```bash
    ssh user@production-server
    cd /path/to/wordpress
-   tar -xzf ../backups/backup-YYYYMMDD-HHMMSS.tar.gz
+   tar -xzf wp-content/backups/backup-YYYYMMDD-HHMMSS.tar.gz
    ```
 
 3. **Redeploy Previous Version**:
