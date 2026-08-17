@@ -80,6 +80,7 @@ msgid "Determine when members should be able to see this content."
 msgstr ""
 
 #: assets/js/blocks/src/components/block-member-content.js:317
+#: assets/js/blocks/src/components/sidebar-memberships.js:76
 msgid "Immediately"
 msgstr ""
 
@@ -161,6 +162,128 @@ msgstr ""
 
 #: assets/js/blocks/src/components/block-non-member-content.js:82
 msgid "End of content for non-members only."
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:129
+msgid "Plan"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:145
+msgid "Remove"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:152
+msgid "Accessible"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:165
+msgid "After"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:177
+msgid "Period"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:189
+msgid ""
+"This rule cannot be edited here because it applies to multiple content "
+"objects."
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:194
+msgid "Edit this rule on the membership plan screen"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:278
+msgid "Content Restriction"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:282
+msgid ""
+"This content can be viewed by all visitors. Add a rule to restrict it to "
+"members."
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:288
+msgid "This content can only be viewed by members of the plans listed below."
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:321
+msgid "Add New Rule"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:326
+msgid "Need to add or edit a plan?"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:328
+msgid "Manage Membership Plans"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:361
+msgid "Custom Restriction Message"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:365
+msgid "Use custom message"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:366
+msgid "Customize the content restricted message for this content."
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:376
+msgid "automatically inserts the product(s) needed to gain access."
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:380
+msgid "inserts the URL to my account page. HTML is allowed."
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:385
+msgid "Message"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:465
+msgid "Memberships"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:471
+msgid "Disable restrictions"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:472
+msgid ""
+"Force this content to be public regardless of any restriction rules that "
+"may apply now or in the future."
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:48
+msgid "WooCommerce Memberships"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:51
+msgid "Content Restriction Rules"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:69
+msgid "day(s)"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:70
+msgid "week(s)"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:71
+msgid "month(s)"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:72
+msgid "year(s)"
+msgstr ""
+
+#: assets/js/blocks/src/components/sidebar-memberships.js:77
+msgid "Specific time"
 msgstr ""
 
 #: assets/js/blocks/src/directory/edit.js:139

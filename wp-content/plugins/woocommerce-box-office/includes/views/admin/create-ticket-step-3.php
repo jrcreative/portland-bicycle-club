@@ -4,6 +4,11 @@
  *
  * Render all created tickets.
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 $tickets = $this->_created_tickets;
 ?>
 <div class="wrap woocommerce">

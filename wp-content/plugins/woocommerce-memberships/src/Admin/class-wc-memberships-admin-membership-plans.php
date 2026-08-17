@@ -21,6 +21,8 @@
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Helpers\ScriptHelper;
+
 defined( 'ABSPATH' ) or exit;
 
 /**
@@ -375,7 +377,10 @@ class WC_Memberships_Admin_Membership_Plans {
 			if ( $handler->has_ongoing_job( $plan->get_id() ) ) {
 
 				// opens the modal if there's an ongoing job
-				wc_enqueue_js( ' $( "#grant-access-modal-plan-' . $plan->get_id() . '" ).trigger( "click" ); ' );
+				ScriptHelper::addInlinejQuery(
+					'woocommerce-memberships',
+					' $( "#grant-access-modal-plan-' . $plan->get_id() . '" ).trigger( "click" ); '
+				);
 
 			} elseif ( $job = $handler->get_job() ) {
 

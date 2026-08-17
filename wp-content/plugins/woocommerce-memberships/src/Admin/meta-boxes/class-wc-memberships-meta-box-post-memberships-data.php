@@ -21,6 +21,8 @@
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
+use SkyVerge\WooCommerce\Memberships\Blocks\BlockEditorSidebar;
+
 defined( 'ABSPATH' ) or exit;
 
 /**
@@ -54,6 +56,34 @@ class WC_Memberships_Meta_Box_Post_Memberships_Data extends \WC_Memberships_Meta
 	 */
 	public function get_title() {
 		return __( 'Memberships', 'woocommerce-memberships' );
+	}
+
+
+	/**
+	 * Hides this meta box in favor of the block-editor sidebar on WordPress 6.9+.
+	 *
+	 * On older WordPress versions, or on any screen that isn't using the block editor,
+	 * the classic meta box continues to render unchanged.
+	 *
+	 * @since 1.29.0
+	 *
+	 * @param \WP_Screen|null $screen
+	 * @return bool
+	 */
+	protected function should_add_meta_box( ?\WP_Screen $screen ) : bool {
+
+		if ( ! parent::should_add_meta_box( $screen ) ) {
+			return false;
+		}
+
+		if ( BlockEditorSidebar::isSupported()
+		     && method_exists( $screen, 'is_block_editor' )
+		     && $screen->is_block_editor()
+		) {
+			return false;
+		}
+
+		return true;
 	}
 
 

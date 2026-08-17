@@ -10,7 +10,7 @@
  * be bumped and the readme will list any important changes.
  *
  * @author  WooCommerce
- * @version 1.1.1
+ * @version 1.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,12 +21,12 @@ echo wp_kses_post( $ticket_description );
 ?>
 
 <p class="buttons">
-	<a href="<?php echo esc_url( $edit_ticket_url ); ?>" target="_blank" class="button">
+	<a href="<?php echo esc_url( $edit_ticket_url ); ?>" class="button">
 		<?php esc_html_e( 'Edit', 'woocommerce-box-office' ); ?>
 	</a>
 
 	<?php if ( $print_ticket_enabled ) : ?>
-		<a href="<?php echo esc_url( $print_ticket_url ); ?>" target="_blank" class="button">
+		<a href="<?php echo esc_url( $print_ticket_url ); ?>" class="button">
 			<?php esc_html_e( 'Print ticket', 'woocommerce-box-office' ); ?>
 		</a>
 	<?php endif; ?>

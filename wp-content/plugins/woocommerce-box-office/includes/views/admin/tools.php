@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 $active_tab = ! empty( $_GET['tab'] ) ? $_GET['tab'] : 'export';
 if ( ! in_array( $active_tab, array( 'export', 'email', 'user-privacy' ) ) ) {

@@ -21,7 +21,7 @@
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -202,10 +202,13 @@ class WC_Memberships_Integration_Subscriptions_Admin {
 
 				$subscription_expires = $this->get_subscription_expiration( $subscription );
 
-				wc_enqueue_js( '
+				Framework\Helpers\ScriptHelper::addInlinejQuery(
+					'woocommerce-memberships',
+					'
 					$( "._end_date_field" ).find( ".js-user-membership-date, .ui-datepicker-trigger, .description" ).hide();
 					$( "._end_date_field" ).append( "<span>' . esc_html( $subscription_expires ) . '</span>" );
-				' );
+					'
+				);
 			}
 		}
 
@@ -364,9 +367,9 @@ class WC_Memberships_Integration_Subscriptions_Admin {
 
 		// check if a membership plan has subscription(s):
 		// if the current membership plan has at least one subscription product that grants access, enable the subscription-specific controls
-		wc_enqueue_js( '
-			( function( $ ) {
-
+		Framework\Helpers\ScriptHelper::addInlinejQuery(
+			'woocommerce-memberships',
+			'
 				var checkIfPlanHasPurchaseAccess = function() {
 
 					var $access_method_options = $( ".plan-access-method-selectors" ).find( \'input[name="_access_method"]\' );
@@ -456,9 +459,8 @@ class WC_Memberships_Integration_Subscriptions_Admin {
 
 					}
 				} );
-
-			} ) ( jQuery );
-		' );
+			'
+		);
 
 		?>
 		<style type="text/css">

@@ -26,7 +26,7 @@ namespace SkyVerge\WooCommerce\Memberships\API\Controller;
 use SkyVerge\WooCommerce\Memberships\API\Controller;
 use SkyVerge\WooCommerce\Memberships\Helpers\Directory_Block_Validator;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -180,49 +180,9 @@ class User_Memberships extends Controller {
 
 
 	/**
-	 * Handles read permissions check for a single item request.
-	 *
-	 * @since 1.25.3-dev.1
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return bool|\WP_Error
-	 */
-	public function get_items_permissions_check( $request ) {
-
-		$nonce = $request->get_header( 'X-WP-Nonce' );
-
-		// allow internal requests originating from the Memberships plugin
-		if ( $nonce && wp_verify_nonce( $nonce, 'wp_rest' ) ) { // nosemgrep: scanner.php.wp.security.csrf.verify-nonce-inverted
-			return true;
-		}
-
-		return parent::get_items_permissions_check( $request );
-	}
-
-
-	/**
-	 * Handles read permissions check for multiple items request.
-	 *
-	 * @since 1.25.3-dev.1
-	 *
-	 * @param $request
-	 * @return bool|\WP_Error
-	 */
-	public function get_item_permissions_check( $request ) {
-
-		$nonce = $request->get_header( 'X-WP-Nonce' );
-
-		// allow internal requests originating from the Memberships plugin
-		if ( $nonce && wp_verify_nonce( $nonce, 'wp_rest' ) ) { // nosemgrep: scanner.php.wp.security.csrf.verify-nonce-inverted
-			return true;
-		}
-
-		return parent::get_item_permissions_check( $request );
-	}
-
-
-	/**
 	 * Handles permissions check for directory members requests.
+	 *
+	 * Validates the requested page and the directory block context on it.
 	 *
 	 * @since 1.27.3
 	 *
@@ -230,24 +190,23 @@ class User_Memberships extends Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function get_directory_members_permissions_check( $request ) {
+		$errorResponse = new \WP_Error( 'forbidden', __( 'You do not have permission to view this page.', 'woocommerce-memberships' ), [ 'status' => 403 ] );
 
-		// First check standard permissions
-		$standard_check = $this->get_items_permissions_check( $request );
-		if ( is_wp_error( $standard_check ) || ! $standard_check ) {
-			return $standard_check;
+		// 1. Check if directory is enabled.
+		if ( ! wc_memberships()->is_member_directory_enabled() ) {
+			return $errorResponse;
 		}
 
-		// Additional directory-specific validation
 		$validator = new Directory_Block_Validator();
 
-		// 1. Validate page access
+		// 2. Validate page access
 		if ( ! $validator->can_user_access_page( $request['page_id'] ) ) {
-			return new \WP_Error( 'forbidden', __( 'You do not have permission to view this page.', 'woocommerce-memberships' ), [ 'status' => 403 ] );
+			return $errorResponse;
 		}
 
-		// 2. Validate block access (including restriction block hierarchy)
+		// 3. Validate block access (including restriction block hierarchy)
 		if ( ! $validator->can_user_access_block( $request ) ) {
-			return new \WP_Error( 'forbidden', __( 'You do not have permission to access this content.', 'woocommerce-memberships' ), [ 'status' => 403 ] );
+			return $errorResponse;
 		}
 
 		return true;
@@ -973,6 +932,7 @@ class User_Memberships extends Controller {
 
 		// Register filter to add customer data based on block settings
 		add_filter( 'wc_memberships_rest_api_user_membership_data', [ $this, 'add_directory_customer_data' ], 10, 3 );
+		add_filter( 'wc_memberships_rest_api_user_membership_links', [ $this, 'filter_directory_links' ] );
 
 		// Store block settings for the filter
 		$this->directory_block_settings = $block_settings;
@@ -982,6 +942,7 @@ class User_Memberships extends Controller {
 
 		// Clean up: remove filter and stored settings
 		remove_filter( 'wc_memberships_rest_api_user_membership_data', [ $this, 'add_directory_customer_data' ], 10 );
+		remove_filter( 'wc_memberships_rest_api_user_membership_links', [ $this, 'filter_directory_links' ] );
 		$this->directory_block_settings = [];
 
 		return $response;
@@ -1044,7 +1005,61 @@ class User_Memberships extends Controller {
 			// If there's any error getting customer data, leave customer_data empty
 		}
 
+		// Restrict the response to fields rendered by the directory block: meta_data is
+		// blanked, and profile_fields is filtered to slugs allowed by the block settings.
+		// Keys are preserved (set to []) rather than unset() so the response shape is stable.
+		if ( is_array( $data ) && array_key_exists( 'meta_data', $data ) ) {
+			$data['meta_data'] = [];
+		}
+
+		if ( is_array( $data ) && array_key_exists( 'profile_fields', $data ) ) {
+			$allowed_slugs = isset( $this->directory_block_settings['profileFields'] ) && is_array( $this->directory_block_settings['profileFields'] )
+				? $this->directory_block_settings['profileFields']
+				: [];
+
+			if ( empty( $allowed_slugs ) || ! is_array( $data['profile_fields'] ) ) {
+				$data['profile_fields'] = [];
+			} else {
+				$data['profile_fields'] = array_values( array_filter(
+					$data['profile_fields'],
+					static fn( $field ) => is_array( $field )
+						&& isset( $field['slug'] )
+						&& in_array( $field['slug'], $allowed_slugs, true )
+				) );
+			}
+		}
+
+		// Whitelist the fields the directory block actually renders. Anything not
+		// listed here is dropped, so future additions to get_formatted_item_data()
+		// stay private to the admin-gated endpoint by default.
+		if ( is_array( $data ) ) {
+			$data = array_intersect_key( $data, array_flip( [
+				'id',
+				'customer_data',
+				'plan_name',
+				'profile_fields',
+				'meta_data',
+			] ) );
+		}
+
 		return $data;
+	}
+
+
+	/**
+	 * Strips cross-resource links from directory responses.
+	 *
+	 * The directory block doesn't follow these links, and they expose pointers
+	 * to admin-gated endpoints (/customers, /orders, /members/{id}) that the
+	 * directory caller isn't authorized to fetch.
+	 *
+	 * @since 1.28.3
+	 *
+	 * @param array|mixed $links
+	 * @return array
+	 */
+	public function filter_directory_links( $links ) {
+		return [];
 	}
 
 

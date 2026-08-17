@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) or exit;
  * @type \WC_Memberships_User_Membership[] $customer_memberships array of user membership objects
  * @type int $user_id the current user ID
  *
- * @version 1.13.0
+ * @version 1.29.0
  * @since 1.0.0
  */
 global $post;
@@ -145,14 +145,17 @@ if ( ! empty( $customer_memberships ) ) : ?>
 								echo wp_kses_post( wc_memberships_get_members_area_action_links( 'my-memberships', $customer_membership, $post ) );
 
 								// ask confirmation before cancelling a membership
-								wc_enqueue_js( "
+								\SkyVerge\WooCommerce\PluginFramework\v6_2_1\Helpers\ScriptHelper::addInlinejQuery(
+									'woocommerce-memberships',
+									"
 									jQuery( document ).ready( function() {
 										$( '.membership-actions' ).on( 'click', '.button.cancel', function( e ) {
 											e.stopImmediatePropagation();
 											return confirm( '" . esc_html__( 'Are you sure that you want to cancel your membership?', 'woocommerce-memberships' ) . "' );
 										} );
 									} );
-								" );
+									"
+								);
 								?>
 							</td>
 

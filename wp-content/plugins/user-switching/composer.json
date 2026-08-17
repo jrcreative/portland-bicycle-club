@@ -14,7 +14,7 @@
 		"issues": "https://github.com/johnbillion/user-switching/issues",
 		"forum": "https://wordpress.org/support/plugin/user-switching",
 		"source": "https://github.com/johnbillion/user-switching",
-		"security": "https://github.com/johnbillion/user-switching/security/policy"
+		"security": "https://github.com/johnbillion/user-switching/security"
 	},
 	"funding": [
 		{
@@ -27,9 +27,9 @@
 		"composer/installers": "^1.0 || ^2.0"
 	},
 	"require-dev": {
-		"johnbillion/plugin-infrastructure": "2.8.0",
-		"johnbillion/wp-compat": "1.3.0",
-		"php-stubs/wordpress-stubs": "6.9.0",
+		"johnbillion/plugin-infrastructure": "2.9.4",
+		"johnbillion/wp-compat": "1.5.0",
+		"php-stubs/wordpress-stubs": "7.0.0 as 6.9.4",
 		"phpcompatibility/phpcompatibility-wp": "2.1.8",
 		"phpstan/phpstan": "2.1.33",
 		"phpstan/phpstan-phpunit": "2.0.11",
@@ -79,7 +79,7 @@
 			"phpcs -ps --colors --report-code --report-summary --report-width=80 --basepath='./' ."
 		],
 		"test:phpstan": [
-			"phpstan analyze -v --memory-limit=1024M"
+			"phpstan analyze -v --memory-limit=2G"
 		],
 		"test:start": [
 			"tests-start"

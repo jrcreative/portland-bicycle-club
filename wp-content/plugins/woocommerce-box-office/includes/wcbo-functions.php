@@ -5,6 +5,10 @@
  * @package woocommerce-box-office
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Returns the main instance of WC_Box_Office to prevent the need to use globals.
  *
@@ -154,8 +158,8 @@ function wc_box_office_get_ticket_by_email( $email, $product_id ) {
  * Get description of a ticket.
  *
  * @param  integer $ticket_id Ticket ID
- * @param  string  $formater  Display formatter. Defaults to flat.
- * @return string             Ticket description
+ * @param  string  $formatter Display formatter. Defaults to flat.
+ * @return string Ticket description.
  */
 function wc_box_office_get_ticket_description( $ticket_id = 0, $formatter = 'flat' ) {
 	if ( ! $ticket_id ) {
@@ -291,7 +295,7 @@ function wc_box_office_ticket_description_table_formatter( $ticket_id, $ticket_f
 			$value = '-';
 		}
 
-		$ticket_description .= sprintf( '<tr><td><strong>%1$s</strong></td><td>%2$s</td></tr>', esc_html( $field['label'] ), esc_html( $value ) );
+		$ticket_description .= sprintf( '<tr><th scope="row"><strong>%1$s</strong></th><td>%2$s</td></tr>', esc_html( $field['label'] ), esc_html( $value ) );
 	}
 
 	if ( ! empty( $ticket_description ) ) {
@@ -907,4 +911,40 @@ function wcbo_register_script( $handle = '', $filename = '', $deps = array() ) {
 		);
 
 	wp_register_script( $handle, $script_url, $script_asset['dependencies'], $script_asset['version'], true );
+}
+
+/**
+ * Sanitize Twitter/X handle. Remove URLs, @ symbols, etc. Only the handle
+ * itself is returned.
+ *
+ * @param string $twitter Twitter handle to sanitize.
+ * @return string Sanitized Twitter handle.
+ */
+function wcbo_sanitize_twitter_handle( $twitter ) {
+
+	if ( ! is_string( $twitter ) ) {
+		return '';
+	}
+
+	$original = $twitter;
+
+	$twitter = str_replace( 'http://', '', $twitter );
+	$twitter = str_replace( 'https://', '', $twitter );
+	$twitter = str_replace( 'www.', '', $twitter );
+	$twitter = str_replace( 'twitter.com', '', $twitter );
+	$twitter = str_replace( 'x.com', '', $twitter );
+	$twitter = trim( $twitter, '/' );
+	$twitter = trim( $twitter, '.' );
+	$twitter = str_replace( '@', '', $twitter );
+
+	/**
+	 * Filter the sanitized Twitter handle.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $twitter The sanitized Twitter handle.
+	 * @param string $original The original Twitter handle.
+	 * @return string The sanitized Twitter handle.
+	 */
+	return apply_filters( 'woocommerce_box_office_sanitize_twitter_handle', $twitter, $original );
 }

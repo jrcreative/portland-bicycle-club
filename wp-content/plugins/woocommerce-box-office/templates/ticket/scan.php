@@ -1,3 +1,14 @@
+<?php
+/**
+ * Template for ticket scan form.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 <div class="woocommerce">
 	<div id="ticket-scan-form">
 		<form name="ticket-scan" action="" method="post">

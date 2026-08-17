@@ -193,7 +193,7 @@ function wc_memberships_user_can( $user_id, $action, $target, $when = '' ) {
  *
  * @param array $args array of arguments
  * @param string $action either 'create' or 'renew' -- when in doubt, use 'create'
- * @throws \SkyVerge\WooCommerce\PluginFramework\v6_1_1\SV_WC_Plugin_Exception may create an exception on errors
+ * @throws \SkyVerge\WooCommerce\PluginFramework\v6_2_1\SV_WC_Plugin_Exception may create an exception on errors
  * @return \WC_Memberships_User_Membership
  */
 function wc_memberships_create_user_membership( $args = array(), $action = 'create' ) {

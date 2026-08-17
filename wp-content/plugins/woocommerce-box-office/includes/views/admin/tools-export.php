@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin view for export tools.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 <form action="" method="get">
 	<input type="hidden" name="post_type" value="event_ticket">
 	<input type="hidden" name="page" value="ticket_tools">

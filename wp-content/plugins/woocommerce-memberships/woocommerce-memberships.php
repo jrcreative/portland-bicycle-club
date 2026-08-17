@@ -6,7 +6,7 @@
  * Description: Sell memberships that provide access to restricted content, products, discounts, and more!
  * Author: SkyVerge
  * Author URI: https://www.woocommerce.com/
- * Version: 1.28.1
+ * Version: 1.29.2
  * Text Domain: woocommerce-memberships
  * Domain Path: /i18n/languages/
  *
@@ -19,9 +19,10 @@
  * @copyright Copyright (c) 2014-2026, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  *
- * Woo: 958589:9288e7609ad0b487b81ef6232efa5cfc
  * WC requires at least: 3.9.4
- * WC tested up to: 10.6.1
+ * WC tested up to: 11.0.1
+ * Woo: 958589:9288e7609ad0b487b81ef6232efa5cfc
+
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -93,7 +94,7 @@ class WC_Memberships_Loader {
 	const MINIMUM_WC_VERSION = '3.9.4';
 
 	/** SkyVerge plugin framework version used by this plugin */
-	const FRAMEWORK_VERSION = '6.1.1';
+	const FRAMEWORK_VERSION = '6.2.1';
 
 	/** the plugin name, for displaying notices */
 	const PLUGIN_NAME = 'WooCommerce Memberships';

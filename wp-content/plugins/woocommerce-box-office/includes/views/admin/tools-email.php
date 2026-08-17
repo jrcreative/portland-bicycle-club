@@ -1,5 +1,8 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 $email_settings    = get_option( 'woocommerce_wc_box_office_email_settings', array( 'enabled' => 'no' ) );
 $wc_emails_enabled = 'yes' === $email_settings['enabled'];

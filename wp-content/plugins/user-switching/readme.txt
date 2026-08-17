@@ -1,7 +1,7 @@
 # User Switching
 
-Stable tag: 1.11.2
-Tested up to: 6.9
+Stable tag: 1.12.1
+Tested up to: 7.0
 License: GPL v2 or later
 Tags: users, user switching, fast user switching, multisite, woocommerce
 Contributors: johnbillion
@@ -11,7 +11,7 @@ Instant switching between user accounts in WordPress and WooCommerce.
 
 ## Description
 
-This plugin allows you to quickly swap between user accounts in WordPress at the click of a button. You'll be instantly logged out and logged in as your desired user. This is handy for helping customers on WooCommerce sites, membership sites, testing environments, or for any site where administrators need to switch between multiple accounts.
+This plugin allows you to quickly switch between user accounts in WordPress at the click of a button. You'll be instantly logged out and logged in as your desired user. This is handy for helping customers on WooCommerce sites, membership sites, testing environments, or for any site where administrators need to switch between multiple accounts.
 
 ### Features
 
@@ -33,13 +33,14 @@ Note: User Switching supports versions of WordPress up to three years old, and P
  * Implements the nonce security system in WordPress, meaning only those who intend to switch users can switch.
  * Full support for user session validation where appropriate.
  * Full support for HTTPS.
- * Backed by [the Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/user-switching)
 
 ### Usage
 
  1. Visit the *Users* menu in WordPress and you'll see a *Switch To* link in the list of action links for each user.
  2. Click this and you will immediately switch into that user account.
  3. You can switch back to your originating account via the *Switch back* link on each dashboard screen or in your profile menu in the WordPress toolbar.
+
+Alternatively, in the [WordPress Command Palette](https://wordpress.org/documentation/article/site-editor-command-palette/) you can search for a user and immediately switch into their account. You can switch off and switch back from there too.
 
 See the [FAQ](https://wordpress.org/plugins/user-switching/faq/) for information about the *Switch Off* feature.
 
@@ -49,6 +50,15 @@ I maintain several other plugins for developers. Check them out:
 
 * [Query Monitor](https://wordpress.org/plugins/query-monitor/) is the developer tools panel for WordPress
 * [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/) lets you view and control what's happening in the WP-Cron system
+
+### Thanks
+
+The time that I spend maintaining this plugin and others is in part sponsored by:
+
+* [Automattic](https://automattic.com/)
+* [ServMask](https://servmask.com/)
+* [WP Staging](https://wp-staging.com/)
+* [All my kind sponsors on GitHub](https://github.com/sponsors/johnbillion)
 
 ### Privacy Statement
 
@@ -77,7 +87,7 @@ User Switching should adhere to Web Content Accessibility Guidelines (WCAG) 2.0 
 
 ### Does this plugin work with PHP 8?
 
-Yes, it's actively tested and working up to PHP 8.4.
+Yes, it's actively tested and working up to PHP 8.5.
 
 ### What does "Switch off" mean?
 
@@ -136,7 +146,11 @@ add_filter( 'user_has_cap', function( $allcaps, $caps, $args, $user ) {
 }, 9, 4 );
 ~~~
 
-Note that this needs to happen before User Switching's own capability filtering, hence the priority of `9`.
+Notes:
+
+* This needs to happen before User Switching's own capability filtering, hence the priority of `9`.
+* The `$user` parameter is the currently logged in user.
+* The ID of the target user can be found in `$args[2]`.
 
 ### Can the ability to switch accounts be denied from users?
 
@@ -156,6 +170,7 @@ add_filter( 'user_has_cap', function( $allcaps, $caps, $args, $user ) {
 Notes:
 
 * This needs to happen before User Switching's own capability filtering, hence the priority of `9`.
+* The `$user` parameter is the currently logged in user.
 * The ID of the target user can be found in `$args[2]`.
 
 ### Can I add a custom "Switch To" link to my own plugin or theme?
@@ -250,7 +265,7 @@ This feature is useful if you have multiple users on your site who may be switch
 
 ### Can I switch users directly from the admin toolbar?
 
-Yes, there's a third party add-on plugin for this: [Admin Bar User Switching](https://wordpress.org/plugins/admin-bar-user-switching/).
+Yes, in the [WordPress Command Palette](https://wordpress.org/documentation/article/site-editor-command-palette/) you can search for a user and immediately switch into their account. You can switch off and switch back from there too.
 
 ### Are any plugin actions called when a user switches account?
 
@@ -329,12 +344,27 @@ In addition, User Switching respects the following filters from WordPress core w
 
 ### How can I report a security bug?
 
-[You can report security bugs through the official User Switching Vulnerability Disclosure Program on Patchstack](https://patchstack.com/database/vdp/user-switching). The Patchstack team helps validate, triage, and handle any security vulnerabilities.
+You can submit a private security vulnerability report to User Switching via [the Security tab on the GitHub repo](https://github.com/johnbillion/user-switching/security). The GitHub Security Advisory process facilitates private collaboration on security issues. You'll receive credit for a valid report and a CVE if necessary.
+
+Do not report security issues on the WordPress.org support forums or via email. Thank you.
 
 ### Do you accept donations?
 
 [I am accepting sponsorships via the GitHub Sponsors program](https://github.com/sponsors/johnbillion) and any support you can give will help me maintain this plugin and keep it free for everyone.
 ## Changelog ##
+
+### 1.12.1 (9 July 2026) ###
+
+- Fixes a hardcoded period after the "Switch back" link that could break punctuation in non-English languages
+- Switches to `wp_print_inline_script_tag()` for the inline script
+- Styling tweaks for the Switch Back button in the footer
+- Confirms full compatibility with PHP 8.5
+
+
+### 1.12.0 (24 May 2026) ###
+
+- Introduces the ability to switch users from the WordPress Command Palette
+- Confirms support for WordPress 7.0
 
 ### 1.11.2 (27 February 2026) ###
 
@@ -374,18 +404,6 @@ In addition, User Switching respects the following filters from WordPress core w
 
 * Adds a 'Switch back' link to some access denied messages within the admin area.
 * Confirms support for WordPress 6.6.
-
-### 1.7.3 (21 February 2024) ###
-
-* Confirms support for PHP 8.3
-* Fixes compatibility with BuddyPress version 12
-* Adds configuration for the Live Preview feature on wordpress.org
-
-
-### 1.7.2 (16 November 2023) ###
-
-* Confirm support for WordPress 6.4
-* Reinstate the missing plugin readme file
 
 ### Earlier versions ###
 

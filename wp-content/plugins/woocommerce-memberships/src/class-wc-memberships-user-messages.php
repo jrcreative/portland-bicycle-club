@@ -22,7 +22,7 @@
  */
 
 use SkyVerge\WooCommerce\Memberships\Helpers\Strings_Helper;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -55,6 +55,24 @@ class WC_Memberships_User_Messages {
 
 	/** @var string the option key where the array of user messages is stored */
 	private static $user_messages_option_key = 'wc_memberships_messages';
+
+
+	/**
+	 * Sanitizes a user message body prior to saving.
+	 *
+	 * @since 1.29.0
+	 *
+	 * @param mixed $message raw message value
+	 * @return string sanitized HTML message body
+	 */
+	public static function sanitize_message( $message ) {
+
+		if ( ! is_string( $message ) ) {
+			return '';
+		}
+
+		return wp_unslash( sanitize_post_field( 'post_content', $message, 0, 'db' ) );
+	}
 
 
 	/**

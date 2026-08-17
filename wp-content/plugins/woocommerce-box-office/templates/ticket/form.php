@@ -1,3 +1,14 @@
+<?php
+/**
+ * Template for ticket edit form.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 <form name="edit-ticket" action="" method="post" class="edit-ticket">
 	<?php $ticket_form->render( array( 'editable' => $editable ) ); ?>
 
@@ -9,7 +20,7 @@
 		<?php endif; ?>
 
 		<?php if ( $print_ticket_enabled ) : ?>
-			<a href="<?php echo esc_url( $print_ticket_url ); ?>" target="_blank" class="button">
+			<a href="<?php echo esc_url( $print_ticket_url ); ?>" class="button">
 				<?php esc_html_e( 'Print ticket', 'woocommerce-box-office' ); ?>
 			</a>
 		<?php endif; ?>

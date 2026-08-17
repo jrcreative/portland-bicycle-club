@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 $product_id = get_post_meta( $post->ID, '_product_id', true );
 $product    = wc_get_product( $product_id );
 $ticket_ids = get_post_meta( $post->ID, '_ticket_ids', true );

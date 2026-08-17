@@ -27,12 +27,14 @@ use SkyVerge\WooCommerce\Memberships\Plans\Abilities\CreatePlan;
 use SkyVerge\WooCommerce\Memberships\Plans\Abilities\DeletePlan;
 use SkyVerge\WooCommerce\Memberships\Plans\Abilities\GetPlan;
 use SkyVerge\WooCommerce\Memberships\Plans\Abilities\ListPlans;
+use SkyVerge\WooCommerce\Memberships\Posts\Abilities\GetPostRestrictionRules;
+use SkyVerge\WooCommerce\Memberships\Posts\Abilities\UpdatePostRestrictionRules;
 use SkyVerge\WooCommerce\Memberships\UserMemberships\Abilities\CreateUserMembership;
 use SkyVerge\WooCommerce\Memberships\UserMemberships\Abilities\DeleteUserMembership;
 use SkyVerge\WooCommerce\Memberships\UserMemberships\Abilities\GetUserMembership;
 use SkyVerge\WooCommerce\Memberships\UserMemberships\Abilities\ListUserMemberships;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\AbstractAbilitiesProvider;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\AbilityCategory;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\AbstractAbilitiesProvider;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\DataObjects\AbilityCategory;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -48,6 +50,7 @@ class Provider extends AbstractAbilitiesProvider
 {
 	const PLANS_CATEGORY_SLUG = 'woocommerce-membership-plans';
 	const USER_MEMBERSHIPS_CATEGORY_SLUG = 'woocommerce-user-memberships';
+	const POSTS_CATEGORY_SLUG = 'woocommerce-memberships-posts';
 
 	/** @inheritDoc */
 	protected array $abilities = [
@@ -62,6 +65,10 @@ class Provider extends AbstractAbilitiesProvider
 		DeleteUserMembership::class,
 		GetUserMembership::class,
 		ListUserMemberships::class,
+
+		// posts (per-post membership configuration)
+		GetPostRestrictionRules::class,
+		UpdatePostRestrictionRules::class,
 	];
 
 	/** @inheritDoc */
@@ -77,6 +84,11 @@ class Provider extends AbstractAbilitiesProvider
 				static::USER_MEMBERSHIPS_CATEGORY_SLUG,
 				__('WooCommerce User Memberships', 'woocommerce-memberships'),
 				__('Abilities related to WooCommerce User Memberships.', 'woocommerce-memberships'),
+			),
+			new AbilityCategory(
+				static::POSTS_CATEGORY_SLUG,
+				__('WooCommerce Memberships Posts', 'woocommerce-memberships'),
+				__('Abilities related to per-post membership configuration (restriction rules and overrides).', 'woocommerce-memberships'),
 			),
 		];
 	}

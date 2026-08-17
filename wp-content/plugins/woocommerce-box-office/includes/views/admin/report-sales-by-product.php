@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin view for sales by product report.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 <table class="widefat wp-list-table">
 	<thead>
 		<tr>

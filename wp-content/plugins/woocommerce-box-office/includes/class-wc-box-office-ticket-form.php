@@ -97,8 +97,8 @@ class WC_Box_Office_Ticket_Form {
 			$this->_multiple_tickets_js();
 		}
 
-		$customer            = $this->_get_customer_data();
-		$required_checkboxes = array();
+		$customer        = $this->_get_customer_data();
+		$required_fields = array();
 
 		foreach ( $this->fields as $field_key => $field ) {
 			if ( is_string( $field['options'] ) && ! empty( $field['options'] ) ) {
@@ -112,6 +112,10 @@ class WC_Box_Office_Ticket_Form {
 			}
 
 			$field['disabled'] = ! $args['editable'];
+
+			$vars = array();
+
+			$field_type = 'input';
 
 			switch ( $field['type'] ) {
 				case 'text':
@@ -127,20 +131,27 @@ class WC_Box_Office_Ticket_Form {
 				case 'select':
 					$vars = $this->_option_field_to_template_vars( $field_key, $field );
 					$this->_load_field_template( 'select', $vars );
+					$field_type = 'select';
 					break;
 
 				case 'radio':
 					$vars = $this->_option_field_to_template_vars( $field_key, $field );
 					$this->_load_field_template( 'radio', $vars );
+					$field_type = 'radio';
 					break;
 
 				case 'checkbox':
 					$vars = $this->_option_field_to_template_vars( $field_key, $field );
 					$this->_load_field_template( 'checkbox', $vars );
-					if ( 'yes' === $field['required'] ) {
-						$required_checkboxes[] = $field_key;
-					}
+					$field_type = 'checkbox';
 					break;
+			}
+
+			if ( 'yes' === $field['required'] ) {
+				$required_fields[] = array(
+					'fieldKey'  => $field_key,
+					'fieldType' => $field_type,
+				);
 			}
 		}
 
@@ -165,22 +176,21 @@ class WC_Box_Office_Ticket_Form {
 
 			$pii_preference = get_post_meta( $ticket_id, '_user_pii_preference', true );
 			?>
-			<p class="form-row form-field">
-				<label for="pii_preference">
+			<fieldset class="form-row form-field form-field-fieldset">
+				<legend>
 					<?php esc_html_e( 'Privacy Preference:', 'woocommerce-box-office' ); ?>
-				</label>
-				<input type="checkbox" name="<?php echo esc_attr( $this->field_name_prefix ); ?>[pii_preference]" id="pii_preference" value="opted-out" <?php checked( $pii_preference, 'opted-out' ); ?> />
-				&nbsp;
-				<span class="description">
+				</legend>
+				<label class="description" for="pii_preference">
+					<input type="checkbox" name="<?php echo esc_attr( $this->field_name_prefix ); ?>[pii_preference]" id="pii_preference" value="opted-out" <?php checked( $pii_preference, 'opted-out' ); ?> />
 					<?php esc_html_e( 'Opt-out from being displayed in the public list of attendees.', 'woocommerce-box-office' ); ?>
-				</span>
-			</p>
+				</label>
+			</fieldset>
 			<?php
 		}
 
-		// Enqueue Ticket form JS to handle checkbox group required.
-		if ( ! empty( $required_checkboxes ) ) {
-			$this->ticket_form_js( $required_checkboxes, $args );
+		// Enqueue ticket form JS to handle required field validation and error summary.
+		if ( ! empty( $required_fields ) ) {
+			$this->ticket_form_js( $args, $required_fields );
 		}
 	}
 
@@ -258,31 +268,27 @@ class WC_Box_Office_Ticket_Form {
 	}
 
 	/**
-	 * Enqueue JS script to handle checkbox group required.
+	 * Enqueue JS script to handle client-side validation of required ticket fields,
+	 * including checkbox groups.
 	 *
-	 * @param array $required_checkboxes Field key for required checkboxes.
-	 * @param array $args                Ticket form related parameters.
+	 * @param array $args            Ticket form related parameters.
+	 * @param array $required_fields Configuration data for all required fields used for validation.
 	 * @see   https://github.com/woocommerce/woocommerce-box-office/issues/105
 	 */
-	private function ticket_form_js( $required_checkboxes, $args ) {
-		wp_enqueue_script(
-			'wc-box-office-ticket-form',
-			WCBO()->assets_url . 'ticket-form.js',
-			array( 'jquery' ),
-			WCBO()->_version,
-			true
+	private function ticket_form_js( $args, $required_fields ) {
+		$params = array(
+			'requiredFields'  => $required_fields,
+			'multipleTickets' => $args['multiple_tickets'],
+			'summaryMessage'  => esc_html__( 'Please correct the following errors before continuing:', 'woocommerce-box-office' ),
 		);
 
-		wp_localize_script(
-			'wc-box-office-ticket-form',
-			'wcBOTicketFormParams',
-			array(
-				'requiredCheckboxes'    => $required_checkboxes,
-				'fieldPrefix'           => $args['field_name_prefix'],
-				'multipleTickets'       => $args['multiple_tickets'],
-				'checkboxValidationMsg' => esc_attr__( 'Please check at least one box to proceed.', 'woocommerce-box-office' ),
-			)
-		);
+		if ( $args['multiple_tickets'] ) {
+			wp_localize_script( 'wc-box-office-multiple-tickets', 'wcBOTicketFormParams', $params );
+		} else {
+			wcbo_register_script( 'wc-box-office-ticket-form', 'ticket-form' );
+			wp_enqueue_script( 'wc-box-office-ticket-form' );
+			wp_localize_script( 'wc-box-office-ticket-form', 'wcBOTicketFormParams', $params );
+		}
 	}
 
 	/**
@@ -295,7 +301,7 @@ class WC_Box_Office_Ticket_Form {
 	 */
 	private function _input_field_to_template_vars( $field_key, $field ) {
 
-		return apply_filters( 'wocommerce_box_office_input_field_template_vars', array(
+		$vars = array(
 			'before_field' => '<p class="form-row">',
 			'after_field'  => '</p>',
 			'id'           => 'field_' . $field_key,
@@ -307,7 +313,35 @@ class WC_Box_Office_Ticket_Form {
 			'label_class'  => ( 'yes' === $field['required'] ) ? 'required-field' : '',
 			'name'         => sprintf( '%s[%s]', $this->field_name_prefix, $field_key ),
 			'type'         => 'text',
-		) );
+			'required_el'  => 'yes' === $field['required'] ? $this->_get_required_template( $field_key, $field ) : '',
+		);
+
+		$autocomplete = '';
+
+		switch ( $field['type'] ) {
+			case 'first_name':
+				$autocomplete = 'given-name';
+				break;
+			case 'last_name':
+				$autocomplete = 'family-name';
+				break;
+			case 'email':
+				$autocomplete = 'email';
+				break;
+			case 'url':
+				$autocomplete = 'url';
+				break;
+		}
+
+		$vars['autocomplete'] = $autocomplete;
+
+		/**
+		 * Filter input field template vars.
+		 *
+		 * @since 1.0.0
+		 * @param array $vars Template vars.
+		 */
+		return apply_filters( 'wocommerce_box_office_input_field_template_vars', $vars );
 	}
 
 	/**
@@ -319,29 +353,89 @@ class WC_Box_Office_Ticket_Form {
 	 * @return array Template vars
 	 */
 	private function _option_field_to_template_vars( $field_key, $field ) {
-		$input_class = 'ticket-field-input';
+		$before_field   = '<p class="form-row">';
+		$after_field    = '</p>';
+		$input_class    = 'ticket-field-input';
+		$fieldset_class = 'ticket-fieldset';
+
+		// radio and checkboxes are wrapped in a fieldset which can't be wrapped
+		// in a p tag.
 		switch ( $field['type'] ) {
 			case 'radio':
-				$input_class .= ' input-radio';
+				$before_field    = '';
+				$after_field     = '';
+				$input_class    .= ' input-radio';
+				$fieldset_class .= ' ticket-fieldset-radio';
 				break;
 			case 'checkbox':
-				$input_class .= ' input-checbox';
+				$before_field    = '';
+				$after_field     = '';
+				$input_class    .= ' input-checkbox';
+				$fieldset_class .= ' ticket-fieldset-checkbox';
 				break;
 		}
 
-		return apply_filters( 'wocommerce_box_office_option_field_template_vars', array(
-			'before_field' => '<p class="form-row">',
-			'after_field'  => '</p>',
-			'id'           => 'field_' . $field_key,
-			'required'     => ( 'yes' === $field['required'] ),
-			'disabled'     => $field['disabled'],
-			'value'        => isset( $field['value'] ) ? $field['value'] : '',
-			'input_class'  => $input_class,
-			'label'        => $field['label'],
-			'label_class'  => ( 'yes' === $field['required'] ) ? 'required-field' : '',
-			'name'         => sprintf( '%s[%s]', $this->field_name_prefix, $field_key ),
-			'options'      => $field['options'],
-		) );
+		$vars = array(
+			'before_field'   => $before_field,
+			'after_field'    => $after_field,
+			'id'             => 'field_' . $field_key,
+			'required'       => ( 'yes' === $field['required'] ),
+			'disabled'       => $field['disabled'],
+			'value'          => isset( $field['value'] ) ? $field['value'] : '',
+			'input_class'    => $input_class,
+			'label'          => $field['label'],
+			'label_class'    => ( 'yes' === $field['required'] ) ? 'required-field' : '',
+			'name'           => sprintf( '%s[%s]', $this->field_name_prefix, $field_key ),
+			'options'        => $field['options'],
+			'fieldset_class' => $fieldset_class,
+			'required_el'    => ( 'yes' === $field['required'] && in_array( $field['type'], array( 'checkbox', 'radio', 'select' ), true ) ) ? $this->_get_required_template( $field_key, $field ) : '',
+		);
+
+		/**
+		 * Filter option field template vars.
+		 *
+		 * @since 1.0.0
+		 * @param array $vars Template vars.
+		 */
+		return apply_filters( 'wocommerce_box_office_option_field_template_vars', $vars );
+	}
+
+	/**
+	 * Get required field template.
+	 *
+	 * @param string $field_key Field's key.
+	 * @param array  $field     Field properties.
+	 * @return string
+	 */
+	private function _get_required_template( $field_key, $field ) { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+
+		$vars = array(
+			'field_key'            => $field_key,
+			'field_type'           => $field['type'],
+			/* translators: %s: ticket field label */
+			'error_message'        => sprintf( __( '%s is a required field and cannot be empty.', 'woocommerce-box-office' ), $field['label'] ),
+			/* translators: %s: ticket field label */
+			'error_message_choice' => sprintf( __( '%s is a required field. Please make a selection.', 'woocommerce-box-office' ), $field['label'] ),
+		);
+
+		/**
+		 * Filter required field template vars.
+		 *
+		 * @since 1.5.1
+		 * @param array  $vars      Template vars.
+		 * @param string $field_key Field's key.
+		 * @param array  $field     Field properties.
+		 */
+		$vars = apply_filters( 'woocommerce_box_office_required_field_template_vars', $vars, $field_key, $field );
+
+		ob_start();
+		wc_get_template(
+			'ticket-fields/required.php',
+			$vars,
+			'woocommerce-box-office',
+			WCBO()->dir . 'templates/'
+		);
+		return ob_get_clean();
 	}
 
 	/**
@@ -472,7 +566,7 @@ class WC_Box_Office_Ticket_Form {
 	 *
 	 * @param string $key     Field's key
 	 * @param string $prop    Field's property
-	 * @param mixed  $default Default value to return of propety doesn't exist
+	 * @param mixed  $default Default value to return of property doesn't exist.
 	 *
 	 * @return mixed Value of field's property
 	 */

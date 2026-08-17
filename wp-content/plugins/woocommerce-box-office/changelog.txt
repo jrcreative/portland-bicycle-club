@@ -1,5 +1,34 @@
 *** WooCommerce Box Office Changelog ***
 
+2026-07-13 - version 1.5.1
+* Fix - Added accessible inline validation errors and an error summary for required ticket fields in the ticket form, with full ARIA support for improved accessibility.
+* Fix - Ensure that tickets link to the customer's account correctly when using the Block Checkout.
+* Fix - Add direct-access prevention check to PHP files to resolve Plugin Check action errors.
+* Dev - Bump WooCommerce "tested up to" version 10.9.
+* Dev - Bump WooCommerce minimum supported version to 10.7.
+* Dev - Upgrade Node.js from v20 to v24 and npm from v10 to v11.
+* Dev - Upgrade npm and Composer dependencies.
+* Dev - Add a spell-check GitHub Actions workflow and fix typos.
+
+2026-05-21 - version 1.5.0
+* Add - Added autocomplete attributes to ticket form fields.
+* Fix - Sanitize the Twitter field value to ensure that only the handle is saved and displayed, instead of the full URL.
+* Fix - Removed the H3 from the ticket form title to correct the heading order.
+* Fix - Added HTML document and a page title to the print ticket view to improve accessibility.
+* Fix - Added screen reader text to the "View or Edit" ticket links to improve accessibility.
+* Fix - Added "Actions" as the column header to resolve the missing column header issue.
+* Fix - Open print ticket links in the same tab instead of a new tab to improve accessibility.
+* Fix - Added `role="button"` to ticket form link to improve accessibility.
+* Fix - Set aria-expanded for the ticket fields when collapsed/expanded
+* Fix - Updated the ticket list in the `order_tickets` shortcode to use proper `ul`/`li` markup instead of incorrect `dt` elements, improving accessibility and semantic structure.
+* Fix - Wrapped the ticket fields in the ticket form with `<fieldset>` and `<legend>` to improve accessibility.
+* Fix - Added the missing table header in the order ticket table to improve accessibility.
+* Fix - Added the missing table header in the my tickets table to improve accessibility.
+* Fix - Updated the `aria-label` for the Ticket Details link/button to improve accessibility.
+* Fix - Linked the label to the input to improve accessibility.
+* Dev - Bump WooCommerce "tested up to" version 10.8.
+* Dev - Bump WooCommerce minimum supported version to 10.6.
+
 2026-04-30 - version 1.4.0
 * Add - New checked-in ticket counter on the admin ticket management screen.
 * Fix - Allow exporting tickets for unpublished, draft, and private ticket products by including all non-trashed post statuses in the admin product query.

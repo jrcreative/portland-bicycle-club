@@ -10,33 +10,46 @@
  * be bumped and the readme will list any important changes.
  *
  * @author  WooThemes
- * @version 1.0.0
+ * @version 1.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
-
-/**
- * woocommerce_box_office_before_print_ticket hook.
- */
-do_action( 'woocommerce_box_office_before_print_ticket' );
 ?>
+<html lang="<?php echo esc_attr( get_bloginfo( 'language' ) ); ?>">
+	<head>
+		<title><?php echo esc_html( $page_title ); ?></title>
+	</head>
+	<body>
+		<?php
+		/**
+		 * Fires before the printed ticket content.
+		 *
+		 * @since 1.5.0
+		 */
+		do_action( 'woocommerce_box_office_before_print_ticket' );
+		?>
 
-<div id="ticket-print-content-container">
-	<div id="ticket-print-content">
-		<?php echo wp_kses_post( $printed_content ); ?>
+		<div id="ticket-print-content-container">
+			<div id="ticket-print-content">
+				<?php echo wp_kses_post( $printed_content ); ?>
 
-		<?php if ( $print_barcode ) : ?>
-		<div id="ticket-print-content-barcode">
-			<?php WCBO()->components->ticket_barcode->display_ticket_barcode( $ticket_id, array( 'auto_generate' => false ) ); ?>
+				<?php if ( $print_barcode ) : ?>
+				<div id="ticket-print-content-barcode">
+					<?php WCBO()->components->ticket_barcode->display_ticket_barcode( $ticket_id, array( 'auto_generate' => false ) ); ?>
+				</div>
+				<?php endif; ?>
+			</div>
 		</div>
-		<?php endif; ?>
-	</div>
-</div>
 
-<?php
-/**
- * woocommerce_box_office_after_edit_ticket hook.
- */
-do_action( 'woocommerce_box_office_after_print_ticket' );
+		<?php
+		/**
+		 * Fires after the printed ticket content.
+		 *
+		 * @since 1.5.0
+		 */
+		do_action( 'woocommerce_box_office_after_print_ticket' );
+		?>
+	</body>
+</html>

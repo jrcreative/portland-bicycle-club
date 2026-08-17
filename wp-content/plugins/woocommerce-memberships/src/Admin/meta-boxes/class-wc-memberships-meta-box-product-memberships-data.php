@@ -468,7 +468,7 @@ class WC_Memberships_Meta_Box_Product_Memberships_Data extends \WC_Memberships_M
 						foreach ( $variations as $variation_id ) {
 							if ( $access_plans = $this->get_product_membership_plans( $variation_id ) ) {
 								foreach ( $access_plans as $access_plan ) {
-									$variation_grants_access_to_plans[ (int) $variation_id ] = ' <a href="' . esc_url( get_edit_post_link( $access_plan->get_id() ) ) . '">' . esc_html( $access_plan->get_formatted_name() ) . '</a>';
+									$variation_grants_access_to_plans[ (int) $variation_id ][] = ' <a href="' . esc_url( get_edit_post_link( $access_plan->get_id() ) ) . '">' . esc_html( $access_plan->get_formatted_name() ) . '</a>';
 								}
 							}
 						}
@@ -481,10 +481,10 @@ class WC_Memberships_Meta_Box_Product_Memberships_Data extends \WC_Memberships_M
 								<label><?php esc_html_e( 'Purchasing individual variations grants access to', 'woocommerce-memberships' ) ?></label>
 								<br />
 								<span>
-									<?php foreach ( $variation_grants_access_to_plans as $variation_id => $access_plan ) : ?>
+									<?php foreach ( $variation_grants_access_to_plans as $variation_id => $access_plan_links ) : ?>
 
 										<?php if ( $variation_product = wc_get_product( $variation_id ) ) : ?>
-											<strong><?php echo esc_html( $variation_product->get_formatted_name() ); ?></strong>: <?php echo Strings_Helper::get_human_readable_items_list( $variation_grants_access_to_plans, 'and' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>.<br />
+										<strong><?php echo wp_kses_post( $variation_product->get_formatted_name() ); ?></strong>: <?php echo wp_kses_post( Strings_Helper::get_human_readable_items_list( $access_plan_links, 'and' ) ); ?>.<br />
 										<?php endif; ?>
 
 									<?php endforeach; ?>

@@ -1,9 +1,9 @@
 === Maintenance ===
 Contributors: WebFactory
 Tags: maintenance, maintenance mode, maintenance page, coming soon, coming soon page
-Requires at least: 4.0
-Tested up to: 7.0
-Stable tag: 4.21
+Requires at least: 4.4
+Tested up to: 7.1
+Stable tag: 4.32
 Requires PHP: 5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -12,16 +12,15 @@ Great looking maintenance, coming soon & under construction pages. Put your site
 
 == Description ==
 
-<a href="https://wpmaintenancemode.com/">WP Maintenance</a> plugin allows the WordPress site administrator to close the website for maintenance, enable "503 Service temporarily unavailable”, set a temporary page with authorization, which can be edited via the plugin settings. Easy customize the good look on all devices. Add your logo, background image, select the desired color, add text. Maintenance uses Bunny Fonts for EU GDPR compliance.
+<a href="https://wpmaintenancemode.com/">WP Maintenance</a> plugin allows the WordPress site administrator to close the website for maintenance, enable "503 Service temporarily unavailable”, set a temporary page with authorization, which can be edited via the plugin settings. Add your logo, background image, select the desired color and text - all with easy maintenance builder. Maintenance uses Bunny Fonts for EU GDPR compliance.
 
-Need **pre-made themes** and over 3 million free images to build maintenance, coming soon & landing pages faster? Have a look at <a href="https://wpmaintenancemode.com/">WP Maintenance PRO</a> plugin.
+Need **pre-made themes** and over 8 million free images to build maintenance, coming soon & landing pages faster? Have a look at <a href="https://wpmaintenancemode.com/">WP Maintenance PRO</a> plugin.
 
 Having problems with spam or bots? Try our free <a href="https://wordpress.org/plugins/advanced-google-recaptcha/">Advanced Google ReCaptcha</a> plugin. It's used on over 200,000 sites and provides great protection!
 
 <h3>Features</h3>
 <ul>
 <li>over <a href="https://wpmaintenancemode.com/#themes">200 themes in the PRO version</li>
-<li>retina ready HTML/CSS layout</li>
 <li>Full-screen background (<a target="_blank" href="https://github.com/srobbin/jquery-backstretch">Backstretch</a>)</li>
 <li>Blur background effect</li>
 <li>Upload your own logo</li>
@@ -43,7 +42,14 @@ Want to say "thank you"? Please leave a <a href="http://wordpress.org/support/vi
 <h3>GDPR Compatibility</h3>
 We are not lawyers. Please do not take any of the following as legal advice.
 If you don’t opt to use Bunny Fonts and don’t use Google Analytics then no resources are loaded or shared with 3rd parties. And nothing is tracked. Opting to use any of those services will result in data sharing/tracking as described in their terms of service.
-If you opt to activate your PRO license in the plugin admin, some data will be shared with WebFactory Ltd; that’s clearly noted below the license activation form.
+
+Maintenance uses these 3rd party libs:
+
+* Super simple WYSIWYG editor v0.9.0, MIT
+* SweetAlert 2, github.com/Sweetalert2/Sweetalert2, MIT
+* jscolor Color Picker, GNU GPL v3
+* Ace Editor (Ajax.org Cloud9 Editor), BSD
+* Web Font Loader, Apache 2 License
 
 == Installation ==
 
@@ -63,9 +69,9 @@ Or if needed, upload manually;
 
 
 == Screenshots ==
-1. Maintenance page with default design
+1. Maintenance page with default design and layout
 2. Log in form is built into the maintenance page
-3. Maintenance plugin options page
+4. Maintenance plugin layout builder
 
 
 == Frequently Asked Questions ==
@@ -82,10 +88,6 @@ The site will not be visible to search engines only if "503 Service Temporarily 
 
 You can use your "normal" WP administrator access or create a new user in WordPress dashboard - Users.
 
-= If I incorrectly write a login and password I will see the error on the page wp-login? =
-
-No, it will be display error on current maintenance page, without redirect to wp-login page.
-
 = I haven’t found an answer to my question, what should I do? =
 
 Please post the question on the <a href="http://wordpress.org/support/plugin/maintenance">support forum</a>.
@@ -96,6 +98,20 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 
 == Changelog ==
+= v4.32 =
+- 2026/07/13
+- minor bug fix
+
+= v4.31 =
+- 2026/06/30
+- changed login icon back to padlock
+- minor bug fixes
+
+= v4.30 =
+- 2026/06/18
+- complete rewrite, new options, new GUI
+- drag&drop maintenance page builder
+
 = v4.21 =
 - 2026/04/02
 - Minor fixes

@@ -14,7 +14,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package woocommerce-box-office
- * @version 1.2.0
+ * @version 1.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,9 +35,9 @@ $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_
 	<table class="woocommerce-MyAccount-my-tickets shop_table shop_table_responsive">
 		<thead>
 			<tr>
-				<th class="ticket-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce-box-office' ); ?></span></th>
-				<th class="ticket-order"><span class="nobr"><?php esc_html_e( 'Order', 'woocommerce-box-office' ); ?></span></th>
-				<th class="ticket-actions"><span class="nobr">&nbsp;</span></th>
+				<th class="ticket-product" scope="col"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce-box-office' ); ?></span></th>
+				<th class="ticket-order" scope="col"><span class="nobr"><?php esc_html_e( 'Order', 'woocommerce-box-office' ); ?></span></th>
+				<th class="ticket-actions" scope="col"><span class="nobr"><?php esc_html_e( 'Actions', 'woocommerce-box-office' ); ?></span></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -53,20 +53,28 @@ $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_
 			?>
 			<tr>
 				<td class="ticket-product">
-					<a href="<?php echo esc_url( $product->get_permalink() ); ?>"><?php echo esc_html( $product->get_title() ); ?></a>
+					<a href="<?php echo esc_url( $product->get_permalink() ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Product: %s', 'woocommerce-box-office' ), $product->get_title() ) ); ?>"><?php echo esc_html( $product->get_title() ); ?></a>
 				</td>
-				<td class="ticket-order">
+				<th class="ticket-order" scope="row">
 					<?php
 					/**
 					 * In case a ticket created from admin without an order.
 					 */
 					?>
 					<?php if ( is_a( $order, 'WC_Order' ) ) : ?>
-						<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>"><?php echo esc_html( $order->get_order_number() ); ?></a>
+						<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Order #: %s', 'woocommerce-box-office' ), $order->get_order_number() ) ); ?>"><?php echo esc_html( $order->get_order_number() ); ?></a>
 					<?php endif; ?>
-				</td>
+				</th>
 				<td class="ticket-actions">
-					<a href="<?php echo esc_url( wcbo_get_my_ticket_url( $ticket->id ) ); ?>" class="button woocommerce-Button"><?php esc_html_e( 'View or Edit', 'woocommerce-box-office' ); ?></a>
+					<a href="<?php echo esc_url( wcbo_get_my_ticket_url( $ticket->id ) ); ?>" class="button woocommerce-Button">
+						<?php esc_html_e( 'View or Edit', 'woocommerce-box-office' ); ?>
+						<span class="screen-reader-text">
+							<?php
+							/* translators: Hidden accessibility text. */
+							echo esc_html( sprintf( __( 'ticket for order #%s', 'woocommerce-box-office' ), $order->get_order_number() ) );
+							?>
+						</span>
+					</a>
 				</td>
 			</tr>
 		<?php endforeach; ?>

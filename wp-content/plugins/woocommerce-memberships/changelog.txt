@@ -1,5 +1,29 @@
 *** WooCommerce Memberships Changelog ***
 
+2026.08.11 - version 1.29.2
+* Misc - Tested up to WooCommerce 11.0.1 and WordPress 7.0.3
+
+2026.07.01 - version 1.29.1
+* Fix - Block editor: prevent "Updating failed" banner when users without the `manage_woocommerce_membership_plans` capability (e.g. Editor, Author, Contributor) save a post
+
+2026.06.29 - version 1.29.0
+* New - Added ability for retrieving post restriction rules: `woocommerce-memberships/post-restriction-rules-get`
+* New - Added ability for updating post restriction rules: `woocommerce-memberships/post-restriction-rules-update`
+* Tweak - Block editor: the "Memberships" metabox with content restriction settings has been moved to the block sidebar
+* Fix - Replace usage of deprecated `wc_enqueue_js()`
+* Fix - Product variation membership plans displaying incorrectly in product "Grant Access" tab
+* Template - Edited `templates/myaccount/my-memberships.php`
+
+2026.06.10 - version 1.28.3
+* Fix - Limit data returned by `/members/directory` endpoint to only data the directory requires
+* Fix - Harden security checks on members REST endpoints
+* Fix - "Translations loaded too early" errors during WP Cron and WP CLI
+
+2026.05.18 - version 1.28.2
+* Fix - Granting access via previous purchase not working correctly with HPOS
+* Fix - Broken HTML in "Grant Access Retroactively" modal
+* Misc - Update the SkyVerge Plugin Framework to v6.2.1
+
 2026.03.23 - version 1.28.1
 * Fix - Subscriptions - Dropdown for editing subscription link on "Edit User Membership" page not working
 * Misc - Update the SkyVerge Plugin Framework to v6.1.1

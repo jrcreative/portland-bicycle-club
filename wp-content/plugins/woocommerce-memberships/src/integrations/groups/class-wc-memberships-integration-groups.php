@@ -233,9 +233,9 @@ class WC_Memberships_Integration_Groups {
 		</form>
 		<?php
 
-		wc_enqueue_js( "
-			( function( $ ) {
-
+		\SkyVerge\WooCommerce\PluginFramework\v6_2_1\Helpers\ScriptHelper::addInlinejQuery(
+			'woocommerce-memberships',
+			"
 				var groups_count = " . count( $this->get_groups() ) . ";
 
 				$( '#import_groups' ).on( 'change', 'input.js-import-action', function() {
@@ -246,9 +246,8 @@ class WC_Memberships_Integration_Groups {
 						$( '#submit' ).removeAttr( 'disabled' );
 					}
 				} );
-
-			} ) ( jQuery );
-		" );
+			"
+		);
 	}
 
 

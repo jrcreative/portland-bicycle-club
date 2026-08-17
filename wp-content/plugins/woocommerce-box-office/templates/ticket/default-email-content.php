@@ -5,6 +5,10 @@
  * @package woocommerce-box-office
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 echo esc_html_x( 'Hi there!', 'default-email-content', 'woocommerce-box-office' );
 ?>
 

@@ -53,7 +53,7 @@ class WC_Box_Office_Post_Type {
 		$this->single      = $single;
 		$this->description = $description;
 
-		// Regsiter post type
+		// Register post type.
 		add_action( 'init' , array( $this, 'register_post_type' ) );
 
 		// Display custom update messages for posts edits

@@ -5,6 +5,10 @@
  * @package woocommerce-box-office
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 $is_scheduled = get_option( 'wc-box-office-update-user-privacy-preference', false ); ?>
 
 <form action="" method="POST">

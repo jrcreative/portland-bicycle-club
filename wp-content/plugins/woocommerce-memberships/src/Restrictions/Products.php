@@ -23,7 +23,7 @@
 
 namespace SkyVerge\WooCommerce\Memberships\Restrictions;
 
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 use WC_Product;
 use WC_Product_Variation;
 
@@ -670,7 +670,9 @@ class Products {
 				}
 
 				if ( $variations_restricted ) {
-					wc_enqueue_js( "
+					Framework\Helpers\ScriptHelper::addInlinejQuery(
+						'woocommerce-memberships',
+						"
 						$( '.variations_form' )
 							.on( 'woocommerce_variation_select_change', function( event ) {
 								$( '.wc-memberships-variation-message' ).hide();
@@ -682,7 +684,8 @@ class Products {
 								}
 							} )
 							.find( '.variations select' ).change();
-					" );
+						"
+					);
 				}
 			}
 		}
@@ -735,7 +738,9 @@ class Products {
 				}
 
 				if ( $variations_discounted ) {
-					wc_enqueue_js( "
+					Framework\Helpers\ScriptHelper::addInlinejQuery(
+						'woocommerce-memberships',
+						"
 						$( '.variations_form' )
 							.on( 'woocommerce_variation_select_change', function( event ) {
 								$( '.wc-memberships-variation-message.wc-memberships-member-discount-message' ).hide();
@@ -745,7 +750,8 @@ class Products {
 								$( '.wc-memberships-variation-message.wc-memberships-member-discount-message.js-variation-' + variation.variation_id ).show();
 							} )
 							.find( '.variations select' ).change();
-					" );
+						"
+					);
 				}
 			}
 		}

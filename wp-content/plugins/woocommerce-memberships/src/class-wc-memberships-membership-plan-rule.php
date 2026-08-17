@@ -22,7 +22,7 @@
  */
 
 use SkyVerge\WooCommerce\Memberships\Plans\Adapters\JsonSerializers\MembershipPlanRuleSerializer;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -36,7 +36,7 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 1.0.0
  */
-class WC_Memberships_Membership_Plan_Rule implements \SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\JsonSerializable {
+class WC_Memberships_Membership_Plan_Rule implements \SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\Contracts\JsonSerializable {
 
 
 	/** @var string the rule unique ID (alphanumerical value) */

@@ -24,7 +24,7 @@
 namespace SkyVerge\WooCommerce\Memberships\Integrations\Courseware;
 
 use SkyVerge\WooCommerce\Memberships\Integrations\Courseware;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -135,9 +135,9 @@ class Admin {
 	 * @since 1.22.0
 	 */
 	public function toggle_course_auto_enroll_option() {
-
-		wc_enqueue_js( "
-			( function( $ ) {
+		Framework\Helpers\ScriptHelper::addInlinejQuery(
+			'woocommerce-memberships',
+			"
 				var course_rule_types = " . json_encode( $this->get_course_content_type_keys() ) . ";
 
 				$( '.js-rules' ).on( 'change', '.js-content-type', function() {
@@ -148,8 +148,8 @@ class Admin {
 						checkbox.addClass( 'hide' );
 					}
 				} );
-			} ) ( jQuery );
-		" );
+			"
+		);
 	}
 
 

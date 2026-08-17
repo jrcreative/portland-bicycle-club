@@ -86,8 +86,7 @@ class Directory_Block_Validator {
 		$page = get_post( $page_id );
 
 		if ( ! $page ) {
-			// Fallback to most restrictive settings
-			return $this->get_most_restrictive_block_settings();
+			return [];
 		}
 
 		$blocks = parse_blocks( $page->post_content );
@@ -97,7 +96,9 @@ class Directory_Block_Validator {
 
 
 	/**
-	 * Extracts directory block settings from parsed blocks with graceful fallback.
+	 * Extracts directory block settings for the block context the request positively
+	 * identifies. Returns an empty array when no such context can be resolved — callers
+	 * use that as the signal to skip directory-only response augmentations.
 	 *
 	 * Note: This method assumes access validation has already been performed
 	 * (typically in the permission callback via can_user_access_block()).
@@ -106,18 +107,16 @@ class Directory_Block_Validator {
 	 *
 	 * @param array $blocks parsed blocks from post content
 	 * @param string|null $block_instance_id optional block instance ID for specific block targeting
-	 * @return array block settings with privacy controls
+	 * @return array block settings with privacy controls, or [] when no block context resolves
 	 */
 	protected function get_directory_block_settings( array $blocks, ?string $block_instance_id = null ) : array {
 
 		$directory_blocks = $this->find_directory_blocks( $blocks );
 
 		if ( empty( $directory_blocks ) ) {
-			// No directory blocks found, use most restrictive settings
-			return $this->get_most_restrictive_block_settings();
+			return [];
 		}
 
-		// Strategy 1: If block_instance_id provided, try to find matching block
 		if ( $block_instance_id ) {
 			foreach ( $directory_blocks as $block ) {
 				$attrs = $block['attrs'] ?? [];
@@ -125,17 +124,20 @@ class Directory_Block_Validator {
 					return $this->normalize_block_settings( $attrs );
 				}
 			}
+
+			return [];
 		}
 
-		// Strategy 2: If only one directory block exists, use it
-		// We'd end up here for blocks created prior to 1.27.3, which don't have an instance ID yet.
+		// Legacy single-block fallback: blocks saved before 1.27.3 don't carry a
+		// blockInstanceId attribute, so the front-end has nothing to send.
 		if ( 1 === count( $directory_blocks ) ) {
 			$attrs = $directory_blocks[0]['attrs'] ?? [];
-			return $this->normalize_block_settings( $attrs );
+			if ( empty( $attrs['blockInstanceId'] ) ) {
+				return $this->normalize_block_settings( $attrs );
+			}
 		}
 
-		// Strategy 3: Multiple blocks found but no specific match - use most restrictive
-		return $this->get_most_restrictive_settings_from_blocks( $directory_blocks );
+		return [];
 	}
 
 
@@ -186,70 +188,23 @@ class Directory_Block_Validator {
 		 * @see \SkyVerge\WooCommerce\Memberships\Blocks\Members_Directory::register_attributes()
 		 */
 		$block_editor_defaults = [
-			'showBio'     => true,
-			'showEmail'   => true,
-			'showPhone'   => true,
-			'showAddress' => true,
-			'avatar'      => true,
-			'avatarSize'  => 100,
+			'showBio'       => true,
+			'showEmail'     => true,
+			'showPhone'     => true,
+			'showAddress'   => true,
+			'avatar'        => true,
+			'avatarSize'    => 100,
+			'profileFields' => [],
 		];
 
-		return array_merge( $block_editor_defaults, array_intersect_key( $attrs, $block_editor_defaults ) );
-	}
+		$normalized = array_merge( $block_editor_defaults, array_intersect_key( $attrs, $block_editor_defaults ) );
 
+		// Defensive: profileFields must be an array of slug strings, regardless of how it was saved.
+		$normalized['profileFields'] = is_array( $normalized['profileFields'] )
+			? array_values( array_filter( $normalized['profileFields'], 'is_string' ) )
+			: [];
 
-	/**
-	 * Returns the most restrictive block settings (all privacy fields hidden).
-	 *
-	 * @since 1.27.3
-	 *
-	 * @return array most restrictive settings
-	 */
-	protected function get_most_restrictive_block_settings() : array {
-
-		return [
-			'showBio'     => false,
-			'showEmail'   => false,
-			'showPhone'   => false,
-			'showAddress' => false,
-			'avatar'      => false,
-			'avatarSize'  => 100,
-		];
-	}
-
-
-	/**
-	 * Gets the most restrictive settings from multiple directory blocks.
-	 *
-	 * @since 1.27.3
-	 *
-	 * @param array $directory_blocks array of directory blocks
-	 * @return array most restrictive settings across all blocks
-	 */
-	protected function get_most_restrictive_settings_from_blocks( array $directory_blocks ) : array {
-
-		$restrictive_settings = $this->get_most_restrictive_block_settings();
-
-		// For each privacy setting, only allow it if ALL blocks allow it
-		$privacy_fields = [ 'showBio', 'showEmail', 'showPhone', 'showAddress', 'avatar' ];
-
-		foreach ( $privacy_fields as $field ) {
-			$allow_field = true;
-
-			foreach ( $directory_blocks as $block ) {
-				$attrs = $block['attrs'] ?? [];
-				$normalized = $this->normalize_block_settings( $attrs );
-
-				if ( empty( $normalized[ $field ] ) ) {
-					$allow_field = false;
-					break;
-				}
-			}
-
-			$restrictive_settings[ $field ] = $allow_field;
-		}
-
-		return $restrictive_settings;
+		return $normalized;
 	}
 
 
@@ -369,6 +324,12 @@ class Directory_Block_Validator {
 		$blocks = parse_blocks( $page->post_content );
 		$directory_block_contexts = $this->find_directory_blocks_with_parents( $blocks );
 
+		// The request must reference a page that contains a Members Directory block;
+		// without one there is no block context to validate the request against.
+		if ( empty( $directory_block_contexts ) ) {
+			return false;
+		}
+
 		// Find the specific directory block context for validation
 		$target_directory_context = null;
 
@@ -382,21 +343,27 @@ class Directory_Block_Validator {
 				}
 			}
 		} elseif ( 1 === count( $directory_block_contexts ) ) {
-			// Single directory block - use it
-			$target_directory_context = $directory_block_contexts[0];
+			// Legacy single-block fallback: blocks saved before 1.27.3 don't carry a
+			// blockInstanceId attribute, so the front-end has nothing to send. Use this path
+			// only when the sole block on the page itself has no blockInstanceId — otherwise
+			// the caller has skipped a value the block exposes and we won't guess which
+			// block they meant.
+			$sole_attrs = $directory_block_contexts[0]['directory_block']['attrs'] ?? [];
+			if ( empty( $sole_attrs['blockInstanceId'] ) ) {
+				$target_directory_context = $directory_block_contexts[0];
+			}
 		}
 
-		// If we found a target directory block, validate its parent restriction blocks
-		if ( $target_directory_context && ! empty( $target_directory_context['parent_restrictions'] ) ) {
-			return $this->validate_restriction_block_hierarchy( $target_directory_context['parent_restrictions'] );
-		}
-
-		// SECURITY: If a specific block_instance_id was requested but not found, deny access
-		if ( $block_instance_id && ! $target_directory_context ) {
+		// A positively-identified directory block context is required: either a matched
+		// block_instance_id or the legacy single-block fallback above.
+		if ( ! $target_directory_context ) {
 			return false;
 		}
 
-		// No restrictions found or no specific block found - allow access
+		if ( ! empty( $target_directory_context['parent_restrictions'] ) ) {
+			return $this->validate_restriction_block_hierarchy( $target_directory_context['parent_restrictions'] );
+		}
+
 		return true;
 	}
 

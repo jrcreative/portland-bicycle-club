@@ -22,6 +22,7 @@
  */
 
 use SkyVerge\WooCommerce\Memberships\Helpers\Strings_Helper;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Helpers\ScriptHelper;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -901,9 +902,10 @@ class WC_Memberships_Meta_Box_Membership_Plan_Data extends \WC_Memberships_Meta_
 	public function render_admin_notice_js() {
 
 		// remove force-hide class (which prevents message flicker on page load) and simply hide the hidden notices
-		wc_enqueue_js( "
-			$( '.js-wc-plugin-framework-admin-notice.force-hide' ).removeClass( 'force-hide' ).hide();
-		" );
+		ScriptHelper::addInlinejQuery(
+			'woocommerce-memberships',
+			"$( '.js-wc-plugin-framework-admin-notice.force-hide' ).removeClass( 'force-hide' ).hide();"
+		);
 	}
 
 

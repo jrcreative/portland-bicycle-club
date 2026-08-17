@@ -200,7 +200,9 @@ class WC_Memberships_Shipping {
 
 		if ( $this->is_shipping_settings() ) {
 
-			wc_enqueue_js( "
+			\SkyVerge\WooCommerce\PluginFramework\v6_2_1\Helpers\ScriptHelper::addInlinejQuery(
+				'woocommerce-memberships',
+				"
 				function wcMembershipsFreeShippingHideShowFields( el ) {
 
 					var form                 = $( el ).closest( 'form' ),
@@ -237,7 +239,8 @@ class WC_Memberships_Shipping {
 						wcMembershipsFreeShippingHideShowFields( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );
 					}
 				} );
-			" );
+			"
+			);
 		}
 	}
 

@@ -21,7 +21,7 @@
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 use SkyVerge\WooCommerce\Memberships\CLI\Import_User_Memberships;
 
 /**
@@ -497,27 +497,31 @@ if ( Framework\SV_WC_Plugin_Compatibility::is_wc_version_gte( '3.0' ) && ! class
  */
 class WC_Memberships_CLI {}
 
-require_once __DIR__ . '/cli/class-wc-memberships-cli-command.php';
-require_once __DIR__ . '/cli/class-wc-memberships-cli-import-user-memberships.php';
-require_once __DIR__ . '/cli/class-wc-memberships-cli-membership-plan.php';
-require_once __DIR__ . '/cli/class-wc-memberships-cli-membership-plan-rule.php';
-require_once __DIR__ . '/cli/class-wc-memberships-cli-user-membership.php';
+if (defined('WP_CLI') && WP_CLI) {
+	add_action('init', function() {
+		require_once __DIR__ . '/cli/class-wc-memberships-cli-command.php';
+		require_once __DIR__ . '/cli/class-wc-memberships-cli-import-user-memberships.php';
+		require_once __DIR__ . '/cli/class-wc-memberships-cli-membership-plan.php';
+		require_once __DIR__ . '/cli/class-wc-memberships-cli-membership-plan-rule.php';
+		require_once __DIR__ . '/cli/class-wc-memberships-cli-user-membership.php';
 
-// legacy commands for old style WP CLI (not mapped from the WC REST API)
+		// legacy commands for old style WP CLI (not mapped from the WC REST API)
 
-/* @deprecated: this is the legacy command now replaced by `wc user_membership <options>` */
-\WP_CLI::add_command( 'wc memberships membership', 'WC_Memberships_CLI_User_Membership' );
-/* @deprecated: this is the legacy command now replaced by `wc membership_plan <options>` */
-\WP_CLI::add_command( 'wc memberships plan',       'WC_Memberships_CLI_Membership_Plan' );
-/* @deprecated: these are legacy command to be replaced as we add support for membership rules in REST API */
-\WP_CLI::add_command( 'wc memberships plan rule',  'WC_Memberships_CLI_Membership_Plan_Rule' );
-\WP_CLI::add_command( 'wc memberships rule',       'WC_Memberships_CLI_Membership_Plan_Rule' ); // TODO: remove this when the above command can be fixed {CW 2018-11-14}
+		/* @deprecated: this is the legacy command now replaced by `wc user_membership <options>` */
+		\WP_CLI::add_command( 'wc memberships membership', 'WC_Memberships_CLI_User_Membership' );
+		/* @deprecated: this is the legacy command now replaced by `wc membership_plan <options>` */
+		\WP_CLI::add_command( 'wc memberships plan',       'WC_Memberships_CLI_Membership_Plan' );
+		/* @deprecated: these are legacy command to be replaced as we add support for membership rules in REST API */
+		\WP_CLI::add_command( 'wc memberships plan rule',  'WC_Memberships_CLI_Membership_Plan_Rule' );
+		\WP_CLI::add_command( 'wc memberships rule',       'WC_Memberships_CLI_Membership_Plan_Rule' ); // TODO: remove this when the above command can be fixed {CW 2018-11-14}
 
-// extended commands (not included with default WP CLI REST API mappings)
+		// extended commands (not included with default WP CLI REST API mappings)
 
-// import memberships from CLI: `wc user_membership import <file> <options>`
-\WP_CLI::add_command(
-	'wc user_membership import',
-	[ '\\SkyVerge\\WooCommerce\\Memberships\\CLI\\Import_User_Memberships', 'import' ],
-	[ 'synopsis' => Import_User_Memberships::synopsis() ]
-);
+		// import memberships from CLI: `wc user_membership import <file> <options>`
+		\WP_CLI::add_command(
+			'wc user_membership import',
+			[ '\\SkyVerge\\WooCommerce\\Memberships\\CLI\\Import_User_Memberships', 'import' ],
+			[ 'synopsis' => Import_User_Memberships::synopsis() ]
+		);
+	});
+}

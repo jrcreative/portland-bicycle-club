@@ -23,7 +23,7 @@
 
 namespace SkyVerge\WooCommerce\Memberships\Blocks;
 
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 use SkyVerge\WooCommerce\Memberships\Blocks\Helpers\BlockAccessValidator;
 
 defined( 'ABSPATH' ) or exit;

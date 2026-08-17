@@ -26,7 +26,7 @@ namespace SkyVerge\WooCommerce\Memberships\Admin\Views\Meta_Boxes\User_Membershi
 use SkyVerge\WooCommerce\Memberships\Profile_Fields as Profile_Fields_Handler;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields\Profile_Field;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields\Profile_Field_Definition;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -420,9 +420,9 @@ class Profile_Fields extends \WC_Memberships_Meta_Box {
 		</dd>
 		<?php
 
-		wc_enqueue_js( "
-			( function( $ ) {
-
+		Framework\Helpers\ScriptHelper::addInlinejQuery(
+			'woocommerce-memberships',
+			"
 				$( '#wc-memberships-profile-field-input-file-upload-" . esc_js( $profile_field->get_slug() ) . "' ).on( 'click', function( e ){
 					e.preventDefault();
 
@@ -441,9 +441,8 @@ class Profile_Fields extends \WC_Memberships_Meta_Box {
 					$( this ).parent( 'div' ).find( 'input[type=hidden]' ).val( '' );
 					$( this ).hide();
 				} );
-
-			} ) ( jQuery );
-		" );
+			"
+		);
 	}
 
 

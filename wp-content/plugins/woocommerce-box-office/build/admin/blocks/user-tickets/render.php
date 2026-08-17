@@ -6,6 +6,10 @@
  * @package woocommerce-box-office
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 $format       = $attributes['format'] ?? 'flat';
 $block_title  = $attributes['title'] ?? '';
 $description  = $attributes['description'] ?? '';

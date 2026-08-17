@@ -19,7 +19,7 @@ class WC_Box_Office_Cart {
 		// Change the add to cart button related stuff.
 		add_filter( 'woocommerce_product_add_to_cart_text', array( $this, 'change_add_to_cart_text' ), 10, 2 );
 		add_filter( 'woocommerce_product_add_to_cart_url', array( $this, 'change_add_to_cart_url' ), 10, 2 );
-		add_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'loop_add_to_cart_buttom_remove_add_to_cart_class'), 10, 2 );
+		add_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'loop_add_to_cart_button_remove_add_to_cart_class' ), 10, 2 );
 		add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'change_add_to_cart_text_single' ), 10, 2 );
 
 		// Cart page.
@@ -58,6 +58,9 @@ class WC_Box_Office_Cart {
 		// Braintree PayPal Express Button compatibility.
 		add_filter( 'wc_braintree_paypal_product_button_validate_product_data', array( $this, 'braintree_paypal_product_button_validate_product_data' ) );
 		add_action( 'wc_braintree_paypal_before_product_button_add_to_cart', array( $this, 'braintree_paypal_before_product_button_add_to_cart' ), 10, 4 );
+
+		// Update the aria-label attribute for the add to cart button.
+		add_filter( 'woocommerce_loop_add_to_cart_args', array( $this, 'update_add_to_cart_aria_label' ), 10, 2 );
 	}
 
 	/**
@@ -336,13 +339,9 @@ class WC_Box_Office_Cart {
 	 */
 	public function change_add_to_cart_text( $text, $product ) {
 		if ( wc_box_office_is_product_ticket( $product ) ) {
-			$text = get_option( 'box_office_add_to_cart_text', '' );
-			if ( empty( $text ) ) {
-				$text = esc_html__( 'Ticket Detail', 'woocommerce-box-office' );
-			}
-
-			$text = apply_filters( 'woocommerce_box_office_add_to_cart_text', $text );
+			$text = $this->get_add_to_cart_text( $product );
 		}
+
 		return $text;
 	}
 
@@ -364,16 +363,29 @@ class WC_Box_Office_Cart {
 	/**
 	 * Remove the add to cart class from ticket enabled products.
 	 *
-	 * @param String $link
-	 * @param WC_Product $product
-	 *
-	 * @return String
+	 * @param String     $link    The HTML link for the add to cart button.
+	 * @param WC_Product $product The product object.
+	 * @return String The modified HTML link for the add to cart button.
 	 */
-	public function loop_add_to_cart_buttom_remove_add_to_cart_class( $link, $product ) {
+	public function loop_add_to_cart_button_remove_add_to_cart_class( $link, $product ) {
 		if ( wc_box_office_is_product_ticket( $product ) ) {
 			$link = str_ireplace( 'add_to_cart_button', '', $link );
 		}
 		return $link;
+	}
+
+	/**
+	 * Remove the add to cart class from ticket enabled products.
+	 *
+	 * @deprecated 1.5.1 Use loop_add_to_cart_button_remove_add_to_cart_class instead.
+	 *
+	 * @param String     $link    The HTML link for the add to cart button.
+	 * @param WC_Product $product The product object.
+	 * @return String The modified HTML link for the add to cart button.
+	 */
+	public function loop_add_to_cart_buttom_remove_add_to_cart_class( $link, $product ) {
+		wc_deprecated_function( __FUNCTION__, '1.5.1', 'loop_add_to_cart_button_remove_add_to_cart_class' );
+		return $this->loop_add_to_cart_button_remove_add_to_cart_class( $link, $product );
 	}
 
 	/*
@@ -462,7 +474,7 @@ class WC_Box_Office_Cart {
 	 * @param array  $cart_item_data Extra cart item data being passed into the item.
 	 * @param string $cart_id        Cart ID being evaluated.
 	 *
-	 * @return bool Whether an iten found in the cart.
+	 * @return bool Whether an item found in the cart.
 	 */
 	public function filter_sold_individually_found_in_cart( $found_in_cart, $product_id, $variation_id, $cart_item_data, $cart_id ) {
 		if ( ! wc_box_office_is_product_ticket( $product_id ) ) {
@@ -551,5 +563,70 @@ class WC_Box_Office_Cart {
 		}
 
 		return $passed;
+	}
+
+	/**
+	 * Get the add to cart text for ticket enabled products.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return string
+	 */
+	public function get_add_to_cart_text( $product ) {
+		$text = '';
+		if ( wc_box_office_is_product_ticket( $product ) ) {
+			$text = get_option( 'box_office_add_to_cart_text', '' );
+			if ( empty( $text ) ) {
+				$text = esc_html__( 'Ticket Detail', 'woocommerce-box-office' );
+			}
+
+			/**
+			 * Filter the add to cart text for ticket products.
+			 *
+			 * @since 1.5.0
+			 * @param string     $text    The add to cart text.
+			 * @param WC_Product $product The product.
+			 * @return string
+			 */
+			$text = apply_filters( 'woocommerce_box_office_add_to_cart_text', $text, $product );
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Update the aria-label attribute for the add to cart button.
+	 *
+	 * @param array      $args    Add to cart button args.
+	 * @param WC_Product $product The product.
+	 * @return array
+	 */
+	public function update_add_to_cart_aria_label( $args, $product ) {
+		if ( wc_box_office_is_product_ticket( $product ) ) {
+			// Aria-label format: '{add to cart text}: {product name}'.
+			$aria_label = sprintf(
+				/* translators: 1: Add to cart text, 2: product name */
+				__( '%1$s: %2$s', 'woocommerce-box-office' ),
+				$this->get_add_to_cart_text( $product ),
+				$product->get_name()
+			);
+
+			if ( ! isset( $args['attributes']['aria-label'] ) ) {
+				$args['attributes']['aria-label'] = '';
+			}
+
+			/**
+			 * Filter the aria-label attribute for the add to cart button for ticket products.
+			 *
+			 * @since 1.5.0
+			 * @param string     $aria_label The aria-label text.
+			 * @param array      $args       Add to cart button args.
+			 * @param WC_Product $product    The product.
+			*/
+			$aria_label = apply_filters( 'woocommerce_box_office_add_to_cart_aria_label', $aria_label, $args, $product );
+
+			$args['attributes']['aria-label'] = esc_attr( $aria_label );
+		}
+
+		return $args;
 	}
 }

@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Class that represents a ticket.
  */
@@ -208,7 +212,7 @@ class WC_Box_Office_Ticket {
 		$order_id = $data['order_item_id'] ? wc_get_order_id_by_order_item_id( $data['order_item_id'] ) : 0;
 
 		// Post parent ID (order ID in fact) is no more guaranteed to come from posts table since COT introduced.
-		// However it will work as ususal as long as we do things with the order ID in WooCommerce way.
+		// However it will work as usual as long as we do things with the order ID in WooCommerce way.
 		$ticket_data = array(
 			'post_type'    => 'event_ticket',
 			'post_title'   => $title,
@@ -456,14 +460,7 @@ class WC_Box_Office_Ticket {
 					break;
 
 				case 'twitter':
-					$value = str_replace( 'http://', '', $value );
-					$value = str_replace( 'https://', '', $value );
-					$value = str_replace( 'www.', '', $value );
-					$value = str_replace( 'twitter.com', '', $value );
-					$value = trim( $value, '/' );
-					$value = trim( $value, '.' );
-					$value = str_replace( '@', '', $value );
-					$value = sanitize_text_field( $value );
+					$value = wcbo_sanitize_twitter_handle( $value );
 					break;
 
 				case 'url':

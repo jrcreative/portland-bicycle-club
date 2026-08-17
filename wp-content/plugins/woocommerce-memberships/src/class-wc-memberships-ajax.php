@@ -26,7 +26,7 @@ use SkyVerge\WooCommerce\Memberships\Frontend\Profile_Fields as Profile_Fields_F
 use SkyVerge\WooCommerce\Memberships\Helpers\Strings_Helper;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields\Profile_Field_Definition;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -1006,18 +1006,64 @@ class WC_Memberships_AJAX {
 			if ( ! empty( $order_ids ) ) {
 
 				// get user IDs for the found orders
-				$order_ids = Strings_Helper::esc_sql_in_ids( $order_ids );
-				$user_ids  = $wpdb->get_col( "
-					SELECT posts_meta.meta_value
-					FROM {$wpdb->prefix}postmeta AS posts_meta
-					WHERE posts_meta.post_id IN ({$order_ids})
-					AND posts_meta.meta_key = '_customer_user'
-				" );
+				$user_ids = Framework\SV_WC_Plugin_Compatibility::is_hpos_enabled()
+					? $this->getOrderUserIdsFromHposTable($order_ids)
+					: $this->getOrderUserIdsFromLegacyPostMetaTable($order_ids);
 			}
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 
 		return ! empty( $user_ids ) ? array_unique( array_map( 'absint', array_values( $user_ids ) ) ) : [];
+	}
+
+	/**
+	 * Gets the IDs of the users associated with the provided orders.
+	 * This looks up orders using the old post meta table.
+	 *
+	 * @param array<int|string> $orderIds
+	 * @return array<string|int>
+	 */
+	private function getOrderUserIdsFromLegacyPostMetaTable(array $orderIds) : array
+	{
+		global $wpdb;
+
+		$order_ids = Strings_Helper::esc_sql_in_ids( $orderIds );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$user_ids  = $wpdb->get_col( "
+					SELECT posts_meta.meta_value
+					FROM {$wpdb->postmeta} AS posts_meta
+					WHERE posts_meta.post_id IN ({$order_ids})
+					AND posts_meta.meta_key = '_customer_user'
+				" );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return $user_ids;
+	}
+
+	/**
+	 * Gets the IDs of the users associated with the provided orders.
+	 * This looks up orders in the new HPOS table.
+	 *
+	 * @param array<int|string> $orderIds
+	 * @return array<string|int>
+	 */
+	private function getOrderUserIdsFromHposTable(array $orderIds) : array
+	{
+		global $wpdb;
+
+		$order_ids    = Strings_Helper::esc_sql_in_ids( $orderIds );
+		$orders_table = Framework\SV_WC_Order_Compatibility::get_orders_table();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$user_ids = $wpdb->get_col( "
+			SELECT customer_id
+			FROM {$orders_table}
+			WHERE id IN ({$order_ids})
+		" );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return $user_ids;
 	}
 
 

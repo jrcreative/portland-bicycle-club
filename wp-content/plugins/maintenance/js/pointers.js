@@ -1,14 +1,14 @@
 /**
  * Maintenance
  * https://wpmaintenancemode.com/
- * (c) WebFactory Ltd, 2022
+ * (c) WebFactory Ltd, 2026
  */
 
 jQuery(document).ready(function($){
     if (typeof mtnc_pointers  == 'undefined') {
       return;
     }
-
+  
     $.each(mtnc_pointers, function(index, pointer) {
       if (index.charAt(0) == '_') {
         return true;
@@ -24,9 +24,10 @@ jQuery(document).ready(function($){
                   $.get(ajaxurl, {
                       notice_name: index,
                       _ajax_nonce: mtnc_pointers._nonce_dismiss_pointer,
-                      action: 'mtnc_dismiss_notice'
+                      action: 'maintenance_dismiss_notice'
                   });
           }
         }).pointer('open');
     });
   });
+  

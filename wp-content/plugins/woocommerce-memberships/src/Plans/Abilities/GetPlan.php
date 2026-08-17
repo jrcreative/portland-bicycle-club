@@ -24,9 +24,9 @@
 namespace SkyVerge\WooCommerce\Memberships\Plans\Abilities;
 
 use SkyVerge\WooCommerce\Memberships\Abilities\Provider;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\MakesAbilityContract;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\Ability;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\DataObjects\AbilityAnnotations;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\Contracts\MakesAbilityContract;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\DataObjects\Ability;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\DataObjects\AbilityAnnotations;
 use WC_Memberships_Membership_Plan;
 use WP_Error;
 

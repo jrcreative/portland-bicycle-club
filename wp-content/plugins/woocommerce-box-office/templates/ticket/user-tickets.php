@@ -5,6 +5,10 @@
  * @package woocommerce-box-office
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 if ( ! empty( $title ) ) : ?>
 	<h2>
 		<?php

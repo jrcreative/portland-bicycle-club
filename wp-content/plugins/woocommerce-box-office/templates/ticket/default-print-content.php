@@ -1,3 +1,14 @@
+<?php
+/**
+ * Default ticket print content template.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 <h1>{post_title}</h1>
 
 {post_content}

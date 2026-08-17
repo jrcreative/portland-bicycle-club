@@ -24,7 +24,7 @@
 use SkyVerge\WooCommerce\Memberships\Profile_Fields\Profile_Field;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields;
 use SkyVerge\WooCommerce\Memberships\UserMemberships\Adapters\JsonSerializers\UserMembershipSerializer;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -35,7 +35,7 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 1.0.0
  */
-class WC_Memberships_User_Membership implements \SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\JsonSerializable {
+class WC_Memberships_User_Membership implements \SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\Contracts\JsonSerializable {
 
 
 	/** @var int User Membership (post) ID */

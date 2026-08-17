@@ -22,7 +22,7 @@ class WC_Box_Office_Order {
 		add_action( 'woocommerce_order_status_processing', array( $this, 'publish_tickets' ), 10, 1 );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'publish_tickets' ), 10, 1 );
 
-		// Proces orders that used to be completed or processing and now are on-hold or pending.
+		// Process orders that used to be completed or processing and now are on-hold or pending.
 		add_action( 'woocommerce_order_status_processing_to_on-hold', array( $this, 'maybe_unpublish_tickets' ), 10, 1 );
 		add_action( 'woocommerce_order_status_completed_to_on-hold', array( $this, 'maybe_unpublish_tickets' ), 10, 1 );
 		add_action( 'woocommerce_order_status_processing_to_pending', array( $this, 'maybe_unpublish_tickets' ), 10, 1 );
@@ -58,6 +58,9 @@ class WC_Box_Office_Order {
 
 		// Move ticket to trash if it was refunded and part of an order with other non-refunded items.
 		add_action( 'woocommerce_order_refunded', array( $this, 'move_ticket_to_trash_on_refund' ) );
+
+		// Assign the logged-in user to the tickets.
+		add_action( 'woocommerce_store_api_checkout_order_processed', array( $this, 'fix_box_office_tickets_customer_id_block_checkout' ) );
 	}
 
 	/**
@@ -586,7 +589,7 @@ class WC_Box_Office_Order {
 	}
 
 	/**
-	 * Create barcode fields in chekcout form.
+	 * Create barcode fields in checkout form.
 	 *
 	 * The fields contain 2 * N fields, where N is number of purchased tickets.
 	 * Each field represent barcode text for a ticket.
@@ -746,6 +749,58 @@ class WC_Box_Office_Order {
 						wp_trash_post( $ticket_id );
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Assign the logged-in user to the tickets.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return void
+	 */
+	public function fix_box_office_tickets_customer_id_block_checkout( $order ) {
+		// Only proceed if this is a valid order.
+		if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
+
+		// Only proceed if the order has a customer ID (user account was created).
+		$customer_id = absint( $order->get_customer_id() );
+		if ( 0 === $customer_id ) {
+			return;
+		}
+
+		// Only proceed if the customer is now logged in.
+		if ( ! is_user_logged_in() || get_current_user_id() !== $customer_id ) {
+			return;
+		}
+
+		$tickets = $this->get_tickets_by_order( $order->get_id(), 'all', 'ids' );
+
+		if ( empty( $tickets ) ) {
+			return;
+		}
+
+		// Update customer ID for each ticket that has customer_id = 0.
+		foreach ( $tickets as $ticket_id ) {
+			// Double-check the ticket still has customer_id = 0 before updating.
+			$current_customer_id = absint( get_post_meta( $ticket_id, '_customer_id', true ) );
+
+			if ( 0 === $current_customer_id ) {
+				// Update the primary customer ID meta.
+				update_post_meta( $ticket_id, '_customer_id', $customer_id );
+
+				// Also update the legacy _user meta for backward compatibility.
+				update_post_meta( $ticket_id, '_user', $customer_id );
+
+				// And set the post author to the customer ID as well.
+				wp_update_post(
+					array(
+						'ID'          => $ticket_id,
+						'post_author' => $customer_id,
+					)
+				);
 			}
 		}
 	}

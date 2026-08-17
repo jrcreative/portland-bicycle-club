@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin view for ticket field data panel.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 	<div id="ticket_field_data" class="panel woocommerce_options_panel">
 		<div class="options_group show_if_ticket">
 			<div class="form-field ticket_fields">

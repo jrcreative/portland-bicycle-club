@@ -1,4 +1,14 @@
 <?php
+/**
+ * Admin view for ticket meta box.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 // Get order ID.
 $order_id = get_post_meta( $post->ID, '_order', true );
 $order    = wc_get_order( $order_id );

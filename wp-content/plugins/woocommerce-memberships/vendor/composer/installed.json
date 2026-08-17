@@ -2,17 +2,12 @@
     "packages": [
         {
             "name": "skyverge/wc-plugin-framework",
-            "version": "6.1.1",
-            "version_normalized": "6.1.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/godaddy-wordpress/wc-plugin-framework.git",
-                "reference": "dfda04b4736f5a0acdd03a5ce72da52a156d9d48"
-            },
+            "version": "6.2.1",
+            "version_normalized": "6.2.1.0",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/godaddy-wordpress/wc-plugin-framework/zipball/dfda04b4736f5a0acdd03a5ce72da52a156d9d48",
-                "reference": "dfda04b4736f5a0acdd03a5ce72da52a156d9d48",
+                "url": "https://gdartifactory1.jfrog.io/artifactory/api/composer/composer-virt/vcs-dists/zip/godaddy-wordpress/wc-plugin-framework/bcbf433a783abce508369db6540f3916ef4917f6",
+                "reference": "bcbf433a783abce508369db6540f3916ef4917f6",
                 "shasum": ""
             },
             "require": {
@@ -26,10 +21,13 @@
                 "lucatume/wp-browser": "3.0.5",
                 "phpcompatibility/php-compatibility": "9.3.5"
             },
-            "time": "2026-03-23T13:44:18+00:00",
+            "time": "2026-05-18T13:39:19+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
+                "psr-4": {
+                    "SkyVerge\\WooCommerce\\PluginFramework\\v6_2_1\\": "woocommerce/"
+                },
                 "classmap": [
                     "woocommerce/admin",
                     "woocommerce/api",
@@ -46,23 +44,15 @@
                     "woocommerce/class-sv-wc-plugin-dependencies.php",
                     "woocommerce/class-sv-wc-plugin-exception.php",
                     "woocommerce/class-sv-wp-admin-message-handler.php"
-                ],
-                "psr-4": {
-                    "SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\": "woocommerce/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "SkyVerge\\WooCommerce\\PluginFramework\\v6_1_1\\Tests\\": "tests/"
-                }
+                ]
             },
             "license": [
                 "GPL-3.0"
             ],
             "description": "The official SkyVerge WooCommerce plugin framework",
             "support": {
-                "source": "https://github.com/godaddy-wordpress/wc-plugin-framework/tree/6.1.1",
-                "issues": "https://github.com/godaddy-wordpress/wc-plugin-framework/issues"
+                "issues": "https://github.com/godaddy-wordpress/wc-plugin-framework/issues",
+                "source": "https://github.com/godaddy-wordpress/wc-plugin-framework/tree/6.2.1"
             },
             "install-path": "../skyverge/wc-plugin-framework"
         },
@@ -70,14 +60,9 @@
             "name": "woocommerce/action-scheduler",
             "version": "2.2.5",
             "version_normalized": "2.2.5.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "fd7c6b76a7af27d6403ffe39b0963dbd8ce50488"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/fd7c6b76a7af27d6403ffe39b0963dbd8ce50488",
+                "url": "https://gdartifactory1.jfrog.io/artifactory/api/composer/composer-virt/vcs-dists/zip/woocommerce/action-scheduler/fd7c6b76a7af27d6403ffe39b0963dbd8ce50488",
                 "reference": "fd7c6b76a7af27d6403ffe39b0963dbd8ce50488",
                 "shasum": ""
             },
@@ -87,7 +72,6 @@
             "time": "2019-04-24T12:45:40+00:00",
             "type": "wordpress-plugin",
             "installation-source": "dist",
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0"
             ],

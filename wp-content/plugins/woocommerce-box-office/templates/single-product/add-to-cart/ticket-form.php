@@ -22,9 +22,9 @@ if ( ! $product->is_purchasable() ) {
 	?>
 
 	<div class="wc-box-office-ticket-fields" data-index="0" style="display: none">
-		<h3 class="wc-box-office-ticket-fields-title">
-			<a href="#"><?php echo esc_html( wcbo_get_ticket_title_prefix() ) . '1'; ?></a>
-		</h3>
+		<h2 class="wc-box-office-ticket-fields-title">
+			<a href="#" role="button" aria-expanded="false"><?php echo esc_html( wcbo_get_ticket_title_prefix() ) . '1'; ?></a>
+		</h2>
 		<div class="wc-box-office-ticket-fields-body">
 			<?php
 			$ticket_form->render( array(

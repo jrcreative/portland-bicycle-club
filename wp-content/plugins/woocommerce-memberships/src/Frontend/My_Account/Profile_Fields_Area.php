@@ -26,7 +26,7 @@ namespace SkyVerge\WooCommerce\Memberships\Frontend\My_Account;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields\Profile_Field;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields\Profile_Field_Definition;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -313,10 +313,9 @@ class Profile_Fields_Area {
 	 * @since 1.19.0
 	 */
 	private function enqueue_frontend_banner_js() {
-
-		wc_enqueue_js( "
-			( function( $ ) {
-
+		Framework\Helpers\ScriptHelper::addInlinejQuery(
+			'woocommerce-memberships',
+			"
 				$( 'div.wc-memberships.wc-memberships-frontend-banner a.dismiss-link' ).on( 'click', function ( e ) {
 					e.preventDefault();
 
@@ -332,9 +331,8 @@ class Profile_Fields_Area {
 						} );
 					}
 				} );
-
-			} ) ( jQuery );
-		" );
+			"
+		);
 	}
 
 

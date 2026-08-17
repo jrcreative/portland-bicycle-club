@@ -10,14 +10,14 @@
  *
  * Plugin Name:       User Switching
  * Description:       Instant switching between user accounts in WordPress and WooCommerce.
- * Version:           1.11.2
+ * Version:           1.12.1
  * Plugin URI:        https://wordpress.org/plugins/user-switching/
  * Author:            John Blackbourn
  * Author URI:        https://johnblackbourn.com
  * Text Domain:       user-switching
  * Domain Path:       /languages/
  * Network:           true
- * Requires at least: 6.1
+ * Requires at least: 6.2
  * Requires PHP:      7.4
  * License URI:       https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
@@ -35,6 +35,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+define( 'USER_SWITCHING_VERSION', '1.12.1' );
 
 /**
  * Main singleton class for the User Switching plugin.
@@ -79,6 +81,10 @@ final class user_switching {
 		add_action( 'personal_options', [ $this, 'action_personal_options' ] );
 		add_action( 'admin_bar_menu', [ $this, 'action_admin_bar_menu' ], 11 );
 		add_action( 'shutdown', [ $this, 'action_shutdown_for_wp_die' ], 1, 0 );
+
+		// Command Palette integration:
+		add_action( 'rest_api_init', [ $this, 'action_rest_api_init' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'action_enqueue_command_palette_script' ] );
 
 		// BuddyPress integration:
 		add_action( 'bp_member_header_actions', [ $this, 'action_bp_button' ], 11 );
@@ -487,9 +493,8 @@ final class user_switching {
 		$old_user = self::get_old_user();
 
 		if ( $old_user instanceof WP_User ) {
-			$locale = get_user_locale( $old_user );
-			$switched_locale = switch_to_locale( $locale );
-			$lang_attr = str_replace( '_', '-', $locale );
+			$switched_locale = switch_to_user_locale( $old_user->ID );
+			$lang_attr = str_replace( '_', '-', get_user_locale( $old_user ) );
 
 			?>
 			<div id="user_switching" class="updated notice notice-success is-dismissible">
@@ -515,7 +520,7 @@ final class user_switching {
 				], self::switch_back_url( $old_user ) );
 
 				$message .= sprintf(
-					' <a href="%s">%s</a>.',
+					' <a href="%s">%s</a>',
 					esc_url( $switch_back_url ),
 					esc_html( self::switch_back_message( $old_user ) )
 				);
@@ -678,7 +683,7 @@ final class user_switching {
 	 * Adds a 'Switch back to {user}' link to access denied messages within the admin area.
 	 */
 	public function action_shutdown_for_wp_die(): void {
-		if ( ! did_action( 'admin_page_access_denied' ) && ! ( function_exists( 'did_filter' ) && did_filter( 'wp_die_handler' ) ) ) {
+		if ( ! did_action( 'admin_page_access_denied' ) && ! did_filter( 'wp_die_handler' ) ) {
 			return;
 		}
 
@@ -703,16 +708,16 @@ final class user_switching {
 			esc_html( self::switch_back_message( $old_user ) )
 		);
 
-		?>
-		<script>
 		// Move the switch back link so it's within the wp_die message container.
-		document.addEventListener( 'DOMContentLoaded', function() {
-			document.querySelector( '.wp-die-message' ).appendChild(
-				document.getElementById( 'user_switching_wp_die' )
-			);
-		} );
-		</script>
-		<?php
+		function_exists( 'wp_print_inline_script_tag' ) && wp_print_inline_script_tag(
+			<<<'JS'
+			document.addEventListener( 'DOMContentLoaded', function() {
+				document.querySelector( '.wp-die-message' ).appendChild(
+					document.getElementById( 'user_switching_wp_die' )
+				);
+			} );
+			JS
+		);
 	}
 
 	/**
@@ -801,7 +806,7 @@ final class user_switching {
 			'<p id="user_switching_switch_on" style="%s"><a href="%s" style="%s">%s</a></p>',
 			'position: fixed; bottom: 40px; padding: 0; margin: 0; left: 10px; font-size: 13px; z-index:99999;',
 			esc_url( $url ),
-			'padding: 8px 10px; background: #fff; color: #3858e9;',
+			'padding: 9px 12px; background: #3858e9; color: #fff; text-decoration: none; border-radius: 2px;',
 			esc_html( self::switch_back_message( $old_user ) )
 		);
 	}
@@ -1062,7 +1067,7 @@ final class user_switching {
 	 * @return string The message.
 	 */
 	public static function switch_back_message( WP_User $user ): string {
-		$switched_locale = switch_to_locale( get_user_locale( $user ) );
+		$switched_locale = switch_to_user_locale( $user->ID );
 
 		$message = sprintf(
 			/* Translators: 1: user display name; 2: username; */
@@ -1143,6 +1148,96 @@ final class user_switching {
 	 */
 	public static function secure_auth_cookie(): bool {
 		return ( is_ssl() && ( 'https' === wp_parse_url( wp_login_url(), PHP_URL_SCHEME ) ) );
+	}
+
+	/**
+	 * Registers a REST API field on the users endpoint containing the "Switch to" URL.
+	 */
+	public function action_rest_api_init(): void {
+		register_rest_field( 'user', 'user_switching_url', [
+			'get_callback' => function ( array $user ): ?string {
+				if ( ! current_user_can( 'switch_to_user', $user['id'] ) ) {
+					return null;
+				}
+
+				$target = get_userdata( $user['id'] );
+
+				if ( ! $target ) {
+					return null;
+				}
+
+				return wp_specialchars_decode( self::switch_to_url( $target ) );
+			},
+			'schema' => [
+				'type' => [
+					'string',
+					'null',
+				],
+				'description' => __( 'The URL to switch to this user.', 'user-switching' ),
+				'readonly' => true,
+			],
+		] );
+	}
+
+	/**
+	 * Enqueues the command palette integration script.
+	 */
+	public function action_enqueue_command_palette_script(): void {
+		if ( ! wp_script_is( 'wp-commands', 'enqueued' ) ) {
+			return;
+		}
+
+		$old_user = self::get_old_user();
+		$can_switch_off = current_user_can( 'switch_off' );
+
+		if ( ! $can_switch_off && ! $old_user ) {
+			return;
+		}
+
+		$settings = [
+			'canSwitchUsers' => $can_switch_off,
+			'switchToLabel' => str_replace( '&nbsp;', ' ', __( 'Switch&nbsp;To', 'user-switching' ) ),
+		];
+
+		if ( $old_user instanceof WP_User ) {
+			$switch_back_url = add_query_arg( [
+				'redirect_to' => rawurlencode( self::current_url() ),
+			], self::switch_back_url( $old_user ) );
+
+			$settings['switchBackUrl'] = wp_specialchars_decode( $switch_back_url );
+			$settings['switchBackLabel'] = self::switch_back_message( $old_user );
+			$settings['switchBackAvatar'] = get_avatar_url( $old_user->ID, [ 'size' => 48 ] );
+		}
+
+		if ( $can_switch_off ) {
+			$switch_off_url = self::switch_off_url();
+			$redirect_to = is_admin() ? self::get_admin_redirect_to() : [
+				'redirect_to' => rawurlencode( self::current_url() ),
+			];
+
+			if ( is_array( $redirect_to ) ) {
+				$switch_off_url = add_query_arg( $redirect_to, $switch_off_url );
+			}
+
+			$settings['switchOffUrl'] = wp_specialchars_decode( $switch_off_url );
+			$settings['switchOffLabel'] = __( 'Switch Off', 'user-switching' );
+		}
+
+		wp_enqueue_script(
+			'user-switching',
+			plugins_url( 'js/command-palette.js', __FILE__ ),
+			[ 'wp-commands', 'wp-components', 'wp-compose', 'wp-core-data', 'wp-data', 'wp-element', 'wp-i18n' ],
+			USER_SWITCHING_VERSION,
+			true
+		);
+
+		wp_set_script_translations( 'user-switching', 'user-switching' );
+
+		wp_localize_script(
+			'user-switching',
+			'userSwitchingCommands',
+			$settings
+		);
 	}
 
 	/**
@@ -1428,7 +1523,7 @@ if ( ! function_exists( 'user_switching_clear_olduser_cookie' ) ) {
 		}
 		if ( $clear_all || empty( $auth_cookie ) ) {
 			/**
-			 * Fires just before the user switching cookies are cleared.
+			 * Fires just before the User Switching cookies are cleared.
 			 *
 			 * @since 1.4.0
 			 */

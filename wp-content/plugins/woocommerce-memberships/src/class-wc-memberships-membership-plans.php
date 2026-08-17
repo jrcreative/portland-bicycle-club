@@ -26,7 +26,7 @@ use SkyVerge\WooCommerce\Memberships\Plans\Exceptions\PlanCreateFailedException;
 use SkyVerge\WooCommerce\Memberships\Plans\Exceptions\PlanDeleteFailedException;
 use SkyVerge\WooCommerce\Memberships\Plans\Exceptions\PlanNotDeletableException;
 use SkyVerge\WooCommerce\Memberships\Plans\Exceptions\PlanNotFoundException;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 

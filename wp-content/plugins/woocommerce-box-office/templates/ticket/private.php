@@ -1,3 +1,14 @@
+<?php
+/**
+ * Template for private ticket content.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 <div class="ticket-private-content">
 	<?php
 	if ( $notice && $notice_type ) {

@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin view for email history.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 <h3><?php esc_html_e( 'Previously sent emails', 'woocommerce-box-office' ); ?></h3>
 
 <table class="widefat past-emails">
@@ -7,7 +18,7 @@
 			<th><?php esc_html_e( 'Product', 'woocommerce-box-office' ); ?></th>
 			<th><?php esc_html_e( 'Sent', 'woocommerce-box-office' ); ?></th>
 			<th><?php esc_html_e( 'Remaining', 'woocommerce-box-office' ); ?></th>
-			<th><?php esc_html_e( 'Total targetted', 'woocommerce-box-office' ); ?></th>
+			<th><?php esc_html_e( 'Total targeted', 'woocommerce-box-office' ); ?></th>
 			<th><?php esc_html_e( 'Date sent', 'woocommerce-box-office' ); ?></th>
 		</tr>
 	</thead>
@@ -66,7 +77,7 @@
 			<th><?php esc_html_e( 'Product', 'woocommerce-box-office' ); ?></th>
 			<th><?php esc_html_e( 'Sent', 'woocommerce-box-office' ); ?></th>
 			<th><?php esc_html_e( 'Remaining', 'woocommerce-box-office' ); ?></th>
-			<th><?php esc_html_e( 'Total targetted', 'woocommerce-box-office' ); ?></th>
+			<th><?php esc_html_e( 'Total targeted', 'woocommerce-box-office' ); ?></th>
 			<th><?php esc_html_e( 'Date sent', 'woocommerce-box-office' ); ?></th>
 		</tr>
 	</tfoot>

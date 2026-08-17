@@ -136,10 +136,24 @@ class WC_Box_Office_Ticket_Frontend {
 			return;
 		}
 
+		$page_title = sprintf( __( 'Ticket for %s', 'woocommerce-box-office' ), $ticket->title );
+
+		/**
+		 * Filter the printed ticket page title.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param string              $page_title The page title.
+		 * @param WC_Box_Office_Ticket $ticket    The ticket object.
+		 * @return string
+		*/
+		$page_title = apply_filters( 'woocommerce_box_office_print_ticket_page_title', $page_title, $ticket );
+
 		$template_vars = array(
 			'printed_content' => $ticket->get_printed_content(),
 			'print_barcode'   => ( 'yes' === get_post_meta( $ticket->product_id, '_print_barcode', true ) ),
 			'ticket_id'       => $ticket->id,
+			'page_title'      => $page_title,
 		);
 
 		wc_get_template( 'my-ticket-printed.php', $template_vars, 'woocommerce-box-office', WCBO()->dir . 'templates/' );
@@ -223,7 +237,7 @@ class WC_Box_Office_Ticket_Frontend {
 
 		$html = '';
 
-		$description = apply_filters( 'woocommerce_box_office_pdf_invoice_tickets_description', esc_html__( 'Log into your acount to edit each of your purchased tickets.', 'woocommerce-box-office' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$description = apply_filters( 'woocommerce_box_office_pdf_invoice_tickets_description', esc_html__( 'Log into your account to edit each of your purchased tickets.', 'woocommerce-box-office' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		if ( $description ) {
 			$html .= '<p class="ticket-list-description">' . $description . '</p>' . "\n";

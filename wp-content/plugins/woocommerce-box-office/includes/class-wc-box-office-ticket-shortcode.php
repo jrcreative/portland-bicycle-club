@@ -217,8 +217,8 @@ class WC_Box_Office_Ticket_Shortcode {
 	/**
 	 * Shortcode to display purchased tickets (attendees).
 	 *
-	 * @param  array  $params Shortcode paramaters
-	 * @return string         HTML of ticket list
+	 * @param array $params Shortcode parameters.
+	 * @return string HTML of ticket list.
 	 */
 	public function display_tickets( $params = array() ) {
 		// Get shortcode parameters.
@@ -319,13 +319,7 @@ class WC_Box_Office_Ticket_Shortcode {
 					break;
 
 					case 'twitter':
-						$twitter = str_replace( 'http://', '', $ticket_meta );
-						$twitter = str_replace( 'https://', '', $twitter );
-						$twitter = str_replace( 'www.', '', $twitter );
-						$twitter = str_replace( 'twitter.com', '', $twitter );
-						$twitter = trim( $twitter, '/' );
-						$twitter = trim( $twitter, '.' );
-						$twitter = str_replace( '@', '', $twitter );
+						$twitter = wcbo_sanitize_twitter_handle( $ticket_meta );
 					break;
 				}
 			}

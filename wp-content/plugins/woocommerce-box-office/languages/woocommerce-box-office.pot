@@ -2,16 +2,16 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Box Office 1.4.0\n"
+"Project-Id-Version: WooCommerce Box Office 1.5.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/target-repo\n"
-"POT-Creation-Date: 2026-04-30 10:06:01+00:00\n"
+"POT-Creation-Date: 2026-07-13 13:06:47+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2026-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"X-Generator: node-wp-i18n 1.2.7\n"
+"X-Generator: node-wp-i18n 1.2.8\n"
 
 #: includes/class-wc-box-office-assets.php:104
 msgid "Product is not selected or email body is empty. Please fill it."
@@ -21,38 +21,43 @@ msgstr ""
 msgid "WooCommerce Box Office"
 msgstr ""
 
-#: includes/class-wc-box-office-cart.php:341
-#: includes/class-wc-box-office-settings.php:111
-msgid "Ticket Detail"
-msgstr ""
-
-#: includes/class-wc-box-office-cart.php:389
+#: includes/class-wc-box-office-cart.php:401
 #: includes/class-wc-box-office-settings.php:127
-#: includes/class-wc-box-office-ticket-form.php:238
+#: includes/class-wc-box-office-ticket-form.php:248
 msgid "Buy Ticket Now"
 msgstr ""
 
-#: includes/class-wc-box-office-cart.php:430
+#: includes/class-wc-box-office-cart.php:442
 msgid "%s\"%s\" has been added to your cart."
 msgid_plural "%s\"%s\" have been added to your cart."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-box-office-cart.php:438
+#: includes/class-wc-box-office-cart.php:450
 msgid "Continue Shopping"
 msgstr ""
 
-#: includes/class-wc-box-office-cart.php:440
+#: includes/class-wc-box-office-cart.php:452
 msgid "View Cart"
 msgstr ""
 
-#: includes/class-wc-box-office-cart.php:534
+#: includes/class-wc-box-office-cart.php:546
 #. translators: %s - Ticket field label.
 msgid "%s is a required field and can not be empty."
 msgstr ""
 
-#: includes/class-wc-box-office-cart.php:546
+#: includes/class-wc-box-office-cart.php:558
 msgid "Please enter all required fields."
+msgstr ""
+
+#: includes/class-wc-box-office-cart.php:579
+#: includes/class-wc-box-office-settings.php:111
+msgid "Ticket Detail"
+msgstr ""
+
+#: includes/class-wc-box-office-cart.php:608
+#. translators: 1: Add to cart text, 2: product name
+msgid "%1$s: %2$s"
 msgstr ""
 
 #: includes/class-wc-box-office-cron.php:45
@@ -128,17 +133,17 @@ msgstr ""
 msgid "Choose which format of email to send."
 msgstr ""
 
-#: includes/class-wc-box-office-privacy.php:22
+#: includes/class-wc-box-office-privacy.php:27
 #: includes/class-wc-box-office-settings.php:50
 msgid "Box Office"
 msgstr ""
 
-#: includes/class-wc-box-office-privacy.php:24
-#: includes/class-wc-box-office-privacy.php:25
+#: includes/class-wc-box-office-privacy.php:29
+#: includes/class-wc-box-office-privacy.php:30
 msgid "WooCommerce Box Office Data"
 msgstr ""
 
-#: includes/class-wc-box-office-privacy.php:52
+#: includes/class-wc-box-office-privacy.php:57
 #. translators: %s: URL.
 msgid ""
 "By using this extension, you may be storing personal data or sharing data "
@@ -147,23 +152,23 @@ msgid ""
 "policy.</a>"
 msgstr ""
 
-#: includes/class-wc-box-office-privacy.php:75
+#: includes/class-wc-box-office-privacy.php:80
 #: includes/class-wc-box-office-report.php:36
 #: includes/lib/class-wc-box-office-post-type.php:73
 #: includes/views/admin/create-ticket-step-2.php:43
 msgid "Tickets"
 msgstr ""
 
-#: includes/class-wc-box-office-privacy.php:79
+#: includes/class-wc-box-office-privacy.php:84
 #: includes/class-wc-box-office-tools.php:215
 msgid "Ticket ID"
 msgstr ""
 
-#: includes/class-wc-box-office-privacy.php:83
+#: includes/class-wc-box-office-privacy.php:88
 msgid "Ticket data"
 msgstr ""
 
-#: includes/class-wc-box-office-privacy.php:119
+#: includes/class-wc-box-office-privacy.php:124
 msgid "Box office personal data erased."
 msgstr ""
 
@@ -171,7 +176,7 @@ msgstr ""
 #: includes/class-wc-box-office-ticket-admin.php:446
 #: includes/class-wc-box-office-tools.php:218
 #: includes/lib/class-wc-box-office-post-type.php:89
-#: includes/views/admin/create-ticket-step-3.php:30
+#: includes/views/admin/create-ticket-step-3.php:35
 msgid "Ticket"
 msgstr ""
 
@@ -240,7 +245,7 @@ msgid "Ticket Title Prefix"
 msgstr ""
 
 #: includes/class-wc-box-office-settings.php:119
-#: includes/wcbo-functions.php:883
+#: includes/wcbo-functions.php:887
 msgid "Ticket #"
 msgstr ""
 
@@ -261,7 +266,7 @@ msgid "Buy Ticket Button Button Text Plural"
 msgstr ""
 
 #: includes/class-wc-box-office-settings.php:135
-#: includes/class-wc-box-office-ticket-form.php:243
+#: includes/class-wc-box-office-ticket-form.php:253
 msgid "Buy Tickets Now"
 msgstr ""
 
@@ -280,7 +285,7 @@ msgid "Enable Ticket Printing"
 msgstr ""
 
 #: includes/class-wc-box-office-settings.php:152
-#: includes/views/admin/product-ticket-panel.php:101
+#: includes/views/admin/product-ticket-panel.php:112
 msgid "This will enable the 'Print ticket' button on the ticket edit page."
 msgstr ""
 
@@ -348,7 +353,7 @@ msgstr ""
 
 #: includes/class-wc-box-office-ticket-admin.php:104
 #: includes/class-wc-box-office-tools.php:225
-#: includes/views/admin/ticket-meta-box.php:62
+#: includes/views/admin/ticket-meta-box.php:72
 msgid "Attended"
 msgstr ""
 
@@ -400,26 +405,26 @@ msgid "Opted-out of public listing"
 msgstr ""
 
 #: includes/class-wc-box-office-ticket-admin.php:450
-#: includes/views/admin/ticket-email-log-meta-box.php:7
+#: includes/views/admin/ticket-email-log-meta-box.php:18
 msgid "Date"
 msgstr ""
 
 #: includes/class-wc-box-office-ticket-admin.php:478
 #: includes/class-wc-box-office-ticket-shortcode.php:66
-#: templates/order/order-tickets.php:15
+#: templates/order/order-tickets.php:26
 msgid "Pending"
 msgstr ""
 
 #: includes/class-wc-box-office-ticket-admin.php:498
 #: includes/class-wc-box-office-ticket-admin.php:504
-#: includes/views/admin/ticket-field.php:39
-#: includes/views/admin/ticket-field.php:46
-#: includes/views/admin/ticket-field.php:52
+#: includes/views/admin/ticket-field.php:44
+#: includes/views/admin/ticket-field.php:51
+#: includes/views/admin/ticket-field.php:57
 msgid "Yes"
 msgstr ""
 
 #: includes/class-wc-box-office-ticket-admin.php:538
-#: templates/ticket/scan.php:7
+#: templates/ticket/scan.php:18
 msgid "Mark as attended"
 msgstr ""
 
@@ -543,39 +548,49 @@ msgstr ""
 msgid "Number of ticket fields does not match with provided ticket quantity."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:170
+#: includes/class-wc-box-office-ticket-form.php:181
 msgid "Privacy Preference:"
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:175
+#: includes/class-wc-box-office-ticket-form.php:185
 msgid "Opt-out from being displayed in the public list of attendees."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:251
+#: includes/class-wc-box-office-ticket-form.php:261
 msgid "Fields are required"
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:283
-msgid "Please check at least one box to proceed."
+#: includes/class-wc-box-office-ticket-form.php:282
+msgid "Please correct the following errors before continuing:"
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:411
+#: includes/class-wc-box-office-ticket-form.php:416
+#. translators: %s: ticket field label
+msgid "%s is a required field and cannot be empty."
+msgstr ""
+
+#: includes/class-wc-box-office-ticket-form.php:418
+#. translators: %s: ticket field label
+msgid "%s is a required field. Please make a selection."
+msgstr ""
+
+#: includes/class-wc-box-office-ticket-form.php:505
 msgid "%s is required field and can not be empty."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:422
+#: includes/class-wc-box-office-ticket-form.php:516
 msgid "Invalid email is provided."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:431
+#: includes/class-wc-box-office-ticket-form.php:525
 msgid "Invalid URL is provided"
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:446
+#: includes/class-wc-box-office-ticket-form.php:540
 msgid "Invalid value for field %s"
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-form.php:516
+#: includes/class-wc-box-office-ticket-form.php:610
 msgid "Call %s::validate first"
 msgstr ""
 
@@ -613,12 +628,16 @@ msgstr ""
 msgid "Ticket updated."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-frontend.php:226
-msgid "Log into your acount to edit each of your purchased tickets."
+#: includes/class-wc-box-office-ticket-frontend.php:139
+msgid "Ticket for %s"
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-frontend.php:264
-#: templates/order/order-tickets.php:1
+#: includes/class-wc-box-office-ticket-frontend.php:240
+msgid "Log into your account to edit each of your purchased tickets."
+msgstr ""
+
+#: includes/class-wc-box-office-ticket-frontend.php:278
+#: templates/order/order-tickets.php:12
 msgid "Order Tickets"
 msgstr ""
 
@@ -632,45 +651,45 @@ msgid "Your information for %1$s%2$s."
 msgstr ""
 
 #: includes/class-wc-box-office-ticket-shortcode.php:104
-#: templates/order/order-tickets.php:4
+#: templates/order/order-tickets.php:15
 msgid "View or edit each of your purchased tickets using the links below."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-shortcode.php:462
+#: includes/class-wc-box-office-ticket-shortcode.php:456
 msgid "The content on this page is private."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-shortcode.php:467
+#: includes/class-wc-box-office-ticket-shortcode.php:461
 msgid "Invalid ticket token."
 msgstr ""
 
+#: includes/class-wc-box-office-ticket-shortcode.php:465
 #: includes/class-wc-box-office-ticket-shortcode.php:471
-#: includes/class-wc-box-office-ticket-shortcode.php:477
 msgid "Sorry, but your ticket does not allow you to view this content."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-shortcode.php:509
+#: includes/class-wc-box-office-ticket-shortcode.php:503
 msgid "The e-mail address you have entered does not seem to be valid."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-shortcode.php:519
+#: includes/class-wc-box-office-ticket-shortcode.php:513
 msgid "No attendee matches with your email."
 msgstr ""
 
-#: includes/class-wc-box-office-ticket-shortcode.php:528
+#: includes/class-wc-box-office-ticket-shortcode.php:522
 #. translators: %s: email address.
 msgid "URL to view this content is already sent to %s"
 msgstr ""
 
-#: includes/class-wc-box-office-ticket.php:290
+#: includes/class-wc-box-office-ticket.php:294
 msgid "Unknown ticket to update"
 msgstr ""
 
-#: includes/class-wc-box-office-ticket.php:427
+#: includes/class-wc-box-office-ticket.php:431
 msgid "%1$s (%2$s)"
 msgstr ""
 
-#: includes/class-wc-box-office-tools.php:52 includes/views/admin/tools.php:13
+#: includes/class-wc-box-office-tools.php:52 includes/views/admin/tools.php:18
 msgid "Ticket Tools"
 msgstr ""
 
@@ -789,7 +808,7 @@ msgid "Emails"
 msgstr ""
 
 #: includes/lib/class-wc-box-office-post-type.php:93
-#: includes/views/admin/tools.php:22
+#: includes/views/admin/tools.php:27
 msgid "Email"
 msgstr ""
 
@@ -963,7 +982,7 @@ msgid "Don't create an order for this ticket."
 msgstr ""
 
 #: includes/views/admin/create-ticket-step-1.php:89
-#: templates/myaccount/my-tickets.php:83
+#: templates/myaccount/my-tickets.php:91
 msgid "Next"
 msgstr ""
 
@@ -977,327 +996,327 @@ msgid ""
 "found in selected ticket product."
 msgstr ""
 
-#: includes/views/admin/create-ticket-step-3.php:10
+#: includes/views/admin/create-ticket-step-3.php:15
 msgid "Created Tickets"
 msgstr ""
 
-#: includes/views/admin/create-ticket-step-3.php:16
+#: includes/views/admin/create-ticket-step-3.php:21
 #. Translators: %s is the number of tickets created.
 msgid "%s ticket created."
 msgid_plural "%s tickets created"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/views/admin/create-ticket-step-3.php:21
+#: includes/views/admin/create-ticket-step-3.php:26
 msgid "View order."
 msgstr ""
 
-#: includes/views/admin/create-ticket-step-3.php:29
-#: includes/views/admin/ticket-field.php:40
-#: includes/views/admin/ticket-field.php:47
+#: includes/views/admin/create-ticket-step-3.php:34
+#: includes/views/admin/ticket-field.php:45
 #: includes/views/admin/ticket-field.php:52
+#: includes/views/admin/ticket-field.php:57
 msgid "No"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:8
+#: includes/views/admin/product-ticket-panel.php:19
 msgid "Label"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:10
-#: includes/views/admin/product-ticket-panel.php:12
+#: includes/views/admin/product-ticket-panel.php:21
+#: includes/views/admin/product-ticket-panel.php:23
 msgid "The field label as it is shown to the user."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:15
+#: includes/views/admin/product-ticket-panel.php:26
 msgid "Type"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:17
+#: includes/views/admin/product-ticket-panel.php:28
 msgid "Auto-fill"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:19
-#: includes/views/admin/product-ticket-panel.php:21
+#: includes/views/admin/product-ticket-panel.php:30
+#: includes/views/admin/product-ticket-panel.php:32
 msgid ""
 "Choose the customer's billing field from which data is auto-filled as well "
 "as what options are available for applicable field types."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:24
+#: includes/views/admin/product-ticket-panel.php:35
 msgid "Required"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:46
+#: includes/views/admin/product-ticket-panel.php:57
 msgid "Add Field"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:77
-#: includes/views/admin/tools-user-privacy.php:30
+#: includes/views/admin/product-ticket-panel.php:88
+#: includes/views/admin/tools-user-privacy.php:34
 msgid "User privacy preference"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:80
+#: includes/views/admin/product-ticket-panel.php:91
 msgid ""
 "Allow customers to opt-out from being displayed in the public list of "
 "attendees when %s shortcode is used."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:96
+#: includes/views/admin/product-ticket-panel.php:107
 msgid ""
 "Note that even if disabled here, if this setting is enabled at the global "
 "level, the Print ticket button will be shown."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:97
+#: includes/views/admin/product-ticket-panel.php:108
 msgid "Enable ticket printing"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:105
+#: includes/views/admin/product-ticket-panel.php:116
 msgid ""
 "Note that even if disabled here, if this setting is enabled at the global "
 "level, the customer won't be allowed to edit the ticket."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:106
+#: includes/views/admin/product-ticket-panel.php:117
 msgid "Disable ticket editing"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:110
+#: includes/views/admin/product-ticket-panel.php:121
 msgid "This will disable customers to edit their purchased tickets."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:115
+#: includes/views/admin/product-ticket-panel.php:126
 msgid "Include barcode"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:115
+#: includes/views/admin/product-ticket-panel.php:126
 msgid "This will add the unique ticket barcode to the bottom of the ticket."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:120
+#: includes/views/admin/product-ticket-panel.php:131
 msgid "This is the content that will be shown on each printed ticket."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:122
-#: includes/views/admin/product-ticket-panel.php:189
+#: includes/views/admin/product-ticket-panel.php:133
+#: includes/views/admin/product-ticket-panel.php:200
 msgid "Add ticket fields to the content by using following labels: "
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:126
-#: includes/views/admin/product-ticket-panel.php:199
+#: includes/views/admin/product-ticket-panel.php:137
+#: includes/views/admin/product-ticket-panel.php:210
 msgid "To insert ticket ID use: "
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:132
-#: includes/views/admin/product-ticket-panel.php:225
+#: includes/views/admin/product-ticket-panel.php:143
+#: includes/views/admin/product-ticket-panel.php:236
 msgid "You can also use this ticket product variables: "
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:168
+#: includes/views/admin/product-ticket-panel.php:179
 msgid ""
 "Note that even if disabled here, if this setting is enabled at the global "
 "level, an email will be sent any time the ticket is changed."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:169
+#: includes/views/admin/product-ticket-panel.php:180
 msgid "Enable ticket emails"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:173
+#: includes/views/admin/product-ticket-panel.php:184
 msgid ""
 "This will send an email to the contact address for each ticket whenever it "
 "is purchased or updated."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:179
+#: includes/views/admin/product-ticket-panel.php:190
 msgid "Your ticket has been purchased successfully!"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:182
-#: includes/views/admin/tools-email.php:57
+#: includes/views/admin/product-ticket-panel.php:193
+#: includes/views/admin/tools-email.php:60
 msgid "Email subject"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:182
+#: includes/views/admin/product-ticket-panel.php:193
 msgid ""
 "Add ticket fields to the subject by inserting the field label like this: "
 "%1$s<br>e.g. %2$s"
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:186
+#: includes/views/admin/product-ticket-panel.php:197
 msgid "This is the content that will make up each email."
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:193
+#: includes/views/admin/product-ticket-panel.php:204
 msgid "To insert ticket link use: "
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:209
+#: includes/views/admin/product-ticket-panel.php:220
 msgid "To insert barcode use: "
 msgstr ""
 
-#: includes/views/admin/product-ticket-panel.php:218
+#: includes/views/admin/product-ticket-panel.php:229
 msgid "To insert ticket token use: "
 msgstr ""
 
-#: includes/views/admin/report-sales-by-product.php:4
+#: includes/views/admin/report-sales-by-product.php:15
 msgid "Ticket Product"
 msgstr ""
 
-#: includes/views/admin/report-sales-by-product.php:5
+#: includes/views/admin/report-sales-by-product.php:16
 msgid "Sold Tickets"
 msgstr ""
 
-#: includes/views/admin/report-sales-by-product.php:6
+#: includes/views/admin/report-sales-by-product.php:17
 msgid "Stock"
 msgstr ""
 
-#: includes/views/admin/report-sales-by-product.php:7
+#: includes/views/admin/report-sales-by-product.php:18
 msgid "Price"
 msgstr ""
 
-#: includes/views/admin/report-sales-by-product.php:8
+#: includes/views/admin/report-sales-by-product.php:19
 msgid "Total Sales"
 msgstr ""
 
-#: includes/views/admin/report-sales-by-product.php:29
+#: includes/views/admin/report-sales-by-product.php:40
 msgid "No data to show. Start selling your tickets!"
 msgstr ""
 
-#: includes/views/admin/ticket-email-log-meta-box.php:8
+#: includes/views/admin/ticket-email-log-meta-box.php:19
 msgid "Log Message"
 msgstr ""
 
-#: includes/views/admin/ticket-email-meta-box.php:11
+#: includes/views/admin/ticket-email-meta-box.php:16
 msgid "Subject:"
 msgstr ""
 
-#: includes/views/admin/ticket-email-meta-box.php:18
-#: includes/views/admin/ticket-meta-box.php:28
+#: includes/views/admin/ticket-email-meta-box.php:23
+#: includes/views/admin/ticket-meta-box.php:38
 msgid "Product:"
 msgstr ""
 
-#: includes/views/admin/ticket-email-meta-box.php:24
+#: includes/views/admin/ticket-email-meta-box.php:29
 msgid "(deleted)"
 msgstr ""
 
-#: includes/views/admin/ticket-email-meta-box.php:31
+#: includes/views/admin/ticket-email-meta-box.php:36
 msgid "Sent by:"
 msgstr ""
 
-#: includes/views/admin/ticket-email-meta-box.php:38
+#: includes/views/admin/ticket-email-meta-box.php:43
 msgid "Date sent:"
 msgstr ""
 
-#: includes/views/admin/ticket-email-meta-box.php:45
+#: includes/views/admin/ticket-email-meta-box.php:50
 msgid "Total target:"
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:10
+#: includes/views/admin/ticket-field.php:15
 msgid "None"
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:11
+#: includes/views/admin/ticket-field.php:16
 msgid "--------"
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:30
+#: includes/views/admin/ticket-field.php:35
 msgid "Field Label"
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:34
+#: includes/views/admin/ticket-field.php:39
 msgid "Comma-separated list of available options"
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:36
+#: includes/views/admin/ticket-field.php:41
 msgid "Use this email address to contact the ticket holder."
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:37
+#: includes/views/admin/ticket-field.php:42
 msgid "Contact: "
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:43
+#: includes/views/admin/ticket-field.php:48
 msgid "Use this email address for the ticket holder's gravatar."
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:44
+#: includes/views/admin/ticket-field.php:49
 msgid "Gravatar: "
 msgstr ""
 
-#: includes/views/admin/ticket-field.php:53
+#: includes/views/admin/ticket-field.php:58
 msgid "Delete"
 msgstr ""
 
-#: includes/views/admin/ticket-meta-box.php:17
+#: includes/views/admin/ticket-meta-box.php:27
 msgid "Edit Ticket URL:"
 msgstr ""
 
-#: includes/views/admin/ticket-meta-box.php:36
+#: includes/views/admin/ticket-meta-box.php:46
 #. translators: %d - Product ID.
 msgid "ID: %d (Product associated with the ticket no longer exists)"
 msgstr ""
 
-#: includes/views/admin/ticket-meta-box.php:45
+#: includes/views/admin/ticket-meta-box.php:55
 msgid "Order:"
 msgstr ""
 
-#: includes/views/admin/ticket-meta-box.php:54
+#: includes/views/admin/ticket-meta-box.php:64
 msgid "User:"
 msgstr ""
 
-#: includes/views/admin/ticket-meta-box.php:64
+#: includes/views/admin/ticket-meta-box.php:74
 msgid "Mark this ticket as attended."
 msgstr ""
 
-#: includes/views/admin/tools-email-history.php:1
+#: includes/views/admin/tools-email-history.php:12
 msgid "Previously sent emails"
 msgstr ""
 
-#: includes/views/admin/tools-email-history.php:6
-#: includes/views/admin/tools-email-history.php:65
+#: includes/views/admin/tools-email-history.php:17
+#: includes/views/admin/tools-email-history.php:76
 msgid "Subject"
 msgstr ""
 
-#: includes/views/admin/tools-email-history.php:7
-#: includes/views/admin/tools-email-history.php:66
+#: includes/views/admin/tools-email-history.php:18
+#: includes/views/admin/tools-email-history.php:77
 #: templates/myaccount/my-tickets.php:38
 msgid "Product"
 msgstr ""
 
-#: includes/views/admin/tools-email-history.php:8
-#: includes/views/admin/tools-email-history.php:67
+#: includes/views/admin/tools-email-history.php:19
+#: includes/views/admin/tools-email-history.php:78
 msgid "Sent"
 msgstr ""
 
-#: includes/views/admin/tools-email-history.php:9
-#: includes/views/admin/tools-email-history.php:68
+#: includes/views/admin/tools-email-history.php:20
+#: includes/views/admin/tools-email-history.php:79
 msgid "Remaining"
 msgstr ""
 
-#: includes/views/admin/tools-email-history.php:10
-#: includes/views/admin/tools-email-history.php:69
-msgid "Total targetted"
+#: includes/views/admin/tools-email-history.php:21
+#: includes/views/admin/tools-email-history.php:80
+msgid "Total targeted"
 msgstr ""
 
-#: includes/views/admin/tools-email-history.php:11
-#: includes/views/admin/tools-email-history.php:70
+#: includes/views/admin/tools-email-history.php:22
+#: includes/views/admin/tools-email-history.php:81
 msgid "Date sent"
 msgstr ""
 
-#: includes/views/admin/tools-email-history.php:58
+#: includes/views/admin/tools-email-history.php:69
 msgid "No emails have been sent yet."
 msgstr ""
 
-#: includes/views/admin/tools-email.php:20
+#: includes/views/admin/tools-email.php:23
 msgid "Send an email to all individuals who have booked the following ticket:"
 msgstr ""
 
-#: includes/views/admin/tools-email.php:23
+#: includes/views/admin/tools-email.php:26
 msgid "Select ticket product"
 msgstr ""
 
-#: includes/views/admin/tools-email.php:47
+#: includes/views/admin/tools-email.php:50
 #. translators: %1$s is the field label, %2$s is an example field label, %3$s
 #. is the ticket edit link.
 msgid ""
@@ -1305,114 +1324,114 @@ msgid ""
 "label like this: %1$s - e.g. %2$s. Use %3$s for the ticket edit link."
 msgstr ""
 
-#: includes/views/admin/tools-email.php:82
+#: includes/views/admin/tools-email.php:85
 msgid "Preview email"
 msgstr ""
 
-#: includes/views/admin/tools-email.php:83
+#: includes/views/admin/tools-email.php:86
 msgid "Send to all ticket holders"
 msgstr ""
 
-#: includes/views/admin/tools-export.php:7
+#: includes/views/admin/tools-export.php:18
 msgid "Export attendee data for the following chosen tickets:"
 msgstr ""
 
-#: includes/views/admin/tools-export.php:21
+#: includes/views/admin/tools-export.php:32
 msgid "Only export published tickets"
 msgstr ""
 
-#: includes/views/admin/tools-export.php:26
+#: includes/views/admin/tools-export.php:37
 msgid "Download Export File (CSV)"
 msgstr ""
 
-#: includes/views/admin/tools-user-privacy.php:21
+#: includes/views/admin/tools-user-privacy.php:25
 #. translators: %s - Plugin name
 msgid "<strong>%s</strong>: User privacy preference update is in progress..."
 msgstr ""
 
-#: includes/views/admin/tools-user-privacy.php:32
+#: includes/views/admin/tools-user-privacy.php:36
 msgid "Select an option to bulk-update user privacy preference for all tickets."
 msgstr ""
 
-#: includes/views/admin/tools-user-privacy.php:38
+#: includes/views/admin/tools-user-privacy.php:42
 msgid ""
 "Exclude all ticket holders from being displayed in the public list of "
 "attendees."
 msgstr ""
 
-#: includes/views/admin/tools-user-privacy.php:43
+#: includes/views/admin/tools-user-privacy.php:47
 msgid "Include all ticket holders in the public list of attendees."
 msgstr ""
 
-#: includes/views/admin/tools-user-privacy.php:48 templates/ticket/form.php:8
+#: includes/views/admin/tools-user-privacy.php:52 templates/ticket/form.php:19
 msgid "Update"
 msgstr ""
 
-#: includes/views/admin/tools.php:17
+#: includes/views/admin/tools.php:22
 msgid "Export"
 msgstr ""
 
-#: includes/views/admin/tools.php:27
+#: includes/views/admin/tools.php:32
 msgid "User Privacy"
 msgstr ""
 
-#: includes/wcbo-functions.php:680 includes/wcbo-functions.php:703
+#: includes/wcbo-functions.php:684 includes/wcbo-functions.php:707
 msgid "First name"
 msgstr ""
 
-#: includes/wcbo-functions.php:681 includes/wcbo-functions.php:704
+#: includes/wcbo-functions.php:685 includes/wcbo-functions.php:708
 msgid "Last name"
 msgstr ""
 
-#: includes/wcbo-functions.php:682 includes/wcbo-functions.php:705
+#: includes/wcbo-functions.php:686 includes/wcbo-functions.php:709
 msgid "Email address"
 msgstr ""
 
-#: includes/wcbo-functions.php:683
+#: includes/wcbo-functions.php:687
 msgid "URL"
 msgstr ""
 
-#: includes/wcbo-functions.php:684
+#: includes/wcbo-functions.php:688
 msgid "Twitter"
 msgstr ""
 
-#: includes/wcbo-functions.php:685
+#: includes/wcbo-functions.php:689
 msgid "Text"
 msgstr ""
 
-#: includes/wcbo-functions.php:686
+#: includes/wcbo-functions.php:690
 msgid "Drop down menu"
 msgstr ""
 
-#: includes/wcbo-functions.php:687
+#: includes/wcbo-functions.php:691
 msgid "Radio buttons"
 msgstr ""
 
-#: includes/wcbo-functions.php:688
+#: includes/wcbo-functions.php:692
 msgid "Checkbox(es)"
 msgstr ""
 
-#: includes/wcbo-functions.php:706
+#: includes/wcbo-functions.php:710
 msgid "Phone"
 msgstr ""
 
-#: includes/wcbo-functions.php:707
+#: includes/wcbo-functions.php:711
 msgid "Company"
 msgstr ""
 
-#: includes/wcbo-functions.php:708
+#: includes/wcbo-functions.php:712
 msgid "Country"
 msgstr ""
 
-#: includes/wcbo-functions.php:709
+#: includes/wcbo-functions.php:713
 msgid "Town / City"
 msgstr ""
 
-#: includes/wcbo-functions.php:710
+#: includes/wcbo-functions.php:714
 msgid "State"
 msgstr ""
 
-#: includes/wcbo-functions.php:711
+#: includes/wcbo-functions.php:715
 msgid "Postcode / Zip"
 msgstr ""
 
@@ -1420,23 +1439,40 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: templates/my-ticket-read-only.php:30 templates/ticket/form.php:13
+#: templates/my-ticket-read-only.php:30 templates/ticket/form.php:24
 msgid "Print ticket"
 msgstr ""
 
-#: templates/myaccount/my-tickets.php:69
+#: templates/myaccount/my-tickets.php:40
+msgid "Actions"
+msgstr ""
+
+#: templates/myaccount/my-tickets.php:56
+msgid "Product: %s"
+msgstr ""
+
+#: templates/myaccount/my-tickets.php:65
+msgid "Order #: %s"
+msgstr ""
+
+#: templates/myaccount/my-tickets.php:70
 msgid "View or Edit"
 msgstr ""
 
-#: templates/myaccount/my-tickets.php:79
+#: templates/myaccount/my-tickets.php:74
+#. translators: Hidden accessibility text.
+msgid "ticket for order #%s"
+msgstr ""
+
+#: templates/myaccount/my-tickets.php:87
 msgid "Previous"
 msgstr ""
 
-#: templates/myaccount/my-tickets.php:91
+#: templates/myaccount/my-tickets.php:99
 msgid "Go Shop"
 msgstr ""
 
-#: templates/myaccount/my-tickets.php:93
+#: templates/myaccount/my-tickets.php:101
 msgid "No ticket has been purchased yet."
 msgstr ""
 
@@ -1444,45 +1480,45 @@ msgstr ""
 msgid "Your browser must support JavaScript in order to purchase ticket(s)."
 msgstr ""
 
-#: templates/ticket/default-print-content.php:8
+#: templates/ticket/default-print-content.php:19
 msgid "Attendee Detail"
 msgstr ""
 
-#: templates/ticket/private.php:9
+#: templates/ticket/private.php:20
 msgid ""
 "If you've purchased the ticket use the form below to send link for "
 "unlocking content to your email."
 msgstr ""
 
-#: templates/ticket/private.php:18
+#: templates/ticket/private.php:29
 msgid "E-mail"
 msgstr ""
 
-#: templates/ticket/private.php:23
+#: templates/ticket/private.php:34
 msgid "Your email associated with the ticket."
 msgstr ""
 
-#: templates/ticket/private.php:27
+#: templates/ticket/private.php:38
 msgid "Send me private link"
 msgstr ""
 
-#: templates/ticket/scan.php:5
+#: templates/ticket/scan.php:16
 msgid "Select action"
 msgstr ""
 
-#: templates/ticket/scan.php:6
+#: templates/ticket/scan.php:17
 msgid "Look up"
 msgstr ""
 
-#: templates/ticket/scan.php:10
+#: templates/ticket/scan.php:21
 msgid "Scan or enter ticket barcode"
 msgstr ""
 
-#: templates/ticket/scan.php:11
+#: templates/ticket/scan.php:22
 msgid "Go"
 msgstr ""
 
-#: templates/ticket/scan.php:15
+#: templates/ticket/scan.php:26
 msgid "Processing ticket..."
 msgstr ""
 
@@ -1519,12 +1555,12 @@ msgctxt "Page title"
 msgid "My Ticket"
 msgstr ""
 
-#: templates/ticket/default-email-content.php:8
+#: templates/ticket/default-email-content.php:12
 msgctxt "default-email-content"
 msgid "Hi there!"
 msgstr ""
 
-#: templates/ticket/default-email-content.php:13
+#: templates/ticket/default-email-content.php:17
 msgctxt "default-email-content"
 msgid ""
 "Thank you so much for purchasing a ticket and hope to see you soon at our "
@@ -1532,22 +1568,22 @@ msgid ""
 "visiting the following link:"
 msgstr ""
 
-#: templates/ticket/default-email-content.php:20
+#: templates/ticket/default-email-content.php:24
 msgctxt "default-email-content"
 msgid "Ticket ID:"
 msgstr ""
 
-#: templates/ticket/default-email-content.php:25
+#: templates/ticket/default-email-content.php:29
 msgctxt "default-email-content"
 msgid "Let us know if you have any questions!"
 msgstr ""
 
-#: templates/ticket/private-link-email.php:8
+#: templates/ticket/private-link-email.php:12
 msgctxt "private-link-email"
 msgid "Hi there!"
 msgstr ""
 
-#: templates/ticket/private-link-email.php:12
+#: templates/ticket/private-link-email.php:16
 #. translators: private link title
 msgctxt "private-link-email"
 msgid "Here's the link to view %s:"

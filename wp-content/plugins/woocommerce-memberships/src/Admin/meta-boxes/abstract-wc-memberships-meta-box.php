@@ -21,7 +21,7 @@
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -551,11 +551,7 @@ abstract class WC_Memberships_Meta_Box {
 
 		$screen = Framework\SV_WC_Helper::get_current_screen();
 
-		if ( ! $screen || ! in_array( $screen->id, $this->screens, true ) ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'manage_woocommerce_membership_plans' ) ) {
+		if ( ! $this->should_add_meta_box( $screen ) ) {
 			return;
 		}
 
@@ -569,6 +565,24 @@ abstract class WC_Memberships_Meta_Box {
 		);
 
 		add_filter( "postbox_classes_{$screen->id}_{$this->id}", array( $this, 'postbox_classes' ) );
+	}
+
+	/**
+	 * Determines whether the meta box should be added.
+	 *
+	 * @since 1.29.0
+	 */
+	protected function should_add_meta_box( ?\WP_Screen $screen ) : bool
+	{
+		if ( ! $screen || ! in_array( $screen->id, $this->screens, true ) ) {
+			return false;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce_membership_plans' ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 
@@ -634,7 +648,7 @@ abstract class WC_Memberships_Meta_Box {
 			$use_custom   = 'no';
 
 			if ( ! empty( $_POST["_wc_memberships_{$message_code}"] ) ) {
-				$message = wp_unslash( sanitize_post_field( 'post_content', $_POST["_wc_memberships_{$message_code}"], 0, 'db' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$message = \WC_Memberships_User_Messages::sanitize_message( $_POST["_wc_memberships_{$message_code}"] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			}
 
 			if ( isset( $_POST["_wc_memberships_use_custom_{$message_code}"] ) && 'no' !== $_POST["_wc_memberships_use_custom_{$message_code}"] ) {

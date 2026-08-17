@@ -1,4 +1,15 @@
-<?php $logs = get_post_meta( $post->ID, 'wc_box_office_log', true ); ?>
+<?php
+/**
+ * Admin view for ticket email log meta box.
+ *
+ * @package woocommerce-box-office
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
+$logs = get_post_meta( $post->ID, 'wc_box_office_log', true ); ?>
 
 <div class="panel woocommerce_options_panel">
 	<table class="widefat">

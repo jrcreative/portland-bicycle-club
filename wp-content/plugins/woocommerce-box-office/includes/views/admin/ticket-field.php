@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 $type_options = '';
 foreach ( $field_types as $k => $v ) {
 	$type_options .= '<option value="' . $k . '"' . selected( $field['type'], $k, false ) . '>' . $v . '</option>' . "\n";

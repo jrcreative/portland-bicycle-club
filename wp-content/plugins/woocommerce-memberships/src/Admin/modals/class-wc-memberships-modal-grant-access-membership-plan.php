@@ -73,10 +73,10 @@ class WC_Memberships_Modal_Grant_Access_Membership_Plan extends \WC_Memberships_
 
 		?>
 		<# if ( 'signup' == data.plan.access ) { #>
-			<p><span class="grant-access-signup"><?php echo esc_html( $signup_label ); ?></span></p>
+			<p><span class="grant-access-signup"><?php echo wp_kses_post( $signup_label ); ?></span></p>
 		<# } #>
 		<# if ( 'purchase' == data.plan.access ) { #>
-			<p><span class="grant-access-purchase"><?php echo esc_html( $purchase_label ); ?></span></p>
+			<p><span class="grant-access-purchase"><?php echo wp_kses_post( $purchase_label ); ?></span></p>
 		<# } #>
 		<p><?php /* translators: Placeholders: %1$s - opening <em> tag, %2$s - opening <strong> tag, %3$s - closing </strong> tag, %4$s - opening <u> tag, %5$s - closing </u> tag, %6$s - opening <u> tag, %7$s - closing </u> tag, %8$s - closing </em> tag */
 			printf( esc_html__( '%1$s%2$sImportant!%3$s The process is %4$snot%5$s reversible. Once memberships have been created, you must manually delete them. Please be sure you have %6$ssaved changes to your plan%7$s before starting this process.%8$s', 'woocommerce-memberships' ), '<em>', '<strong>', '</strong>', '<u>', '</u>', '<u>', '</u>', '</em>' ); ?></p><?php

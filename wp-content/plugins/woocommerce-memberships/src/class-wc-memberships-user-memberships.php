@@ -24,7 +24,7 @@
 use SkyVerge\WooCommerce\Memberships\Cache\MembershipNotesCountCache;
 use SkyVerge\WooCommerce\Memberships\UserMemberships\Exceptions\UserMembershipDeleteFailedException;
 use SkyVerge\WooCommerce\Memberships\UserMemberships\Exceptions\UserMembershipNotFoundException;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
 
 defined( 'ABSPATH' ) or exit;
 

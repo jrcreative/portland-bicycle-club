@@ -23,14 +23,14 @@
 
 use Composer\Autoload\ClassLoader;
 use SkyVerge\WooCommerce\Memberships\Admin\Setup_Wizard;
-use SkyVerge\WooCommerce\Memberships\REST_API;
 use SkyVerge\WooCommerce\Memberships\API\Webhooks;
 use SkyVerge\WooCommerce\Memberships\Blocks;
-use SkyVerge\WooCommerce\Memberships\Shortcodes;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1 as Framework;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\AbilitiesProviderContract;
-use SkyVerge\WooCommerce\PluginFramework\v6_1_1\Abilities\Contracts\HasAbilitiesContract;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields;
+use SkyVerge\WooCommerce\Memberships\REST_API;
+use SkyVerge\WooCommerce\Memberships\Shortcodes;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\Contracts\AbilitiesProviderContract;
+use SkyVerge\WooCommerce\PluginFramework\v6_2_1\Abilities\Contracts\HasAbilitiesContract;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -45,7 +45,7 @@ class WC_Memberships extends Framework\SV_WC_Plugin implements HasAbilitiesContr
 
 
 	/** plugin version number */
-	const VERSION = '1.28.1';
+	const VERSION = '1.29.2';
 
 	/** @var \WC_Memberships single instance of this plugin */
 	protected static $instance;
@@ -321,6 +321,11 @@ class WC_Memberships extends Framework\SV_WC_Plugin implements HasAbilitiesContr
 
 		// Gutenberg blocks
 		$this->blocks = $this->load_class( '/src/Blocks.php', '\\SkyVerge\\WooCommerce\\Memberships\\Blocks' );
+
+		// block-editor sidebar replacement for the classic post restrictions meta box on WP 6.9+
+		// (must run outside the is_admin() branch above — REST API requests hit this codepath with is_admin() === false)
+		$this->load_class( '/src/Admin/class-wc-memberships-admin-membership-plan-rules.php', 'WC_Memberships_Admin_Membership_Plan_Rules' );
+		(new Blocks\BlockEditorSidebar())->addHooks();
 
 		// WP CLI support
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
