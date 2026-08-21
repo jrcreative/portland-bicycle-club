@@ -891,9 +891,15 @@ EOT;
 	
 	public static function bbpost_unsubmitted_email($postid, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));
+		$post_url = get_permalink($postid);
+		$author_id = get_post_field('post_author', $postid);
+		$author_email = get_the_author_meta('user_email', $author_id);
+		$post_author = get_the_author_meta('first_name', $author_id) . ' ' . get_the_author_meta('last_name', $author_id);
+		$author_link = '<a href="' . esc_url('mailto:'.$author_email) . '">' . $post_author . '</a>';
+		$post_link = '<a href="' . esc_url($post_url) . '">' . $post_title . '</a>';
 		$subject = 'PBC Post Unsubmitted';
 		$message = <<<EOT
-The author has reverted the Portland Bicycling Club post $post_title back to draft. 
+The author $author_link has reverted the Portland Bicycling Club post $post_link back to draft. 
 Ignore the previous review request email and do not review this post. 
 Do not reply to this email!
 EOT;
