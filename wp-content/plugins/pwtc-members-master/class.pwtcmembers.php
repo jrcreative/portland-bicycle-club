@@ -284,6 +284,9 @@ class PwtcMembers {
 	}
 
 	public static function add_card_download_callback() {
+		$current_user = wp_get_current_user();
+		$rider_id = get_field('rider_id', 'user_'.$current_user->ID);
+		echo '<p>Your rider ID number is <strong>' . $rider_id . '</strong>.</p>';
 	    echo '<p>Make sure your emergency contact information is up to date; <a href="/rider-emergency-contact">edit your emergency contact information.</a></p>';
 		echo '<p>Click the button below to download your rider ID card.';
 		echo do_shortcode('[pwtc_riderid_download]');
