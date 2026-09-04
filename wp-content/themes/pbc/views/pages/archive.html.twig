@@ -8,15 +8,17 @@
                         {% if desc is defined %}
                             {{ desc }}
                         {% elseif topics is defined %}
-                            <label>Topics</label><div class="button-group">
-                                {{ topics }}
-                            </div>
+                            <div class="button-group"><ul class="dropdown menu" data-dropdown-menu>
+                                <li class="is-dropdown-submenu-parent"><a class="hollow button" href="#">Select Topic</a><ul class="menu">
+                                    {{ topics }}
+                                </ul></li>
+                            </ul></div>
                         {% endif %}
                     </div>
                 {% if return_url is defined %}
                     <div class="cell">
                         <div class="button-group">
-                            <a class="button" href="{{ return_url }}"><i class="fa fa-angle-left" aria-hidden="true"></i> Back</a>
+                            <a class="hollow button" href="{{ return_url }}"><i class="fa fa-angle-left" aria-hidden="true"></i> Back</a>
                         </div>
                     </div>
                 {% endif %}

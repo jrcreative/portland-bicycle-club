@@ -181,12 +181,12 @@ class PwtcMapdb_BBPost {
 			$admin = self::get_topic_button_links(get_option('pwtc_mapdb_admin_topics_parent_category_name', ''));
 			if (!empty($admin)) {
 				$output .= $admin;
-				$output .= '<span style="padding: 0px 10px;"></span>';
+				//$output .= '<span style="padding: 0px 10px;"></span>';
 			}
 			$member = self::get_topic_button_links(get_option('pwtc_mapdb_topics_parent_category_name', ''));
 			if (!empty($member)) {
 				$output .= $member;
-				$output .= '<span style="padding: 0px 10px;"></span>';
+				//$output .= '<span style="padding: 0px 10px;"></span>';
 			}
 			$public = self::get_topic_button_links(get_option('pwtc_mapdb_public_topics_parent_category_name', ''));
 			$output .= $public;
@@ -819,9 +819,15 @@ class PwtcMapdb_BBPost {
 			]);
 			if (!empty($categories)) {
 				foreach($categories as $category) {
+					/*
 					$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
 						esc_url( get_category_link( $category->term_id ) ),
 						esc_attr( sprintf('View all posts under topic %s', $category->name ) ),
+						esc_html( $category->name )
+					);
+					*/
+					$category_link = sprintf('<li><a href="%1$s">%2$s</a></li>',
+						esc_url( get_category_link( $category->term_id ) ),
 						esc_html( $category->name )
 					);
 					$output .= $category_link;
