@@ -723,7 +723,7 @@ class PwtcMembers {
 				members.forEach(function(item) {
 					var data = '<tr userid="' + item.ID + '">' +
 					'<td data-th="Name">' + item.first_name + ' ' + item.last_name + 
-					' <a class="view_avatar" title="View member avatar."><i class="fa fa-user"></i></a>' +
+					(item.has_avatar ? ' <a class="view_avatar" title="View member avatar."><i class="fa fa-user"></i></a>' : '') +
 					(item.is_expired ? ' <i class="fa fa-exclamation-triangle" title="Membership Expired"></i>' : '') +
 					(item.is_ride_leader ? ' <i class="fa fa-bicycle" title="Ride Leader"></i>' : '') + '</td>' + 
 					'<td data-th="Email">' + item.email + '</td>' +
@@ -1590,7 +1590,8 @@ class PwtcMembers {
 						'email' => $email,
 						'phone' => $phone,
 						'is_expired' => in_array('expired_member', $member_info->roles),
-						'is_ride_leader' => in_array('ride_leader', $member_info->roles)
+						'is_ride_leader' => in_array('ride_leader', $member_info->roles),
+						'has_avatar' => !empty(get_user_meta($member->ID, 'wp_user_avatar', true))
 					];
 				}
 			}
