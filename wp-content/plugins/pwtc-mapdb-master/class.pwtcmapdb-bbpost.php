@@ -36,6 +36,7 @@ class PwtcMapdb_BBPost {
 		add_filter('pwtc_recent_posts_after', array('PwtcMapdb_BBPost', 'recent_posts_after_callback'));
 		add_filter('pwtc_category_button_links', array('PwtcMapdb_BBPost', 'category_button_links_callback'));
 		add_filter('pwtc_allow_post_comments', array('PwtcMapdb_BBPost', 'allow_post_comments_callback'));
+		add_filter('pwtc_check_post_modified_gmt', array('PwtcMapdb_BBPost', 'check_post_modified_gmt_callback'));
 
 		if ('yes' === get_option('pwtc_mapdb_force_comment_moderation', 'no')) {
 			add_filter('pre_comment_approved', array('PwtcMapdb_BBPost', 'force_comment_moderation_callback'), 9999);
@@ -203,6 +204,10 @@ class PwtcMapdb_BBPost {
 			}
 		}	
 		return $allowed;
+	}
+
+	public static function check_post_modified_gmt_callback($allowed) {
+		return ('yes' === get_option('pwtc_mapdb_check_post_modified_gmt', 'no'));
 	}
 
 	public static function comment_update_post_modified_time_callback1($comment_id, $comment_approved) {
