@@ -1583,6 +1583,11 @@ class PwtcMembers {
 							$phone = '';
 						}
 					}
+					$has_avatar = false;
+					$avatar = get_user_meta($member->ID, 'wp_user_avatar', true);
+					if (!empty($avatar) and str_contains(print_r($avatar, true), 'avatar_url')) {
+						$has_avatar = true;
+					}
 					$member_names[] = [
 						'ID' => $member->ID,
 						'first_name' => $member_info->first_name,
@@ -1591,7 +1596,7 @@ class PwtcMembers {
 						'phone' => $phone,
 						'is_expired' => in_array('expired_member', $member_info->roles),
 						'is_ride_leader' => in_array('ride_leader', $member_info->roles),
-						'has_avatar' => !empty(get_user_meta($member->ID, 'wp_user_avatar', true))
+						'has_avatar' => $has_avatar
 					];
 				}
 			}
