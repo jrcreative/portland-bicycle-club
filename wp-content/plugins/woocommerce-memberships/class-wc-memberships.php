@@ -45,7 +45,7 @@ class WC_Memberships extends Framework\SV_WC_Plugin implements HasAbilitiesContr
 
 
 	/** plugin version number */
-	const VERSION = '1.29.2';
+	const VERSION = '1.30.0';
 
 	/** @var \WC_Memberships single instance of this plugin */
 	protected static $instance;

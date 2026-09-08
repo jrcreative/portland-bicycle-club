@@ -2,10 +2,10 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Square 5.4.3\n"
+"Project-Id-Version: WooCommerce Square 5.5.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/woocommerce-square\n"
-"POT-Creation-Date: 2026-08-06 13:18:41+00:00\n"
+"POT-Creation-Date: 2026-08-31 14:54:53+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -80,12 +80,12 @@ msgstr ""
 msgid "Stock must be fetched from Square before editing stock quantity"
 msgstr ""
 
-#: includes/API.php:1144
+#: includes/API.php:1299
 #. translators: %1$s: error code, %2$s: error message
 msgid "Square CalculateOrder API error [%1$s]: %2$s"
 msgstr ""
 
-#: includes/API.php:1147
+#: includes/API.php:1302
 msgid "We couldn't apply the discount. Please try again later."
 msgstr ""
 
@@ -425,7 +425,7 @@ msgid "Status"
 msgstr ""
 
 #: includes/Admin/Sync_Page.php:292 includes/Admin/Sync_Page.php:333
-#: includes/Handlers/Order.php:594 includes/Handlers/Products.php:1027
+#: includes/Handlers/Order.php:677 includes/Handlers/Products.php:1027
 #: includes/Handlers/Products.php:1225
 msgid "Message"
 msgstr ""
@@ -488,87 +488,87 @@ msgstr ""
 msgid "Start sync"
 msgstr ""
 
-#: includes/Admin.php:158
+#: includes/Admin.php:161
 msgid "Inventory tracking is disabled for this product"
 msgstr ""
 
-#: includes/Admin.php:159 includes/Handlers/Products.php:243
+#: includes/Admin.php:162 includes/Handlers/Products.php:243
 msgid "Synced with Square"
 msgstr ""
 
-#: includes/Admin.php:160
+#: includes/Admin.php:163
 msgid "Managed by Square"
 msgstr ""
 
-#: includes/Admin.php:161
+#: includes/Admin.php:164
 msgid "Fetch stock from Square"
 msgstr ""
 
-#: includes/Admin.php:162
+#: includes/Admin.php:165
 msgid "Sync inventory"
 msgstr ""
 
-#: includes/Admin.php:163
+#: includes/Admin.php:166
 msgid "Sync stock from Square"
 msgstr ""
 
-#: includes/Admin.php:164
+#: includes/Admin.php:167
 msgid "Attribute name is too long, maximum allowed are 65 characters"
 msgstr ""
 
-#: includes/Admin.php:165
+#: includes/Admin.php:168
 msgid "Too many attributes, maximum allowed are 6."
 msgstr ""
 
-#: includes/Admin.php:167
+#: includes/Admin.php:170
 #. translators: %d - maximum allowed attribute values
 msgid "Too many attribute values: %d (max 250)"
 msgstr ""
 
-#: includes/Admin.php:168
+#: includes/Admin.php:171
 msgid "Too many variations, maximum allowed are 250."
 msgstr ""
 
-#: includes/Admin.php:214 includes/Sync/Records/Record.php:208
+#: includes/Admin.php:217 includes/Sync/Records/Record.php:208
 msgid "Resolved"
 msgstr ""
 
-#: includes/Admin.php:215
+#: includes/Admin.php:218
 msgid "No records found"
 msgstr ""
 
-#: includes/Admin.php:216
+#: includes/Admin.php:219
 msgid "Skipped"
 msgstr ""
 
-#: includes/Admin.php:217
+#: includes/Admin.php:220
 msgid "Updated"
 msgstr ""
 
-#: includes/Admin.php:218
+#: includes/Admin.php:221
 msgid "Imported"
 msgstr ""
 
-#: includes/Admin.php:220
+#: includes/Admin.php:223
 msgid "Enable to fetch inventory changes from Square"
 msgstr ""
 
-#: includes/Admin.php:221
+#: includes/Admin.php:224
 msgid "Enable to push inventory changes to Square"
 msgstr ""
 
-#: includes/Admin.php:224
+#: includes/Admin.php:227
 msgid "Inventory is fetched from Square periodically and updated in WooCommerce"
 msgstr ""
 
-#: includes/Admin.php:227
+#: includes/Admin.php:230
 #. translators: Placeholders: %1$s - <strong> tag, %2$s - </strong> tag
 msgid ""
 "Inventory is %1$salways fetched from Square%2$s periodically to account for "
 "sales from other channels."
 msgstr ""
 
-#: includes/Admin.php:453
+#: includes/Admin.php:456
 #. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag, %3$s - <a> tag,
 #. %4$s - </a> tag
 msgid ""
@@ -576,6 +576,14 @@ msgid ""
 "a sync from the %1$supdate page%2$s, or clear the ongoing sync from the "
 "%3$stools page%4$s if it is stuck, to ensure that your products are up to "
 "date."
+msgstr ""
+
+#: includes/Admin.php:513
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
+msgid ""
+"A stuck Square sync job was detected and automatically stopped. Product "
+"data may be out of date, please start a new sync from the %1$supdate "
+"page%2$s."
 msgstr ""
 
 #: includes/Coupons.php:158
@@ -1649,7 +1657,7 @@ msgstr ""
 
 #: includes/Framework/PaymentGateway/Payment_Gateway.php:1155
 #: includes/Gateway/Blocks_Handler.php:153 includes/Gateway.php:166
-#: includes/Handlers/Order.php:905
+#: includes/Handlers/Order.php:988
 msgid "Credit Card"
 msgstr ""
 
@@ -2362,7 +2370,7 @@ msgstr ""
 
 #: includes/Gateway/Cash_App_Pay_Blocks_Handler.php:142
 #: includes/Gateway/Cash_App_Pay_Gateway.php:247
-#: includes/Handlers/Order.php:907
+#: includes/Handlers/Order.php:990
 msgid "Cash App Pay"
 msgstr ""
 
@@ -2566,7 +2574,7 @@ msgstr ""
 msgid "credit card or cash app pay"
 msgstr ""
 
-#: includes/Gateway/Gift_Card.php:569 includes/Handlers/Order.php:993
+#: includes/Gateway/Gift_Card.php:569 includes/Handlers/Order.php:1076
 msgid "credit card"
 msgstr ""
 
@@ -2712,24 +2720,34 @@ msgid ""
 "Please remove the Square discount code to use another payment method."
 msgstr ""
 
-#: includes/Handlers/Background_Job.php:220
+#: includes/Handlers/Background_Job.php:284
 msgid "Sync failed. Please try again"
 msgstr ""
 
-#: includes/Handlers/Background_Job.php:250
+#: includes/Handlers/Background_Job.php:285
+msgid ""
+"A sync stopped responding and was stopped automatically. Product data may "
+"be out of date, please start a new sync."
+msgstr ""
+
+#: includes/Handlers/Background_Job.php:320
 msgid "Clear Square Sync"
 msgstr ""
 
-#: includes/Handlers/Background_Job.php:251
+#: includes/Handlers/Background_Job.php:321
 msgid "Clear"
 msgstr ""
 
-#: includes/Handlers/Background_Job.php:252
+#: includes/Handlers/Background_Job.php:322
 msgid "This tool will clear any ongoing Square product syncs."
 msgstr ""
 
-#: includes/Handlers/Background_Job.php:302
+#: includes/Handlers/Background_Job.php:372
 msgid "Success! You can now sync your products."
+msgstr ""
+
+#: includes/Handlers/Background_Job.php:579
+msgid "Sync job stalled and was automatically marked as failed."
 msgstr ""
 
 #: includes/Handlers/Connection.php:106 includes/Handlers/Connection.php:180
@@ -2752,74 +2770,74 @@ msgstr ""
 msgid "Disconnect from Square"
 msgstr ""
 
-#: includes/Handlers/Order.php:582 includes/Handlers/Products.php:1012
+#: includes/Handlers/Order.php:665 includes/Handlers/Products.php:1012
 #: includes/Handlers/Products.php:1197
 msgid "Sender's name"
 msgstr ""
 
-#: includes/Handlers/Order.php:586 includes/Handlers/Products.php:1017
+#: includes/Handlers/Order.php:669 includes/Handlers/Products.php:1017
 #: includes/Handlers/Products.php:1204
 msgid "Recipient's email"
 msgstr ""
 
-#: includes/Handlers/Order.php:590 includes/Handlers/Products.php:1022
+#: includes/Handlers/Order.php:673 includes/Handlers/Products.php:1022
 #: includes/Handlers/Products.php:1218
 msgid "Recipient's name"
 msgstr ""
 
-#: includes/Handlers/Order.php:598 includes/Handlers/Products.php:1211
+#: includes/Handlers/Order.php:681 includes/Handlers/Products.php:1211
 msgid "Gift card number"
 msgstr ""
 
-#: includes/Handlers/Order.php:847
+#: includes/Handlers/Order.php:930
 msgid "Square Gift Card:"
 msgstr ""
 
-#: includes/Handlers/Order.php:853
+#: includes/Handlers/Order.php:936
 #. Translators: %s - last 4 digits of the gift card.
 msgid "ending in %s"
 msgstr ""
 
-#: includes/Handlers/Order.php:912
+#: includes/Handlers/Order.php:995
 #. translators: %1$s - Amount charged on gift card, %2$s -  Amount charged on
 #. credit card.
 msgid "Square Gift Card (%1$s) and %2$s (%3$s)"
 msgstr ""
 
-#: includes/Handlers/Order.php:922
+#: includes/Handlers/Order.php:1005
 #. translators: %1$s - Amount charged on gift card.
 msgid "Square Gift Card (%1$s)"
 msgstr ""
 
-#: includes/Handlers/Order.php:990
+#: includes/Handlers/Order.php:1073
 #. translators: %1$s - Order total, %2$s - Amount charged on gift card, %3$s -
 #. Other payment method %4$s -  Amount charged on credit card/cash app pay.
 msgid "%1$s — Total split between gift card (%2$s) and %3$s (%4$s)"
 msgstr ""
 
-#: includes/Handlers/Order.php:993
+#: includes/Handlers/Order.php:1076
 msgid "cash app pay"
 msgstr ""
 
-#: includes/Handlers/Order.php:1024
+#: includes/Handlers/Order.php:1107
 msgid "Billing country is a mandatory field for Square payment gateway."
 msgstr ""
 
-#: includes/Handlers/Order.php:1053
+#: includes/Handlers/Order.php:1136
 msgid ""
 "Billing country is not set which is required for payment using Square. "
 "Please update the billing country before continuing."
 msgstr ""
 
-#: includes/Handlers/Order.php:1057
+#: includes/Handlers/Order.php:1140
 msgid "Update billing details:"
 msgstr ""
 
-#: includes/Handlers/Order.php:1080
+#: includes/Handlers/Order.php:1163
 msgid "Save details"
 msgstr ""
 
-#: includes/Handlers/Order.php:1124
+#: includes/Handlers/Order.php:1207
 msgid "Customer has updated their billing details from the Pay for order page."
 msgstr ""
 
@@ -3300,7 +3318,7 @@ msgid ""
 msgstr ""
 
 #: includes/Sync/Interval_Polling.php:171
-#: includes/Sync/Manual_Synchronization.php:118
+#: includes/Sync/Manual_Synchronization.php:184
 #. translators: %1$s - product edit page URL, %2$s - Product ID, %3$s - Product
 #. type.
 msgid ""
@@ -3309,42 +3327,98 @@ msgid ""
 msgstr ""
 
 #: includes/Sync/Interval_Polling.php:202
-#: includes/Sync/Manual_Synchronization.php:2085
+#: includes/Sync/Manual_Synchronization.php:2977
 #. translators: Placeholder %1$s Product Name, %2$s Exception message
 msgid "%1$s was deleted in Square but could not be hidden in WooCommerce. %2$s."
 msgstr ""
 
 #: includes/Sync/Interval_Polling.php:237
-#: includes/Sync/Manual_Synchronization.php:1866
+#: includes/Sync/Manual_Synchronization.php:2685
 #. translators: Placeholder %1$s Product Name, %2$s Exception message
 msgid "Could not sync %1$s data from Square. %2$s."
 msgstr ""
 
-#: includes/Sync/Manual_Synchronization.php:804
+#: includes/Sync/Manual_Synchronization.php:169
+#: includes/Sync/Manual_Synchronization.php:1294
+#. translators: %1$s - Product ID.
+msgid ""
+"Product ID (%1$s) is excluded from sync because the product could not be "
+"found."
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:522
+msgid "unknown category"
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:533
+#. translators: Placeholders: %1$s - category name, %2$s - failure reason
+msgid "Category \"%1$s\" was skipped so the sync could continue. Reason: %2$s"
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:934
 #. translators: %1$s - SKU, %2$s - Square Item 1, %3$s - Square Item 2.
 msgid "Multiple Square items share the same SKU: %1$s. Square Item IDs: %2$s, %3$s"
 msgstr ""
 
-#: includes/Sync/Manual_Synchronization.php:1054
+#: includes/Sync/Manual_Synchronization.php:1192
 #. translators: Placeholder: %s - product ID
 msgid "Product #%s could not be updated."
 msgstr ""
 
-#: includes/Sync/Manual_Synchronization.php:1300
-#. translators: Placeholder: %s - product ID
-msgid "Product %s could not be updated in Square."
+#: includes/Sync/Manual_Synchronization.php:1387
+#. translators: Placeholders: %1$d - number of Square objects the product
+#. needs, %2$d - the per request limit
+msgid "it needs %1$d Square objects, more than the %2$d a single request allows"
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:1656
+#. translators: Placeholder: %s - one or more error messages returned by Square
+msgid ""
+"Square did not return the product in the upsert response. Errors returned "
+"by the request: %s"
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:1659
+msgid "Square did not return the product in the upsert response"
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:1704
+#. translators: Placeholders: %1$d - number of errors, %2$d - number of skipped
+#. products
+msgid ""
+"Sync completed with %1$d errors. %2$d products were skipped; the most "
+"recent alerts above give the product and reason for each, and the full list "
+"is in the Square logs."
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:1810
+#. translators: Placeholders: %1$s - product name/SKU (possibly linked), %2$s -
+#. failure reason
+msgid "Product %1$s was skipped so the sync could continue. Reason: %2$s"
 msgstr ""
 
 #: includes/Sync/Manual_Synchronization.php:1819
+#. translators: Placeholder: %s - failure reason
+msgid ""
+"A Square item with no matching WooCommerce product was skipped so the sync "
+"could continue. Reason: %s"
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:2380
+#. translators: Placeholder: %s - Square catalog object ID
+msgid "its saved Square mapping (%s) is no longer usable in Square"
+msgstr ""
+
+#: includes/Sync/Manual_Synchronization.php:2638
 #. translators: Placeholder %s Product ID
 msgid "%s does not exist in the Square catalog."
 msgstr ""
 
-#: includes/Sync/Manual_Synchronization.php:1830
+#: includes/Sync/Manual_Synchronization.php:2649
 msgid "This product failed to be hidden."
 msgstr ""
 
-#: includes/Sync/Manual_Synchronization.php:2032
+#: includes/Sync/Manual_Synchronization.php:2924
 #. translators: %1$s - Item Variation ID
 msgid ""
 "[Pull Inventory] The product does not exist in the WooCommerce store for "
@@ -3373,50 +3447,50 @@ msgstr ""
 msgid "Order pickup completed in Square."
 msgstr ""
 
-#: includes/Sync/Product_Import.php:654
+#: includes/Sync/Product_Import.php:701
 #. translators: Placeholders: %1$s - Square item name, %2$s - Square item
 #. variation name, %3$s - failure reason
 msgid "Could not import \"%1$s - %2$s\" from Square. %3$s"
 msgstr ""
 
-#: includes/Sync/Product_Import.php:698
+#: includes/Sync/Product_Import.php:745
 #. translators: Placeholders: %1$s - Square item name, %2$s - failure reason
 msgid "Could not import \"%1$s\" from Square. %2$s"
 msgstr ""
 
-#: includes/Sync/Product_Import.php:726
+#: includes/Sync/Product_Import.php:773
 msgid "Items with variable pricing cannot be imported."
 msgstr ""
 
-#: includes/Sync/Product_Import.php:730
+#: includes/Sync/Product_Import.php:777
 msgid "Variations with missing SKUs cannot be imported."
 msgstr ""
 
-#: includes/Sync/Product_Import.php:986 includes/Sync/Product_Import.php:1305
+#: includes/Sync/Product_Import.php:1038 includes/Sync/Product_Import.php:1357
 msgid "The SKU already exists on another product"
 msgstr ""
 
-#: includes/Sync/Product_Import.php:1220
+#: includes/Sync/Product_Import.php:1272
 #. translators: Placeholders: %1$s - variation ID, %2$s - product name
 msgid "Variation #%1$s of %2$s"
 msgstr ""
 
-#: includes/Sync/Product_Import.php:1601
+#: includes/Sync/Product_Import.php:1653
 #. translators: Placeholders: %s - missing parameter name
 msgid "Missing parameter %s"
 msgstr ""
 
-#: includes/Sync/Product_Import.php:1607
+#: includes/Sync/Product_Import.php:1659
 #. translators: Placeholders: %s - comma separated list of valid product types
 msgid "Invalid product type - the product type must be any of these: %s"
 msgstr ""
 
-#: includes/Sync/Product_Import.php:1651
+#: includes/Sync/Product_Import.php:1703
 #. translators: Placeholders: %1$s - Square item name, %2$s - Failure reason
 msgid "Could not update %1$s from Square. %2$s"
 msgstr ""
 
-#: includes/Sync/Product_Import.php:1654
+#: includes/Sync/Product_Import.php:1706
 #. translators: Placeholders: %1$s - Square item name, %2$s - Failure reason
 msgid "Could not import %1$s from Square. %2$s"
 msgstr ""
@@ -3457,6 +3531,13 @@ msgstr ""
 
 #: includes/Sync/Records/Record.php:570
 msgid "Unlink"
+msgstr ""
+
+#: includes/Sync/Stepped_Job.php:172
+msgid ""
+"Square could not confirm which products are genuinely sold out, so their "
+"stock was left unchanged and the sync continued. Run the sync again once "
+"Square is responding normally."
 msgstr ""
 
 #: includes/Utilities/Coupon_Utility.php:445
@@ -3549,21 +3630,21 @@ msgstr ""
 msgid "%1$s has a message for you: \"%2$s\""
 msgstr ""
 
-#: woocommerce-square.php:343
+#: woocommerce-square.php:361
 #. translators: plugin name
 msgid ""
 "<strong>All features in %1$s have been disabled</strong> due to unsupported "
 "settings:<br>"
 msgstr ""
 
-#: woocommerce-square.php:351
+#: woocommerce-square.php:369
 #. translators: minimum PHP version, current PHP version
 msgid ""
 "&bull;&nbsp;<strong>Invalid PHP version: </strong>The minimum PHP version "
 "required is %1$s. You are running %2$s.<br>"
 msgstr ""
 
-#: woocommerce-square.php:360
+#: woocommerce-square.php:378
 #. translators: link to documentation
 msgid ""
 "&bull;&nbsp;<strong>Invalid OPcache config: </strong><a href=\"%s\" "
@@ -3572,7 +3653,7 @@ msgid ""
 "caching options.<br />"
 msgstr ""
 
-#: woocommerce-square.php:369
+#: woocommerce-square.php:387
 #. translators: 1: Minimum required WooCommerce version.
 msgid ""
 "&bull;&nbsp;<strong>WooCommerce is not installed: </strong>The plugin "

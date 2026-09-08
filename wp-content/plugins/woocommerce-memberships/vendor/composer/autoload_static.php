@@ -7,7 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInit6de7b01281b8ffeb1227ae393039c637
 {
     public static $prefixLengthsPsr4 = array (
-        'S' => 
+        'S' =>
         array (
             'SkyVerge\\WooCommerce\\PluginFramework\\v6_2_1\\' => 44,
             'SkyVerge\\WooCommerce\\Memberships\\Integrations\\' => 46,
@@ -16,15 +16,15 @@ class ComposerStaticInit6de7b01281b8ffeb1227ae393039c637
     );
 
     public static $prefixDirsPsr4 = array (
-        'SkyVerge\\WooCommerce\\PluginFramework\\v6_2_1\\' => 
+        'SkyVerge\\WooCommerce\\PluginFramework\\v6_2_1\\' =>
         array (
             0 => __DIR__ . '/..' . '/skyverge/wc-plugin-framework/woocommerce',
         ),
-        'SkyVerge\\WooCommerce\\Memberships\\Integrations\\' => 
+        'SkyVerge\\WooCommerce\\Memberships\\Integrations\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src/integrations',
         ),
-        'SkyVerge\\WooCommerce\\Memberships\\' => 
+        'SkyVerge\\WooCommerce\\Memberships\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),

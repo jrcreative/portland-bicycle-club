@@ -22,6 +22,7 @@
  */
 
 use SkyVerge\WooCommerce\Memberships\Data_Stores;
+use SkyVerge\WooCommerce\Memberships\FixedWindowRateLimiter;
 use SkyVerge\WooCommerce\Memberships\Frontend\Profile_Fields as Profile_Fields_Frontend;
 use SkyVerge\WooCommerce\Memberships\Helpers\Strings_Helper;
 use SkyVerge\WooCommerce\Memberships\Profile_Fields;
@@ -756,9 +757,15 @@ class WC_Memberships_AJAX {
 			return false;
 		}
 
-		// bail if invalid profile field was posted
-		if ( ! Profile_Fields::is_profile_field_slug( $slug ) ) {
+		// bail if the field isn't a file field the current context is allowed to upload to
+		if ( ! $this->is_profile_customer_editable_file_upload( $slug ) ) {
 			return false;
+		}
+
+		$rate_limiter = new FixedWindowRateLimiter( 'wc_memberships_profile_field_upload_attempts' );
+
+		if ( $rate_limiter->isRateLimited( $slug ) ) {
+			wp_send_json_error( __( 'Too many upload attempts. Please try again in a few minutes.', 'woocommerce-memberships' ), 429 );
 		}
 
 		if ( ! function_exists( 'wp_handle_upload' ) ) {
@@ -772,11 +779,31 @@ class WC_Memberships_AJAX {
 		// ensure names are unique in sessions
 		$_FILES['file']['name'] = uniqid( $file_info['filename'] . '-', false ) . '.' . $file_info['extension'];
 
-		$attachment_id = media_handle_upload( 'file', 0 );
+		$mimes = Profile_Fields::get_allowed_profile_field_upload_mime_types();
+
+		/**
+		 * Filters the allowed mime types for a profile field file upload.
+		 *
+		 * @since 1.30.0
+		 *
+		 * @param array $mimes allowed mime types, in the `'ext|ext' => 'mime/type'` shape expected by `wp_handle_upload()`
+		 * @param string $slug the profile field slug the file is being uploaded for
+		 */
+		$mimes = (array) apply_filters( 'wc_memberships_profile_field_upload_allowed_mime_types', $mimes, $slug );
+
+		// bail if every mime type was filtered/configured out - do not fall back to core's broader default
+		if ( empty( $mimes ) ) {
+			wp_send_json_error( __( 'Invalid file type.', 'woocommerce-memberships' ), 400 );
+		}
+
+		$attachment_id = media_handle_upload( 'file', 0, [], [
+			'mimes'     => $mimes,
+			'test_form' => false,
+		] );
 
 		if ( is_wp_error( $attachment_id ) ) {
 
-			echo json_encode( $attachment_id );
+			wp_send_json_error( $attachment_id->get_error_message(), 400 );
 
 		} else {
 
@@ -792,6 +819,37 @@ class WC_Memberships_AJAX {
 		}
 
 		exit;
+	}
+
+
+	/**
+	 * Determines whether a profile field slug is a customer-editable file field eligible for upload.
+	 *
+	 * @since 1.30.0
+	 *
+	 * @param string $slug profile field slug
+	 * @return bool
+	 */
+	protected function is_profile_customer_editable_file_upload( string $slug ) : bool {
+
+		if ( ! Profile_Fields::is_profile_field_slug( $slug ) ) {
+			return false;
+		}
+
+		$profile_field_definition = Profile_Fields::get_profile_field_definition( $slug );
+
+		if ( null === $profile_field_definition
+			|| ! $profile_field_definition->is_type( Profile_Fields::TYPE_FILE )
+			|| ! $profile_field_definition->is_editable_by( Profile_Field_Definition::EDITABLE_BY_CUSTOMER ) ) {
+			return false;
+		}
+
+		// the My Account area requires a logged-in user - reject uploads to a field only reachable there from a guest
+		if ( $profile_field_definition->is_visible_only_in_my_account_area() && ! is_user_logged_in() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 
