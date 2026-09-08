@@ -32,7 +32,7 @@ if ( 'email' != $field['type'] ) {
 }
 ?>
 <tr class="<?php echo esc_attr( $row ?? '' ); ?>">
-	<td class="field_label"><input type="text" class="input_text" placeholder="<?php esc_attr_e( 'Field Label', 'woocommerce-box-office' ); ?>" name="_ticket_field_labels[]" value="<?php echo esc_attr( $field['label'] ); ?>" required="required" /></td>
+	<td class="field_label"><input type="text" class="input_text" placeholder="<?php esc_attr_e( 'Field Label', 'woocommerce-box-office' ); ?>" name="_ticket_field_labels[]" value="<?php echo esc_attr( htmlspecialchars( $field['label'], ENT_QUOTES, 'UTF-8', true ) ); ?>" required="required" /></td>
 	<td class="field_type"><select name="_ticket_field_types[]"><?php echo $type_options; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select></td>
 	<td class="field_options">
 		<?php echo $autofill_select; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

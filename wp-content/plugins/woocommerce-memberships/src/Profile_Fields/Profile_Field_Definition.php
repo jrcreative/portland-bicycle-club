@@ -548,6 +548,22 @@ class Profile_Field_Definition extends \WC_Data {
 
 
 	/**
+	 * Determines whether the related profile field is only shown in the My Account area.
+	 *
+	 * The My Account area requires a logged-in user to reach, unlike the other visibility contexts
+	 * (product page, registration form), which are also reachable by guests.
+	 *
+	 * @since 1.30.0
+	 *
+	 * @return bool
+	 */
+	public function is_visible_only_in_my_account_area() {
+
+		return [ Profile_Fields::VISIBILITY_PROFILE_FIELDS_AREA ] === $this->get_visibility( 'view' );
+	}
+
+
+	/**
 	 * Gets the required value.
 	 *
 	 * @since 1.19.0

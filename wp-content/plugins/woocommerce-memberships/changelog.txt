@@ -1,5 +1,10 @@
 *** WooCommerce Memberships Changelog ***
 
+2026.08.18 - version 1.30.0
+* New - Added an "Allowed file types" setting for 'file' profile fields. Configure this in Settings > Memberships after upgrading.
+* New - Added rate limiting to profile field uploads.
+* Fix - Harden security and validation checks around profile field uploads
+
 2026.08.11 - version 1.29.2
 * Misc - Tested up to WooCommerce 11.0.1 and WordPress 7.0.3
 

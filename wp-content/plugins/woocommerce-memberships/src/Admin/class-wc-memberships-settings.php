@@ -21,6 +21,8 @@
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
+use SkyVerge\WooCommerce\Memberships\Profile_Fields;
+
 defined( 'ABSPATH' ) or exit;
 
 /**
@@ -582,7 +584,7 @@ class WC_Settings_Memberships extends \WC_Settings_Page {
 					'type'     => 'sectionend',
 				],
 
-			], $this->get_member_directory_settings(), $this->get_roles_settings(), $this->get_privacy_settings() ) );
+			], $this->get_member_directory_settings(), $this->get_profile_field_upload_settings(), $this->get_roles_settings(), $this->get_privacy_settings() ) );
 		}
 
 		/**
@@ -638,6 +640,48 @@ class WC_Settings_Memberships extends \WC_Settings_Page {
 		 * @param array $member_directory_settings associative array
 		 */
 		return (array) apply_filters( 'wc_memberships_member_directory_settings', $member_directory_settings );
+	}
+
+
+	/**
+	 * Gets the settings for profile field file uploads.
+	 *
+	 * @since 1.30.0
+	 *
+	 * @return array<array<string, mixed>>
+	 */
+	private function get_profile_field_upload_settings() : array {
+
+		return [
+
+			[
+				'title' => __( 'Profile Field Uploads', 'woocommerce-memberships' ),
+				'type'  => 'title',
+			],
+
+			[
+				'title'    => __( 'Allowed file types', 'woocommerce-memberships' ),
+				'desc_tip' => __( 'Restricts the file types members and guests can upload via file-type profile fields.', 'woocommerce-memberships' ),
+				'id'       => 'wc_memberships_profile_field_upload_allowed_file_types',
+				'type'     => 'multiselect',
+				'class'    => 'wc-enhanced-select',
+				'css'      => 'min-width: 250px;',
+				'default'  => Profile_Fields::DEFAULT_ALLOWED_UPLOAD_FILE_TYPES,
+				'options'  => [
+					'images' => __( 'Images (jpg, png, gif, webp)', 'woocommerce-memberships' ),
+					'pdf'    => __( 'PDF', 'woocommerce-memberships' ),
+					'text'   => __( 'Text (txt)', 'woocommerce-memberships' ),
+					'office' => __( 'Office documents (docx, xlsx, pptx)', 'woocommerce-memberships' ),
+				],
+				'custom_attributes' => [
+					'data-placeholder' => __( 'Choose file types', 'woocommerce-memberships' ),
+				],
+			],
+
+			[
+				'type' => 'sectionend',
+			],
+		];
 	}
 
 

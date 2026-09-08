@@ -38,7 +38,7 @@ class Plugin extends Framework\SV_WC_Plugin implements Framework\Abilities\Contr
 
 
 	/** plugin version number */
-	const VERSION = '1.9.0';
+	const VERSION = '1.9.1';
 
 	/** @var \SkyVerge\WooCommerce\Memberships\Teams\Plugin single instance of this plugin */
 	protected static $instance;

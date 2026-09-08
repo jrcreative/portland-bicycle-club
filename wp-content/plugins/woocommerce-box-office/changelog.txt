@@ -1,5 +1,13 @@
 *** WooCommerce Box Office Changelog ***
 
+2026-08-20 - version 1.5.2
+* Fix - Ensure ticket field labels are always rendered and inserted as plain text in the product editor.
+* Dev - Bump WordPress "Tested up to" version 7.1.
+* Dev - Bump WordPress minimum supported version to 6.9.
+* Dev - Bump WooCommerce "tested up to" version 11.0.
+* Dev - Bump WooCommerce minimum supported version to 10.8.
+* Dev - Update the PHP_CodeSniffer development dependency to 3.13.6 and WPCS to 3.4.1.
+
 2026-07-13 - version 1.5.1
 * Fix - Added accessible inline validation errors and an error summary for required ticket fields in the ticket form, with full ARIA support for improved accessibility.
 * Fix - Ensure that tickets link to the customer's account correctly when using the Block Checkout.

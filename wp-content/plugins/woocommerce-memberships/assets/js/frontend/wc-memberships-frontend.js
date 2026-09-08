@@ -116,11 +116,28 @@ jQuery( function ( $ ) {
 			// handle upload errors
 			uploader.bind( 'Error', function ( up, err ) {
 
-				var error        = wc_memberships_frontend.i18n.upload_error,
-				    errorCode    = error.replace( '%1$s', err.code ),
-				    errorMessage = errorCode.replace( '%2$s', err.message );
+				var errorMessage,
+				    response = null;
+
+				try {
+					response = err.response ? JSON.parse( err.response ) : null;
+				} catch ( e ) {
+					response = null;
+				}
+
+				// if we have a message in response.data, use that
+				if ( response && response.data ) {
+					errorMessage = response.data;
+				} else {
+					// otherwise use err.message, which might be more generic like "HTTP Error"
+					var error     = wc_memberships_frontend.i18n.upload_error,
+					    errorCode = error.replace( '%1$s', err.code );
+
+					errorMessage = errorCode.replace( '%2$s', err.message );
+				}
 
 				$feedback.html( errorMessage ).removeClass( 'hide' );
+				$dropzone.removeClass( 'disabled' );
 
 				return $progress.addClass( 'hide' );
 			} );
@@ -144,20 +161,21 @@ jQuery( function ( $ ) {
 			// update preview once file has been uploaded
 			uploader.bind( 'FileUploaded', function ( up, file, res ) {
 
-				var data = JSON.parse( res.response );
+				var data = null;
+
+				try {
+					data = JSON.parse( res.response );
+				} catch ( e ) {
+					data = null;
+				}
 
 				// check for upload errors
-				if ( ! data || data.errors ) {
+				if ( ! data || false === data.success ) {
 
 					$progress.addClass( 'hide' );
 					$dropzone.removeClass( 'disabled' );
 
-					if ( ! data || ! data.length ) {
-						console.log( res.response );
-						return;
-					}
-
-					$feedback.html( data.errors.upload_error ).removeClass( 'hide' );
+					$feedback.html( data && data.data ? data.data : res.response ).removeClass( 'hide' );
 
 					return;
 				}
