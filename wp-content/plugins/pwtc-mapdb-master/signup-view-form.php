@@ -416,7 +416,7 @@
             }
             else {
                 $('#pwtc-mapdb-view-signup-div .rider-signup-frm input[name="signup_userid"]').val(res.userid);
-                show_errmsg4_success(res.name + ' found, press accept to sign up.');
+                show_errmsg4_success(res.name + ' (' + res.riderid + ') found, press accept to sign up.');
                 $('#pwtc-mapdb-view-signup-div .rider-signup-frm button[type="submit"]').prop('disabled',false);
             }
         }
@@ -435,21 +435,28 @@
         $('#pwtc-mapdb-view-signup-div .rider-signup-frm input[type="button"]').on('click', function(evt) {
             var riderid = $('#pwtc-mapdb-view-signup-div .rider-signup-frm input[name="signup_riderid"]').val().trim();
             if (riderid.length == 0) {
-                show_errmsg4_warning('You must enter a Rider ID.');
+                show_errmsg4_warning('You must enter a rider ID or name.');
                 return;
             }
             var rideridrgx = /^\d{5}$/;
             if (!rideridrgx.test(riderid)) {
-                show_errmsg4_warning('The Rider ID must be a 5 digit number.');
-                return;
+                var action = "<?php echo admin_url('admin-ajax.php'); ?>";
+                var data = {
+                    'action': 'pwtc_mapdb_lookup_riderid',
+                    'ridername': riderid
+                };
+                $.post(action, data, riderid_lookup_cb);
+                show_errmsg4_wait();
             }
-            var action = "<?php echo admin_url('admin-ajax.php'); ?>";
-            var data = {
-                'action': 'pwtc_mapdb_lookup_riderid',
-                'riderid': riderid
-            };
-            $.post(action, data, riderid_lookup_cb);
-            show_errmsg4_wait();
+            else {
+                var action = "<?php echo admin_url('admin-ajax.php'); ?>";
+                var data = {
+                    'action': 'pwtc_mapdb_lookup_riderid',
+                    'riderid': riderid
+                };
+                $.post(action, data, riderid_lookup_cb);
+                show_errmsg4_wait();
+            }
         });
     
         $('#pwtc-mapdb-view-signup-div .rider-signup-frm').on('keypress', function(evt) {
@@ -626,10 +633,10 @@
                 <form class="rider-signup-frm" method="POST" novalidate>
                     <?php wp_nonce_field('signup-view-form', 'nonce_field'); ?>
                     <input type="hidden" name="signup_userid" value="0"/>
-                    <div class="help-text"><p>Enter the member's rider ID and press lookup. After a rider matching that ID is found, you can enter their mileage and press the accept sign-up button.</p></div>
+                    <div class="help-text"><p>Enter the member's rider ID or name and press lookup. After a rider matching that ID or name is found, you can enter their mileage and press the accept sign-up button.</p></div>
                     <div class="row">
                         <div class="small-12 medium-4 columns">
-                            <label>Rider ID
+                            <label>Rider ID or Name
                                 <div class="input-group">
                                     <input class="input-group-field" type="text" name="signup_riderid" value="">
                                     <div class="input-group-button">

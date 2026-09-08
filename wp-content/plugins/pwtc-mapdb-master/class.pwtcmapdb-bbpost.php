@@ -36,6 +36,7 @@ class PwtcMapdb_BBPost {
 		add_filter('pwtc_recent_posts_after', array('PwtcMapdb_BBPost', 'recent_posts_after_callback'));
 		add_filter('pwtc_category_button_links', array('PwtcMapdb_BBPost', 'category_button_links_callback'));
 		add_filter('pwtc_allow_post_comments', array('PwtcMapdb_BBPost', 'allow_post_comments_callback'));
+		add_filter('pwtc_check_post_modified_gmt', array('PwtcMapdb_BBPost', 'check_post_modified_gmt_callback'));
 
 		if ('yes' === get_option('pwtc_mapdb_force_comment_moderation', 'no')) {
 			add_filter('pre_comment_approved', array('PwtcMapdb_BBPost', 'force_comment_moderation_callback'), 9999);
@@ -181,12 +182,12 @@ class PwtcMapdb_BBPost {
 			$admin = self::get_topic_button_links(get_option('pwtc_mapdb_admin_topics_parent_category_name', ''));
 			if (!empty($admin)) {
 				$output .= $admin;
-				$output .= '<span style="padding: 0px 10px;"></span>';
+				//$output .= '<span style="padding: 0px 10px;"></span>';
 			}
 			$member = self::get_topic_button_links(get_option('pwtc_mapdb_topics_parent_category_name', ''));
 			if (!empty($member)) {
 				$output .= $member;
-				$output .= '<span style="padding: 0px 10px;"></span>';
+				//$output .= '<span style="padding: 0px 10px;"></span>';
 			}
 			$public = self::get_topic_button_links(get_option('pwtc_mapdb_public_topics_parent_category_name', ''));
 			$output .= $public;
@@ -203,6 +204,10 @@ class PwtcMapdb_BBPost {
 			}
 		}	
 		return $allowed;
+	}
+
+	public static function check_post_modified_gmt_callback($allowed) {
+		return ('yes' === get_option('pwtc_mapdb_check_post_modified_gmt', 'no'));
 	}
 
 	public static function comment_update_post_modified_time_callback1($comment_id, $comment_approved) {
@@ -819,9 +824,15 @@ class PwtcMapdb_BBPost {
 			]);
 			if (!empty($categories)) {
 				foreach($categories as $category) {
+					/*
 					$category_link = sprintf('<a class="button" href="%1$s" title="%2$s">%3$s</a>',
 						esc_url( get_category_link( $category->term_id ) ),
 						esc_attr( sprintf('View all posts under topic %s', $category->name ) ),
+						esc_html( $category->name )
+					);
+					*/
+					$category_link = sprintf('<li><a href="%1$s">%2$s</a></li>',
+						esc_url( get_category_link( $category->term_id ) ),
 						esc_html( $category->name )
 					);
 					$output .= $category_link;
@@ -891,9 +902,15 @@ EOT;
 	
 	public static function bbpost_unsubmitted_email($postid, $moderator_email) {
 		$post_title = esc_html(get_the_title($postid));
+		$post_url = get_permalink($postid);
+		$author_id = get_post_field('post_author', $postid);
+		$author_email = get_the_author_meta('user_email', $author_id);
+		$post_author = get_the_author_meta('first_name', $author_id) . ' ' . get_the_author_meta('last_name', $author_id);
+		$author_link = '<a href="' . esc_url('mailto:'.$author_email) . '">' . $post_author . '</a>';
+		$post_link = '<a href="' . esc_url($post_url) . '">' . $post_title . '</a>';
 		$subject = 'PBC Post Unsubmitted';
 		$message = <<<EOT
-The author has reverted the Portland Bicycling Club post $post_title back to draft. 
+The author $author_link has reverted the Portland Bicycling Club post $post_link back to draft. 
 Ignore the previous review request email and do not review this post. 
 Do not reply to this email!
 EOT;

@@ -3,7 +3,7 @@
         'name' => 'skyverge/woocommerce-memberships-for-teams',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '9ae0dc9f4b98327d82d79df94492f3d9877f265d',
+        'reference' => '5a659ddd531696b7daadf3675e115e8728049721',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'skyverge/woocommerce-memberships-for-teams' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '9ae0dc9f4b98327d82d79df94492f3d9877f265d',
+            'reference' => '5a659ddd531696b7daadf3675e115e8728049721',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

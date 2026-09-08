@@ -3,7 +3,7 @@
         'name' => 'skyverge/woocommerce-memberships',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '9349b76a26d26229f543ae14c539b7388b8bcfef',
+        'reference' => '0b38e961c2fc5820d6a6dff15f5ff43032ab5fd0',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'skyverge/woocommerce-memberships' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '9349b76a26d26229f543ae14c539b7388b8bcfef',
+            'reference' => '0b38e961c2fc5820d6a6dff15f5ff43032ab5fd0',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

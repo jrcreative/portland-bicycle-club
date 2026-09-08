@@ -1,7 +1,7 @@
 # User Switching
 
-Stable tag: 1.12.1
-Tested up to: 7.0
+Stable tag: 1.12.2
+Tested up to: 7.1
 License: GPL v2 or later
 Tags: users, user switching, fast user switching, multisite, woocommerce
 Contributors: johnbillion
@@ -353,6 +353,13 @@ Do not report security issues on the WordPress.org support forums or via email. 
 [I am accepting sponsorships via the GitHub Sponsors program](https://github.com/sponsors/johnbillion) and any support you can give will help me maintain this plugin and keep it free for everyone.
 ## Changelog ##
 
+### 1.12.2 (29 August 2026) ###
+
+* Fixed a `useSelect` warning triggered by the command palette integration
+* Added ARIA labels to the switch back links
+* Tested up to WordPress 7.1
+* Bumped the minimum supported version of WordPress to 6.3
+
 ### 1.12.1 (9 July 2026) ###
 
 - Fixes a hardcoded period after the "Switch back" link that could break punctuation in non-English languages
@@ -399,11 +406,6 @@ Do not report security issues on the WordPress.org support forums or via email. 
 * Confirms support for WordPress 6.7.
 * Confirms support for PHP 8.4.
 * Various code quality improvements.
-
-### 1.8.0 (22 July 2024) ###
-
-* Adds a 'Switch back' link to some access denied messages within the admin area.
-* Confirms support for WordPress 6.6.
 
 ### Earlier versions ###
 

@@ -284,6 +284,9 @@ class PwtcMembers {
 	}
 
 	public static function add_card_download_callback() {
+		$current_user = wp_get_current_user();
+		$rider_id = get_field('rider_id', 'user_'.$current_user->ID);
+		echo '<p>Your rider ID number is <strong>' . $rider_id . '</strong>.</p>';
 	    echo '<p>Make sure your emergency contact information is up to date; <a href="/rider-emergency-contact">edit your emergency contact information.</a></p>';
 		echo '<p>Click the button below to download your rider ID card.';
 		echo do_shortcode('[pwtc_riderid_download]');
@@ -720,7 +723,7 @@ class PwtcMembers {
 				members.forEach(function(item) {
 					var data = '<tr userid="' + item.ID + '">' +
 					'<td data-th="Name">' + item.first_name + ' ' + item.last_name + 
-					' <a class="view_avatar" title="View member avatar."><i class="fa fa-user"></i></a>' +
+					(item.has_avatar ? ' <a class="view_avatar" title="View member avatar."><i class="fa fa-user"></i></a>' : '') +
 					(item.is_expired ? ' <i class="fa fa-exclamation-triangle" title="Membership Expired"></i>' : '') +
 					(item.is_ride_leader ? ' <i class="fa fa-bicycle" title="Ride Leader"></i>' : '') + '</td>' + 
 					'<td data-th="Email">' + item.email + '</td>' +
@@ -1327,7 +1330,7 @@ class PwtcMembers {
 				wc_memberships_for_teams()->get_teams_handler_instance()->maybe_delete_related_data($id);
 				wc_memberships_for_teams()->get_teams_handler_instance()->deleteTeam($id);
 			}
-			wc_empty_cart();
+			//wc_empty_cart();
 			wp_redirect(get_permalink(), 303);
 			exit;
 		}
@@ -1356,7 +1359,7 @@ class PwtcMembers {
 			}
 			ob_start();
 			?>
-			<div class="callout success"><p>You may delete your expired individual membership. Your shopping cart will also be emptied.
+			<div class="callout success"><p>You may delete your expired individual membership.
 				<form method="POST" novalidate>
 					<?php wp_nonce_field('delete-membership-form', 'nonce_field'); ?>
 					<input type="hidden" name="userid" value="<?php echo $current_user->ID; ?>"/>
@@ -1380,9 +1383,25 @@ class PwtcMembers {
 			if ('yes' !== get_option('pwtc_members_allow_member_deletion', 'no')) {
 				return '<div class="callout warning"><p>You are not allowed to delete your expired family membership, please contact the Membership Secretary instead.</p></div>';
 			}
+			$msg = 'You may delete your expired family membership.';
+			$members = $teams[0]->get_members();
+			if ($members and !empty($members)) {
+				$family_list = '';
+				foreach ( $members as $member ) {
+					if ($teams[0]->get_owner_id() != $member->get_id()) {
+						$user = $member->get_user();
+						$name = get_user_meta($user->ID, 'first_name', true) . ' ' . get_user_meta($user->ID, 'last_name', true);
+						$family_list .= '&bull; ' . $name . ' - ' . $user->user_email . '<br>';
+					}
+				}
+				if (!empty($family_list)) {
+					$msg .= ' The membership of your following family members will also be deleted:<br>' . $family_list;
+					$msg .= '(If you purchase a new family membership, you will have to reinvite these family members.)';
+				}
+			}
 			ob_start();
 			?>
-			<div class="callout success"><p>You may delete your expired family membership. The memberships of any family members will also be deleted. Your shopping cart will also be emptied.
+			<div class="callout success"><p><?php echo $msg; ?>
 				<form method="POST" novalidate>
 					<?php wp_nonce_field('delete-membership-form', 'nonce_field'); ?>
 					<input type="hidden" name="userid" value="<?php echo $current_user->ID; ?>"/>
@@ -1564,6 +1583,11 @@ class PwtcMembers {
 							$phone = '';
 						}
 					}
+					$has_avatar = false;
+					$avatar = get_user_meta($member->ID, 'wp_user_avatar', true);
+					if (!empty($avatar) and str_contains(print_r($avatar, true), 'avatar_url')) {
+						$has_avatar = true;
+					}
 					$member_names[] = [
 						'ID' => $member->ID,
 						'first_name' => $member_info->first_name,
@@ -1571,7 +1595,8 @@ class PwtcMembers {
 						'email' => $email,
 						'phone' => $phone,
 						'is_expired' => in_array('expired_member', $member_info->roles),
-						'is_ride_leader' => in_array('ride_leader', $member_info->roles)
+						'is_ride_leader' => in_array('ride_leader', $member_info->roles),
+						'has_avatar' => $has_avatar
 					];
 				}
 			}

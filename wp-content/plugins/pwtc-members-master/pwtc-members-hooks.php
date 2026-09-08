@@ -138,22 +138,26 @@ function pwtc_members_adjust_start_date($user_membership, $detect_only=false) {
 	}
 	if (preg_match('/^\d{5}$/', $rider_id) === 1) {
 		$y = intval(substr($rider_id, 0, 2));
-		$c = intval(substr(date('Y', current_time('timestamp')), 0, 2));
-		if ($y > 50) {
-			$year = strval((($c - 1) * 100) + $y);
+        $now = date('Y', current_time('timestamp'));
+		$c = intval(substr($now, 0, 2));
+        $d = intval(substr($now, 2, 2));
+		if ($y > ($d+1)) {
+            $year = (($c - 1) * 100) + $y;
 		}
 		else {
-			$year = strval(($c * 100) + $y);
+            $year = ($c * 100) + $y;
 		}
 		$start = $user_membership->get_start_date();
-		if ($start and strncmp($start, $year, 4) !== 0) {
-            if (!$detect_only) {
-			    $user_membership->set_start_date($year . '-07-01 12:00:00');
-			    $user_membership->add_note('PWTC Members plugin modified start date to match rider ID year.');
-			    //$user_membership->add_note('PWTC Members plugin modified start date to match rider ID year. startdate=' . $start . ', riderid=' . $rider_id . ', rideryear=' . $year);
+        if ($start) {
+            $start_year = intval(substr($start, 0, 4));
+            if ($start_year != $year and $year < intval($now)) {
+                if (!$detect_only) {
+                    $user_membership->set_start_date(strval($year) . '-07-01 12:00:00');
+			        $user_membership->add_note('PWTC Members plugin modified start date to match rider ID year.');
+                }
+                return true;
             }
-            return true;
-		}
+        }
 	}
     return false;
 }

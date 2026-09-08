@@ -6,7 +6,7 @@
  * Description: Expands WooCommerce Memberships to sell memberships to teams, families, companies, or other groups!
  * Author: SkyVerge
  * Author URI: https://www.woocommerce.com/
- * Version: 1.9.0
+ * Version: 1.9.1
  * Text Domain: woocommerce-memberships-for-teams
  * Domain Path: /i18n/languages/
  *
@@ -20,9 +20,10 @@
  * @copyright Copyright (c) 2017-2026, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  *
- * Woo: 2893267:f0b7ed22ec012e2e159ec30f5af5c1d1
  * WC requires at least: 3.9.4
- * WC tested up to: 10.7.0
+ * WC tested up to: 11.0.1
+ * Woo: 2893267:f0b7ed22ec012e2e159ec30f5af5c1d1
+
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -103,7 +104,7 @@ class WC_Memberships_For_Teams_Loader {
 	 */
 	public function handle_hpos_compatibility()
 	{
-		if ( version_compare( static::get_memberships_version(), '1.25.0', '>=' ) && class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', plugin_basename( __FILE__ ), true );
 		}
 	}

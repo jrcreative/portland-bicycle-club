@@ -684,6 +684,35 @@ class PwtcMapdb {
 				);
 			}
 		}
+		else if (isset($_POST['ridername'])) {
+			$ridername = trim($_POST['ridername']);
+			$query_args = [
+				'meta_key' => 'last_name',
+				'orderby' => 'meta_value',
+				'order' => 'ASC',
+				'role__in' => [self::ROLE_CURRENT_MEMBER, self::ROLE_EXPIRED_MEMBER],
+				'search' => '*'.$ridername.'*',
+				'search_columns' => array('display_name')
+			];
+			$user_query = new WP_User_Query( $query_args );
+    		$results = $user_query->get_results();
+			if (!empty($results)) {
+				$userid = $results[0]->ID;
+				$info = get_userdata($userid);
+				$name = $info->first_name . ' ' . $info->last_name;
+				$riderid = get_field(self::USER_RIDER_ID, 'user_'.$userid);
+				$response = array(
+					'riderid' => $riderid,
+					'userid' => $userid,
+					'name' => $name
+				);
+			}
+			else {
+				$response = array(
+					'error' => 'Lookup failed, rider name "' . $ridername . '" not found.'
+				);
+			}
+		}
 		else {
 			$response = array(
 				'error' => 'Lookup failed, server post arguments missing.'

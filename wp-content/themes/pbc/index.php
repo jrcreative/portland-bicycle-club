@@ -45,17 +45,20 @@ if(is_singular())
                 $query_args = [
                     'posts_per_page' => -1,
                     'date_query' => [				
-                        'relation' => 'OR',
 				        [
                             'column' => 'post_date_gmt',
                             'after' => $after,
 				        ],
-				        [
-                            'column' => 'post_modified_gmt',
-                            'after' => $after,
-				        ],
                     ],
                 ];
+                $check_modified = apply_filters('pwtc_check_post_modified_gmt', false);
+                if ($check_modified) {
+                    $query_args['date_query']['relation'] = 'OR';
+                    $query_args['date_query'][] = [
+                        'column' => 'post_modified_gmt',
+                        'after' => $after,
+                    ];
+                }
                 $exclude_categories = apply_filters('pwtc_category_exclude_list', []);
                 if (!empty($exclude_categories)) {
                     $query_args['category__not_in'] = $exclude_categories;
@@ -63,6 +66,7 @@ if(is_singular())
                 // Timber 2.0: get_posts() with query array directly
                 $context['news'] = Timber::get_posts($query_args);
                 $context['after'] = $after;
+                $context['check_modified'] = $check_modified;
             }
             elseif(get_row_layout() == "rides")
             {

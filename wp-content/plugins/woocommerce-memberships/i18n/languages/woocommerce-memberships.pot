@@ -2,16 +2,16 @@
 # This file is distributed under the GNU General Public License v3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Memberships 1.29.2\n"
+"Project-Id-Version: WooCommerce Memberships 1.30.0\n"
 "Report-Msgid-Bugs-To: https://woocommerce.com/my-account/marketplace-ticket-form/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-11T20:36:14+00:00\n"
+"POT-Creation-Date: 2026-08-18T12:40:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.12.0\n"
+"X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: woocommerce-memberships\n"
 
 #. Plugin Name of the plugin
@@ -51,36 +51,30 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag
 #: class-wc-memberships.php:880
-#, php-format
 msgid "%1$sHeads up!%2$s We've merged the Directory Shortcode add-on into Memberships, so you no longer need this add-on to display a Member Directory. This add-on has been deactivated and can be safely removed from your plugin list."
 msgstr ""
 
 #. translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag
 #: class-wc-memberships.php:887
-#, php-format
 msgid "%1$sHeads up!%2$s We've merged the Adjust Excerpt Length add-on into Memberships, so you no longer need this add-on to adjust the restricted content excerpt. This add-on has been deactivated and can be safely removed from your plugin list."
 msgstr ""
 
 #. translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag
 #: class-wc-memberships.php:894
-#, php-format
 msgid "%1$sHeads up!%2$s We've merged the Role Handler add-on into Memberships, so you no longer need this add-on to set default member roles. This add-on has been deactivated and can be safely removed from your plugin list."
 msgstr ""
 
 #. translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag
 #: class-wc-memberships.php:901
-#, php-format
 msgid "%1$sHeads up!%2$s We've merged the Sensei Member Area add-on into Memberships, so you no longer need this add-on to add the \"Courses & Lessons\" section to your plan member areas. This add-on has been deactivated and can be safely removed from your plugin list."
 msgstr ""
 
 #. translators: Placeholders: %1$s - "WooCommerce Memberships" plugin name in <strong> HTML tags, %2$s - opening <a> HTML tag, %3$s - closing </a> HTML tag
 #: class-wc-memberships.php:922
-#, php-format
 msgid "%1$s: The Member Directory block and shortcode are enabled and ready to use. You can add the shortcode or the block to a post or a page to display members of your published plans. Make sure you have %2$sread the documentation%3$s about this feature."
 msgstr ""
 
 #: class-wc-memberships.php:951
-#, php-format
 msgid "%1$sHeads up!%2$s We introduced a bug in version 1.16.0 of Memberships that caused issues with scheduled actions. We're so sorry for this issue! The bug should be resolved in the current version, but %3$splease contact our support team immediately%4$s if you notice any further issues."
 msgstr ""
 
@@ -90,19 +84,17 @@ msgid "User Memberships"
 msgstr ""
 
 #: class-wc-memberships.php:1228
-#, php-format
 msgid "Removed User Membership for \"%s\"."
 msgstr ""
 
 #: class-wc-memberships.php:1231
-#, php-format
 msgid "User Membership for \"%s\" has been retained."
 msgstr ""
 
 #: class-wc-memberships.php:1291
 #: src/Admin/class-wc-memberships-admin-users.php:141
 #: src/Admin/class-wc-memberships-admin.php:1279
-#: src/Admin/class-wc-memberships-settings.php:42
+#: src/Admin/class-wc-memberships-settings.php:44
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-post-memberships-data.php:58
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-product-memberships-data.php:61
 #: src/Blocks.php:137
@@ -255,13 +247,11 @@ msgstr ""
 
 #. translators: Placeholder: %s - HTML button
 #: src/Admin/class-wc-memberships-admin-membership-plans.php:346
-#, php-format
 msgid "Existing users: %s"
 msgstr ""
 
 #. translators: Placeholder: %s - HTML button
 #: src/Admin/class-wc-memberships-admin-membership-plans.php:357
-#, php-format
 msgid "Existing purchases: %s"
 msgstr ""
 
@@ -275,7 +265,6 @@ msgstr ""
 
 #. translators: Placeholder: %d - membership plan ID
 #: src/Admin/class-wc-memberships-admin-membership-plans.php:496
-#, php-format
 msgid "Membership plan creation failed, could not find original plan to copy: %d"
 msgstr ""
 
@@ -293,7 +282,6 @@ msgstr ""
 
 #. translators: Placeholder: %1$s - product name linked to edit screen, %2$s list of membership plan names linked to edit screens
 #: src/Admin/class-wc-memberships-admin-products.php:94
-#, php-format
 msgid "The product %1$s is currently set to grant membership access to %2$s. When permanently deleted, it will be removed from the list of products that grant access."
 msgstr ""
 
@@ -333,7 +321,6 @@ msgstr ""
 
 #. translators: Placeholder: %d - product count (number)
 #: src/Admin/class-wc-memberships-admin-products.php:395
-#, php-format
 msgid "%d Product has been marked as public and excluded from memberships restriction rules."
 msgid_plural "%d Products have been marked as public and excluded from memberships restriction rules."
 msgstr[0] ""
@@ -341,7 +328,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %d - product count (number)
 #: src/Admin/class-wc-memberships-admin-products.php:399
-#, php-format
 msgid "%d Product has been unmarked as public and will now follow any membership plan rules that may affect it."
 msgid_plural "%d Products have been unmarked as public and will now follow any membership plan rules that may affect them."
 msgstr[0] ""
@@ -349,7 +335,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %d - product count (number)
 #: src/Admin/class-wc-memberships-admin-products.php:403
-#, php-format
 msgid "%d Product has been excluded from member discounts."
 msgid_plural "%d Products have been excluded from member discounts."
 msgstr[0] ""
@@ -357,7 +342,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %d - product count (number)
 #: src/Admin/class-wc-memberships-admin-products.php:407
-#, php-format
 msgid "%d Product has been marked to be eligible for member discounts from applicable membership plan rules."
 msgid_plural "%d Product have been marked to be eligible for member discounts from applicable membership plan rules."
 msgstr[0] ""
@@ -432,19 +416,16 @@ msgstr ""
 #. translators: Placeholder: %s - date since the membership was paused
 #: src/Admin/class-wc-memberships-admin-user-memberships.php:343
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-user-membership-data.php:423
-#, php-format
 msgid "Paused since %s"
 msgstr ""
 
 #. translators: Placeholder: %s - date on which the membership was cancelled
 #: src/Admin/class-wc-memberships-admin-user-memberships.php:346
-#, php-format
 msgid "Cancelled on %s"
 msgstr ""
 
 #. translators: Placeholder: %s - order number
 #: src/Admin/class-wc-memberships-admin-user-memberships.php:369
-#, php-format
 msgid "Order: %s"
 msgstr ""
 
@@ -489,7 +470,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - dropdown input with filters operand (any/all)
 #: src/Admin/class-wc-memberships-admin-user-memberships.php:1055
-#, php-format
 msgid "User memberships match %s filters"
 msgstr ""
 
@@ -561,12 +541,10 @@ msgid "unselected"
 msgstr ""
 
 #: src/Admin/class-wc-memberships-admin-user-memberships.php:1394
-#, php-format
 msgid "Looking for your member profile fields? Click the %1$sScreen Options%2$s button at the top of this page to decide which profile fields should be visible on the members list."
 msgstr ""
 
 #: src/Admin/class-wc-memberships-admin-user-memberships.php:1404
-#, php-format
 msgid "%1$s Membership Directories %2$s %3$s New! We’ve made adding member directories easier. You can use a block to add a directory to any page. %4$s Read more %5$s"
 msgstr ""
 
@@ -589,7 +567,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - Membership Plan(s)
 #: src/Admin/class-wc-memberships-admin-users.php:168
-#, php-format
 msgid "This user is a member of %s."
 msgstr ""
 
@@ -623,19 +600,16 @@ msgstr ""
 
 #. translators: Placeholder: %s - post type name (plural)
 #: src/Admin/class-wc-memberships-admin.php:726
-#, php-format
 msgid "No %s have been marked as public."
 msgstr ""
 
 #. translators: Placeholder: %s - post type name (plural)
 #: src/Admin/class-wc-memberships-admin.php:730
-#, php-format
 msgid "No %s have been unmarked as public."
 msgstr ""
 
 #. translators: Placeholder: %1$s - processed items (number), %2$s - post type name (singular), %3$s - post type name (plural)
 #: src/Admin/class-wc-memberships-admin.php:739
-#, php-format
 msgid "%1$s %2$s has been marked as public and excluded from memberships restriction rules."
 msgid_plural "%1$s %3$s have been marked as public and excluded from memberships restriction rules."
 msgstr[0] ""
@@ -643,7 +617,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %1$s - processed items (number), %2$s - post type name (singular), %3$s - post type name (plural)
 #: src/Admin/class-wc-memberships-admin.php:743
-#, php-format
 msgid "%1$s %2$s has been unmarked as public and will now follow any membership plan rules that may affect it."
 msgid_plural "%1$s %3$s have been unmarked as public and will now follow any membership plan rules that may affect them."
 msgstr[0] ""
@@ -735,7 +708,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - the 'woocommerce_my_account' shortcode, %2$s - the 'order_count' shortcode attribute
 #: src/Admin/class-wc-memberships-admin.php:1449
-#, php-format
 msgid "It looks like you might be using the %1$s shortcode with deprecated attributes, such as %2$s. These attributes have been deprecated since WooCommerce 2.6 and may no longer have any effect on the shortcode output. Furthermore, they might cause a server error when visiting the Members Area while WooCommerce Memberships is active."
 msgstr ""
 
@@ -775,7 +747,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening <a> link HTML tag, $2$s - closing </a> link HTML tag
 #: src/Admin/class-wc-memberships-import-export-handler.php:326
-#, php-format
 msgid "Your CSV file must be formatted with the correct column names and cell data. Please %1$ssee the documentation%2$s for more information and a sample CSV file."
 msgstr ""
 
@@ -785,7 +756,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - maximum uploadable file size (e.g. 8M, 20M, 100M...)
 #: src/Admin/class-wc-memberships-import-export-handler.php:338
-#, php-format
 msgid "Choose a file from your computer. Acceptable file types: CSV or tab-delimited text files. Maximum file size: %s"
 msgstr ""
 
@@ -839,7 +809,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - "YYY-MM-DD" wrapped in HTML tags
 #: src/Admin/class-wc-memberships-import-export-handler.php:399
-#, php-format
 msgid "When creating new memberships, you can specify a default date in the %s format to set a membership start date if not defined in the import data. Leave this blank to use today's date otherwise."
 msgstr ""
 
@@ -872,7 +841,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening HTML link tag, %2$s - closing HTML link tag
 #: src/Admin/class-wc-memberships-import-export-handler.php:427
-#, php-format
 msgid "Enter the date and time format matching the expected format of the membership dates on file. %1$sRead the documentation on date and time formatting%2$s."
 msgstr ""
 
@@ -926,7 +894,6 @@ msgid "Start Date"
 msgstr ""
 
 #: src/Admin/class-wc-memberships-import-export-handler.php:526
-#, php-format
 msgid "Start date of memberships to include in the exported file, in the format %s."
 msgstr ""
 
@@ -940,7 +907,6 @@ msgid "End Date"
 msgstr ""
 
 #: src/Admin/class-wc-memberships-import-export-handler.php:541
-#, php-format
 msgid "Expiration date of memberships to include in the exported file, in the format %s."
 msgstr ""
 
@@ -954,7 +920,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - date format wrapped in HTML <code> tags
 #: src/Admin/class-wc-memberships-import-export-handler.php:556
-#, php-format
 msgid "It is recommended to use \"Default\" %s, especially if you intend to re-import the exported membership data in the future."
 msgstr ""
 
@@ -965,7 +930,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening HTML link tag, %2$s - closing HTML link tag
 #: src/Admin/class-wc-memberships-import-export-handler.php:571
-#, php-format
 msgid "Enter the date and time format to apply to the exported membership dates. %1$sRead the documentation on date and time formatting%2$s."
 msgstr ""
 
@@ -1021,534 +985,561 @@ msgstr ""
 msgid "To:"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:63
-#: src/Admin/class-wc-memberships-settings.php:491
+#: src/Admin/class-wc-memberships-settings.php:65
+#: src/Admin/class-wc-memberships-settings.php:493
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:200
 #: src/Admin/Views/Meta_Boxes/Profile_Field/Data.php:220
 msgid "General"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:64
-#: src/Admin/class-wc-memberships-settings.php:94
+#: src/Admin/class-wc-memberships-settings.php:66
+#: src/Admin/class-wc-memberships-settings.php:96
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:341
 #: src/functions/wc-memberships-functions-membership-plans.php:89
 msgid "Products"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:65
-#: src/Admin/class-wc-memberships-settings.php:161
+#: src/Admin/class-wc-memberships-settings.php:67
+#: src/Admin/class-wc-memberships-settings.php:163
 msgid "Messages"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:101
+#: src/Admin/class-wc-memberships-settings.php:103
 msgid "Apply discounts when purchasing membership"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:102
+#: src/Admin/class-wc-memberships-settings.php:104
 msgid "Apply plan discounts to eligible products when the cart contains a product that grants access to the membership plan."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:109
+#: src/Admin/class-wc-memberships-settings.php:111
 msgid "Allow cumulative purchases"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:110
+#: src/Admin/class-wc-memberships-settings.php:112
 msgid "Purchasing products that grant access to a membership in the same order extends the length of the membership."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:117
+#: src/Admin/class-wc-memberships-settings.php:119
 msgid "Exclude products on sale from member discounts"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:118
+#: src/Admin/class-wc-memberships-settings.php:120
 msgid "Do not apply member discounts from any membership plan discount rules to products that are currently on sale."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:125
+#: src/Admin/class-wc-memberships-settings.php:127
 msgid "Hide restricted products"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:126
+#: src/Admin/class-wc-memberships-settings.php:128
 msgid "If enabled, products with viewing restricted will be hidden from the shop catalog. Products will still be accessible directly, unless Content Restriction Mode is \"Hide completely\"."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:138
+#: src/Admin/class-wc-memberships-settings.php:140
 msgid "Customize restriction and discount messages displayed to non-members and members. Basic HTML is allowed. You can also use the following merge tags:"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:169
+#: src/Admin/class-wc-memberships-settings.php:171
 msgid "Edit messages for:"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:171
+#: src/Admin/class-wc-memberships-settings.php:173
 msgid "Blog posts restriction"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:172
+#: src/Admin/class-wc-memberships-settings.php:174
 msgid "Pages restriction"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:173
+#: src/Admin/class-wc-memberships-settings.php:175
 msgid "Content restriction"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:174
+#: src/Admin/class-wc-memberships-settings.php:176
 msgid "Products restriction"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:175
-#: src/Admin/class-wc-memberships-settings.php:393
+#: src/Admin/class-wc-memberships-settings.php:177
+#: src/Admin/class-wc-memberships-settings.php:395
 msgid "Purchasing discount"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:189
+#: src/Admin/class-wc-memberships-settings.php:191
 msgid "Post restricted messages"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:192
+#: src/Admin/class-wc-memberships-settings.php:194
 msgid "The following messages may be shown to members and non-members when trying to access a blog post."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:199
+#: src/Admin/class-wc-memberships-settings.php:201
 msgid "Post restricted (product purchase required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:200
+#: src/Admin/class-wc-memberships-settings.php:202
 msgid "Displays when purchase is required to view the blog post."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:202
+#: src/Admin/class-wc-memberships-settings.php:204
 msgid "Message displayed if visitor does not have access to the post, but can purchase it."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:209
+#: src/Admin/class-wc-memberships-settings.php:211
 msgid "Post restricted (membership required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:210
+#: src/Admin/class-wc-memberships-settings.php:212
 msgid "Displays if the blog post is restricted to a membership that cannot be purchased."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:212
+#: src/Admin/class-wc-memberships-settings.php:214
 msgid "Message displayed if visitor does not have access to the post and no products can grant access."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:219
+#: src/Admin/class-wc-memberships-settings.php:221
 msgid "Post delayed (members)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:220
+#: src/Admin/class-wc-memberships-settings.php:222
 msgid "Displays if access to blog post is not available yet."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:222
+#: src/Admin/class-wc-memberships-settings.php:224
 msgid "Message displayed if the current user is a member but does not have access to the post yet."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:235
+#: src/Admin/class-wc-memberships-settings.php:237
 msgid "Page restricted messages"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:238
+#: src/Admin/class-wc-memberships-settings.php:240
 msgid "The following messages may be shown to members and non-members when trying to access a page."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:245
+#: src/Admin/class-wc-memberships-settings.php:247
 msgid "Page restricted (product purchase required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:246
+#: src/Admin/class-wc-memberships-settings.php:248
 msgid "Displays when purchase is required to view the page."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:248
+#: src/Admin/class-wc-memberships-settings.php:250
 msgid "Message displayed if visitor does not have access to the page, but can purchase it."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:255
+#: src/Admin/class-wc-memberships-settings.php:257
 msgid "Page restricted (membership required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:256
+#: src/Admin/class-wc-memberships-settings.php:258
 msgid "Displays if the page is restricted to a membership that cannot be purchased."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:258
+#: src/Admin/class-wc-memberships-settings.php:260
 msgid "Message displayed if visitor does not have access to the page and no products can grant access."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:265
+#: src/Admin/class-wc-memberships-settings.php:267
 msgid "Page delayed (members)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:266
+#: src/Admin/class-wc-memberships-settings.php:268
 msgid "Displays if access to page is not available yet."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:268
+#: src/Admin/class-wc-memberships-settings.php:270
 msgid "Message displayed if the current user is a member but does not have access to the page yet."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:281
+#: src/Admin/class-wc-memberships-settings.php:283
 msgid "Content restricted messages"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:284
+#: src/Admin/class-wc-memberships-settings.php:286
 msgid "The following messages may be shown to members and non-members when trying to access content that is not a product, blog post, or page (such as a custom content type)."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:291
+#: src/Admin/class-wc-memberships-settings.php:293
 msgid "Content restricted (product purchase required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:292
+#: src/Admin/class-wc-memberships-settings.php:294
 msgid "Displays when purchase is required to view the content."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:294
+#: src/Admin/class-wc-memberships-settings.php:296
 msgid "Message displayed if visitor does not have access to the content, but can purchase it."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:301
+#: src/Admin/class-wc-memberships-settings.php:303
 msgid "Content restricted (membership required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:302
+#: src/Admin/class-wc-memberships-settings.php:304
 msgid "Displays if the content is restricted to a membership that cannot be purchased."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:304
+#: src/Admin/class-wc-memberships-settings.php:306
 msgid "Message displayed if visitor does not have access to the content and no products can grant access."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:311
+#: src/Admin/class-wc-memberships-settings.php:313
 msgid "Content delayed (members)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:312
+#: src/Admin/class-wc-memberships-settings.php:314
 msgid "Displays if access to content is not available yet."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:314
+#: src/Admin/class-wc-memberships-settings.php:316
 msgid "Message displayed if the current user is a member but does not have access to content yet."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:327
+#: src/Admin/class-wc-memberships-settings.php:329
 msgid "Product restriction messages"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:330
+#: src/Admin/class-wc-memberships-settings.php:332
 msgid "The following messages may be shown to members and non-members when trying to view or purchase products."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:337
+#: src/Admin/class-wc-memberships-settings.php:339
 msgid "Product viewing or purchasing delayed (members)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:338
+#: src/Admin/class-wc-memberships-settings.php:340
 msgid "Displays if access for viewing or purchasing a product is not available yet."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:340
+#: src/Admin/class-wc-memberships-settings.php:342
 msgid "Message displayed if the current user is a member but does not have access yet to view or purchase the product."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:347
+#: src/Admin/class-wc-memberships-settings.php:349
 msgid "Product viewing restricted (purchase required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:348
+#: src/Admin/class-wc-memberships-settings.php:350
 msgid "Displays when purchase is required to view the product."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:350
+#: src/Admin/class-wc-memberships-settings.php:352
 msgid "Message displayed if viewing is restricted to members but access can be purchased."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:357
+#: src/Admin/class-wc-memberships-settings.php:359
 msgid "Product viewing restricted (membership required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:358
+#: src/Admin/class-wc-memberships-settings.php:360
 msgid "Displays if viewing is restricted to a membership that cannot be purchased."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:360
+#: src/Admin/class-wc-memberships-settings.php:362
 msgid "Message displayed if viewing is restricted to members and no products can grant access."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:367
+#: src/Admin/class-wc-memberships-settings.php:369
 msgid "Product buying restricted (purchase required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:368
+#: src/Admin/class-wc-memberships-settings.php:370
 msgid "Displays when purchase is required to buy the product."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:370
+#: src/Admin/class-wc-memberships-settings.php:372
 msgid "Message displayed if purchasing is restricted to members but access can be purchased."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:377
+#: src/Admin/class-wc-memberships-settings.php:379
 msgid "Product buying restricted (membership required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:378
+#: src/Admin/class-wc-memberships-settings.php:380
 msgid "Displays if purchasing is restricted to a membership that cannot be purchased."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:380
+#: src/Admin/class-wc-memberships-settings.php:382
 msgid "Message displayed if purchasing is restricted to members and no products can grant access."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:395
+#: src/Admin/class-wc-memberships-settings.php:397
 msgid "The following messages may be used to inform non-members of discounts."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:403
+#: src/Admin/class-wc-memberships-settings.php:405
 msgid "Product discounted (purchase required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:404
+#: src/Admin/class-wc-memberships-settings.php:406
 msgid "Message displayed to non-members if the product has a member discount."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:406
-#: src/Admin/class-wc-memberships-settings.php:416
+#: src/Admin/class-wc-memberships-settings.php:408
+#: src/Admin/class-wc-memberships-settings.php:418
 msgid "Displays below add to cart buttons. Leave blank to disable."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:413
+#: src/Admin/class-wc-memberships-settings.php:415
 msgid "Product discounted (membership required)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:414
+#: src/Admin/class-wc-memberships-settings.php:416
 msgid "Message displayed to non-members if the product has a member discount, but no products can grant access."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:422
+#: src/Admin/class-wc-memberships-settings.php:424
 msgid "Member discount login reminder"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:424
+#: src/Admin/class-wc-memberships-settings.php:426
 msgid "Do not show"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:425
+#: src/Admin/class-wc-memberships-settings.php:427
 msgid "Show on cart page"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:426
+#: src/Admin/class-wc-memberships-settings.php:428
 msgid "Show on checkout page"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:427
+#: src/Admin/class-wc-memberships-settings.php:429
 msgid "Show on both cart & checkout page"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:430
+#: src/Admin/class-wc-memberships-settings.php:432
 msgid "Select when & where to display login reminder notice for guests if products in cart have member discounts."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:438
+#: src/Admin/class-wc-memberships-settings.php:440
 msgid "Member discount login message"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:439
+#: src/Admin/class-wc-memberships-settings.php:441
 msgid "Message to remind members to log in to claim a discount. Leave blank to use the default log in message."
 msgstr ""
 
 #. translators: Placeholder: %s - a message text example
-#: src/Admin/class-wc-memberships-settings.php:441
-#, php-format
+#: src/Admin/class-wc-memberships-settings.php:443
 msgid "for example: \"%s\""
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:456
+#: src/Admin/class-wc-memberships-settings.php:458
 msgid "No redirect"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:461
+#: src/Admin/class-wc-memberships-settings.php:463
 msgid "Members area"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:462
+#: src/Admin/class-wc-memberships-settings.php:464
 msgid "Redirect members upon login to the \"My Account - Members Area\" page. If the Members Area is not enabled on a member's plan, the member will not be redirected."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:466
+#: src/Admin/class-wc-memberships-settings.php:468
 msgid "Site page"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:467
+#: src/Admin/class-wc-memberships-settings.php:469
 msgid "Redirect members upon login to a site page. If this page is restricted from a member's plan the member won't be redirected."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:498
+#: src/Admin/class-wc-memberships-settings.php:500
 msgid "Content restriction mode"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:500
+#: src/Admin/class-wc-memberships-settings.php:502
 #: src/Restrictions.php:178
 msgid "Hide completely"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:501
+#: src/Admin/class-wc-memberships-settings.php:503
 #: src/Restrictions.php:179
 msgid "Hide content only"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:502
+#: src/Admin/class-wc-memberships-settings.php:504
 #: src/Restrictions.php:180
 msgid "Redirect to page"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:505
+#: src/Admin/class-wc-memberships-settings.php:507
 msgid "Specifies the way content is restricted: whether to show nothing, excerpts, or send to a landing page."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:508
+#: src/Admin/class-wc-memberships-settings.php:510
 msgid "\"Hide completely\" removes all traces of content for non-members, search engines and 404s restricted pages."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:509
+#: src/Admin/class-wc-memberships-settings.php:511
 msgid "\"Hide content only\" will show items in archives, but protect page or post content and comments."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:517
+#: src/Admin/class-wc-memberships-settings.php:519
 msgid "Redirect page"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:518
+#: src/Admin/class-wc-memberships-settings.php:520
 msgid "Select the page to redirect non-members to - should contain the [wcm_content_restricted] shortcode."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:529
+#: src/Admin/class-wc-memberships-settings.php:531
 msgid "Show excerpts"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:531
+#: src/Admin/class-wc-memberships-settings.php:533
 msgid "If enabled, an excerpt of the protected content will be displayed to non-members & search engines."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:532
+#: src/Admin/class-wc-memberships-settings.php:534
 msgid "If enabled, an excerpt of the protected content will be displayed to search engines. Non-members can view excerpts on archive pages only."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:537
+#: src/Admin/class-wc-memberships-settings.php:539
 msgid "Excerpt length (words)"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:538
+#: src/Admin/class-wc-memberships-settings.php:540
 msgid "Number of words shown to non-members and search engines."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:555
+#: src/Admin/class-wc-memberships-settings.php:557
 msgid "Inherit parent restrictions"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:556
+#: src/Admin/class-wc-memberships-settings.php:558
 msgid "If enabled, hierarchical post types such as pages will apply restriction rules to their children."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:563
+#: src/Admin/class-wc-memberships-settings.php:565
 msgid "Redirect members upon login"
 msgstr ""
 
 #. translators: Placeholders: %1$s - emphasis HTML opening tags, %2$s - emphasis HTML closing tags
-#: src/Admin/class-wc-memberships-settings.php:566
-#, php-format
+#: src/Admin/class-wc-memberships-settings.php:568
 msgid "Choose a page to redirect members to when they log into your site. This will %1$snot%2$s redirect members who log in from the Cart or Checkout, or login prompts on a restricted content message / redirect page (if applicable based on the Content restriction mode)."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:576
+#: src/Admin/class-wc-memberships-settings.php:578
 msgid "Login redirect page"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:612
+#: src/Admin/class-wc-memberships-settings.php:614
 #: assets/js/blocks/src/directory/index.js:10
 msgid "Member Directory"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:619
+#: src/Admin/class-wc-memberships-settings.php:621
 msgid "Enable Member Directory shortcode and block"
 msgstr ""
 
 #. translators: Placeholder: %1$s - opening HTML <a> link tag, %2$s - closing HTML </a> link tag
-#: src/Admin/class-wc-memberships-settings.php:622
-#, php-format
+#: src/Admin/class-wc-memberships-settings.php:624
 msgid "If enabled, the Member Directory will be available to display a list of members in posts and pages that include the corresponding block or shortcode. %1$sRead more about this feature%2$s."
 msgstr ""
 
+#: src/Admin/class-wc-memberships-settings.php:658
+msgid "Profile Field Uploads"
+msgstr ""
+
 #: src/Admin/class-wc-memberships-settings.php:663
+msgid "Allowed file types"
+msgstr ""
+
+#: src/Admin/class-wc-memberships-settings.php:664
+msgid "Restricts the file types members and guests can upload via file-type profile fields."
+msgstr ""
+
+#: src/Admin/class-wc-memberships-settings.php:671
+msgid "Images (jpg, png, gif, webp)"
+msgstr ""
+
+#: src/Admin/class-wc-memberships-settings.php:672
+msgid "PDF"
+msgstr ""
+
+#: src/Admin/class-wc-memberships-settings.php:673
+msgid "Text (txt)"
+msgstr ""
+
+#: src/Admin/class-wc-memberships-settings.php:674
+msgid "Office documents (docx, xlsx, pptx)"
+msgstr ""
+
+#: src/Admin/class-wc-memberships-settings.php:677
+msgid "Choose file types"
+msgstr ""
+
+#: src/Admin/class-wc-memberships-settings.php:707
 msgctxt "Default member user role"
 msgid "WordPress default"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:668
+#: src/Admin/class-wc-memberships-settings.php:712
 msgid "Member Roles"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:673
+#: src/Admin/class-wc-memberships-settings.php:717
 msgid "Enable member roles"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:674
+#: src/Admin/class-wc-memberships-settings.php:718
 msgid "Choose the roles to assign to active and inactive members."
 msgstr ""
 
 #. translators: Placeholders %1$s - opening <em> HTML tag, %2$s - closing </em> HTML tag, %3$s - opening <em> HTML tag, %4$s - closing </em> HTML tag
-#: src/Admin/class-wc-memberships-settings.php:676
-#, php-format
+#: src/Admin/class-wc-memberships-settings.php:720
 msgid "Users with the %1$sadministrator%2$s or %3$sshop manager%4$s role will never be allocated these roles to prevent locking out admin users."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:683
+#: src/Admin/class-wc-memberships-settings.php:727
 msgid "Member default role"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:684
+#: src/Admin/class-wc-memberships-settings.php:728
 msgid "When a membership is activated, new members will be assigned this role."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:694
+#: src/Admin/class-wc-memberships-settings.php:738
 msgid "Inactive member role"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:695
+#: src/Admin/class-wc-memberships-settings.php:739
 msgid "If a member becomes inactive (e.g., the membership is cancelled or expired), the member will be assigned this role."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:732
+#: src/Admin/class-wc-memberships-settings.php:776
 msgid "Privacy"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:738
+#: src/Admin/class-wc-memberships-settings.php:782
 msgid "Account erasure requests"
 msgstr ""
 
 #. translators: Placeholders: %1$s - opening HTML <a> link tag , %2$s - closing HTML </a> link tag
-#: src/Admin/class-wc-memberships-settings.php:740
-#, php-format
+#: src/Admin/class-wc-memberships-settings.php:784
 msgid "Delete all matching memberships when %1$susers request to erase their personal data%2$s."
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:855
+#: src/Admin/class-wc-memberships-settings.php:899
 #: src/Frontend/My_Account/Members_Area.php:254
 msgid "My Membership"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:856
+#: src/Admin/class-wc-memberships-settings.php:900
 msgid "Endpoint for the My Account &rarr; My Membership page"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:864
+#: src/Admin/class-wc-memberships-settings.php:908
 #: src/Frontend/My_Account/Profile_Fields_Area.php:157
 #: templates/myaccount/my-profile-fields.php:42
 msgid "My Profile"
 msgstr ""
 
-#: src/Admin/class-wc-memberships-settings.php:865
+#: src/Admin/class-wc-memberships-settings.php:909
 msgid "Endpoint for the My Account &rarr; My Profile page"
 msgstr ""
 
@@ -1583,7 +1574,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag, %3$s - opening <strong> HTML tag, %4$s - closing </strong> HTML tag, %4$s - opening <strong> HTML tag, %6$s - closing </strong> HTML tag
 #: src/Admin/class-wc-memberships-setup-wizard.php:162
-#, php-format
 msgid "You can %1$shide restricted content completely%2$s, so non-members see a content not found (404) page, %3$shide only restricted content%4$s so non-members see a \"content restricted\" notice, or %5$sredirect non-members to a landing page%6$s when they try to view restricted content."
 msgstr ""
 
@@ -1671,7 +1661,6 @@ msgstr ""
 
 #. translators: Placeholders: %s - date format
 #: src/Admin/class-wc-memberships-setup-wizard.php:396
-#, php-format
 msgid "Format: %s"
 msgstr ""
 
@@ -1681,7 +1670,6 @@ msgstr ""
 
 #. translators: Placeholders: %s - Membership plan name
 #: src/Admin/class-wc-memberships-setup-wizard.php:530
-#, php-format
 msgid "%s perks"
 msgstr ""
 
@@ -1960,7 +1948,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - list of products that are in the trash, linked to their edit screen
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:505
-#, php-format
 msgid "The product %s is in the trash and may not be purchasable."
 msgid_plural "The products %s are in the trash and may not be purchasable."
 msgstr[0] ""
@@ -1968,19 +1955,16 @@ msgstr[1] ""
 
 #. translators: Placeholder: %s - links to posts
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:570
-#, php-format
 msgid "These posts are public, and will be excluded from all restriction rules: %s"
 msgstr ""
 
 #. translators: Placeholder: %s - links to posts
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:622
-#, php-format
 msgid "These products are public, and will be excluded from all restriction rules: %s"
 msgstr ""
 
 #. translators: Placeholder: %s - links to posts
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:674
-#, php-format
 msgid "These products are excluded from all member discount rules: %s"
 msgstr ""
 
@@ -2026,19 +2010,16 @@ msgstr ""
 
 #. translators: Placeholder: %1$s - opening <a> link tag, %2$s - closing </a> link tag
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:820
-#, php-format
 msgid "It looks like you haven't enabled any of the Memberships emails. To configure email content for this plan, you need to enable at least one membership email from the %1$sWooCommerce Emails settings%2$s"
 msgstr ""
 
 #. translators: %1$s - line break, %2$s - opening <a> link tag, %3$s - closing </a> tag
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:867
-#, php-format
 msgid "When you add a restriction rule for content, it will no longer be public on your site. By adding a rule for a page, post, or taxonomy, it will become restricted, and can only be accessed by members of this plan, or by members of another plan that grants access to the content. Learn more about %1$srestriction rules in the documentation%2$s."
 msgstr ""
 
 #. translators: these %s placeholders consist of pairs of opening a closing <strong> HTML tags highlighting text
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-membership-plan-data.php:879
-#, php-format
 msgid "When you add a %1$sviewing%2$s restriction rule for a product, it will no longer be public on your site, and can only be accessed by members of this plan, or by members of another plan that grants access to the product. By adding a %3$spurchasing%4$s restriction rule, the product can be viewed publicly, but only purchased by members. Learn more about %5$srestriction rules in the documentation%6$s."
 msgstr ""
 
@@ -2116,7 +2097,6 @@ msgstr ""
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-post-memberships-data.php:196
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-product-memberships-data.php:347
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-product-memberships-data.php:379
-#, php-format
 msgid "%1$s automatically inserts the product(s) needed to gain access. %2$s inserts the URL to my account page. HTML is allowed."
 msgstr ""
 
@@ -2143,13 +2123,11 @@ msgstr ""
 
 #. translators: %1$s - opening <a> link tag, %2$s - closing </a> link tag
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-product-memberships-data.php:429
-#, php-format
 msgid "These settings affect all variations. For variation-level control use the %1$smembership plan screen%2$s."
 msgstr ""
 
 #. translators: Placeholders: %1$s - opening <a> link tag, %2$s - closing </a> link tag
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-product-memberships-data.php:440
-#, php-format
 msgid "To grant membership access, please %1$sAdd a Membership Plan%2$s"
 msgstr ""
 
@@ -2243,7 +2221,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - order number
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-user-membership-data.php:477
-#, php-format
 msgid "Order %s"
 msgstr ""
 
@@ -2273,7 +2250,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - date
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-user-membership-member-details.php:109
-#, php-format
 msgid "Member since %s"
 msgstr ""
 
@@ -2283,7 +2259,6 @@ msgstr ""
 
 #. translators: Placeholder: %s last activity (e.g. "today", "3 days ago", etc.)
 #: src/Admin/meta-boxes/class-wc-memberships-meta-box-user-membership-member-details.php:154
-#, php-format
 msgid "Last active: %s"
 msgstr ""
 
@@ -2318,7 +2293,7 @@ msgstr ""
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-content-restriction-rule.php:55
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-product-restriction-rule.php:61
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-purchasing-discount-rule.php:63
-#: src/Profile_Fields.php:166
+#: src/Profile_Fields.php:168
 msgid "Select"
 msgstr ""
 
@@ -2372,7 +2347,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - an opening HTML tag, %2$s - a closing HTML tag, %3$s - a numeric value, %4$s - a period, such as day(s), month(s), etc. - The result will look something like: "after 3 day(s)"
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-content-restriction-rule.php:260
-#, php-format
 msgid "%1$safter%2$s %3$s %4$s"
 msgstr ""
 
@@ -2386,7 +2360,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening HTML <a> tag, %2$s - closing </a> HTML tag
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-content-restriction-rule.php:306
-#, php-format
 msgid "This rule cannot be edited here because it applies to multiple content objects. You can %1$sedit this rule on the membership plan screen%2$s."
 msgstr ""
 
@@ -2416,7 +2389,6 @@ msgstr ""
 #. translators: Placeholder: %s outputs "Add a Membership Plan" action link
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-content-restriction-rules.php:111
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-product-restriction-rules.php:132
-#, php-format
 msgid "To create restriction rules, please %s"
 msgstr ""
 
@@ -2439,7 +2411,6 @@ msgstr ""
 
 #. translators: Placeholders: Date (%1$s) and time (%2$s) when a Membership Note was added
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-membership-note.php:61
-#, php-format
 msgid "added on %1$s at %2$s"
 msgstr ""
 
@@ -2453,7 +2424,6 @@ msgstr ""
 #. translators: Placeholders: %1$s - membership note published date and time; %2$s membership note published by - for example "On 1 October 2020 at 10:25am by John Doe"
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-membership-note.php:69
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-membership-recent-activity-note.php:85
-#, php-format
 msgid "%1$s by %2$s"
 msgstr ""
 
@@ -2468,13 +2438,11 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - Membership Plan Name, %2$s - Membership note. Example "Gold Plan: Membership cancelled"
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-membership-recent-activity-note.php:60
-#, php-format
 msgid "%1$s: %2$s"
 msgstr ""
 
 #. translators: Placeholders: Date (%1$s) and time (%2$s) when a Membership Note was published
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-membership-recent-activity-note.php:77
-#, php-format
 msgid "On %1$s at %2$s"
 msgstr ""
 
@@ -2502,7 +2470,6 @@ msgstr ""
 #. translators: Placeholders: %1$s - opening HTML <a> tag, %2$s - closing </a> HTML tag
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-product-restriction-rule.php:308
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-purchasing-discount-rule.php:269
-#, php-format
 msgid "This rule cannot be edited here because it applies to multiple products. You can %1$sedit this rule on the membership plan screen%2$s."
 msgstr ""
 
@@ -2521,7 +2488,6 @@ msgstr ""
 #. translators: Placeholders: %1$s - opening HTML <a> tag, %2$s - closing </a> HTML tag
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-product-restriction-rules.php:300
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-purchasing-discount-rules.php:253
-#, php-format
 msgid "This rule cannot be edited here. You can %1$sedit this rule on the membership plan screen%2$s."
 msgstr ""
 
@@ -2554,7 +2520,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - "Add a membership plan" link
 #: src/Admin/meta-boxes/views/class-wc-memberships-meta-box-view-purchasing-discount-rules.php:131
-#, php-format
 msgid "To create member discounts, please %s"
 msgstr ""
 
@@ -2568,7 +2533,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - percentage completed
 #: src/Admin/modals/abstract-wc-memberships-batch-job-modal.php:106
-#, php-format
 msgid "Current progress: %s"
 msgstr ""
 
@@ -2603,7 +2567,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - "required" in parenthesis
 #: src/Admin/modals/abstract-wc-memberships-member-modal.php:191
-#, php-format
 msgid "Email %s"
 msgstr ""
 
@@ -2648,13 +2611,11 @@ msgstr ""
 
 #. translators: Placeholder: %s - the plan name
 #: src/Admin/modals/class-wc-memberships-modal-grant-access-membership-plan.php:62
-#, php-format
 msgid "This action will create a membership for registered users who are not yet members of the %s plan."
 msgstr ""
 
 #. translators: Placeholder: %s - the plan name
 #: src/Admin/modals/class-wc-memberships-modal-grant-access-membership-plan.php:64
-#, php-format
 msgid "This action will create a membership for customers who have previously purchased one of the products that grant access to the %s plan."
 msgstr ""
 
@@ -2668,7 +2629,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening <em> tag, %2$s - opening <strong> tag, %3$s - closing </strong> tag, %4$s - opening <u> tag, %5$s - closing </u> tag, %6$s - opening <u> tag, %7$s - closing </u> tag, %8$s - closing </em> tag
 #: src/Admin/modals/class-wc-memberships-modal-grant-access-membership-plan.php:82
-#, php-format
 msgid "%1$s%2$sImportant!%3$s The process is %4$snot%5$s reversible. Once memberships have been created, you must manually delete them. Please be sure you have %6$ssaved changes to your plan%7$s before starting this process.%8$s"
 msgstr ""
 
@@ -2678,13 +2638,11 @@ msgstr ""
 
 #. translators: Placeholders: %s - current progress (number), either 0 or 1
 #: src/Admin/modals/class-wc-memberships-modal-grant-access-membership-plan.php:129
-#, php-format
 msgid "Processed %s out of 1 user."
 msgstr ""
 
 #. translators: Placeholders: %1$s - current progress (number), %2$s - total amount of users to process (number)
 #: src/Admin/modals/class-wc-memberships-modal-grant-access-membership-plan.php:132
-#, php-format
 msgid "Processed %1$s out of %2$s users."
 msgstr ""
 
@@ -2695,25 +2653,21 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening <em> tag, %2$s - opening <strong> tag, %3$s - closing </strong> tag, %4$s - closing </em> tag
 #: src/Admin/modals/class-wc-memberships-modal-import-export-user-memberships.php:65
-#, php-format
 msgid "%1$s%2$sImportant!%3$s Do not leave this window until the import completes or it will be cancelled. Imported memberships will not be deleted automatically if the import is interrupted.%4$s"
 msgstr ""
 
 #. translators: Placeholders: %1$s - opening <em> tag, %2$s - opening <strong> tag, %3$s - closing </strong> tag, %4$s - closing </em> tag
 #: src/Admin/modals/class-wc-memberships-modal-import-export-user-memberships.php:70
-#, php-format
 msgid "%1$s%2$sImportant!%3$s Do not leave this window until the export has completed or it will be stopped.%4$s"
 msgstr ""
 
 #. translators: Placeholders: %s - current progress (number), either 0 or 1
 #: src/Admin/modals/class-wc-memberships-modal-import-export-user-memberships.php:101
-#, php-format
 msgid "Processed %s out of 1 row."
 msgstr ""
 
 #. translators: Placeholders: %1$s - current progress (number), %2$s - total amount of rows processed during an import
 #: src/Admin/modals/class-wc-memberships-modal-import-export-user-memberships.php:104
-#, php-format
 msgid "Processed %1$s out of %2$s rows."
 msgstr ""
 
@@ -2721,14 +2675,12 @@ msgstr ""
 #. translators: Placeholders: %s - current progress (number), either 0 or 1
 #: src/Admin/modals/class-wc-memberships-modal-import-export-user-memberships.php:115
 #: src/Admin/modals/class-wc-memberships-modal-reschedule-user-memberships-events.php:112
-#, php-format
 msgid "Processed %s out of 1 membership."
 msgstr ""
 
 #. translators: Placeholders: %1$s - current progress (number), %2$s - total amount of user memberships to process (number)
 #: src/Admin/modals/class-wc-memberships-modal-import-export-user-memberships.php:118
 #: src/Admin/modals/class-wc-memberships-modal-reschedule-user-memberships-events.php:115
-#, php-format
 msgid "Processed %1$s out of %2$s memberships."
 msgstr ""
 
@@ -2762,7 +2714,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening <em> tag, %2$s - opening <strong> tag, %3$s - closing </strong> tag, %4$s - opening <u> underline tag, %5$s, closing </u> underline tag, %6$s - closing </em> tag
 #: src/Admin/modals/class-wc-memberships-modal-reschedule-user-memberships-events.php:65
-#, php-format
 msgid "%1$s%2$sImportant!%3$s Please be sure to %4$ssave your email settings%5$s before running this tool.%6$s"
 msgstr ""
 
@@ -2776,7 +2727,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - processed user memberships
 #: src/Admin/modals/class-wc-memberships-modal-reschedule-user-memberships-events.php:151
-#, php-format
 msgid "Processed %s memberships."
 msgstr ""
 
@@ -2904,7 +2854,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - Opening HTML <a> link tag, %2$s - Closing </a> HTML link tag
 #: src/Admin/Profile_Fields/List_Table.php:258
-#, php-format
 msgid "You haven't created any profile fields yet &mdash; %1$sClick Here%2$s to create your first one!"
 msgstr ""
 
@@ -2949,7 +2898,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag
 #: src/Admin/Views/Meta_Boxes/Profile_Field/Data.php:92
-#, php-format
 msgid "This profile field is currently in use by one or more members, so %1$sField type%2$s editing is limited."
 msgstr ""
 
@@ -3046,7 +2994,7 @@ msgid "Field options"
 msgstr ""
 
 #: src/Admin/Views/Meta_Boxes/Profile_Field/Data.php:669
-#: src/Profile_Fields/Profile_Field_Definition.php:625
+#: src/Profile_Fields/Profile_Field_Definition.php:641
 msgid "Please add one or more field options before saving this profile field."
 msgstr ""
 
@@ -3060,7 +3008,6 @@ msgstr ""
 
 #. translators: Placeholder: %1$s - opening <strong> HTML tag, %2$s - closing </strong> HTML tag
 #: src/Admin/Views/Meta_Boxes/Profile_Field/Data.php:703
-#, php-format
 msgid "You don't have any options yet! Click the %1$sAdd new option%2$s button below to get started."
 msgstr ""
 
@@ -3088,7 +3035,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening <a> HTML link tag, %2$s - closing </a> HTML link tag
 #: src/Admin/Views/Meta_Boxes/User_Membership/Profile_Fields.php:146
-#, php-format
 msgid "Collect or store more information about your members with %1$sProfile Fields%2$s."
 msgstr ""
 
@@ -3121,7 +3067,6 @@ msgid "Delete field"
 msgstr ""
 
 #: src/Admin/Views/Modals/Profile_Field/Confirm_Deletion.php:92
-#, php-format
 msgid "Deleting profile fields will also delete all data entered in the field(s). To hide the field from member-view instead, click %1$sHide field%2$s to change it to admin-only access. To proceed with deleting, click %3$sDelete field%4$s."
 msgstr ""
 
@@ -3135,19 +3080,16 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - post ID, %2$s - membership object name (e.g. Membership Plan or User Membership)
 #: src/API/Controller.php:256
-#, php-format
 msgid "Object with ID %1$s is not a valid %2$s."
 msgstr ""
 
 #. translators: Placeholder: %s - membership object name (e.g. Membership Plan or User Membership)
 #: src/API/Controller.php:259
-#, php-format
 msgid "%s invalid or not found."
 msgstr ""
 
 #. translators: Placeholder: %s - object name (e.g. "User Membership")
 #: src/API/Controller.php:337
-#, php-format
 msgid "This %s cannot be deleted."
 msgstr ""
 
@@ -3250,59 +3192,49 @@ msgid "Invalid request."
 msgstr ""
 
 #: src/API/Controller/User_Memberships.php:250
-#, php-format
 msgid "Required %s is missing."
 msgstr ""
 
 #. translators: Placeholders: %1$s - customer ID, %2$s - membership plan ID
 #: src/API/Controller/User_Memberships.php:261
-#, php-format
 msgid "A membership already exists for user %1$s and plan %2$s."
 msgstr ""
 
 #. translators: Placeholder: %s - user membership identifier (may be empty)
 #: src/API/Controller/User_Memberships.php:345
-#, php-format
 msgid "User Membership%s invalid or not found."
 msgstr ""
 
 #: src/API/Controller/User_Memberships.php:371
-#, php-format
 msgid "Could not change the membership plan of this user membership. %s"
 msgstr ""
 
 #. translators: Placeholder: %s - customer identifier (may be empty)
 #: src/API/Controller/User_Memberships.php:416
-#, php-format
 msgid "Membership Plan%s invalid or not found."
 msgstr ""
 
 #. translators: Placeholder: %s - customer identifier (may be empty)
 #: src/API/Controller/User_Memberships.php:444
-#, php-format
 msgid "Customer%s invalid or not found."
 msgstr ""
 
 #. translators: Placeholder: %s - date string name
 #: src/API/Controller/User_Memberships.php:487
-#, php-format
 msgid "Invalid %s date value."
 msgstr ""
 
 #. translators: Placeholder: %s - product identifier (may be empty)
 #: src/API/Controller/User_Memberships.php:500
-#, php-format
 msgid "Product%s invalid or not found."
 msgstr ""
 
 #. translators: Placeholder: %s - order identifier (may be empty)
 #: src/API/Controller/User_Memberships.php:512
-#, php-format
 msgid "Order %s invalid or not found."
 msgstr ""
 
 #: src/API/Controller/User_Memberships.php:523
-#, php-format
 msgid "Invalid user membership status: \"%s\"."
 msgstr ""
 
@@ -3312,31 +3244,26 @@ msgstr ""
 
 #. translators: Placeholders: %d - array item index
 #: src/API/Controller/User_Memberships.php:548
-#, php-format
 msgid "The profile field slug in \"profile_fields[%d][slug]\" is required."
 msgstr ""
 
 #. translators: Placeholders: %d - array item index
 #: src/API/Controller/User_Memberships.php:557
-#, php-format
 msgid "The profile field value in \"profile_fields[%d][value]\" is required."
 msgstr ""
 
 #. translators: Placeholder: %s - profile field slug
 #: src/API/Controller/User_Memberships.php:568
-#, php-format
 msgid "No profile field definition found for \"%s\"."
 msgstr ""
 
 #. translators: Placeholders: %1$s - profile field value, %2$s - profile field slug
 #: src/API/Controller/User_Memberships.php:575
-#, php-format
 msgid "The value \"%1$s\" for the \"%2$s\" profile field is not a valid attachment ID."
 msgstr ""
 
 #. translators: Placeholders: %1$s - array item index, %2$s - error message
 #: src/API/Controller/User_Memberships.php:585
-#, php-format
 msgid "The \"profile_fields[%1$s]\" data is invalid. %2$s"
 msgstr ""
 
@@ -3353,7 +3280,6 @@ msgid "Invalid meta data value."
 msgstr ""
 
 #: src/API/Controller/User_Memberships.php:636
-#, php-format
 msgid "An error occurred while setting properties for the user membership %s."
 msgstr ""
 
@@ -3617,76 +3543,78 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
-#: src/class-wc-memberships-ajax.php:497
+#: src/class-wc-memberships-ajax.php:498
 msgid "An account is already registered with this email address."
 msgstr ""
 
-#: src/class-wc-memberships-ajax.php:505
+#: src/class-wc-memberships-ajax.php:506
 msgid "Please ensure you have entered valid user information."
 msgstr ""
 
-#: src/class-wc-memberships-ajax.php:569
+#: src/class-wc-memberships-ajax.php:570
 #: src/class-wc-memberships-user-membership.php:2006
 msgid "An error occurred."
 msgstr ""
 
-#: src/class-wc-memberships-ajax.php:848
-#: src/class-wc-memberships-ajax.php:902
+#: src/class-wc-memberships-ajax.php:768
+msgid "Too many upload attempts. Please try again in a few minutes."
+msgstr ""
+
+#: src/class-wc-memberships-ajax.php:796
+msgid "Invalid file type."
+msgstr ""
+
+#: src/class-wc-memberships-ajax.php:906
+#: src/class-wc-memberships-ajax.php:960
 msgid "Must specify a valid job process name and job ID."
 msgstr ""
 
 #. translators: Placeholder: %s - a background job task run by Memberships
 #. translators: Placeholder: %s - a batch job task name run by Memberships
-#: src/class-wc-memberships-ajax.php:860
 #: src/class-wc-memberships-ajax.php:918
-#, php-format
+#: src/class-wc-memberships-ajax.php:976
 msgid "Unknown job process \"%s\"."
 msgstr ""
 
 #. translators: Placeholder: %s - a batch job task name run by Memberships
-#: src/class-wc-memberships-ajax.php:912
-#, php-format
+#: src/class-wc-memberships-ajax.php:970
 msgid "Could not find Memberships job handler for \"%s\"."
 msgstr ""
 
 #. translators: Placeholder: %s - batch job ID
-#: src/class-wc-memberships-ajax.php:924
-#, php-format
+#: src/class-wc-memberships-ajax.php:982
 msgid "Could not remove batch job \"%s\"."
 msgstr ""
 
-#: src/class-wc-memberships-ajax.php:951
+#: src/class-wc-memberships-ajax.php:1009
 msgid "Must specify a valid Membership Plan ID."
 msgstr ""
 
 #. translators: Placeholder: %s Membership PLan ID
-#: src/class-wc-memberships-ajax.php:959
-#, php-format
+#: src/class-wc-memberships-ajax.php:1017
 msgid "Could not get a valid published plan with ID %s."
 msgstr ""
 
-#: src/class-wc-memberships-ajax.php:1096
+#: src/class-wc-memberships-ajax.php:1154
 msgid "Could not start rescheduling user memberships events."
 msgstr ""
 
-#: src/class-wc-memberships-ajax.php:1119
+#: src/class-wc-memberships-ajax.php:1177
 msgid "Invalid or missing export parameters."
 msgstr ""
 
 #. translators: Placeholder: %s - error message
-#: src/class-wc-memberships-ajax.php:1143
-#, php-format
+#: src/class-wc-memberships-ajax.php:1201
 msgid "An error occurred while starting the export process. %s"
 msgstr ""
 
-#: src/class-wc-memberships-ajax.php:1160
+#: src/class-wc-memberships-ajax.php:1218
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:218
 msgid "You need to provide a valid CSV file to import memberships from."
 msgstr ""
 
 #. translators: Placeholder: %s - optional error message
-#: src/class-wc-memberships-ajax.php:1189
-#, php-format
+#: src/class-wc-memberships-ajax.php:1247
 msgid "An error occurred while starting the import process. %s"
 msgstr ""
 
@@ -3697,31 +3625,26 @@ msgstr ""
 #: src/Emails/class-wc-memberships-user-membership-ending-soon-email.php:150
 #: src/Emails/class-wc-memberships-user-membership-note-email.php:119
 #: src/Emails/class-wc-memberships-user-membership-renewal-reminder-email.php:159
-#, php-format
 msgid "%s inserts your site name."
 msgstr ""
 
 #. translators: Placeholder: %s - merge tag
 #: src/class-wc-memberships-emails.php:385
-#, php-format
 msgid "%s inserts the member display name."
 msgstr ""
 
 #. translators: Placeholder: %s - merge tag
 #: src/class-wc-memberships-emails.php:388
-#, php-format
 msgid "%s inserts the member first name."
 msgstr ""
 
 #. translators: Placeholder: %s - merge tag
 #: src/class-wc-memberships-emails.php:391
-#, php-format
 msgid "%s inserts the member last name."
 msgstr ""
 
 #. translators: Placeholder: %s - merge tag
 #: src/class-wc-memberships-emails.php:394
-#, php-format
 msgid "%s inserts the member full name (or display name, if full name is not set)."
 msgstr ""
 
@@ -3732,31 +3655,26 @@ msgstr ""
 #: src/Emails/class-wc-memberships-user-membership-ending-soon-email.php:158
 #: src/Emails/class-wc-memberships-user-membership-note-email.php:127
 #: src/Emails/class-wc-memberships-user-membership-renewal-reminder-email.php:167
-#, php-format
 msgid "%s inserts the membership plan name."
 msgstr ""
 
 #. translators: Placeholder: %s - merge tag
 #: src/class-wc-memberships-emails.php:400
-#, php-format
 msgid "%s inserts the expiration date of the membership."
 msgstr ""
 
 #. translators: Placeholder: %s - merge tag
 #: src/class-wc-memberships-emails.php:403
-#, php-format
 msgid "%s inserts the time difference between now and the date when the membership expires or has expired (e.g. \"2 days\", or \"1 week\", etc.)."
 msgstr ""
 
 #. translators: Placeholder: %s - merge tag
 #: src/class-wc-memberships-emails.php:406
-#, php-format
 msgid "%s inserts a plain URL to the members area to view the membership."
 msgstr ""
 
 #. translators: Placeholder: %s - merge tag
 #: src/class-wc-memberships-emails.php:409
-#, php-format
 msgid "%s inserts a plain membership renewal URL."
 msgstr ""
 
@@ -3773,13 +3691,11 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - product name, %2$s - order number.
 #: src/class-wc-memberships-membership-plan.php:2081
-#, php-format
 msgid "Membership access granted from purchasing %1$s (Order %2$s)"
 msgstr ""
 
 #. translators: Placeholders: %1$s - product name, %2$s - order number.
 #: src/class-wc-memberships-membership-plan.php:2094
-#, php-format
 msgid "Membership access renewed from purchasing %1$s (Order %2$s)"
 msgstr ""
 
@@ -3828,7 +3744,6 @@ msgstr ""
 
 #. translators: Placeholder: Membership plan name for a membership that is inactive
 #: src/class-wc-memberships-membership-plans.php:394
-#, php-format
 msgid "%s (inactive)"
 msgstr ""
 
@@ -3944,70 +3859,60 @@ msgid "User Membership saved."
 msgstr ""
 
 #: src/class-wc-memberships-post-types.php:251
-#, php-format
 msgid "%s membership plan updated."
 msgid_plural "%s membership plans updated."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:252
-#, php-format
 msgid "%s membership plan not updated, somebody is editing it."
 msgid_plural "%s membership plans not updated, somebody is editing them."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:253
-#, php-format
 msgid "%s membership plan permanently deleted."
 msgid_plural "%s membership plans permanently deleted."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:254
-#, php-format
 msgid "%s membership plan moved to the Trash."
 msgid_plural "%s membership plans moved to the Trash."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:255
-#, php-format
 msgid "%s membership plan restored from the Trash."
 msgid_plural "%s membership plans restored from the Trash."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:259
-#, php-format
 msgid "%s user membership updated."
 msgid_plural "%s user memberships updated."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:260
-#, php-format
 msgid "%s user membership not updated, somebody is editing it."
 msgid_plural "%s user memberships not updated, somebody is editing them."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:261
-#, php-format
 msgid "%s user membership permanently deleted."
 msgid_plural "%s user memberships permanently deleted."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:262
-#, php-format
 msgid "%s user membership moved to the Trash."
 msgid_plural "%s user memberships moved to the Trash."
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/class-wc-memberships-post-types.php:263
-#, php-format
 msgid "%s user membership restored from the Trash."
 msgid_plural "%s user memberships restored from the Trash."
 msgstr[0] ""
@@ -4069,7 +3974,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - post type name (plural, e.g. "posts")
 #: src/class-wc-memberships-system-status-report.php:272
-#, php-format
 msgid "The plan contains a rule to restrict all %s to non-members"
 msgstr ""
 
@@ -4082,7 +3986,6 @@ msgid "Not published"
 msgstr ""
 
 #: src/class-wc-memberships-system-status-report.php:364
-#, php-format
 msgid "%d item"
 msgid_plural "%d items"
 msgstr[0] ""
@@ -4097,7 +4000,6 @@ msgid "Content (posts, pages, products) may be excluded from restrictions and wi
 msgstr ""
 
 #: src/class-wc-memberships-system-status-report.php:397
-#, php-format
 msgid "%d product"
 msgid_plural "%d products"
 msgstr[0] ""
@@ -4168,7 +4070,6 @@ msgstr ""
 
 #. translators: Membership transferred from user %1$s to user %2$s
 #: src/class-wc-memberships-user-membership.php:2060
-#, php-format
 msgid "Membership transferred from %1$s to %2$s."
 msgstr ""
 
@@ -4178,19 +4079,16 @@ msgstr ""
 
 #. translators: Placeholder: %d - membership plan ID
 #: src/class-wc-memberships-user-memberships.php:150
-#, php-format
 msgid "Cannot create User Membership: Membership Plan with ID %d does not exist"
 msgstr ""
 
 #. translators: Placeholder: %s - error message(s)
 #: src/class-wc-memberships-user-memberships.php:168
-#, php-format
 msgid "Cannot create User Membership: %s."
 msgstr ""
 
 #. translators: Placeholder: %d - membership plan ID
 #: src/class-wc-memberships-user-memberships.php:177
-#, php-format
 msgid "Cannot create User Membership #%d."
 msgstr ""
 
@@ -4201,7 +4099,6 @@ msgstr ""
 
 #. translators: Active Membership(s)
 #: src/class-wc-memberships-user-memberships.php:824
-#, php-format
 msgid "Active <span class=\"count\">(%s)</span>"
 msgid_plural "Active <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -4214,7 +4111,6 @@ msgstr ""
 
 #. translators: Delayed Membership(s)
 #: src/class-wc-memberships-user-memberships.php:830
-#, php-format
 msgid "Delayed <span class=\"count\">(%s)</span>"
 msgid_plural "Delayed <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -4227,7 +4123,6 @@ msgstr ""
 
 #. translators: Complimentary Membership(s)
 #: src/class-wc-memberships-user-memberships.php:836
-#, php-format
 msgid "Complimentary <span class=\"count\">(%s)</span>"
 msgid_plural "Complimentary <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -4240,7 +4135,6 @@ msgstr ""
 
 #. translators: Membership(s) Pending Cancellation
 #: src/class-wc-memberships-user-memberships.php:842
-#, php-format
 msgid "Pending Cancellation <span class=\"count\">(%s)</span>"
 msgid_plural "Pending Cancellation <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -4253,7 +4147,6 @@ msgstr ""
 
 #. translators: Paused Membership(s)
 #: src/class-wc-memberships-user-memberships.php:848
-#, php-format
 msgid "Paused <span class=\"count\">(%s)</span>"
 msgid_plural "Paused <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -4266,7 +4159,6 @@ msgstr ""
 
 #. translators: Expired Membership(s)
 #: src/class-wc-memberships-user-memberships.php:854
-#, php-format
 msgid "Expired <span class=\"count\">(%s)</span>"
 msgid_plural "Expired <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -4279,7 +4171,6 @@ msgstr ""
 
 #. translators: Cancelled Membership(s)
 #: src/class-wc-memberships-user-memberships.php:860
-#, php-format
 msgid "Cancelled <span class=\"count\">(%s)</span>"
 msgid_plural "Cancelled <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -4287,7 +4178,6 @@ msgstr[1] ""
 
 #. translators: Placeholders: Membership status changed from status A (%1$s) to status B (%2$s)
 #: src/class-wc-memberships-user-memberships.php:1052
-#, php-format
 msgid "Membership status changed from %1$s to %2$s."
 msgstr ""
 
@@ -4409,51 +4299,43 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - opening HTML <a> link tag, %2$s closing HTML </a> link tag
 #: src/class-wc-memberships-user-messages.php:860
-#, php-format
 msgctxt "Capitalized"
 msgid "%1$sLog in%2$s"
 msgstr ""
 
 #. translators: Placeholders: %1$s - opening HTML <a> link tag, %2$s closing HTML </a> link tag
 #: src/class-wc-memberships-user-messages.php:862
-#, php-format
 msgctxt "Lowercase"
 msgid "%1$slog in%2$s"
 msgstr ""
 
 #. translators: Placeholder: %s shows a message merge tag to be used
 #: src/class-wc-memberships-user-messages.php:1253
-#, php-format
 msgid "%s automatically inserts the product(s) needed to gain access."
 msgstr ""
 
 #. translators: Placeholder: %s shows a message merge tag to be used
 #: src/class-wc-memberships-user-messages.php:1255
-#, php-format
 msgid "%s inserts the date when the member will gain access to delayed content."
 msgstr ""
 
 #. translators: Placeholder: %s shows a message merge tag to be used
 #: src/class-wc-memberships-user-messages.php:1257
-#, php-format
 msgid "%s inserts the highest product discount obtainable by becoming a member."
 msgstr ""
 
 #. translators: Placeholder: %s shows a message merge tag to be used
 #: src/class-wc-memberships-user-messages.php:1259
-#, php-format
 msgid "%s inserts the URL to the \"My Account\" page with the login form."
 msgstr ""
 
 #. translators: Placeholder: %s shows a message merge tag to be used
 #: src/class-wc-memberships-user-messages.php:1261
-#, php-format
 msgid "%s inserts a login link to the \"My Account\" page with the login form."
 msgstr ""
 
 #. translators: Placeholders: %1$s - <strong>, %2$s - </strong>
 #: src/class-wc-memberships-user-messages.php:1284
-#, php-format
 msgid "%1$sHeads up!%2$s Restricted content is visible to you as an administrator, but will be restricted for guests and non-members."
 msgstr ""
 
@@ -4534,7 +4416,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - Opening <a> HTML tag, %2$s - Closing </a> HTML tag
 #: src/Emails/abstract-wc-memberships-user-membership-email.php:63
-#, php-format
 msgid "You can edit the content of this email for %1$seach one of your plans%2$s individually."
 msgstr ""
 
@@ -4664,7 +4545,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - <strong> tag, %2$s - </strong> tag
 #: src/Emails/class-wc-memberships-user-membership-renewal-reminder-email.php:55
-#, php-format
 msgid "Membership renewal reminder emails are sent to former plan members inviting them to renew their membership. %1$sRenewal reminders are not sent for non-renewable memberships, such as registration-based or admin-assign only memberships%2$s."
 msgstr ""
 
@@ -4706,7 +4586,6 @@ msgstr ""
 
 #. translators: Placeholder: %1$s - error code, %2$s - error message
 #: src/Frontend/class-wc-memberships-frontend.php:204
-#, php-format
 msgid "Error %1$s: %2$s"
 msgstr ""
 
@@ -4757,7 +4636,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - a product to purchase to renew a membership
 #: src/Frontend/class-wc-memberships-frontend.php:622
-#, php-format
 msgid "Renew your membership by purchasing %s."
 msgstr ""
 
@@ -4767,7 +4645,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - "Back to Memberships" or "Back to Dashboard" label to return back to the memberships list or the My Account dashboard
 #: src/Frontend/My_Account/Members_Area.php:428
-#, php-format
 msgid "Back to %s"
 msgstr ""
 
@@ -4805,7 +4682,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - <strong>, %2$s - </strong>, %3$s - opening <a> tag, %4$s - closing </a> tag
 #: src/Frontend/My_Account/Profile_Fields_Area.php:350
-#, php-format
 msgid "%1$sHey there%2$s, your profile is incomplete! %3$sPlease click here to complete it%4$s."
 msgstr ""
 
@@ -4847,7 +4723,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
 #: src/functions/wc-memberships-functions-orders.php:290
-#, php-format
 msgid "You can view more details about your membership from %1$syour account%2$s."
 msgstr ""
 
@@ -4987,7 +4862,6 @@ msgstr ""
 
 #. translators: %s - Group name, %d - Group ID
 #: src/integrations/groups/class-wc-memberships-integration-groups.php:165
-#, php-format
 msgid "Group: %s (ID #%d) "
 msgstr ""
 
@@ -5008,7 +4882,6 @@ msgid "Confirm Import"
 msgstr ""
 
 #: src/integrations/groups/class-wc-memberships-integration-groups.php:319
-#, php-format
 msgid "%d member imported from Groups."
 msgid_plural "%d members imported from Groups"
 msgstr[0] ""
@@ -5024,7 +4897,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - link to a Subscription, %2$s - opening <a> HTML tag, %3%s - closing </a> HTML tag
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-admin.php:142
-#, php-format
 msgid "%1$s - %2$sEdit Link%3$s"
 msgstr ""
 
@@ -5101,13 +4973,11 @@ msgstr ""
 
 #. translators: Placeholder: %s - length of a Subscription-tied membership plan
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-admin.php:585
-#, php-format
 msgid "Subscription based: %s"
 msgstr ""
 
 #. translators: Placeholder: %s - order ID
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-admin.php:614
-#, php-format
 msgid "Subscription: %s"
 msgstr ""
 
@@ -5118,7 +4988,6 @@ msgstr ""
 #. translators: Placeholder: %s - notice message
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-admin.php:798
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-admin.php:809
-#, php-format
 msgid "Subscription-tied membership plan: %s"
 msgstr ""
 
@@ -5140,19 +5009,16 @@ msgstr ""
 
 #. translators: %1$s opening strong tag; %2$s closing strong tag
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-ajax.php:240
-#, php-format
 msgid "%1$sNOTE:%2$s Changing the linked subscription has automatically updated the following settings for this membership:"
 msgstr ""
 
 #. translators: %1$s name of the old status; %2$s name of the new status
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-ajax.php:256
-#, php-format
 msgid "The status has changed from %1$s to %2$s"
 msgstr ""
 
 #. translators: %1$s old expiration date; %2$s new expiration date
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-ajax.php:276
-#, php-format
 msgid "The expiration date has changed from %1$s to %2$s"
 msgstr ""
 
@@ -5174,7 +5040,6 @@ msgid "Free Trial"
 msgstr ""
 
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-free-trial.php:69
-#, php-format
 msgid "Free Trial <span class=\"count\">(%s)</span>"
 msgid_plural "Free Trial <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -5199,7 +5064,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s is the subscription product name, %2%s is the order number
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-membership-plans.php:297
-#, php-format
 msgid "Membership re-activated due to subscription re-purchase (%1$s, Order %2$s)."
 msgstr ""
 
@@ -5253,7 +5117,6 @@ msgid "Cannot unlink a subscription from a membership and keep an installment pl
 msgstr ""
 
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions-user-memberships.php:624
-#, php-format
 msgid "Subscription%s invalid or not found."
 msgstr ""
 
@@ -5324,7 +5187,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - The Subscription's id, %2$s - The Subscription's holder full name
 #: src/integrations/subscriptions/class-wc-memberships-integration-subscriptions.php:878
-#, php-format
 msgid "Subscription #%1$s - %2$s"
 msgstr ""
 
@@ -5334,7 +5196,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - Membership Plan name
 #: src/integrations/User_Switching.php:150
-#, php-format
 msgid "\"%s\" Plan"
 msgstr ""
 
@@ -5344,7 +5205,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - Membership Plan name
 #: src/integrations/User_Switching.php:153
-#, php-format
 msgid "A temporary user created for testing the \"%s\" membership plan. If you don't use it, feel free to delete this user."
 msgstr ""
 
@@ -5577,52 +5437,50 @@ msgid "Whether this rule can be edited from this post. Inherited rules are read-
 msgstr ""
 
 #: src/Posts/Exceptions/PostNotFoundException.php:57
-#, php-format
 msgid "Post not found (ID: %d)."
 msgstr ""
 
 #: src/Posts/Exceptions/PostNotRestrictableException.php:58
-#, php-format
 msgid "Post type \"%s\" does not support membership content restrictions."
 msgstr ""
 
-#: src/Profile_Fields.php:161
+#: src/Profile_Fields.php:163
 msgid "Checkbox"
 msgstr ""
 
-#: src/Profile_Fields.php:162
+#: src/Profile_Fields.php:164
 msgid "File"
 msgstr ""
 
-#: src/Profile_Fields.php:163
+#: src/Profile_Fields.php:165
 msgid "Multi Checkbox"
 msgstr ""
 
-#: src/Profile_Fields.php:164
+#: src/Profile_Fields.php:166
 msgid "Multi Select"
 msgstr ""
 
-#: src/Profile_Fields.php:165
+#: src/Profile_Fields.php:167
 msgid "Radio"
 msgstr ""
 
-#: src/Profile_Fields.php:167
+#: src/Profile_Fields.php:169
 msgid "Text"
 msgstr ""
 
-#: src/Profile_Fields.php:168
+#: src/Profile_Fields.php:170
 msgid "Text Area"
 msgstr ""
 
-#: src/Profile_Fields.php:254
+#: src/Profile_Fields.php:256
 msgid "My account"
 msgstr ""
 
-#: src/Profile_Fields.php:255
+#: src/Profile_Fields.php:257
 msgid "Product page"
 msgstr ""
 
-#: src/Profile_Fields.php:256
+#: src/Profile_Fields.php:258
 msgid "Registration form"
 msgstr ""
 
@@ -5632,67 +5490,60 @@ msgstr ""
 
 #. translators: Placeholder: %s - profile field name
 #: src/Profile_Fields/Profile_Field.php:456
-#, php-format
 msgid "The profile field %s should be assigned to a user."
 msgstr ""
 
 #. translators: Placeholder: %s - profile field name
 #: src/Profile_Fields/Profile_Field.php:461
-#, php-format
 msgid "The profile field %s must have a valid slug."
 msgstr ""
 
 #. translators: Placeholder: %s - profile field name
 #: src/Profile_Fields/Profile_Field.php:466
-#, php-format
 msgid "The profile field %s is required."
 msgstr ""
 
 #. translators: Placeholder: %s - profile field name
 #: src/Profile_Fields/Profile_Field.php:472
-#, php-format
 msgid "The value of the profile field %s does not match one of the possible options."
 msgstr ""
 
 #. translators: Placeholder: %s - profile field name
 #: src/Profile_Fields/Profile_Field.php:478
-#, php-format
 msgid "The value for the profile field %s is invalid."
 msgstr ""
 
 #. translators: Placeholder: %s - profile field name
 #: src/Profile_Fields/Profile_Field.php:484
-#, php-format
 msgid "The value of the profile field %s does not match an existing uploaded file."
 msgstr ""
 
 #. translators: Placeholder: %s - profile field name
 #: src/Profile_Fields/Profile_Field.php:496
-#, php-format
 msgid "The user must be a member of one of the %s profile field plans."
 msgstr ""
 
-#: src/Profile_Fields/Profile_Field_Definition.php:593
+#: src/Profile_Fields/Profile_Field_Definition.php:609
 msgid "The profile field should have a name."
 msgstr ""
 
-#: src/Profile_Fields/Profile_Field_Definition.php:601
+#: src/Profile_Fields/Profile_Field_Definition.php:617
 msgid "The profile field slug should be a non-numeric string."
 msgstr ""
 
-#: src/Profile_Fields/Profile_Field_Definition.php:610
+#: src/Profile_Fields/Profile_Field_Definition.php:626
 msgid "A profile field with this slug already exists. Please use a unique slug for this profile field."
 msgstr ""
 
-#: src/Profile_Fields/Profile_Field_Definition.php:620
+#: src/Profile_Fields/Profile_Field_Definition.php:636
 msgid "The profile field should be of a valid type."
 msgstr ""
 
-#: src/Profile_Fields/Profile_Field_Definition.php:632
+#: src/Profile_Fields/Profile_Field_Definition.php:648
 msgid "The profile field can be only made editable by a valid user type."
 msgstr ""
 
-#: src/Profile_Fields/Profile_Field_Definition.php:639
+#: src/Profile_Fields/Profile_Field_Definition.php:655
 msgid "The profile field should have visibility preferences if editable by a customer."
 msgstr ""
 
@@ -5783,14 +5634,12 @@ msgstr ""
 
 #. translators: Placeholder: %s - directory path
 #: src/utilities/class-wc-memberships-csv-export-user-memberships.php:302
-#, php-format
 msgid "Could not create an exports folder in \"%s\"."
 msgstr ""
 
 #. translators: Placeholders: %s - file name
 #: src/utilities/class-wc-memberships-csv-export-user-memberships.php:313
 #: src/utilities/class-wc-memberships-csv-export-user-memberships.php:705
-#, php-format
 msgid "Could not open the export file %s for writing."
 msgstr ""
 
@@ -5808,7 +5657,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - User Memberships to import found in uploaded file
 #: src/utilities/class-wc-memberships-csv-export-user-memberships.php:760
-#, php-format
 msgid "%s User Membership processed for export."
 msgid_plural "%s User Memberships processed for export."
 msgstr[0] ""
@@ -5820,7 +5668,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - skipped User Memberships to import from file
 #: src/utilities/class-wc-memberships-csv-export-user-memberships.php:770
-#, php-format
 msgid "%s User Membership successfully exported."
 msgid_plural "%s User Memberships successfully exported."
 msgstr[0] ""
@@ -5828,7 +5675,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %s - skipped User Memberships to import from file
 #: src/utilities/class-wc-memberships-csv-export-user-memberships.php:775
-#, php-format
 msgid "%s User Membership skipped."
 msgid_plural "%s User Memberships skipped."
 msgstr[0] ""
@@ -5876,7 +5722,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - file name, %2$s - file path
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:250
-#, php-format
 msgid "Failed to move the file \"%1$s\" to \"%2$s\" for processing: is the directory writable?"
 msgstr ""
 
@@ -5886,7 +5731,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - file path (if available)
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:343
-#, php-format
 msgid "Uploaded file %s not found or not readable."
 msgstr ""
 
@@ -5896,7 +5740,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - User display name
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:727
-#, php-format
 msgid "Membership created from %s's import."
 msgstr ""
 
@@ -5906,7 +5749,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - User Memberships to import found in uploaded file
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:1230
-#, php-format
 msgid "%s record found in file."
 msgid_plural "%s records found in file."
 msgstr[0] ""
@@ -5914,7 +5756,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %s - User Memberships processed during import from file
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:1235
-#, php-format
 msgid "%s row processed for import."
 msgid_plural "%s rows processed for import."
 msgstr[0] ""
@@ -5922,7 +5763,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %s - User Memberships created in import
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:1241
-#, php-format
 msgid "%s new User Membership created."
 msgid_plural "%s new User Memberships created."
 msgstr[0] ""
@@ -5930,7 +5770,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %s - User Memberships updated during import
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:1246
-#, php-format
 msgid "%s existing User Membership updated."
 msgid_plural "%s existing User Memberships updated."
 msgstr[0] ""
@@ -5938,7 +5777,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %s - users created during import
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:1251
-#, php-format
 msgid "%s new user was created during import."
 msgid_plural "%s new users were created during import."
 msgstr[0] ""
@@ -5946,7 +5784,6 @@ msgstr[1] ""
 
 #. translators: Placeholder: %s - skipped User Memberships to import from file
 #: src/utilities/class-wc-memberships-csv-import-user-memberships.php:1256
-#, php-format
 msgid "%s row skipped."
 msgid_plural "%s rows skipped."
 msgstr[0] ""
@@ -5978,7 +5815,6 @@ msgstr ""
 
 #. translators: Placeholders: %1$s - number of users that were just granted access to a plan, %2$s - Membership Plan name
 #: src/utilities/class-wc-memberships-grant-retroactive-access.php:547
-#, php-format
 msgid "%1$s user was granted access to \"%2$s\"."
 msgid_plural "%1$s users were granted access to \"%2$s\"."
 msgstr[0] ""
@@ -5994,7 +5830,6 @@ msgstr ""
 
 #. translators: Placeholder: %s - Membership Plan name
 #: src/utilities/class-wc-memberships-grant-retroactive-access.php:558
-#, php-format
 msgid "View all memberships for \"%s\"."
 msgstr ""
 
@@ -6045,7 +5880,6 @@ msgstr ""
 
 #. translators: discount available from date
 #: templates/myaccount/my-membership-discounts.php:154
-#, php-format
 msgid "Available from %s"
 msgstr ""
 
@@ -6130,7 +5964,6 @@ msgid "Visitors without the required plan will see a custom restriction message 
 msgstr ""
 
 #: assets/js/blocks/src/components/block-member-content.js:200
-#, js-format
 msgid "Visitors without the required plan will see the restriction message specified in %1$sMemberships Settings%2$s instead of this block."
 msgstr ""
 
@@ -6159,7 +5992,6 @@ msgid "The content below will be visible only to users who are members of any pl
 msgstr ""
 
 #: assets/js/blocks/src/components/block-member-content.js:249
-#, js-format
 msgid "The content below will be visible only to users who are members of %s."
 msgstr ""
 
@@ -6250,7 +6082,6 @@ msgid "This content will only be shown to guests or non-members."
 msgstr ""
 
 #: assets/js/blocks/src/components/block-non-member-content.js:76
-#, js-format
 msgid "This content will only be shown to guests or users who are not members of %s."
 msgstr ""
 
@@ -6351,7 +6182,6 @@ msgid "Avatar"
 msgstr ""
 
 #: assets/js/blocks/src/directory/edit.js:256
-#, js-format
 msgid "Avatar size %d"
 msgstr ""
 

@@ -42,7 +42,7 @@ class RML_Folder {
      */
     private $absolutePath;
 
-    public function __construct($id, $parent, $name, $slug, $absolute, $order = 999, $type = 0, $cnt) {
+    public function __construct($id, $parent, $name, $slug, $absolute, $order = 999, $type = 0, $cnt = 0) {
         $this->id = $id;
         $this->parent = $parent;
         $this->name = $name;

@@ -76,6 +76,8 @@ class Profile_Fields {
 	/** @var string the meta key used to store submitted values for member profile fields during checkout or sign up */
 	const ORDER_ITEM_PROFILE_FIELDS_META = '_wc_memberships_member_profile_fields';
 
+	const DEFAULT_ALLOWED_UPLOAD_FILE_TYPES = [ 'images', 'pdf', 'text', 'office' ];
+
 
 	/** @var array memoized profile fields, by user ID */
 	private static $profile_fields = [];
@@ -495,6 +497,48 @@ class Profile_Fields {
 	public static function is_valid_field_type( $type ) {
 
 		return in_array( $type, self::get_profile_field_types( false ), true );
+	}
+
+
+	/**
+	 * Gets the mime types allowed for profile field file uploads, per the plugin's settings.
+	 *
+	 * @since 1.30.0
+	 *
+	 * @return array<string, string> mime types, in the `'ext|ext' => 'mime/type'` shape expected by `wp_handle_upload()`
+	 */
+	public static function get_allowed_profile_field_upload_mime_types() : array {
+
+		$categories = [
+			'images' => [
+				'jpg|jpeg|jpe' => 'image/jpeg',
+				'png'          => 'image/png',
+				'gif'          => 'image/gif',
+				'webp'         => 'image/webp',
+			],
+			'pdf'    => [
+				'pdf' => 'application/pdf',
+			],
+			'text'   => [
+				'txt' => 'text/plain',
+			],
+			'office' => [
+				'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+				'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+				'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			],
+		];
+
+		$enabled = (array) get_option( 'wc_memberships_profile_field_upload_allowed_file_types', static::DEFAULT_ALLOWED_UPLOAD_FILE_TYPES );
+		$mimes   = [];
+
+		foreach ( $enabled as $category ) {
+			if ( isset( $categories[ $category ] ) ) {
+				$mimes += $categories[ $category ];
+			}
+		}
+
+		return $mimes;
 	}
 
 
