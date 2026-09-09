@@ -142,20 +142,23 @@ class PwtcMapdb_BBPost {
 			'posts_per_page' => -1,
 			'category__in' => $cat_ids,
 			'date_query' => [
-				'relation' => 'OR',
 				[
                     'column' => 'post_date_gmt',
                     'after' => $after,
 				],
-				[
-                    'column' => 'post_modified_gmt',
-                    'after' => $after,
-				],
 			],
 		];
+		$check_modified = ('yes' === get_option('pwtc_mapdb_check_post_modified_gmt', 'no'));
+		if ($check_modified) {
+            $query_args['date_query']['relation'] = 'OR';
+            $query_args['date_query'][] = [
+                'column' => 'post_modified_gmt',
+                'after' => $after,
+            ];
+        }
 		$results = new WP_Query($query_args);
 		if ($results->found_posts > 0) {
-			$title = '' . $results->found_posts . ' member posts added or modified since ' . $after . '.';
+			$title = '' . $results->found_posts . ' member posts added' . ($check_modified ? ' or modified' : '') . ' since ' . $after . '.';
 			$output .= '<span style="' . $style . '" class="label primary" title="' . $title . '"><i class="fa fa-sticky-note"></i> ' . $results->found_posts . '</span>';	
 		}
 		return $output;
