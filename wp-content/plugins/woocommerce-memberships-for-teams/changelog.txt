@@ -1,5 +1,8 @@
 *** Teams for WooCommerce Memberships Changelog ***
 
+2026.08.24 - version 1.9.1
+* Misc - Tested up to WooCommerce 11.0.1 and WordPress 7.1
+
 2026.04.16 - version 1.9.0
 * New - Add REST API support for teams via `/wp-json/wc-memberships-for-teams/v1/teams`
 * New - Add REST API support for invitations via `/wp-json/wc-memberships-for-teams/v1/invitations`
