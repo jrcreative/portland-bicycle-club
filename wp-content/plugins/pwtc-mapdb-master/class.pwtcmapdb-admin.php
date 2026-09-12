@@ -26,6 +26,7 @@ class PwtcMapdb_Admin {
             $taxonomy = get_taxonomy('category');
             $taxonomy->meta_box_cb = array('PwtcMapdb_Admin', 'post_categories_meta_box_callback');
             $taxonomy->meta_box_sanitize_cb = 'taxonomy_meta_box_sanitize_cb_checkboxes';
+            add_filter('quick_edit_show_taxonomy', array('PwtcMapdb_Admin', 'quick_edit_show_taxonomy_callback'), 10, 3);
         }
     }
 
@@ -168,6 +169,10 @@ class PwtcMapdb_Admin {
         } else {
             wp_die('Security check issue, Please try again.');
         }
+    }
+
+    public static function quick_edit_show_taxonomy_callback($show_in_quick_edit, $taxonomy_name, $post_type) {
+        return false;
     }
 
     public static function post_categories_meta_box_callback( $post, $box ) {
