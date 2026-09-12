@@ -1106,6 +1106,22 @@ if( function_exists('acf_add_local_field_group') ):
                 'default_value' => 0,
             ),
             array (
+                'key' => 'field_display_post_date',
+                'label' => 'Display Post Date',
+                'name' => 'display_post_date',
+                'type' => 'true_false',
+                'instructions' => "Display the post creation date when this post is viewed.",
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array (
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'message' => '',
+                'default_value' => 0,
+            ),
+            array (
                 'key' => 'field_filter_post_content',
                 'label' => 'Strip Out Unallowed HTML Markup from Post Content',
                 'name' => 'filter_post_content',
