@@ -142,16 +142,6 @@ if(is_singular())
             $context['display_post_author'] = get_field('display_post_author');
             $context['display_post_date'] = get_field('display_post_date');
             $context['filter_post_content'] = get_field('filter_post_content');
-            $context['allowed_html_tags'] = array(
-                'a' => array(
-                    'href' => array(),
-                    'title' => array(),
-                ),
-                'br' => array(),
-                'em' => array(),
-                'strong' => array(),
-                'p' => array(),
-            );
             $format = get_field('format');
             if ($format === 'gallery') {
                 $context['images'] = get_field('images');

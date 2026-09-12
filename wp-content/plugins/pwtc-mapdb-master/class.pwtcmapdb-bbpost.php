@@ -566,15 +566,6 @@ class PwtcMapdb_BBPost {
 
 		if ($postid != 0) {
 			if (isset($_GET['preview'])) {
-				$allowed_html_tags = [
-                	'a' => [
-                	    'href' => array(),
-					],
-                	'br' => [],
-                	'em' => [],
-                	'strong' => [],
-                	'p' => [],
-				];
 				ob_start();
 				include('bbpost-preview-form.php');
 				return ob_get_clean();

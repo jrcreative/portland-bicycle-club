@@ -41,7 +41,7 @@
             </div>
             <div class="row column">
                 <div class="callout">
-                    <?php echo wp_kses(wpautop($content), $allowed_html_tags); ?>
+                    <?php echo convert_urls_to_links(strip_tags_from_post(wpautop($content))); ?>
                 </div>
             </div>
             <div class="row column errmsg"></div>

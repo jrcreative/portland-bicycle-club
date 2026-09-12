@@ -77,3 +77,70 @@ add_filter('wp_nav_menu_objects', function ($items){
     return $items;
 
 });
+
+// Accept an input string, break it into tokens delemited by whitespace
+// and look for strings that start with "http://" or "https://". Convert those
+// strings to HTML links using the following translation rules:
+// 1) http://foo.bar.com becomes <a href="http://foo.bar.com">http://foo.bar.com</a>
+// 2) http://foo.bar.com|foo_bar becomes <a href="http://foo.bar.com">foo bar</a> (underscore is converted to a space)
+// 3) http://foo.bar.com|foo_bar|. becomes <a href="http://foo.bar.com">foo bar</a>.
+function convert_urls_to_links($input) {
+    $output = "";
+    $tok = strtok($input, " \n\t\r");
+    while ($tok !== false) {
+        if (0 === strpos($tok, 'http://') or 0 === strpos($tok, 'https://')) {
+            $idx = strpos($tok, '<');
+            if ($idx !== false) {
+                $link = substr($tok, 0, $idx);
+                $rem = substr($tok, $idx);
+                $tok = $link;
+            }
+            else {
+                $rem = "";
+            }
+            $strings = explode("|", $tok, 3);
+            $ref = $strings[0];
+            $label = $ref;
+            $end = "";
+            if (count($strings) > 1) {
+                if (strlen($strings[1]) > 0) {
+                    $label = str_replace("_", " ", $strings[1]);
+                }
+                if (count($strings) > 2) {
+                    if (strlen($strings[2]) > 0) {
+                        $end = $strings[2];
+                    }
+                }
+            }
+            $output .= '<a href="' . $ref . '" target="_blank">' . $label . '</a>' . $end . $rem;
+        }
+        else {
+            $output .= $tok;
+        }
+        $output .= " ";
+        $tok = strtok(" \n\t\r");
+    }
+    return $output;
+}
+
+function strip_tags_from_post($input) {
+    return wp_kses($input, array('br' => array(), 'p' => array(), 'em' => array(), 'strong' => array(), 'a' => array('href' => array())));
+}
+
+function strip_tags_from_comment($input) {
+    return wp_kses($input, array('br' => array(), 'p' => array()));
+}
+
+add_filter('timber/twig/filters', function ($filters) {
+    $filters['urls2links'] = [
+        'callable' => 'convert_urls_to_links',
+    ];
+    $filters['strippost'] = [
+        'callable' => 'strip_tags_from_post',
+    ];
+    $filters['stripcomment'] = [
+        'callable' => 'strip_tags_from_comment',
+    ];
+
+    return $filters;
+});

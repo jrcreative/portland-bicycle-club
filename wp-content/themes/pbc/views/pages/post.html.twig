@@ -12,7 +12,7 @@
                     <p>{{ post.date }}</p>
                 {% endif %}
                 {% if filter_post_content %}
-                    {{ fn('wp_kses', post.content, allowed_html_tags) }}
+                    {{ post.content|wpautop|strippost|urls2links }}
                 {% else %}
                     {{ post.content }}
                 {% endif %}
