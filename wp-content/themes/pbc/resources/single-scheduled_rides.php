@@ -24,7 +24,7 @@ if ($data['length'] == $data['max_length']) {
 }
 $data['maps'] = get_actual_ride_maps();
 
-$data['description'] = convert_ride_desc_addr_to_link();
+$data['description'] = get_field('description');
 
 $data['user_can_cancel'] = can_cancel_ride(get_the_ID());
 $data['user_can_view_signups'] = can_view_signups(get_the_ID());

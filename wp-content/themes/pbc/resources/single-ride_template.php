@@ -16,7 +16,7 @@ if ($data['length'] == $data['max_length']) {
 }
 $data['maps'] = get_actual_ride_maps();
 
-$data['description'] = convert_ride_desc_addr_to_link();
+$data['description'] = get_field('description');
 
 $data['current_url'] = get_permalink();
 
