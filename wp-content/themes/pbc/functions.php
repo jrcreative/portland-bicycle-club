@@ -79,7 +79,7 @@ add_filter('wp_nav_menu_objects', function ($items){
 });
 
 // Accept an input string, break it into tokens delemited by whitespace
-// and look for strings that start with "http://" or "https://". Convert those
+// and look for strings that start with "http://" or "https://" or "mailto:". Convert those
 // strings to HTML links using the following translation rules:
 // 1) http://foo.bar.com becomes <a href="http://foo.bar.com">http://foo.bar.com</a>
 // 2) http://foo.bar.com|foo_bar becomes <a href="http://foo.bar.com">foo bar</a> (underscore is converted to a space)
@@ -88,7 +88,7 @@ function convert_urls_to_links($input) {
     $output = "";
     $tok = strtok($input, " \n\t\r");
     while ($tok !== false) {
-        if (0 === strpos($tok, 'http://') or 0 === strpos($tok, 'https://')) {
+        if (0 === strpos($tok, 'http://') or 0 === strpos($tok, 'https://') or 0 === strpos($tok, 'mailto:')) {
             $idx = strpos($tok, '<');
             if ($idx !== false) {
                 $link = substr($tok, 0, $idx);
