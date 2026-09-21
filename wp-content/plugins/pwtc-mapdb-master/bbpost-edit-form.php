@@ -86,6 +86,7 @@
             evt.preventDefault();
         });
 
+    <?php if ( $allow_anchor_tag ) { ?>
         $('#pwtc-mapdb-edit-bbpost-div form .url-btn').on('click', function(evt) { 
             if (is_text_selected()) {
                 $('#pwtc-mapdb-edit-bbpost-div .errmsg2').empty();
@@ -97,6 +98,7 @@
             }
             evt.preventDefault();
         });
+    <?php } ?>
 
         $('#pwtc-mapdb-edit-bbpost-div input[name="preview"]').on('click', function(evt) { 
             if (is_dirty) {
@@ -278,11 +280,13 @@
                 <div class="tiny dark button-group">
                     <button class="bold-btn button">Bold</button>
                     <button class="italic-btn button">Italic</button>
+    <?php if ( $allow_anchor_tag ) { ?>
                     <button class="url-btn button">URL</button>
+    <?php } ?>
                 </div>
 		        <p class="help-text">
                     Use the above buttons to insert allowed HTML markup around highlighted text. 
-                    Only the following HTML markup is allowed: &lt;a&gt;, &lt;em&gt; and &lt;strong&gt;;
+                    Only the following HTML markup is allowed: <?php if ( $allow_anchor_tag ) { ?>&lt;a&gt;, <?php } ?>&lt;em&gt; and &lt;strong&gt;;
                     all others will be stripped out when this post is viewed.
                 </p>
             </div>
