@@ -11,8 +11,9 @@
                 {% elseif display_post_date %}
                     <p>{{ post.date }}</p>
                 {% endif %}
+                <p class="help-text">Topic: {{ post.category.title }}</p>
                 {% if filter_post_content %}
-                    {{ post.content|wpautop|strippost|urls2links }}
+                    {{ post.post_content|wpautop|strippost|makeclickable }}
                 {% else %}
                     {{ post.content }}
                 {% endif %}

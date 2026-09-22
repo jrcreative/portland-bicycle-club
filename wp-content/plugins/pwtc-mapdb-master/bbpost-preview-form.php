@@ -41,7 +41,7 @@
             </div>
             <div class="row column">
                 <div class="callout">
-                    <?php echo convert_urls_to_links(strip_tags_from_post(wpautop($content))); ?>
+                    <?php echo make_clickable(strip_tags_from_post(wpautop($content))); ?>
                 </div>
             </div>
             <div class="row column errmsg"></div>

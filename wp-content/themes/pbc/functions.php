@@ -124,7 +124,8 @@ function convert_urls_to_links($input) {
 }
 
 function strip_tags_from_post($input) {
-    return wp_kses($input, array('br' => array(), 'p' => array(), 'em' => array(), 'strong' => array(), 'a' => array('href' => array())));
+    //return wp_kses($input, array('br' => array(), 'p' => array(), 'em' => array(), 'strong' => array(), 'a' => array('href' => array())));
+    return wp_kses($input, array('br' => array(), 'p' => array(), 'em' => array(), 'strong' => array()));
 }
 
 function strip_tags_from_comment($input) {
@@ -140,6 +141,9 @@ add_filter('timber/twig/filters', function ($filters) {
     ];
     $filters['stripcomment'] = [
         'callable' => 'strip_tags_from_comment',
+    ];
+    $filters['makeclickable'] = [
+        'callable' => 'make_clickable',
     ];
 
     return $filters;
