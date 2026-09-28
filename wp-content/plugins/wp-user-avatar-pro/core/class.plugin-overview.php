@@ -467,6 +467,7 @@ if ( ! class_exists( 'Flippercode_Product_Overview' ) ) {
 			*/
 			$download_form = isset( $download_form ) ? $download_form : '';
 
+			//$modalArgs = array( 'fc_modal_header' => __('Download WP Google Map Pro 4.0.0',WFIP_TEXT_DOMAIN),
 			$modalArgs = array( 'fc_modal_header' => __('Download WP Google Map Pro 4.0.0',WPUAP_TEXT_DOMAIN),
 					'fc_modal_content' => $download_form,
 					'fc_modal_initiator' => '.fc-open-modal',

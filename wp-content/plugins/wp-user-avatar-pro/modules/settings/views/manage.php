@@ -257,10 +257,12 @@ $form->add_element( 'text', 'wp_user_avatar_settings[theme_color]', array(
 	'after' => '</div>',
 ));
 $form->add_element( 'checkbox', 'wp_user_avatar_settings[apply_predefined_design]', array(
-	'lable' => __( 'Use Predefined Color Schema', wpua_TEXT_DOMAIN ),
+	//'lable' => __( 'Use Predefined Color Schema', wpua_TEXT_DOMAIN ),
+	'lable' => __( 'Use Predefined Color Schema', WPUAP_TEXT_DOMAIN ),
 	'value' => 'true',
 	'current' => $data['wp_user_avatar_settings']['apply_predefined_design'],
-	'desc' => __( 'Use predefined color schema.', wpua_TEXT_DOMAIN ),
+	//'desc' => __( 'Use predefined color schema.', wpua_TEXT_DOMAIN ),
+	'desc' => __( 'Use predefined color schema.', WPUAP_TEXT_DOMAIN ),
 	'class' => 'chkbox_class switch_onoff',
 	'data' => array( 'target' => '.wpuap_design_listing' ),
 ));
@@ -282,7 +284,8 @@ $color_schema = array(
 	'#9E9E9E' => "<span class='wpua-color-schema' style='background-color:#9E9E9E'></span>",
 	);
 $form->add_element( 'radio', 'wp_user_avatar_settings[color_schema]', array(
-	'lable' => __( 'Choose Color Schema', wpua_TEXT_DOMAIN ),
+	//'lable' => __( 'Choose Color Schema', wpua_TEXT_DOMAIN ),
+	'lable' => __( 'Choose Color Schema', WPUAP_TEXT_DOMAIN ),
 	'radio-val-label' => $color_schema,
 	'current' => $data['wp_user_avatar_settings']['color_schema'],
 	'class' => 'chkbox_class wpuap_design_listing',
