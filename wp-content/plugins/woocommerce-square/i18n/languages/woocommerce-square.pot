@@ -2,10 +2,9 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Square 5.5.0\n"
-"Report-Msgid-Bugs-To: "
-"https://wordpress.org/support/plugin/woocommerce-square\n"
-"POT-Creation-Date: 2026-08-31 14:54:53+00:00\n"
+"Project-Id-Version: WooCommerce Square 5.5.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/target-repo\n"
+"POT-Creation-Date: 2026-09-21 12:18:15+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -622,8 +621,8 @@ msgid ""
 msgstr ""
 
 #: includes/Coupons.php:828 includes/Gateway/Cash_App_Pay_Gateway.php:867
-#: includes/Gateway/Digital_Wallet.php:492
-#: includes/Gateway/Digital_Wallet.php:626
+#: includes/Gateway/Digital_Wallet.php:494
+#: includes/Gateway/Digital_Wallet.php:628
 msgid "Tax"
 msgstr ""
 
@@ -631,7 +630,7 @@ msgstr ""
 #: includes/Framework/PaymentGateway/ApplePay/Payment_Gateway_Apple_Pay.php:558
 #: includes/Gateway/API/Requests/Orders.php:464
 #: includes/Gateway/Cash_App_Pay_Gateway.php:859
-#: includes/Gateway/Digital_Wallet.php:618
+#: includes/Gateway/Digital_Wallet.php:620
 msgid "Shipping"
 msgstr ""
 
@@ -1178,13 +1177,13 @@ msgstr ""
 #: includes/Framework/PaymentGateway/ApplePay/Payment_Gateway_Apple_Pay.php:548
 #: includes/Gateway/API/Requests/Orders.php:588
 #: includes/Gateway/Cash_App_Pay_Gateway.php:875
-#: includes/Gateway/Digital_Wallet.php:634
+#: includes/Gateway/Digital_Wallet.php:636
 msgid "Discount"
 msgstr ""
 
 #: includes/Framework/PaymentGateway/ApplePay/Payment_Gateway_Apple_Pay.php:568
 #: includes/Gateway/Cash_App_Pay_Gateway.php:883
-#: includes/Gateway/Digital_Wallet.php:642
+#: includes/Gateway/Digital_Wallet.php:644
 msgid "Fees"
 msgstr ""
 
@@ -1459,7 +1458,7 @@ msgstr ""
 #: includes/Gateway/Cash_App_Pay_Blocks_Handler.php:116
 #: includes/Gateway/Cash_App_Pay_Gateway.php:184
 #: includes/Gateway/Cash_App_Pay_Gateway.php:1271
-#: includes/Gateway/Digital_Wallet.php:146 includes/Gateway/Gift_Card.php:382
+#: includes/Gateway/Digital_Wallet.php:148 includes/Gateway/Gift_Card.php:382
 #: includes/Gateway/Payment_Form.php:227 includes/Gateway.php:390
 #: includes/Gateway.php:1213 includes/Gateway.php:1301
 msgid "An error occurred, please try again or try an alternate form of payment."
@@ -2415,7 +2414,7 @@ msgid ""
 msgstr ""
 
 #: includes/Gateway/Cash_App_Pay_Gateway.php:806
-#: includes/Gateway/Digital_Wallet.php:98
+#: includes/Gateway/Digital_Wallet.php:100
 msgid "via WooCommerce"
 msgstr ""
 
@@ -2437,15 +2436,15 @@ msgstr ""
 msgid "Square Order ID: %s"
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:157
+#: includes/Gateway/Digital_Wallet.php:159
 msgid "Buy with GPay"
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:158
+#: includes/Gateway/Digital_Wallet.php:160
 msgid "opens in a new window"
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:189
+#: includes/Gateway/Digital_Wallet.php:191
 #. Translators: %1$s: expected location of apple pay verification file, %2$s:
 #. opening href tag with link to Square documentation, %3$s: closing href tag
 msgid ""
@@ -2454,7 +2453,7 @@ msgid ""
 "information, please read our documentation on %2$sSetting up Apple Pay%3$s."
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:205
+#: includes/Gateway/Digital_Wallet.php:207
 #. Translators: %1$s: opening bold tags, %2$s: closing strong/bold tags, %3$s:
 #. expected location of apple pay verification file, %4$s: opening href tag
 #. with link to Square documentation, %5$s: closing href tag
@@ -2464,45 +2463,45 @@ msgid ""
 "logs%2$s to find out what caused the registration to fail."
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:327
+#: includes/Gateway/Digital_Wallet.php:329
 msgid "OR"
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:448
+#: includes/Gateway/Digital_Wallet.php:450
 #. translators: product ID
 msgid "Product with the ID (%d) cannot be found."
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:464
+#: includes/Gateway/Digital_Wallet.php:466
 #. translators: 1: product name 2: quantity in stock
 msgid ""
 "You cannot add that amount of \"%1$s\"; to the cart because there is not "
 "enough stock (%2$s remaining)."
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:469
+#: includes/Gateway/Digital_Wallet.php:471
 #. translators: 1: product name
 msgid "You cannot purchase \"%1$s\" because it is currently not available."
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:550
+#: includes/Gateway/Digital_Wallet.php:552
 msgid "This payment method cannot be used for multiple shipments."
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:561
+#: includes/Gateway/Digital_Wallet.php:563
 msgid "Pending"
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:680
+#: includes/Gateway/Digital_Wallet.php:682
 #. translators: Context (product, cart, checkout or page)
 msgid "Empty payment request data for %s."
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:1026
+#: includes/Gateway/Digital_Wallet.php:1028
 msgid "Empty cart"
 msgstr ""
 
-#: includes/Gateway/Digital_Wallet.php:1161
+#: includes/Gateway/Digital_Wallet.php:1177
 msgid "Unable to verify domain with Apple Pay - missing access token."
 msgstr ""
 
