@@ -8,7 +8,7 @@
 /*
 Plugin Name: WP User Avatar Pro
 Plugin URI: http://www.flippercode.com/
-Description: A premium version of wp user avatar wordpress plugin. Assign User Roles According To Wordpress Roles.
+Description: A premium version of wp user avatar wordpress plugin. Assign User Roles According To Wordpress Roles. WARNING: this plugin has been patched by Jeremy Ross and Mark Hartel to fix various bugs!
 Author: flippercode
 Author URI: http://www.flippercode.com/
 Version: 4.1.6
