@@ -696,21 +696,39 @@ class PwtcMapdb {
 			];
 			$user_query = new WP_User_Query( $query_args );
     		$results = $user_query->get_results();
-			if (!empty($results)) {
-				$userid = $results[0]->ID;
-				$info = get_userdata($userid);
-				$name = $info->first_name . ' ' . $info->last_name;
-				$riderid = get_field(self::USER_RIDER_ID, 'user_'.$userid);
+			$maxriders = count($results);
+			if ($maxriders == 0 ) {
 				$response = array(
-					'riderid' => $riderid,
-					'userid' => $userid,
-					'name' => $name
+					'error' => 'Rider name "' . $ridername . '" not found.'
+				);
+			}
+			else if ($maxriders > 10) {
+				$response = array(
+					'error' => 'More than 10 riders found, narrow your search.'
 				);
 			}
 			else {
-				$response = array(
-					'error' => 'Lookup failed, rider name "' . $ridername . '" not found.'
-				);
+				$riderarray = [];
+				foreach ($results as $rider) {
+					$userid = $rider->ID;
+					$info = get_userdata($userid);
+					$name = $info->first_name . ' ' . $info->last_name;
+					$riderid = get_field(self::USER_RIDER_ID, 'user_'.$userid);
+					$riderarray[] = [
+						'riderid' => $riderid,
+						'userid' => $userid,
+						'name' => $name
+					];
+				}
+				$response = [
+					'riderid' => $riderarray[0]['riderid'],
+					'userid' => $riderarray[0]['userid'],
+					'name' => $riderarray[0]['name'],
+					'maxriders' => $maxriders
+				];
+				if ($maxriders > 1) {
+					$response['riderarray'] = $riderarray;
+				}
 			}
 		}
 		else {
