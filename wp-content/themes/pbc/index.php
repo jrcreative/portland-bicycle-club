@@ -67,6 +67,7 @@ if(is_singular())
                 $context['news'] = Timber::get_posts($query_args);
                 $context['after'] = $after;
                 $context['check_modified'] = $check_modified;
+                $context['show_picture'] = apply_filters('pwtc_recent_posts_show_picture', false);
             }
             elseif(get_row_layout() == "rides")
             {

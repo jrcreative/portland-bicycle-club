@@ -72,6 +72,12 @@ else {
             else {
                 update_option('pwtc_mapdb_check_post_modified_gmt', 'no');
             }
+            if (isset($_POST['recent_posts_show_picture'])) {
+                update_option('pwtc_mapdb_recent_posts_show_picture', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_recent_posts_show_picture', 'no');
+            }
             if (isset($_POST['restrict_feed_output'])) {
                 update_option('pwtc_mapdb_restrict_feed_output', 'yes');
             }
@@ -108,12 +114,24 @@ else {
     $enable_post_copy = 'yes' === get_option('pwtc_mapdb_enable_post_copy', 'no');
     $modified_time_update = 'yes' === get_option('pwtc_mapdb_modified_time_update', 'no');
     $check_post_modified_gmt = 'yes' === get_option('pwtc_mapdb_check_post_modified_gmt', 'no');
+    $recent_posts_show_picture = 'yes' === get_option('pwtc_mapdb_recent_posts_show_picture', 'no');
     $restrict_feed_output = 'yes' === get_option('pwtc_mapdb_restrict_feed_output', 'no');
     $edit_forum_post_path = get_option('pwtc_mapdb_edit_forum_post_path', '/');
     $submit_forum_post_path = get_option('pwtc_mapdb_submit_forum_post_path', '/');
     $delete_forum_post_path = get_option('pwtc_mapdb_delete_forum_post_path', '/');
+
+    $next_cache_clear_time = wp_next_scheduled('pwtc_chron_clear_cache');
+    if ($next_cache_clear_time) {
+        $timestamp = new DateTime('@'.$next_cache_clear_time);
+		$next_cache_clear_time = $timestamp->format('Y-m-d H:i:s') . ' UTC';
+    }
+    else {
+        $next_cache_clear_time = 'not scheduled';
+    }
 ?>
     <div id="mapdb-settings-section">
+        <h3>Status</h3>
+        <p>Next scheduled Wordkeeper cache clear time: <?php echo $next_cache_clear_time; ?></p>
         <form method="POST">
 	        <?php wp_nonce_field('pwtc_mapdb_submit_settings'); ?>
             <h3>Forum Posts</h3>
@@ -166,6 +184,10 @@ else {
             <p>
                 <input type="checkbox" id="check_post_modified_gmt" name="check_post_modified_gmt" <?php echo $check_post_modified_gmt ? 'checked' : ''; ?>/>
                 <label for="check_post_modified_gmt">Check for modified posts in Recent Posts section on home page</label>
+            </p>
+            <p>
+                <input type="checkbox" id="recent_posts_show_picture" name="recent_posts_show_picture" <?php echo $recent_posts_show_picture ? 'checked' : ''; ?>/>
+                <label for="recent_posts_show_picture">Show avatar picture for posts in Recent Posts section on home page</label>
             </p>
             <p>
                 <input type="checkbox" id="restrict_feed_output" name="restrict_feed_output" <?php echo $restrict_feed_output ? 'checked' : ''; ?>/>
