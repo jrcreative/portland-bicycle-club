@@ -8,6 +8,12 @@ if ( ! class_exists( 'WC_Abstract_Privacy' ) ) {
 	return;
 }
 
+/**
+ * Exports and erases ticket data for privacy requests.
+ *
+ * @class   WC_Box_Office_Privacy
+ * @version 1.5.1
+ */
 class WC_Box_Office_Privacy extends WC_Abstract_Privacy {
 	/**
 	 * Constructor

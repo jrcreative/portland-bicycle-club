@@ -9,12 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$is_scheduled = get_option( 'wc-box-office-update-user-privacy-preference', false ); ?>
+$is_scheduled = get_option( 'wc-box-office-update-user-privacy-preference', false );
+?>
 
 <form action="" method="POST">
 	<input type="hidden" name="post_type" value="event_ticket">
 	<input type="hidden" name="page" value="ticket_tools">
 	<input type="hidden" name="tab" value="user-privacy">
+	<?php wp_nonce_field( 'woocommerce_box_office' ); ?>
 
 	<?php if ( $is_scheduled ) : ?>
 		<div class="notice notice-info">

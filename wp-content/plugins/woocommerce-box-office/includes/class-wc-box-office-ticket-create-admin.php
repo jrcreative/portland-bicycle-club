@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Creates tickets manually from the admin.
+ *
+ * @class   WC_Box_Office_Ticket_Create_Admin
+ * @version x.x.x
+ */
 class WC_Box_Office_Ticket_Create_Admin {
 
 	/**
@@ -321,6 +327,12 @@ class WC_Box_Office_Ticket_Create_Admin {
 	 */
 	private function _create_tickets( $item_id = 0 ) {
 		$tickets = array();
+		$status  = 'publish';
+		if ( 'new' === $this->_clean_data['create_order_method'] ) {
+			// Match the order lifecycle: processing COD tickets wait for completion.
+			$order  = $this->_current_order;
+			$status = $order->has_status( 'completed' ) || ( $order->has_status( 'processing' ) && 'cod' !== $order->get_payment_method() ) ? 'publish' : 'pending';
+		}
 
 		// Creates ticket(s) and inserts order item meta.
 		foreach ( $this->_clean_data['ticket_fields'] as $index => $fields ) {
@@ -334,7 +346,7 @@ class WC_Box_Office_Ticket_Create_Admin {
 			);
 
 			$ticket = new WC_Box_Office_Ticket( $ticket_data );
-			$ticket->create( 'publish' );
+			$ticket->create( $status );
 
 			// Create a barcode for the ticket, see issue #62
 			$barcode_text = WCBO()->components->ticket_barcode->generate_barcode_text_for_ticket();

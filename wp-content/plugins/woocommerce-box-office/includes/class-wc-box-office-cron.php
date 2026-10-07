@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Schedules and sends Box Office emails.
+ *
+ * @class   WC_Box_Office_Cron
+ * @version x.x.x
+ */
 class WC_Box_Office_Cron {
 	/**
 	 * Whether we are rendering an email or not.
@@ -213,7 +219,19 @@ class WC_Box_Office_Cron {
 	 * @return void
 	 */
 	public function schedule_send_email_for_private_content_link( $timestamp, $email, $ticket_id, $private_content_id ) {
-		wp_schedule_single_event( $timestamp, 'wc-box-office-send-email-for-private-link', array( $email, $ticket_id, $private_content_id ) );
+		$args = array( $email, $ticket_id, $private_content_id );
+		if ( wp_next_scheduled( 'wc-box-office-send-email-for-private-link', $args ) ) {
+			return;
+		}
+
+		// Allow one recovery email per recipient per minute, across tickets and content pages.
+		$rate_limit_key = 'wc_box_office_private_link_' . md5( strtolower( $email ) );
+		if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_key ) ) {
+			return;
+		}
+		WC_Rate_Limiter::set_rate_limit( $rate_limit_key, MINUTE_IN_SECONDS );
+
+		wp_schedule_single_event( $timestamp, 'wc-box-office-send-email-for-private-link', $args );
 	}
 
 	/**
@@ -223,14 +241,19 @@ class WC_Box_Office_Cron {
 	 * Triggered by scheduled event 'wc-box-office-send-email-for-private-link'.
 	 *
 	 * @param string $email              Email address to send the email.
-	 * @param inb    $ticket_id          Ticket ID.
+	 * @param int    $ticket_id          Ticket ID.
 	 * @param int    $private_content_id Private content ID.
 	 *
 	 * @return void
 	 */
 	public function send_email_for_private_content_link( $email, $ticket_id, $private_content_id ) {
+		$ticket = wc_box_office_get_ticket( absint( $ticket_id ) );
+		if ( ! $ticket->id || 'publish' !== $ticket->status ) {
+			return;
+		}
+
 		$content = get_post( $private_content_id );
-		if ( ! $content ) {
+		if ( ! $content || ! is_post_publicly_viewable( $content ) ) {
 			return;
 		}
 

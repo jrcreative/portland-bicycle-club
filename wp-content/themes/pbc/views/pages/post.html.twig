@@ -8,9 +8,12 @@
                 {% if display_post_author %}
                     {{ fn('get_avatar', post.author.id, 150) }}
                     <p><span>By</span> {{ post.author.name }} <span>&bull;</span> {{ post.date }}</p>
+                {% elseif display_post_date %}
+                    <p>{{ post.date }}</p>
                 {% endif %}
+                <p><span class="label primary">{{ post.category.title }}</span></p>
                 {% if filter_post_content %}
-                    {{ fn('wp_kses', post.content, allowed_html_tags) }}
+                    {{ post.post_content|wpautop|strippost|makeclickable }}
                 {% else %}
                     {{ post.content }}
                 {% endif %}

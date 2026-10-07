@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Renders the ticket fields form for a ticket product.
+ *
+ * @class   WC_Box_Office_Ticket_Form
+ * @version 1.6.0
+ */
 class WC_Box_Office_Ticket_Form {
 	/**
 	 * Ticket-enabled product.
@@ -55,7 +61,7 @@ class WC_Box_Office_Ticket_Form {
 	public function __construct( WC_Product $product, $data = null ) {
 		$this->product = $product;
 
-		$fields = get_post_meta( $product->get_id(), '_ticket_fields', true );
+		$fields = wc_box_office_get_product_ticket_fields( $product->get_id() );
 		if ( ! empty( $fields ) ) {
 			$this->fields = $fields;
 		}

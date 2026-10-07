@@ -1,6 +1,53 @@
 *** WooCommerce Box Office Changelog ***
 
-2026-08-20 - version 1.5.2
+= 1.6.2 - 2026-10-07 =
+* Fix - Tickets block's "Order tickets by" setting was not actually sorting results; ticket scan form validation could fail to initialize on some sites.
+* Fix - Keep tickets aligned with order trash, restoration and deletion in legacy storage and HPOS while preserving prior ticket revocations.
+* Fix - Bulk ticket actions now require permission to edit each ticket; custom staff roles with only edit_posts must be updated before use.
+* Fix - Generate checkout ticket barcodes from validated current-order mappings while preserving existing codes and valid tickets alongside incomplete mappings.
+* Fix - Preserve free tickets until their full order-line quantity is refunded.
+* Fix - Revoked all tickets on fully refunded order lines containing more than five tickets.
+* Fix - Required active paid tickets for private content and respected printing settings on direct print links.
+* Fix - Restricted ticket and queued-email administration to commerce roles.
+* Fix - Bound ticket-field allocation when using customer details.
+* Fix - Custom ticket description renderers must register through woocommerce_box_office_ticket_description_formatters; built-in formats retain their layouts.
+* Fix - Require scanner authorization before barcode lookup and scope scan nonces to authorized forms, preserving explicit guest scanner policies.
+* Fix - Kept manually created tickets pending while their new corresponding order awaits payment.
+* Fix - Use cryptographic randomness for new ticket admission barcodes.
+* Fix - Kept attendee field text literal while preserving printable-ticket shortcode arguments.
+* Fix - Keep private-content recovery responses neutral for all valid email addresses.
+* Fix - Limit repeated private-content recovery emails to each recipient.
+* Fix - Keep private-content recovery bound to the current public page, including archive forms.
+* Fix - Show an unavailable notice when scanning tickets without Order Barcodes active.
+* Fix - Made the ticket token hint on the product ticket panel translatable.
+* Tweak - Declared compatibility with WooCommerce 11.2.
+* Dev - Switched the version headings in changelog.txt to the WordPress.org format.
+* Dev - Updated dependencies to address security advisories.
+* Dev - Enforce checks for authored stylesheets.
+* Dev - Run PHPCS and QIT tooling on PHP 8.4.
+* Dev - Read pull request metadata as data and limited the issue-linking workflow token permissions.
+* Dev - Managed changelog entries with the Jetpack Changelogger, so pull requests add a change file instead of writing the entry in the pull request description.
+* Dev - Updated the development toolchain to Node 24.18 and @wordpress/scripts 35.
+* Dev - Updated development dependencies to address security advisories.
+
+= 1.6.1 - 2026-09-15 =
+* Fix - Resolved a fatal error that could make ticket product pages fail to load when Stripe express checkout buttons, such as Apple Pay or Google Pay, were enabled.
+
+= 1.6.0 - 2026-09-15 =
+* Add - Map checkout billing fields to ticket fields with per-product toggle.
+* Add - Show guidance in the Ticket Emails tab on wrapping the "{ticket_link}" in a link to make it clickable.
+* Fix - Added additional permission checks to Ticket Tools admin actions.
+* Fix - Corrected an issue where submitting one Ticket Tools action could trigger an unrelated bulk update.
+* Fix - Correct a malformed date format in the ticket email log meta box.
+* Fix - Add visible labels to the ticket scan form's action select and barcode fields to improve accessibility.
+* Fix - Replace browser-native validation on the ticket scan form with a persistent, accessible error summary to improve accessibility.
+* Fix - Add spacing between the ticket edit and print action links so they are visually distinguishable as separate links.
+* Fix - Use accessible row headers in the Attendee Detail table in the default print ticket template to improve accessibility.
+* Dev - Pin GitHub Actions and their nested dependencies to immutable commit SHAs.
+* Dev - Bump WooCommerce "tested up to" version 11.1.
+* Dev - Bump WooCommerce minimum supported version to 10.9.
+
+= 1.5.2 - 2026-08-20 =
 * Fix - Ensure ticket field labels are always rendered and inserted as plain text in the product editor.
 * Dev - Bump WordPress "Tested up to" version 7.1.
 * Dev - Bump WordPress minimum supported version to 6.9.
@@ -8,7 +55,7 @@
 * Dev - Bump WooCommerce minimum supported version to 10.8.
 * Dev - Update the PHP_CodeSniffer development dependency to 3.13.6 and WPCS to 3.4.1.
 
-2026-07-13 - version 1.5.1
+= 1.5.1 - 2026-07-13 =
 * Fix - Added accessible inline validation errors and an error summary for required ticket fields in the ticket form, with full ARIA support for improved accessibility.
 * Fix - Ensure that tickets link to the customer's account correctly when using the Block Checkout.
 * Fix - Add direct-access prevention check to PHP files to resolve Plugin Check action errors.
@@ -18,7 +65,7 @@
 * Dev - Upgrade npm and Composer dependencies.
 * Dev - Add a spell-check GitHub Actions workflow and fix typos.
 
-2026-05-21 - version 1.5.0
+= 1.5.0 - 2026-05-21 =
 * Add - Added autocomplete attributes to ticket form fields.
 * Fix - Sanitize the Twitter field value to ensure that only the handle is saved and displayed, instead of the full URL.
 * Fix - Removed the H3 from the ticket form title to correct the heading order.
@@ -37,7 +84,7 @@
 * Dev - Bump WooCommerce "tested up to" version 10.8.
 * Dev - Bump WooCommerce minimum supported version to 10.6.
 
-2026-04-30 - version 1.4.0
+= 1.4.0 - 2026-04-30 =
 * Add - New checked-in ticket counter on the admin ticket management screen.
 * Fix - Allow exporting tickets for unpublished, draft, and private ticket products by including all non-trashed post statuses in the admin product query.
 * Fix - Improved stability when viewing ticket emails for deleted products.
@@ -48,12 +95,12 @@
 * Dev - Bump WooCommerce minimum supported version to 10.5.
 * Dev - Bump WordPress "Tested up to" to 7.0.
 
-2026-03-16 - version 1.3.9
+= 1.3.9 - 2026-03-16 =
 * Dev - Bump WooCommerce "tested up to" version 10.6.
 * Dev - Bump WooCommerce minimum supported version to 10.4.
 * Dev - Bump Wordpress minimum supported version to 6.8.
-  
-2025-12-15 - version 1.3.8
+
+= 1.3.8 - 2025-12-15 =
 * Add - Tooltips for ticket settings in the Box Office settings.
 * Fix - PHP 8.4 deprecation notices.
 * Dev - Bump WooCommerce "tested up to" version 10.4.
@@ -63,24 +110,24 @@
 * Dev - Run the PHP Compatibility Sniffs against the entire production code base.
 * Dev - Updates to our QIT GitHub Action workflow.
 
-2025-09-02 - version 1.3.7
+= 1.3.7 - 2025-09-02 =
 * Add - Introduced pagination to the My Account > My Tickets screen.
 * Fix - Potential fatal error when trashing orders containing ticketed products.
 * Dev - Bump WooCommerce "tested up to" version 10.1.
 * Dev - Bump WooCommerce minimum supported version to 9.9.
 * Dev - Bump WordPress minimum supported version to 6.7.
 
-2025-06-30 - version 1.3.6
+= 1.3.6 - 2025-06-30 =
 * Add - Set default user privacy preference.
 * Dev - Bump WooCommerce "tested up to" version 10.0.
 * Dev - Bump WooCommerce minimum supported version to 9.8.
 
-2025-06-16 - version 1.3.5
+= 1.3.5 - 2025-06-16 =
 * Fix - Resolved "translation loading was triggered too early" issue in WordPress 6.7.
 * Fix - Improve performance of syncing check for HPOS compatibility mode.
 * Fix - Issues flagged from QIT Security checks.
 
-2025-05-27 - version 1.3.4
+= 1.3.4 - 2025-05-27 =
 * Add - Custom blocks for My Ticket, Order Tickets, Scan Ticket, Ticket Private Content, User Tickets, and Tickets that match `my_ticket`, `order_tickets`, `scan_ticket`, `ticket_private_content`, `user_tickets`, and `tickets` shortcode functionality.
 * Dev - Bump WooCommerce "tested up to" version 9.9.
 * Dev - Bump WooCommerce minimum supported version to 9.7.
@@ -88,37 +135,37 @@
 * Dev - Update all third-party actions our workflows rely on to use versions based on specific commit hashes.
 * Dev - Add the WordPress Plugin Check GitHub Action and address all issues it was reporting.
 
-2025-03-17 - version 1.3.3
+= 1.3.3 - 2025-03-17 =
 * Fix - Improve performance querying tickets associated with an order.
 * Dev - Bump WooCommerce "tested up to" version 9.8.
 * Dev - Bump WooCommerce minimum supported version to 9.6.
 
-2025-03-10 - version 1.3.2
+= 1.3.2 - 2025-03-10 =
 * Add - Support for WooCommerce's new email preview feature added in 9.6.
 
-2025-02-10 - version 1.3.1
+= 1.3.1 - 2025-02-10 =
 * Dev - Bump WooCommerce "tested up to" version 9.7.
 * Dev - Bump WooCommerce minimum supported version to 9.5.
 * Dev - Bump WordPress minimum supported version to 6.6.
 * Dev - Use the `@woocommerce/e2e-utils-playwright` NPM package for E2E tests.
 
-2024-11-25 - version 1.3.0
+= 1.3.0 - 2024-11-25 =
 * Fix - Ensure that no fatal error occurs in the ticket description if the ticket product is permanently removed.
 * Dev - Bump WooCommerce "tested up to" version 9.5.
 * Dev - Bump WooCommerce minimum supported version to 9.3.
 
-2024-11-18 - version 1.2.10
+= 1.2.10 - 2024-11-18 =
 * Fix - Switch to using the `woocommerce_admin_reports` filter instead of `woocommerce_reports_charts`.
 * Dev - Bump WordPress "tested up to" version 6.7.
 
-2024-11-06 - version 1.2.9
+= 1.2.9 - 2024-11-06 =
 * Fix - Ensure the PayPal Express button is only visible on the ticket product page when all ticket field data is entered and valid.
 * Fix - Proper styling of Ticket Edit Page in the Twenty Twenty-Four default theme.
 * Dev - Bump WooCommerce "tested up to" version 9.4.
 * Dev - Bump WooCommerce minimum supported version to 9.2.
 * Dev - Bump WordPress minimum supported version to 6.5.
 
-2024-09-24 - version 1.2.8
+= 1.2.8 - 2024-09-24 =
 * Add - My Ticket section in My Account now includes breadcrumb heading.
 * Add - Disable reports and display a notice when HPOS is enabled and syncing is disabled.
 * Fix - The custom "Buy Ticket Now" button text does not work when no fields are added.
@@ -126,14 +173,14 @@
 * Dev - Bump WooCommerce "tested up to" version 9.3.
 * Dev - Bump WooCommerce minimum supported version to 9.1.
 
-2024-08-19 - version 1.2.7
+= 1.2.7 - 2024-08-19 =
 * Add - The "Opted-out of public listing" column to the ticket export CSV.
 * Dev - Bump WooCommerce "tested up to" version 9.2.
 * Dev - Bump WooCommerce minimum supported version to 9.0.
 * Dev - Fix QIT E2E tests and add support for a few new test types.
 * Dev - Update E2E tests to accommodate the changes in WooCommerce 9.2.
 
-2024-07-22 - version 1.2.6
+= 1.2.6 - 2024-07-22 =
 * Dev - Bump WooCommerce "tested up to" version 9.1.
 * Dev - Bump WooCommerce minimum supported version to 8.9.
 * Dev - Bump WordPress "tested up to" version 6.6.
@@ -141,14 +188,14 @@
 * Dev - Update NPM packages and node version to v20 to modernize developer experience.
 * Dev - Exclude the Woo Comment Hook `@since` sniff.
 
-2024-03-11 - version 1.2.5
+= 1.2.5 - 2024-03-11 =
 * Add - Ability to add product info to Box Office’s Printable Tickets template.
 * Dev - Bump WooCommerce "tested up to" version 8.6.
 * Dev - Bump WooCommerce minimum supported version to 8.4.
 * Dev - Bump WordPress minimum supported version to 6.3.
 * Fix - Print ticket page shows custom attribute's slug instead of name.
 
-2024-01-16 - version 1.2.4
+= 1.2.4 - 2024-01-16 =
 * Dev - Declare compatibility with WooCommerce Blocks
 * Dev - Bump PHP "tested up to" version 8.3.
 * Dev - Bump PHP minimum supported version to 7.4.
@@ -156,7 +203,7 @@
 * Dev - Bump WooCommerce minimum supported version to 8.2.
 * Fix - Clear the scan ticket input field after ticket results are loaded to improve the ticket scanning process.
 
-2024-01-10 - version 1.2.3
+= 1.2.3 - 2024-01-10 =
 * Dev - Add Playwright end-to-end tests.
 * Dev - Bump WooCommerce "tested up to" version 8.3.
 * Dev - Bump WooCommerce minimum supported version to 8.1.
@@ -166,14 +213,14 @@
 * Fix - Shortcode rendering verification.
 * Tweak - Bump `woocommerce-sniffs` to `1.0.0`.
 
-2023-10-02 - version 1.2.2
+= 1.2.2 - 2023-10-02 =
 * Dev - Update PHPCS and PHPCompatibility GitHub Actions.
 
-2023-09-18 - version 1.2.1
+= 1.2.1 - 2023-09-18 =
 * Add - Compatibility testing with "WooCommerce Payments".
 * Dev - QIT related fixes.
 
-2023-08-28 - version 1.2.0
+= 1.2.0 - 2023-08-28 =
 * Dev - Add Playwright end-to-end tests.
 * Dev - Bump PHP minimum supported version from 7.2 to 7.3.
 * Dev - Bump WooCommerce "tested up to" version from 7.8 to 8.0.
@@ -181,14 +228,14 @@
 * Dev - Bump WordPress "tested up to" version from 6.2 to 6.3.
 * Fix - Styling of the create ticket form within the admin.
 
-2023-07-03 - version 1.1.54
+= 1.1.54 - 2023-07-03 =
 * Dev - Bump WooCommerce "tested up to" version 7.8.
 * Dev - Bump WooCommerce minimum supported version from 6.8 to 7.2.
 * Dev - Bump WordPress minimum supported version from 5.8 to 6.1.
 * Dev - Resolve coding standards issues.
 * Fix - SKU retrieval for variations in ticket export.
 
-2023-06-14 - version 1.1.53
+= 1.1.53 - 2023-06-14 =
 * Dev - Improve escaping in Create Ticket workflow.
 * Dev - Improve escaping in Ticket Fields panel (product editor).
 * Dev - Improve escaping in the Tickets > Tools UI.
@@ -196,12 +243,12 @@
 * Dev - Added new GitHub Workflow to run Quality Insights Toolkit tests.
 * Fix - Update code used to handle shortcode attributes.
 
-2023-05-22 - version 1.1.52
+= 1.1.52 - 2023-05-22 =
 * Fix - Fatal error in short-code `[ticket_private_content]` while editing it in the block editor.
 * Fix - Remove unused Ajax endpoints.
 * Fix - Shortcode rendering issues.
 
-2023-05-12 - version 1.1.51
+= 1.1.51 - 2023-05-12 =
 * Dev - Bump WooCommerce "tested up to" version 7.6.
 * Dev - Bump WordPress "tested up to" version 6.2.
 * Dev - Bump WordPress minimum supported version from 5.6 to 5.8.
@@ -209,52 +256,52 @@
 * Fix - Resolve ticket shortcode compatibility issues.
 * No changelog entry required.
 
-2023-03-15 - version 1.1.50
+= 1.1.50 - 2023-03-15 =
 * Add - Support for WooCommerce email templates for Ticket notifications.
 * Tweak - WC 7.5.0 compatibility.
 
-2023-03-13 - version 1.1.49
+= 1.1.49 - 2023-03-13 =
 * Dev - Set PHP minimum supported version to 7.2.
 * Tweak - Bump WooCommerce "tested up to" version 7.4.
 * Tweak - Bump WooCommerce minimum supported version from 6.0 to 6.8.
 
-2023-02-20 - version 1.1.48
+= 1.1.48 - 2023-02-20 =
 * Fix - Error when exporting a ticket which was created without an order.
 * Fix - Placeholder `{ticket_id}` and `{barcode}` links do not add placeholder to editor.
 
-2023-01-27 - version 1.1.47
+= 1.1.47 - 2023-01-27 =
 * Fix - Use a unique ID for tickets to prevent deletion of wrong ticket.
 * Tweak - Bump WooCommerce "Tested up to" version 7.3.0.
 
-2023-01-17 - version 1.1.46
+= 1.1.46 - 2023-01-17 =
 * Tweak - Bump WordPress "Tested up to" version 6.1.
 
-2022-12-13 - version 1.1.45
+= 1.1.45 - 2022-12-13 =
 * Add - Allow emails to be sent to customers who opted for specific variation.
 * Fix - Refunded ticket will be moved to trash upon `full refund`.
 
-2022-11-24 - version 1.1.44
+= 1.1.44 - 2022-11-24 =
 * Add - Ability to filter tickets by checked-in status.
 * Add - Ensure checkin-in status is added to the export data.
 * Fix - Broken images in email preview.
 * Fix - Ensure that creating a ticket for an existing completed order reduces the ticket stock.
 * Fixed - Incorrect radio button selection on qty update.
 
-2022-11-09 - version 1.1.43
+= 1.1.43 - 2022-11-09 =
 * Fix - Issue with Twitter ticket fields populating correctly on tickets.
 
-2022-11-02 - version 1.1.42
+= 1.1.42 - 2022-11-02 =
 * Add - Declare support for High-performance Order Storage ("HPOS").
 * Add - Support for High-performance Order Storage ("HPOS") (formerly known as Custom Order Tables, "COT").
 
-2022-10-11 - version 1.1.41
+= 1.1.41 - 2022-10-11 =
 * Dev - Update composer versions from v1 to v2.
 * Dev - Update node version from 8.9.3 to 16.13.0.
 * Dev - Update npm version from 5.5.1 to 8.0.0.
 * Fix - Duplicate tickets appear after navigating off-site and returning to cart.
 * Fix - When a ticket moves from Failed to Processing or Completed, it will remain in Trash.
 
-2022-09-13 - version 1.1.40
+= 1.1.40 - 2022-09-13 =
 * Add - Coupon code column to attendee export CSV file.
 * Fix - Broken email formatting.
 * Fix - Default subject added for ticket confirmation email.
@@ -266,148 +313,148 @@
 * Tweak - Include variation details in ticket title of email/print ticket.
 * Update - Ensure tickets can be exported from specific variation.
 
-2022-08-08 - version 1.1.39
+= 1.1.39 - 2022-08-08 =
 * Fixed - Deprecation notice.
 * Fixed: Add better validation for required ticket fields.
 * Fixed: Ensure that auto-fill works as expected for guest users.
 * Fixed: Ensure when a checkbox field is required the validation doesn't require all options to be checked.
 * Tweak - WC 6.7.0 compatibility.
 
-2022-07-06 - version 1.1.38
+= 1.1.38 - 2022-07-06 =
 * Fix - Critical error when viewing a ticket associated with a permanently deleted product.
 * Fix - Ensure all text is translated properly in the Private Link email.
 * Fix - Invoice generation when using PDF Invoices.
 
-2022-06-02 - version 1.1.37
+= 1.1.37 - 2022-06-02 =
 * Add - Class has been created to deal with block editor integration, primarily with the quantity selector on the cart page.
 * Tweak - Bump tested up to WordPress version 6.0.
 
-2021-10-28 - version 1.1.36
+= 1.1.36 - 2021-10-28 =
 * Fix - Add .nvmrc using node v10.16.0.
 * Fix - Missing barcode when ticket assigned to order.
 * Tweak - WC 5.8 compatibility.
 * Tweak - WP 5.8 compatibility.
 
-2021-07-21 - version 1.1.35
+= 1.1.35 - 2021-07-21 =
 * Fix - Ensure barcode is created as an image so it can be easily printed.
 
-2021-06-22 - version 1.1.34
+= 1.1.34 - 2021-06-22 =
 * Fix - Generate a barcode for tickets created via WP Admin.
 
-2021-06-08 - version 1.1.33
+= 1.1.33 - 2021-06-08 =
 * Fix - JS error showing in the console when navigating to My Accounts->Tickets page.
 * Tweak - WC 5.3 compatibility.
 * Tweak - WP 5.7 compatibility.
 
-2021-05-04 - version 1.1.32
+= 1.1.32 - 2021-05-04 =
 * Fix - Replace deprecated jQuery 3 methods.
 * Tweak - WC 5.2.2 compatibility.
 * Tweak - WP 5.7.1 compatibility.
 
-2021-03-25 - version 1.1.31
+= 1.1.31 - 2021-03-25 =
 * Add - Menu item to the new WC Navigation.
 * Fix - Use method_exists to accommodate for backwards compatibility with old WC versions.
 * Tweak - WC 5.1 compatibility.
 * Tweak - WP 5.7 compatibility.
 
-2020-11-05 - version 1.1.30
+= 1.1.30 - 2020-11-05 =
 * Fix - Dev - Fix incompatibilities with PHP 8.
 * Fix - Limited the editable ticket check to the customer facing edit page post-purchase.
 * Tweak - WC 4.6 compatibility.
 * Tweak - WP 5.5 compatibility.
 
-2020-09-29 - version 1.1.29
-* Add   - Option to disable editing of tickets.
-* Fix   - Global options for Ticket Printing and Ticket Emails does not work.
+= 1.1.29 - 2020-09-29 =
+* Add - Option to disable editing of tickets.
+* Fix - Global options for Ticket Printing and Ticket Emails does not work.
 * Tweak - Update wording for ticket emails.
 
-2020-08-19 - version 1.1.28
+= 1.1.28 - 2020-08-19 =
 * Tweak - WordPress 5.5 compatibility.
 
-2020-07-22 - version 1.1.27
+= 1.1.27 - 2020-07-22 =
 * Fix - Show barcode as image in emails.
 
-2020-07-01 - version 1.1.26
+= 1.1.26 - 2020-07-01 =
 * Add - `{barcode}` variable to display barcodes in ticket emails.
 * Add - Ticket ID variables to printed tickets and emails.
 * Tweak - Compatibility with WooCommerce Order Barcodes.
 * Tweak - Scan barcode form layout for mobile devices.
 
-2020-06-16 - version 1.1.25
+= 1.1.25 - 2020-06-16 =
 * Fix - When adding multiple ticket products to cart only last item retains tickets.
 
-2020-06-10 - version 1.1.24
+= 1.1.24 - 2020-06-10 =
 * Tweak - WC 4.2 compatibility.
 
-2020-04-29 - version 1.1.23
+= 1.1.23 - 2020-04-29 =
 * Tweak - WC 4.1 compatibility.
 
-2020-04-14 - version 1.1.22
+= 1.1.22 - 2020-04-14 =
 * Tweak - Add note on logging settings.
 
-2020-04-08 - version 1.1.21
+= 1.1.21 - 2020-04-08 =
 * Fix - Orders created by Box office are charged additional tax.
 
-2020-03-17 - version 1.1.20
+= 1.1.20 - 2020-03-17 =
 * Fix - Tickets created for each failed payment and only first one is trashed.
 
-2020-02-26 - version 1.1.19
+= 1.1.19 - 2020-02-26 =
 * Fix - Undefined constant error.
 * Tweak - WC 4.0 compatibility.
 
-2020-02-18 - version 1.1.18
+= 1.1.18 - 2020-02-18 =
 * Tweak - Remove legacy code.
 
-2020-02-04 - version 1.1.17
+= 1.1.17 - 2020-02-04 =
 * Fix - Clearer wording for editing tickets in My Account section
 * Fix - Use proper escaping function for attributes.
 
-2020-01-14 - version 1.1.16
-* Fix   - Title filter overrides all calls to `the_title`.
+= 1.1.16 - 2020-01-14 =
+* Fix - Title filter overrides all calls to `the_title`.
 * Tweak - Move ticket form fields above "add to cart" button for better UX.
-* Fix   - Updating information on a ticket does not create a Ticket Email.
+* Fix - Updating information on a ticket does not create a Ticket Email.
 * Tweak - WC 3.9 compatibility.
 
-2019-11-04 - version 1.1.15
+= 1.1.15 - 2019-11-04 =
 * Tweak - WC 3.8 compatibility.
 
-2019-09-25 - version 1.1.14
+= 1.1.14 - 2019-09-25 =
 * Fix - Update ticket status when moving order to on-hold or pending status.
 * Fix - Can print tickets in statuses that indicate that the ticket was not yet paid for.
 
-2019-08-06 - version 1.1.13
+= 1.1.13 - 2019-08-06 =
 * Tweak - WC 3.7 compatibility.
 * Fix - Turned ticket export select into multiple select box.
 
-2019-04-16 - version 1.1.12
+= 1.1.12 - 2019-04-16 =
 * Tweak - WC 3.6 compatibility.
 
-2018-09-25 - version 1.1.11
+= 1.1.11 - 2018-09-25 =
 * Update - WC 3.5 compatibility.
 
-2018-05-23 - version 1.1.10
+= 1.1.10 - 2018-05-23 =
 * Update - Privacy policy notification.
 * Update - Export/erasure hooks added.
 * Update - WC 3.4 compatibility.
 
-2018-03-12 - version 1.1.9
+= 1.1.9 - 2018-03-12 =
 * Fix - Email (order item meta) formatting no longer pretty.
 * Fix - Unable to add two different products to the cart if Sold individually option is checked for both.
 
-2018-02-21 - version 1.1.8
+= 1.1.8 - 2018-02-21 =
 * Fix - Issue where ticket checkbox still checked if product type is changed to unsupported ticket product (e.g. subscriptions).
 * Add - Possibility to force ticket creation (e.g. when adding products from 'add-to-cart' query string).
 
-2017-11-27 - version 1.1.7
+= 1.1.7 - 2017-11-27 =
 * Fix - Ticket information link in email and order confirmation page doesn't work.
 * Fix - Emails to ticket individuals who've booked tickets are not sent.
 * Fix - Issue where order details are not shown in PDF invoice when there's no ticket.
 * Fix - Issue where address details in an order are not populated when ticket is created manually.
 
-2017-08-08 - version 1.1.6
+= 1.1.6 - 2017-08-08 =
 * Fix - Issue where sold-individually product doesn't work when ticket is enabled.
 
-2017-08-01 - version 1.1.5
+= 1.1.5 - 2017-08-01 =
 * Fix - PHP notice of undefined variable ticket_product.
 * Fix - Display order number in order link from edit ticket screen.
 * Fix - PPEC button in single product page is rendered twice.
@@ -415,7 +462,7 @@
 * Fix - Pot file not named correctly.
 * Tweak - Add SKU column in exported CSV.
 
-2017-06-02 - version 1.1.4
+= 1.1.4 - 2017-06-02 =
 * Fix - Issue where exported data displayed as 'Array' for a check box field.
 * Fix - Issue where order item meta is not updated when ticket is updated.
 * Fix - Added tax item into order items and recalculate tax in the order total.
@@ -423,16 +470,16 @@
 * Fix - Issue where My Tickets page is missing from My Accounts page.
 * Fix - Notice of product properties should not be accessed directly (deprecation that's added in WC 3.0+).
 
-2017-04-03 - version 1.1.3
+= 1.1.3 - 2017-04-03 =
 * Fix - Update for WooCommerce 3.0 compatibility.
 
-2017-02-23 - version 1.1.2
+= 1.1.2 - 2017-02-23 =
 * Fix - Incorrect incorrect ticket URL in exported tickets CSV.
 * Fix - Customer information not being populated when ticket is create via admin.
 * Enhancement - Added paragraph wrapper in printed ticket.
 * Fix - Multiple product_page shortcodes on a single page only show the the first ticket's fields.
 
-2016-11-30 - version 1.1.1
+= 1.1.1 - 2016-11-30 =
 * Fix - PHP notices on the front page.
 * Fix - Issue where 'Add New' link in ticket admin doesn't work.
 * Fix - Error when updating to 1.1.0 caused by too early hook when performing page creation and rewrite flush
@@ -440,7 +487,7 @@
 * Fix - Issue where barcodes were not generated for purchased tickets.
 * Fix - Error thrown in [scan_ticket] shortcode.
 
-2016-08-16 - version 1.1.0
+= 1.1.0 - 2016-08-16 =
 * Fix - Duplicate navigation under My Tickets page
 * Tweak - Added Box Office settings under WooCommerce > Settings
 * Tweak - Allow set the page for My Ticket (edit ticket) page via settings
@@ -451,17 +498,13 @@
 * Security - Prevent CSV formula injection from exported tickets
 * Fix - Issue where HTML ticket fields being sent to gateway
 
-2016-05-30 - version 1.0.2
+= 1.0.2 - 2016-05-30 =
 * Tweak - UI redesign, with menu and breadcrumb, for "My Tickets" page under "My Account" page when WooCommerce 2.6 is being used
 * Fix - Issue where ticket panel icons were not correctly displayed when WooCommerce 2.6 is being used
 
-2016-04-23 - version 1.0.1
-* Removed displayed order items meta in checkout. Since order item meta contains
-  ticket fields wrapped in markup, it won't displayed nicely in some gateways.
-* Fixes checkbox field is not displayed for ticket holder. Checkbox's value is
-  stored as array and we skipped to render it. This change implode the value into
-  comma separated string.
+= 1.0.1 - 2016-04-23 =
+* Removed displayed order items meta in checkout. Since order item meta contains ticket fields wrapped in markup, it won't displayed nicely in some gateways.
+* Fixes checkbox field is not displayed for ticket holder. Checkbox's value is stored as array and we skipped to render it. This change implode the value into comma separated string.
 
-
-2016-04-20 - version 1.0.0
+= 1.0.0 - 2016-04-20 =
 * Initial release

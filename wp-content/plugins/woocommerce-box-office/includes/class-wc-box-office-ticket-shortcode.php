@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Registers the Box Office shortcodes.
+ *
+ * @class   WC_Box_Office_Ticket_Shortcode
+ * @version x.x.x
+ */
 class WC_Box_Office_Ticket_Shortcode {
 
 	/**
@@ -242,7 +248,7 @@ class WC_Box_Office_Ticket_Shortcode {
 			'post_type'      => 'event_ticket',
 			'post_status'    => 'publish',
 			'posts_per_page' => $attributes['amount'],
-			'order_by'       => $attributes['order_by'],
+			'orderby'        => $attributes['order_by'],
 			'order'          => $attributes['order'],
 		);
 
@@ -281,13 +287,14 @@ class WC_Box_Office_Ticket_Shortcode {
 			$product_id = get_post_meta( $ticket->ID, '_product', true );
 
 			// Get available fields from ticket product
-			$ticket_fields = get_post_meta( $product_id, '_ticket_fields', true );
+			$ticket_fields = wc_box_office_get_product_ticket_fields( $product_id );
 
-			$first_name 	= '';
-			$last_name 		= '';
-			$avatar 		= '';
-			$url 			= '';
-			$twitter 		= '';
+			$first_name = '';
+			$last_name  = '';
+			$avatar     = '';
+			$url        = '';
+			$url_link   = '';
+			$twitter    = '';
 
 			foreach ( $ticket_fields as $field_key => $field ) {
 
@@ -386,7 +393,7 @@ class WC_Box_Office_Ticket_Shortcode {
 
 		// Check if user has ticket scanning permissions
 		$can_scan = apply_filters( 'woocommerce_box_office_scan_permission', current_user_can( 'manage_woocommerce' ), 0 );
-		if ( ! $can_scan ) {
+		if ( ! $can_scan || is_wp_error( $can_scan ) ) {
 			return;
 		}
 
@@ -461,7 +468,7 @@ class WC_Box_Office_Ticket_Shortcode {
 				throw new Exception( esc_html__( 'Invalid ticket token.', 'woocommerce-box-office' ), 400 );
 			}
 
-			if ( $content_vars['product_id'] !== absint( $ticket->product_id ) ) {
+			if ( ! wc_box_office_is_ticket_active( $ticket ) || absint( $ticket->product_id ) !== $content_vars['product_id'] ) {
 				throw new Exception( esc_html__( 'Sorry, but your ticket does not allow you to view this content.', 'woocommerce-box-office' ), 400 );
 			}
 
@@ -493,7 +500,7 @@ class WC_Box_Office_Ticket_Shortcode {
 		}
 
 		$private_content_id = absint( $_POST['private_content_id'] );
-		if ( ! $private_content_id ) {
+		if ( ! $private_content_id || ! is_singular() || get_queried_object_id() !== $private_content_id || ! is_post_publicly_viewable( $private_content_id ) ) {
 			return;
 		}
 
@@ -506,20 +513,18 @@ class WC_Box_Office_Ticket_Shortcode {
 
 		$product_id = ! empty( $_POST['ticket_product_id'] ) ? wc_clean( wp_unslash( $_POST['ticket_product_id'] ) ) : '';
 
+		// Do not disclose ticket membership, including when mail cannot be queued.
+		$this->_notice_type_link_retrieval = 200;
+		$this->_notice_link_retrieval      = esc_html__( 'If a matching ticket exists, a link will be sent to the email address provided.', 'woocommerce-box-office' );
+
 		// Get ticket by email.
 		$ticket = wc_box_office_get_ticket_by_email( $email, $product_id );
 		if ( ! $ticket ) {
-			$this->_notice_type_link_retrieval = 400;
-			$this->_notice_link_retrieval      = esc_html__( 'No attendee matches with your email.', 'woocommerce-box-office' );
 			return;
 		}
 
 		// Ticket matches with the email, send the email.
 		WCBO()->components->cron->schedule_send_email_for_private_content_link( time(), $email, $ticket->id, $private_content_id );
-
-		$this->_notice_type_link_retrieval = 200;
-		// translators: %s: email address.
-		$this->_notice_link_retrieval = sprintf( esc_html__( 'URL to view this content is already sent to %s', 'woocommerce-box-office' ), esc_html( $email ) );
 	}
 
 	/**

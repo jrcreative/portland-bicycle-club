@@ -6,6 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Class that represents a ticket.
+ *
+ * @class   WC_Box_Office_Ticket
+ * @version x.x.x
  */
 class WC_Box_Office_Ticket {
 
@@ -128,7 +131,7 @@ class WC_Box_Office_Ticket {
 	/**
 	 * Populate properties based on WP_Post.
 	 *
-	 * @param int|WP_Post $post  Post ID or object.
+	 * @param int|WP_Post $ticket Post ID or object.
 	 * @param bool        $force Force populate
 	 *
 	 * @return void
@@ -335,7 +338,9 @@ class WC_Box_Office_Ticket {
 			if ( is_array( $val ) ) {
 				$val = implode( ', ', $val );
 			}
-			$ticket_content = str_replace( '{' . $field['label'] . '}', esc_html( $val ), $ticket_content );
+			// Keep attendee brackets literal without changing template shortcode arguments.
+			$val            = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), esc_html( $val ) );
+			$ticket_content = str_replace( '{' . $field['label'] . '}', $val, $ticket_content );
 		}
 
 		$post = get_post( $this->product_id );
@@ -381,7 +386,7 @@ class WC_Box_Office_Ticket {
 	/**
 	 * Get ticket fields by its type.
 	 *
-	 * @param string
+	 * @param string $type Field type.
 	 */
 	public function get_ticket_fields_by_type( $type ) {
 		if ( ! $this->populated ) {

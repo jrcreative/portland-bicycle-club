@@ -67,6 +67,7 @@ if(is_singular())
                 $context['news'] = Timber::get_posts($query_args);
                 $context['after'] = $after;
                 $context['check_modified'] = $check_modified;
+                $context['show_picture'] = apply_filters('pwtc_recent_posts_show_picture', false);
             }
             elseif(get_row_layout() == "rides")
             {
@@ -140,17 +141,8 @@ if(is_singular())
             $template = 'pages/post.html.twig';
             $context['comments'] = apply_filters('pwtc_allow_post_comments', false);
             $context['display_post_author'] = get_field('display_post_author');
+            $context['display_post_date'] = get_field('display_post_date');
             $context['filter_post_content'] = get_field('filter_post_content');
-            $context['allowed_html_tags'] = array(
-                'a' => array(
-                    'href' => array(),
-                    'title' => array(),
-                ),
-                'br' => array(),
-                'em' => array(),
-                'strong' => array(),
-                'p' => array(),
-            );
             $format = get_field('format');
             if ($format === 'gallery') {
                 $context['images'] = get_field('images');

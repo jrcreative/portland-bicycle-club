@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<p>
 		<?php esc_html_e( 'If you\'ve purchased the ticket use the form below to send link for unlocking content to your email.', 'woocommerce-box-office' ); ?>
 	</p>
-	<form method="POST" action="#ticket-private-content">
+	<form method="POST" action="<?php echo esc_url( ( is_singular() && get_queried_object_id() === get_the_ID() ? '' : get_permalink( get_the_ID() ) ) . '#ticket-private-content' ); ?>">
 		<input name="ticket_send_link_for_private_content" type="hidden" value="1" />
 		<input name="ticket_product_id" type="hidden" value="<?php echo esc_attr( $product_id ); ?>" />
 		<input name="private_content_id" type="hidden" value="<?php echo esc_attr( get_the_ID() ); ?>" />

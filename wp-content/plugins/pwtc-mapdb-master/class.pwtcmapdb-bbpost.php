@@ -37,6 +37,7 @@ class PwtcMapdb_BBPost {
 		add_filter('pwtc_category_button_links', array('PwtcMapdb_BBPost', 'category_button_links_callback'));
 		add_filter('pwtc_allow_post_comments', array('PwtcMapdb_BBPost', 'allow_post_comments_callback'));
 		add_filter('pwtc_check_post_modified_gmt', array('PwtcMapdb_BBPost', 'check_post_modified_gmt_callback'));
+		add_filter('pwtc_recent_posts_show_picture', array('PwtcMapdb_BBPost', 'recent_posts_show_picture_callback'));
 
 		if ('yes' === get_option('pwtc_mapdb_force_comment_moderation', 'no')) {
 			add_filter('pre_comment_approved', array('PwtcMapdb_BBPost', 'force_comment_moderation_callback'), 9999);
@@ -142,20 +143,23 @@ class PwtcMapdb_BBPost {
 			'posts_per_page' => -1,
 			'category__in' => $cat_ids,
 			'date_query' => [
-				'relation' => 'OR',
 				[
                     'column' => 'post_date_gmt',
                     'after' => $after,
 				],
-				[
-                    'column' => 'post_modified_gmt',
-                    'after' => $after,
-				],
 			],
 		];
+		$check_modified = ('yes' === get_option('pwtc_mapdb_check_post_modified_gmt', 'no'));
+		if ($check_modified) {
+            $query_args['date_query']['relation'] = 'OR';
+            $query_args['date_query'][] = [
+                'column' => 'post_modified_gmt',
+                'after' => $after,
+            ];
+        }
 		$results = new WP_Query($query_args);
 		if ($results->found_posts > 0) {
-			$title = '' . $results->found_posts . ' member posts added or modified since ' . $after . '.';
+			$title = '' . $results->found_posts . ' member posts added' . ($check_modified ? ' or modified' : '') . ' since ' . $after . '.';
 			$output .= '<span style="' . $style . '" class="label primary" title="' . $title . '"><i class="fa fa-sticky-note"></i> ' . $results->found_posts . '</span>';	
 		}
 		return $output;
@@ -208,6 +212,10 @@ class PwtcMapdb_BBPost {
 
 	public static function check_post_modified_gmt_callback($allowed) {
 		return ('yes' === get_option('pwtc_mapdb_check_post_modified_gmt', 'no'));
+	}
+
+	public static function recent_posts_show_picture_callback($allowed) {
+		return ('yes' === get_option('pwtc_mapdb_recent_posts_show_picture', 'no'));
 	}
 
 	public static function comment_update_post_modified_time_callback1($comment_id, $comment_approved) {
@@ -268,6 +276,7 @@ class PwtcMapdb_BBPost {
 		$a = shortcode_atts(array('use_return' => 'no'), $atts);
 		$use_return = $a['use_return'] == 'yes';
 
+		$allow_anchor_tag = false;
 		$allow_email = ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no'));
 		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
 		$max_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
@@ -563,15 +572,6 @@ class PwtcMapdb_BBPost {
 
 		if ($postid != 0) {
 			if (isset($_GET['preview'])) {
-				$allowed_html_tags = [
-                	'a' => [
-                	    'href' => array(),
-					],
-                	'br' => [],
-                	'em' => [],
-                	'strong' => [],
-                	'p' => [],
-				];
 				ob_start();
 				include('bbpost-preview-form.php');
 				return ob_get_clean();

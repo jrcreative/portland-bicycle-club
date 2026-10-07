@@ -170,7 +170,7 @@ function wc_box_office_get_ticket_description( $ticket_id = 0, $formatter = 'fla
 	$product_id = get_post_meta( $ticket_id, '_product', true );
 
 	// Get available fields from ticket product.
-	$ticket_fields = get_post_meta( $product_id, '_ticket_fields', true );
+	$ticket_fields = wc_box_office_get_product_ticket_fields( $product_id );
 
 	// If no fields are added to the product, a '-' sign will be displayed
 	// wherever fields are displayed in the admin area, front end, and email(s).
@@ -178,23 +178,41 @@ function wc_box_office_get_ticket_description( $ticket_id = 0, $formatter = 'fla
 		return '-';
 	}
 
-	switch ( $formatter ) {
-		case 'flat':
-			$formatter = 'wc_box_office_ticket_description_flat_formatter';
-			break;
-		case 'list':
-			$formatter = 'wc_box_office_ticket_description_list_formatter';
-			break;
-		case 'table':
-			$formatter = 'wc_box_office_ticket_description_table_formatter';
-			break;
-		default:
-			if ( ! is_callable( $formatter ) ) {
-				$formatter = 'wc_box_office_ticket_description_flat_formatter';
-			}
+	$defaults = array(
+		'flat'  => 'wc_box_office_ticket_description_flat_formatter',
+		'list'  => 'wc_box_office_ticket_description_list_formatter',
+		'table' => 'wc_box_office_ticket_description_table_formatter',
+	);
+
+	// Preserve the built-in function-name aliases, including PHP's case-insensitive spelling.
+	if ( is_string( $formatter ) ) {
+		$alias = array_search( strtolower( ltrim( $formatter, '\\' ) ), $defaults, true );
+		if ( false !== $alias ) {
+			$formatter = $alias;
+		}
 	}
 
-	return call_user_func_array( $formatter, array( $ticket_id, $ticket_fields ) );
+	/**
+	 * Register trusted ticket description renderers by format name.
+	 *
+	 * @since x.x.x
+	 *
+	 * Callbacks receive the ticket ID and field definitions and return display text.
+	 *
+	 * @param array $formatters Map of format names to renderer callbacks.
+	 */
+	$formatters = apply_filters( 'woocommerce_box_office_ticket_description_formatters', $defaults );
+	$callback   = is_string( $formatter ) && isset( $defaults[ $formatter ] ) ? $defaults[ $formatter ] : $defaults['flat'];
+	if ( is_array( $formatters ) && is_string( $formatter ) && isset( $formatters[ $formatter ] ) && is_callable( $formatters[ $formatter ] ) ) {
+		$callback = $formatters[ $formatter ];
+	}
+
+	$description = $callback( $ticket_id, $ticket_fields );
+	if ( is_array( $description ) || ( is_object( $description ) && ! method_exists( $description, '__toString' ) ) ) {
+		return wc_box_office_ticket_description_flat_formatter( $ticket_id, $ticket_fields );
+	}
+
+	return (string) $description;
 }
 
 /**
@@ -656,7 +674,17 @@ function wc_box_office_get_email_content_type() {
  * @return array
  */
 function wc_box_office_get_product_ticket_fields( $product_id ) {
-	$ticket_fields = get_post_meta( $product_id, '_ticket_fields', true );
+	// Variations store ticket meta on the parent product.
+	$product = wc_get_product( $product_id );
+	if ( $product && $product->is_type( 'variation' ) ) {
+		$product_id = $product->get_parent_id();
+	}
+
+	if ( wc_box_office_uses_customer_details( $product_id ) ) {
+		$ticket_fields = get_post_meta( $product_id, '_ticket_customer_detail_fields', true );
+	} else {
+		$ticket_fields = get_post_meta( $product_id, '_ticket_fields', true );
+	}
 
 	return ! empty( $ticket_fields ) ? $ticket_fields : array();
 }
@@ -716,6 +744,26 @@ function wc_box_office_autofill_options() {
 	);
 
 	return apply_filters( $plugin_token . '_ticket_autofill_options', $options );
+}
+
+/**
+ * Check if a product uses customer details for tickets.
+ *
+ * @since 1.6.0
+ *
+ * @param mixed $product_id Product ID, WP_Post, or WC_Product.
+ * @return bool
+ */
+function wc_box_office_uses_customer_details( $product_id ) {
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		return false;
+	}
+
+	// Variations store ticket meta on the parent product.
+	$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
+
+	return 'yes' === get_post_meta( $product_id, '_ticket_use_customer_details', true );
 }
 
 /**
@@ -830,10 +878,35 @@ function wcbo_esc_csv( $field ) {
 }
 
 /**
+ * Check whether a ticket grants its published entitlement.
+ *
+ * @param mixed $ticket Ticket object.
+ * @return bool
+ */
+function wc_box_office_is_ticket_active( $ticket ) {
+	if ( ! is_object( $ticket ) || ! isset( $ticket->status ) || 'publish' !== $ticket->status ) {
+		return false;
+	}
+
+	// Manually issued tickets may have no order.
+	if ( empty( $ticket->order_id ) ) {
+		return true;
+	}
+
+	$order = $ticket->order ?? false;
+	if ( ! is_a( $order, 'WC_Order' ) ) {
+		return false;
+	}
+
+	$is_paid = $order->is_paid();
+	return $is_paid && ! is_wp_error( $is_paid ) && ! ( $order->has_status( 'processing' ) && 'cod' === $order->get_payment_method() );
+}
+
+/**
  * Check if a ticket can be printed.
  *
  * In order for the ticket to be printable, the printing option must be enabled,
- * and the ticket must be in publish state.
+ * and the ticket must have an active entitlement.
  *
  * @param mixed $ticket  Ticket object.
  *
@@ -848,7 +921,7 @@ function is_ticket_ready_for_printing( $ticket ) {
 	}
 
 	// Check if order is in a state that allows printing the ticket.
-	$is_status_allowed_for_printing = 'publish' === $ticket->status;
+	$is_status_allowed_for_printing = wc_box_office_is_ticket_active( $ticket );
 
 	return $ticket_printing_enabled && $is_status_allowed_for_printing;
 }

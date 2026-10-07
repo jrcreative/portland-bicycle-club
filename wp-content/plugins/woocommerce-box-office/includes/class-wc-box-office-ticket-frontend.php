@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Handles ticket pages on the frontend.
+ *
+ * @class   WC_Box_Office_Ticket_Frontend
+ * @version x.x.x
+ */
 class WC_Box_Office_Ticket_Frontend {
 
 	/**
@@ -131,9 +137,8 @@ class WC_Box_Office_Ticket_Frontend {
 	public function print_ticket() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$ticket = wc_box_office_get_ticket_by_token( sanitize_text_field( wp_unslash( $_GET['token'] ?? '' ) ) );
-		if ( ! $ticket ) {
-			// @TODO(gedex) Probably send it 404 page?
-			return;
+		if ( ! $ticket || ! is_ticket_ready_for_printing( $ticket ) ) {
+			wp_die( esc_html__( 'This ticket is not available for printing.', 'woocommerce-box-office' ), '', array( 'response' => 403 ) );
 		}
 
 		$page_title = sprintf( __( 'Ticket for %s', 'woocommerce-box-office' ), $ticket->title );
@@ -173,7 +178,8 @@ class WC_Box_Office_Ticket_Frontend {
 	protected function _is_valid_ticket_page_request( $mode = 'edit' ) {
 		global $wp_query;
 
-		if ( ! $wp_query->is_page( get_option( 'box_office_my_ticket_page_id' ) ) ) {
+		$ticket_page_id = absint( get_option( 'box_office_my_ticket_page_id' ) );
+		if ( ! $ticket_page_id || ! $wp_query->is_page( $ticket_page_id ) ) {
 			return false;
 		}
 
@@ -251,7 +257,7 @@ class WC_Box_Office_Ticket_Frontend {
 			$product_id = get_post_meta( $ticket->ID, '_product', true );
 
 			// Get available fields from ticket product
-			$ticket_fields      = get_post_meta( $product_id, '_ticket_fields', true );
+			$ticket_fields      = wc_box_office_get_product_ticket_fields( $product_id );
 			$ticket_description = '';
 			foreach ( $ticket_fields as $field_key => $field ) {
 

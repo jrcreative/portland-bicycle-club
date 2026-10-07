@@ -30,6 +30,8 @@
     <h6>{{ post.date }}</h6>
 {% elseif post.get_field('display_post_author') %}
     <h6>{{ post.author.name }} <span>&bull;</span> {{ post.date }}</h6>
+{% elseif post.get_field('display_post_date') %}
+    <h6>{{ post.date }}</h6>
 {% endif %}
 <p>{{ post.preview }}
 {% if user and post.comments and post.comments|length > 0 %} 

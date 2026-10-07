@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Box Office tools.
  *
  * Handle tools that can be found in Ticket > Tools page.
+ *
+ * @class   WC_Box_Office_Tools
+ * @version 1.6.0
  */
 class WC_Box_Office_Tools {
 
@@ -77,9 +80,12 @@ class WC_Box_Office_Tools {
 				$this->export_tickets();
 				break;
 			case 'email':
+				// email_tickets() does its own nonce check.
 				$this->email_tickets();
+				break;
 			case 'user-privacy':
 				$this->user_privacy();
+				break;
 		}
 	}
 
@@ -200,6 +206,11 @@ class WC_Box_Office_Tools {
 			return false;
 		}
 
+		// Verify nonce for security.
+		if ( ! check_admin_referer( 'woocommerce_box_office' ) ) {
+			return false;
+		}
+
 		$products    = array_map( 'absint', $_GET['tickets'] );
 		$post_status = isset( $_GET['only_published_tickets'] ) ? 'publish' : 'any';
 
@@ -239,7 +250,7 @@ class WC_Box_Office_Tools {
 			$queryable_product_ids[] = $product_id;
 
 			// Get available ticket fields.
-			$ticket_fields = get_post_meta( $product_id, '_ticket_fields', true );
+			$ticket_fields = wc_box_office_get_product_ticket_fields( $product_id );
 
 			foreach ( $ticket_fields as $field_key => $field ) {
 				$columns[ $field_key ] = $field['label'];
@@ -332,7 +343,7 @@ class WC_Box_Office_Tools {
 				);
 
 				// Get available ticket fields.
-				$ticket_fields = get_post_meta( $product_id, '_ticket_fields', true );
+				$ticket_fields = wc_box_office_get_product_ticket_fields( $product_id );
 				if ( is_array( $ticket_fields ) ) {
 					foreach ( $ticket_fields as $field_key => $field ) {
 						$ticket_meta = get_post_meta( $ticket_id, $field_key, true );
@@ -474,6 +485,10 @@ class WC_Box_Office_Tools {
 		}
 
 		if ( ! in_array( $preference, array( 'opted-in', 'opted-out' ), true ) ) {
+			return;
+		}
+
+		if ( ! check_admin_referer( 'woocommerce_box_office' ) ) {
 			return;
 		}
 

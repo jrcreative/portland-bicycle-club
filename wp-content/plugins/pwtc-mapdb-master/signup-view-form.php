@@ -400,6 +400,47 @@
             $('#pwtc-mapdb-view-signup-div .errmsg6').html('<div class="callout small warning">' + msg + '</div>');
         }
 
+        var rider_array = null;
+        var rider_index = 0;
+        var max_riders = 0;
+        var reverse_riders = false;
+        function display_rider(userid, riderid, name) {
+            var link = '';
+            if (max_riders > 1) {
+                if (rider_index < 1) {
+                    reverse_riders = false;
+                }
+                else if (rider_index > max_riders-2) {
+                    reverse_riders = true;
+                }
+                if (reverse_riders) {
+                    link = '<a><i class="fa fa-chevron-left"></i> Previous rider</a>';
+                }
+                else {
+                    link = '<a>Next rider <i class="fa fa-chevron-right"></i></a>';
+                }
+            }
+            $('#pwtc-mapdb-view-signup-div .rider-signup-frm input[name="signup_userid"]').val(userid);
+            show_errmsg4_success(name + ' (' + riderid + ') found, press accept to sign up. ' + link);
+            if (max_riders > 1) {
+                $('#pwtc-mapdb-view-signup-div .errmsg4 a').on('click', function(evt) {
+                    if (rider_index < 1) {
+                        reverse_riders = false;
+                    }
+                    else if (rider_index > max_riders-2) {
+                        reverse_riders = true;
+                    }
+                    if (reverse_riders) {
+                        rider_index--;
+                    }
+                    else {
+                        rider_index++;
+                    }
+                    display_rider(rider_array[rider_index].userid, rider_array[rider_index].riderid, rider_array[rider_index].name);
+                });
+            }
+        }
+
         function riderid_lookup_cb(response) {
             var res;
             try {
@@ -415,8 +456,12 @@
                 show_errmsg4_warning(res.error);
             }
             else {
-                $('#pwtc-mapdb-view-signup-div .rider-signup-frm input[name="signup_userid"]').val(res.userid);
-                show_errmsg4_success(res.name + ' (' + res.riderid + ') found, press accept to sign up.');
+                max_riders = res.maxriders;
+                if (res.riderarray && max_riders > 1) {
+                    rider_array = res.riderarray;
+                    rider_index = 0;
+                }
+                display_rider(res.userid, res.riderid, res.name);
                 $('#pwtc-mapdb-view-signup-div .rider-signup-frm button[type="submit"]').prop('disabled',false);
             }
         }

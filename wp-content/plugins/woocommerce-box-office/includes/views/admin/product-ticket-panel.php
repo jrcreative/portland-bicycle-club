@@ -9,97 +9,209 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 ?>
-	<div id="ticket_field_data" class="panel woocommerce_options_panel">
-		<div class="options_group show_if_ticket">
-			<div class="form-field ticket_fields">
-				<table class="widefat">
-					<thead>
-						<tr>
-							<th>
-								<?php esc_html_e( 'Label', 'woocommerce-box-office' ); ?>
-								<?php if ( function_exists( 'wc_help_tip' ) ) : ?>
-									<?php echo wc_help_tip( esc_html__( 'The field label as it is shown to the user.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>
-								<?php else : ?>
-									<span class="tips" data-tip="<?php echo wc_sanitize_tooltip( esc_html__( 'The field label as it is shown to the user.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>">[?]</span>
-								<?php endif; ?>
-							</th>
-							<th><?php esc_html_e( 'Type', 'woocommerce-box-office' ); ?></th>
-							<th>
-								<?php esc_html_e( 'Auto-fill', 'woocommerce-box-office' ); ?>
-								<?php if ( function_exists( 'wc_help_tip' ) ) : ?>
-									<?php echo wc_help_tip( esc_html__( 'Choose the customer\'s billing field from which data is auto-filled as well as what options are available for applicable field types.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>
-								<?php else : ?>
-									<span class="tips" data-tip="<?php echo wc_sanitize_tooltip( esc_html__( 'Choose the customer\'s billing field from which data is auto-filled as well as what options are available for applicable field types.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>">[?]</span>
-								<?php endif; ?>
-							</th>
-							<th><?php esc_html_e( 'Required', 'woocommerce-box-office' ); ?></th>
-							<th>&nbsp;</th>
-						</tr>
-					</thead>
-					<tfoot>
-						<tr>
-							<th colspan="5">
-								<a href="#" class="button insert" data-row="<?php
-									$field = array(
-										'label'          => '',
-										'type'           => '',
-										'options'        => '',
-										'autofill'       => '',
-										'email_contact'  => 'yes',
-										'email_gravatar' => 'yes',
-										'required'       => 'yes',
-									);
-									$field_types      = wc_box_office_ticket_field_types();
-									$autofill_options = wc_box_office_autofill_options();
-									ob_start();
-									include( WCBO()->dir . 'includes/views/admin/ticket-field.php' );
-									echo esc_attr( ob_get_clean() );
-								?>"><?php esc_html_e( 'Add Field', 'woocommerce-box-office' ); ?></a>
-							</th>
-						</tr>
-					</tfoot>
-					<tbody>
-						<?php
-						$ticket_fields = get_post_meta( $post->ID, '_ticket_fields', true );
-						$row = 'alternate';
-						if ( $ticket_fields ) {
-							foreach ( $ticket_fields as $key => $field ) {
-								include( WCBO()->dir . 'includes/views/admin/ticket-field.php' );
-								if ( 'alternate' === $row ) {
-									$row = '';
-								} else {
-									$row = 'alternate';
-								}
+<div id="ticket_field_data" class="panel woocommerce_options_panel">
+	<div class="options_group show_if_ticket">
+
+		<p class="form-field">
+				<?php
+				$use_customer_details = get_post_meta( $post->ID, '_ticket_use_customer_details', true );
+				$use_customer_details = empty( $use_customer_details ) ? 'no' : $use_customer_details;
+
+				woocommerce_wp_checkbox(
+					array(
+						'id'            => '_ticket_use_customer_details',
+						'wrapper_class' => 'show_if_ticket',
+						'label'         => esc_html__( 'Use customer details for tickets', 'woocommerce-box-office' ),
+						'value'         => $use_customer_details,
+						'description'   => esc_html__(
+							'Ticket fields will not be shown on the product page. Ticket data will be auto-populated from the customer\'s billing details. Ticket metadata will be hidden from the thank you page and order emails.',
+							'woocommerce-box-office'
+						),
+					)
+				);
+				?>
+		</p>
+
+		<?php
+		$ticket_fields   = get_post_meta( $post->ID, '_ticket_fields', true );
+		$ticket_fields   = is_array( $ticket_fields ) ? $ticket_fields : array();
+		$cd_fields       = get_post_meta( $post->ID, '_ticket_customer_detail_fields', true );
+		$cd_fields       = is_array( $cd_fields ) ? $cd_fields : array();
+		$mappings        = get_post_meta( $post->ID, '_ticket_customer_detail_mappings', true );
+		$mappings        = is_array( $mappings ) ? $mappings : array();
+		$mapping_options = wc_box_office_autofill_options();
+		?>
+
+		<!-- Standard ticket fields table (hidden when "Use customer details" is on) -->
+		<div id="ticket_standard_fields_wrapper" class="form-field ticket_fields" style="<?php echo 'yes' === $use_customer_details ? 'display:none;' : ''; ?>">
+			<table class="widefat">
+				<thead>
+					<tr>
+						<th>
+							<?php esc_html_e( 'Label', 'woocommerce-box-office' ); ?>
+							<?php if ( function_exists( 'wc_help_tip' ) ) : ?>
+								<?php echo wc_help_tip( esc_html__( 'The field label as it is shown to the user.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>
+							<?php else : ?>
+								<span class="tips" data-tip="<?php echo wc_sanitize_tooltip( esc_html__( 'The field label as it is shown to the user.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>">[?]</span>
+							<?php endif; ?>
+						</th>
+						<th><?php esc_html_e( 'Type', 'woocommerce-box-office' ); ?></th>
+						<th>
+							<?php esc_html_e( 'Auto-fill', 'woocommerce-box-office' ); ?>
+							<?php if ( function_exists( 'wc_help_tip' ) ) : ?>
+								<?php echo wc_help_tip( esc_html__( 'Choose the customer\'s billing field from which data is auto-filled as well as what options are available for applicable field types.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>
+							<?php else : ?>
+								<span class="tips" data-tip="<?php echo wc_sanitize_tooltip( esc_html__( 'Choose the customer\'s billing field from which data is auto-filled as well as what options are available for applicable field types.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>">[?]</span>
+							<?php endif; ?>
+						</th>
+						<th><?php esc_html_e( 'Required', 'woocommerce-box-office' ); ?></th>
+						<th>&nbsp;</th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr>
+						<th colspan="5">
+							<?php
+							$field            = array(
+								'label'          => '',
+								'type'           => '',
+								'options'        => '',
+								'autofill'       => '',
+								'email_contact'  => 'yes',
+								'email_gravatar' => 'yes',
+								'required'       => 'yes',
+							);
+							$field_types      = wc_box_office_ticket_field_types();
+							$autofill_options = wc_box_office_autofill_options();
+							ob_start();
+							require WCBO()->dir . 'includes/views/admin/ticket-field.php';
+							$field_row_template = esc_attr( ob_get_clean() );
+							?>
+							<a href="#" class="button insert" data-row="<?php echo $field_row_template; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already escaped above. ?>"><?php esc_html_e( 'Add Field', 'woocommerce-box-office' ); ?></a>
+						</th>
+					</tr>
+				</tfoot>
+				<tbody>
+					<?php
+					$row = 'alternate';
+					if ( $ticket_fields ) {
+						foreach ( $ticket_fields as $key => $field ) {
+							include WCBO()->dir . 'includes/views/admin/ticket-field.php';
+							if ( 'alternate' === $row ) {
+								$row = '';
+							} else {
+								$row = 'alternate';
 							}
 						}
-						?>
-					</tbody>
-				</table>
-			</div>
-			<p class="form-field">
-				<?php
-					$pii_setting = get_post_meta( $post->ID, '_user_pii_setting', true );
-					$pii_setting = empty( $pii_setting ) ? 'yes' : $pii_setting;
-
-					woocommerce_wp_checkbox(
-						array(
-							'id'            => '_user_pii_setting',
-							'wrapper_class' => 'show_if_ticket',
-							'label'         => esc_html__( 'User privacy preference', 'woocommerce-box-office' ),
-							'value'         => $pii_setting,
-							'description'   => sprintf(
-								esc_html__(
-									'Allow customers to opt-out from being displayed in the public list of attendees when %s shortcode is used.',
-									'woocommerce-box-office'
-								),
-								'<code>[tickets]</code>'
-							),
-						)
-					);
+					}
 					?>
-			</p>
+				</tbody>
+			</table>
 		</div>
+
+		<!-- Customer details mapping table (shown when "Use customer details" is on) -->
+		<div id="ticket_customer_detail_mappings_wrapper" class="form-field ticket_mapping_fields" style="<?php echo 'yes' !== $use_customer_details ? 'display:none;' : ''; ?>">
+			<?php
+			ob_start();
+			?>
+			<td class="field_label"><input type="hidden" name="_ticket_mapping_keys[]" value="" /><input type="text" class="input_text" placeholder="<?php esc_attr_e( 'Field Label', 'woocommerce-box-office' ); ?>" name="_ticket_mapping_labels[]" value="" required="required" /></td>
+			<td class="field_options">
+				<select name="_ticket_mapping_fields[]" style="width: 254px;">
+					<option value="none"><?php esc_html_e( '-- None --', 'woocommerce-box-office' ); ?></option>
+					<option value="" disabled="disabled"><?php esc_html_e( '--------', 'woocommerce-box-office' ); ?></option>
+					<?php foreach ( $mapping_options as $opt_key => $opt_label ) : ?>
+						<option value="<?php echo esc_attr( $opt_key ); ?>"><?php echo esc_html( $opt_label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</td>
+			<td width="1%"><a href="#" class="delete"><?php esc_html_e( 'Delete', 'woocommerce-box-office' ); ?></a></td>
+			<?php
+			$mapping_row_template = esc_attr( ob_get_clean() );
+			?>
+			<table class="widefat" id="ticket_customer_detail_mappings_table" data-row-template="<?php echo $mapping_row_template; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already escaped above. ?>">
+				<thead>
+					<tr>
+						<th>
+							<?php esc_html_e( 'Label', 'woocommerce-box-office' ); ?>
+							<?php if ( function_exists( 'wc_help_tip' ) ) : ?>
+								<?php echo wc_help_tip( esc_html__( 'The ticket field label.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>
+							<?php endif; ?>
+						</th>
+						<th>
+							<?php esc_html_e( 'Checkout Field', 'woocommerce-box-office' ); ?>
+							<?php if ( function_exists( 'wc_help_tip' ) ) : ?>
+								<?php echo wc_help_tip( esc_html__( 'Choose the checkout field to populate this ticket field from.', 'woocommerce-box-office' ) ); // phpcs:ignore ?>
+							<?php endif; ?>
+						</th>
+						<th>&nbsp;</th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr>
+						<th colspan="3">
+							<a href="#" class="button" id="ticket_customer_detail_add_field"><?php esc_html_e( 'Add Field', 'woocommerce-box-office' ); ?></a>
+						</th>
+					</tr>
+				</tfoot>
+				<tbody>
+					<?php
+					if ( ! empty( $cd_fields ) ) :
+						$cd_row = 'alternate';
+						foreach ( $cd_fields as $field_hash => $field ) :
+							$mapped_value = isset( $mappings[ $field_hash ] ) ? $mappings[ $field_hash ] : 'none';
+							?>
+						<tr class="<?php echo esc_attr( $cd_row ); ?>">
+							<td class="field_label">
+								<input type="hidden" name="_ticket_mapping_keys[]" value="<?php echo esc_attr( $field_hash ); ?>" />
+								<input type="text" class="input_text" placeholder="<?php esc_attr_e( 'Field Label', 'woocommerce-box-office' ); ?>" name="_ticket_mapping_labels[]" value="<?php echo esc_attr( $field['label'] ); ?>" required="required" />
+							</td>
+							<td class="field_options">
+								<select name="_ticket_mapping_fields[]" style="width: 254px;">
+									<option value="none"><?php esc_html_e( '-- None --', 'woocommerce-box-office' ); ?></option>
+									<option value="" disabled="disabled"><?php esc_html_e( '--------', 'woocommerce-box-office' ); ?></option>
+									<?php foreach ( $mapping_options as $opt_key => $opt_label ) : ?>
+										<option value="<?php echo esc_attr( $opt_key ); ?>" <?php selected( $mapped_value, $opt_key ); ?>>
+											<?php echo esc_html( $opt_label ); ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+							</td>
+							<td width="1%"><a href="#" class="delete"><?php esc_html_e( 'Delete', 'woocommerce-box-office' ); ?></a></td>
+						</tr>
+							<?php
+							$cd_row = ( 'alternate' === $cd_row ) ? '' : 'alternate';
+						endforeach;
+					endif;
+					?>
+				</tbody>
+			</table>
+		</div>
+
+		<p class="form-field">
+			<?php
+				$pii_setting = get_post_meta( $post->ID, '_user_pii_setting', true );
+				$pii_setting = empty( $pii_setting ) ? 'yes' : $pii_setting;
+
+				woocommerce_wp_checkbox(
+					array(
+						'id'            => '_user_pii_setting',
+						'wrapper_class' => 'show_if_ticket',
+						'label'         => esc_html__( 'User privacy preference', 'woocommerce-box-office' ),
+						'value'         => $pii_setting,
+						'description'   => sprintf(
+							esc_html__(
+								'Allow customers to opt-out from being displayed in the public list of attendees when %s shortcode is used.',
+								'woocommerce-box-office'
+							),
+							'<code>[tickets]</code>'
+						),
+					)
+				);
+				?>
+		</p>
+
 	</div>
+</div>
 
 	<div id="ticket_content_data" class="panel woocommerce_options_panel">
 	<div class="options_group show_if_ticket">
@@ -184,7 +296,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			woocommerce_wp_checkbox( array( 'id' => '_email_tickets', 'wrapper_class' => 'show_if_ticket', 'label' => $email_label, 'description' => esc_html__( 'This will send an email to the contact address for each ticket whenever it is purchased or updated.', 'woocommerce-box-office' ) ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing
 			?>
 
-			<?php 
+			<?php
 				$ticket_mail_subject = get_post_meta( $post->ID, '_email_ticket_subject', true );
 				if ( empty( $ticket_mail_subject ) ) {
 					$ticket_mail_subject = esc_html__( 'Your ticket has been purchased successfully!', 'woocommerce-box-office' );
@@ -205,6 +317,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<span class="ticket-link-var">
 					<a href="#"><code>{ticket_link}</code></a>
 				</span>
+				<?php
+				printf(
+					/* translators: 1: Placeholder for ticket link. 2: Example of how to wrap the placeholder in a clickable link. */
+					esc_html__( 'Wrap the %1$s placeholder in a link to make it clickable, e.g. %2$s', 'woocommerce-box-office' ),
+					'<code>{ticket_link}</code>',
+					'<code>' . esc_html( '<a href="{ticket_link}">View your ticket</a>' ) . '</code>'
+				);
+				?>
 			</p>
 			<p>
 				<?php esc_html_e( 'To insert ticket ID use: ', 'woocommerce-box-office' ); ?>
@@ -230,7 +350,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<span class="ticket-token-var">
 					<a href="#"><code>{token}</code></a>
 				</span>
-				<?php echo wp_kses_post( 'Ticket token can be used to build private content link, e.g. <code>http://example.com/private?token={token}</code>', 'woocommerce-box-office' ); ?>
+				<?php echo wp_kses_post( __( 'Ticket token can be used to build private content link, e.g. <code>http://example.com/private?token={token}</code>', 'woocommerce-box-office' ) ); ?>
 			</p>
 			<p>
 				<?php esc_html_e( 'You can also use this ticket product variables: ', 'woocommerce-box-office' ); ?>

@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Adds ticket settings to the product edit screen.
+ *
+ * @class   WC_Box_Office_Product_Admin
+ * @version 1.6.0
+ */
 class WC_Box_Office_Product_Admin {
 
 	/**
@@ -12,7 +18,7 @@ class WC_Box_Office_Product_Admin {
 	public function __construct() {
 		// Product options.
 		add_filter( 'product_type_options', array( $this, 'ticket_type_option' ) );
-		add_action( 'woocommerce_product_data_tabs', array( $this, 'ticket_tab' ) );
+		add_filter( 'woocommerce_product_data_tabs', array( $this, 'ticket_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'ticket_panel' ) );
 		add_action( 'woocommerce_process_product_meta', array( $this, 'save_ticket_options' ), 1, 2 );
 	}
@@ -160,6 +166,71 @@ class WC_Box_Office_Product_Admin {
 			update_post_meta( $post_id, '_user_pii_setting', sanitize_text_field( wp_unslash( $_POST['_user_pii_setting'] ) ) );
 		} else {
 			update_post_meta( $post_id, '_user_pii_setting', 'no' );
+		}
+
+		// Use customer details for tickets toggle.
+		$use_customer_details = isset( $_POST['_ticket_use_customer_details'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( $use_customer_details ) {
+			update_post_meta( $post_id, '_ticket_use_customer_details', 'yes' );
+		} else {
+			update_post_meta( $post_id, '_ticket_use_customer_details', 'no' );
+		}
+
+		// Customer detail mappings — save fields and mappings from the mapping table.
+		if ( $use_customer_details ) {
+			if ( isset( $_POST['_ticket_mapping_labels'] ) && is_array( $_POST['_ticket_mapping_labels'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$cd_labels   = array_map( 'wc_clean', wp_unslash( $_POST['_ticket_mapping_labels'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$cd_mappings = isset( $_POST['_ticket_mapping_fields'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['_ticket_mapping_fields'] ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$cd_keys     = isset( $_POST['_ticket_mapping_keys'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['_ticket_mapping_keys'] ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+				$fields   = array();
+				$mappings = array();
+
+				foreach ( $cd_labels as $i => $label ) {
+					if ( empty( $label ) ) {
+						continue;
+					}
+
+					$mapping = isset( $cd_mappings[ $i ] ) ? $cd_mappings[ $i ] : 'none';
+
+					// Determine field type from the mapping.
+					$type = 'text';
+					if ( 'billing_email' === $mapping ) {
+						$type = 'email';
+					} elseif ( 'billing_first_name' === $mapping ) {
+						$type = 'first_name';
+					} elseif ( 'billing_last_name' === $mapping ) {
+						$type = 'last_name';
+					}
+
+					// Reuse the persisted row key so renaming a label keeps existing ticket meta intact.
+					$key = ! empty( $cd_keys[ $i ] ) ? $cd_keys[ $i ] : md5( uniqid( $label, true ) );
+					while ( isset( $fields[ $key ] ) ) {
+						$key = md5( uniqid( $label, true ) );
+					}
+
+					$fields[ $key ] = array(
+						'label'          => $label,
+						'type'           => $type,
+						'options'        => '',
+						'autofill'       => $mapping,
+						'email_contact'  => 'email' === $type ? 'yes' : 'no',
+						'email_gravatar' => 'email' === $type ? 'yes' : 'no',
+						'required'       => 'yes',
+					);
+
+					if ( 'none' !== $mapping ) {
+						$mappings[ $key ] = $mapping;
+					}
+				}
+
+				update_post_meta( $post_id, '_ticket_customer_detail_fields', $fields );
+				update_post_meta( $post_id, '_ticket_customer_detail_mappings', $mappings );
+			} else {
+				// Customer details enabled but no mappings submitted — clear stale data.
+				delete_post_meta( $post_id, '_ticket_customer_detail_mappings' );
+				update_post_meta( $post_id, '_ticket_customer_detail_fields', array() );
+			}
 		}
 	}
 }
