@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Handles ticket products in the cart.
+ *
+ * @class   WC_Box_Office_Cart
+ * @version x.x.x
+ */
 class WC_Box_Office_Cart {
 
 	/**
@@ -14,7 +20,7 @@ class WC_Box_Office_Cart {
 		add_action( 'woocommerce_after_add_to_cart_quantity', array( $this, 'render_ticket_fields' ), 20 );
 
 		// Add ticket meta to cart item data.
-		add_filter( 'woocommerce_add_cart_item_data', array( $this, 'add_cart_item_data' ), 10, 2 );
+		add_filter( 'woocommerce_add_cart_item_data', array( $this, 'add_cart_item_data' ), 10, 4 );
 
 		// Change the add to cart button related stuff.
 		add_filter( 'woocommerce_product_add_to_cart_text', array( $this, 'change_add_to_cart_text' ), 10, 2 );
@@ -71,12 +77,24 @@ class WC_Box_Office_Cart {
 	 *
 	 * @since 1.2.3
 	 *
-	 * @param bool   $is_supported Whether express payment options are supported on product pages.
-	 * @param object $product      The product.
+	 * @param bool  $is_supported Whether express payment options are supported on product pages.
+	 * @param mixed $product      The product. WooPayments documents this as WC_Product|null, but
+	 *                            the shape of a filtered value should not be trusted.
 	 * @return bool Whether express payment options are supported on product pages.
 	 */
 	public function filter_wcpay_payment_request_is_product_supported( $is_supported, $product ) {
+		// Gateways pass unresolved values here (Stripe passes the global $post).
+		// wc_box_office_is_product_ticket() tolerates any shape, but get_id() below does not.
+		$product = wc_get_product( $product );
+		if ( ! $product instanceof WC_Product ) {
+			return $is_supported;
+		}
+
 		if ( wc_box_office_is_product_ticket( $product ) ) {
+			// Allow express payments when using customer details — no ticket form needed.
+			if ( wc_box_office_uses_customer_details( $product->get_id() ) ) {
+				return $is_supported;
+			}
 			return false;
 		}
 
@@ -88,12 +106,23 @@ class WC_Box_Office_Cart {
 	 *
 	 * @since 1.2.9
 	 *
-	 * @param bool   $should_hide Whether express payment options should be hidden on product pages.
-	 * @param object $product     The product.
+	 * @param bool  $should_hide Whether express payment options should be hidden on product pages.
+	 * @param mixed $product     Stripe passes the global $post here (WP_Post|null), not a product.
 	 * @return bool Whether express payment options should be hidden on product pages.
 	 */
 	public function filter_wc_stripe_hide_payment_request_on_product_page( $should_hide, $product ) {
+		// Gateways pass unresolved values here (Stripe passes the global $post).
+		// wc_box_office_is_product_ticket() tolerates any shape, but get_id() below does not.
+		$product = wc_get_product( $product );
+		if ( ! $product instanceof WC_Product ) {
+			return $should_hide;
+		}
+
 		if ( wc_box_office_is_product_ticket( $product ) ) {
+			// Allow express payments when using customer details — no ticket form needed.
+			if ( wc_box_office_uses_customer_details( $product->get_id() ) ) {
+				return $should_hide;
+			}
 			return true;
 		}
 
@@ -209,7 +238,33 @@ class WC_Box_Office_Cart {
 	 */
 	public function render_ticket_fields() {
 		$product = wc_get_product( get_the_ID() );
+		if ( ! $product instanceof WC_Product ) {
+			return;
+		}
+
 		if ( wc_box_office_is_product_ticket( $product ) ) {
+			// When using customer details, don't render ticket fields on product page.
+			// But still show the PII preference checkbox if enabled on the product.
+			if ( wc_box_office_uses_customer_details( $product->get_id() ) ) {
+				$pii_setting = get_post_meta( $product->get_id(), '_user_pii_setting', true );
+				if ( 'yes' === $pii_setting ) {
+					?>
+					<div class="wc-box-office-ticket-form">
+						<p class="form-row form-field">
+							<label for="pii_preference">
+								<?php esc_html_e( 'Privacy Preference:', 'woocommerce-box-office' ); ?>
+							</label>
+							<input type="checkbox" name="ticket_fields[0][pii_preference]" id="pii_preference" value="opted-out" />
+							&nbsp;
+							<span class="description">
+								<?php esc_html_e( 'Opt-out from being displayed in the public list of attendees.', 'woocommerce-box-office' ); ?>
+							</span>
+						</p>
+					</div>
+					<?php
+				}
+				return;
+			}
 			// When in single product page, renders the posted ticket after adding
 			// it to cart. However when in non product page, e.g. via [product_page]
 			// shortcode don't attempt to render posted ticket. There's no context
@@ -236,17 +291,94 @@ class WC_Box_Office_Cart {
 	 * @param array $cart_item_meta Cart item meta
 	 * @param int   $product_id     Product ID
 	 *
+	 * The hook also passes variation ID as argument 3 and quantity as argument 4.
+	 * Overrides should forward all received arguments to preserve those values.
+	 *
 	 * @return array Cart item meta
+	 * @throws Automattic\WooCommerce\StoreApi\Exceptions\RouteException When customer-detail quantity exceeds the purchase limit.
 	 */
 	public function add_cart_item_data( $cart_item_meta, $product_id ) {
+		// Read the normalized hook arguments without changing the public method signature.
+		$args = func_get_args();
+
 		if ( ! wc_box_office_is_product_ticket( $product_id ) ) {
+			return $cart_item_meta;
+		}
+
+		// When using customer details, create empty placeholder ticket field data
+		// and return early — skip normal validation and form processing.
+		if ( wc_box_office_uses_customer_details( $product_id ) ) {
+			$fields = wc_box_office_get_product_ticket_fields( $product_id );
+
+			// Ensure we have an array of valid ticket fields to work with, even if no fields are defined for the product.
+			if ( ! is_array( $fields ) ) {
+				$fields = array();
+			}
+
+			$quantity         = count( $args ) > 3 ? $args[3] : ( isset( $_POST['quantity'] ) ? absint( wp_unslash( $_POST['quantity'] ) ) : 1 ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$product          = wc_get_product( $product_id );
+			$purchase_product = ! empty( $args[2] ) ? wc_get_product( $args[2] ) : $product;
+			$maximum          = $purchase_product && method_exists( $purchase_product, 'get_max_purchase_quantity' ) ? $purchase_product->get_max_purchase_quantity() : -1;
+
+			// The Store API resolves an omitted quantity after this shared hook.
+			if ( null === $quantity ) {
+				$quantity = 1;
+				if ( $purchase_product && class_exists( 'Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits' ) && method_exists( 'Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits', 'get_add_to_cart_limits' ) ) {
+					$limits   = new Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits();
+					$limits   = $limits->get_add_to_cart_limits( $purchase_product );
+					$quantity = $limits['minimum'] ?? 1;
+				}
+			}
+
+			// Unmanaged stock and backorders still need a bound before allocating ticket fields.
+			$has_maximum = is_numeric( $maximum ) && is_finite( (float) $maximum ) && 0 < $maximum;
+			if ( ! is_numeric( $quantity ) || ! is_finite( (float) $quantity ) || 0 >= $quantity || ( ! $has_maximum && $quantity > 100 ) ) {
+				// @phpstan-ignore class.notFound (WooCommerce Store API class is missing from the installed stubs.)
+				throw new Automattic\WooCommerce\StoreApi\Exceptions\RouteException( 'woocommerce_box_office_invalid_ticket_quantity', esc_html__( 'The requested ticket quantity is not available.', 'woocommerce-box-office' ), 400 );
+			}
+
+			// Bound placeholders while WooCommerce applies its sold-individually and stock rules.
+			$quantity = $has_maximum ? min( $quantity, $maximum ) : $quantity;
+
+			// Check if PII preference was posted (from the checkbox on the product page).
+			$pii_preference = '';
+			if ( ! empty( $_POST['ticket_fields'][0]['pii_preference'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$pii_preference = sanitize_text_field( wp_unslash( $_POST['ticket_fields'][0]['pii_preference'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			}
+
+			$ticket_fields = array();
+			for ( $i = 0; $i < $quantity; $i++ ) {
+				$ticket_fields[ $i ] = array();
+				foreach ( $fields as $hash => $field_data ) {
+					$ticket_fields[ $i ][ $hash ] = '';
+				}
+				// Apply PII preference to all tickets.
+				if ( $pii_preference ) {
+					$ticket_fields[ $i ]['pii_preference'] = $pii_preference;
+				}
+			}
+
+			/**
+			 * Filter ticket fields data before storing in cart item meta.
+			 *
+			 * @since 1.6.0
+			 */
+			$ticket_fields = apply_filters( 'woocommerce_cart_item_data_ticket_fields', $ticket_fields, $fields );
+
+			$cart_item_meta['ticket'] = array_merge(
+				$this->_ticket_meta( $product, $_POST ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				array(
+					'fields' => $ticket_fields,
+				)
+			);
+
 			return $cart_item_meta;
 		}
 
 		if ( empty( $_POST['ticket_fields'] ) && ! empty( $_GET['force-ticket-creation'] ) ) {
 			$ticket_fields = array();
 
-			$fields = get_post_meta( $product_id, '_ticket_fields', true );
+			$fields = wc_box_office_get_product_ticket_fields( $product_id );
 
 			foreach ( $fields as $hash => $field_data ) {
 				$ticket_fields[0][ $field_data['type'] ] = '';
@@ -509,9 +641,14 @@ class WC_Box_Office_Cart {
 			return $passed;
 		}
 
+		// Skip validation when using customer details — fields will be populated from billing data.
+		if ( wc_box_office_uses_customer_details( $product_id ) ) {
+			return $passed;
+		}
+
 		$product     = wc_get_product( $product_id );
 		$ticket_form = new WC_Box_Office_Ticket_Form( $product );
-		if ( empty( $product ) || empty( $ticket_form ) || empty( $ticket_form->fields ) ) {
+		if ( empty( $product ) || empty( $ticket_form->fields ) ) {
 			return $passed;
 		}
 

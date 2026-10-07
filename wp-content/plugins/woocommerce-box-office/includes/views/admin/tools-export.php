@@ -8,12 +8,14 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+
 ?>
 <form action="" method="get">
 	<input type="hidden" name="post_type" value="event_ticket">
 	<input type="hidden" name="page" value="ticket_tools">
 	<input type="hidden" name="tab" value="export">
 	<input type="hidden" name="action" value="export_tickets">
+	<?php wp_nonce_field( 'woocommerce_box_office' ); ?>
 
 	<p><?php esc_html_e( 'Export attendee data for the following chosen tickets:', 'woocommerce-box-office' ); ?></p>
 

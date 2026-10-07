@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Registers the Box Office post types.
+ *
+ * @class   WC_Box_Office_Post_Types
+ * @version x.x.x
+ */
 class WC_Box_Office_Post_Types {
 
 	/**
@@ -13,6 +19,8 @@ class WC_Box_Office_Post_Types {
 		// Modify custom post type arguments.
 		add_filter( 'event_ticket_register_args', array( $this, 'ticket_post_type_args' ), 10, 1 );
 		add_filter( 'event_ticket_email_register_args', array( $this, 'ticket_email_post_type_args' ), 10, 1 );
+		add_filter( 'register_event_ticket_post_type_args', array( $this, 'commerce_post_type_args' ), PHP_INT_MAX );
+		add_filter( 'register_event_ticket_email_post_type_args', array( $this, 'commerce_post_type_args' ), PHP_INT_MAX );
 
 		// Register post types.
 		$this->_register_post_types();
@@ -49,6 +57,44 @@ class WC_Box_Office_Post_Types {
 		$args['show_in_menu']        = false;
 		$args['show_in_nav_menus']   = false;
 		$args['supports']            = array( 'title' );
+
+		return $args;
+	}
+
+	/**
+	 * Require commerce authority while preserving explicit capability overrides.
+	 *
+	 * @param array $args Post type arguments.
+	 * @return array
+	 */
+	public function commerce_post_type_args( $args ) {
+		$capability_type = $args['capability_type'] ?? 'post';
+		if ( 'post' !== $capability_type && array( 'post', 'posts' ) !== $capability_type ) {
+			return $args;
+		}
+
+		if ( ! isset( $args['map_meta_cap'] ) && empty( $args['capabilities'] ) ) {
+			$args['map_meta_cap'] = true;
+		}
+		$args['capabilities'] = array_merge(
+			array_fill_keys(
+				array(
+					'edit_posts',
+					'edit_others_posts',
+					'delete_posts',
+					'publish_posts',
+					'read_private_posts',
+					'read',
+					'delete_private_posts',
+					'delete_published_posts',
+					'delete_others_posts',
+					'edit_private_posts',
+					'edit_published_posts',
+				),
+				'manage_woocommerce'
+			),
+			isset( $args['capabilities'] ) && is_array( $args['capabilities'] ) ? $args['capabilities'] : array()
+		);
 
 		return $args;
 	}

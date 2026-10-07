@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Generates and displays ticket barcodes.
+ *
+ * @class   WC_Box_Office_Ticket_Barcode
+ * @version x.x.x
+ */
 class WC_Box_Office_Ticket_Barcode {
 
 	/**
@@ -29,7 +35,7 @@ class WC_Box_Office_Ticket_Barcode {
 	 * barcode (for example the order barcodes extension just installed recently),
 	 * it will generate new barcode text and image.
 	 *
-	 * @param integer $ticket Ticket ID
+	 * @param integer $ticket_id Ticket ID.
 	 * @param array   $args {
 	 *     Optional. Arguments to display ticket barcode.
 	 *
@@ -114,8 +120,8 @@ class WC_Box_Office_Ticket_Barcode {
 	 * @return string Generated barcode text
 	 */
 	public function generate_barcode_text_for_ticket() {
-		// Use PHP's uniqid() for the barcode
-		$barcode_string = uniqid();
+		// Use 128 bits of cryptographic randomness for new admission credentials.
+		$barcode_string = bin2hex( random_bytes( 16 ) );
 
 		// Check if this barcode already exists and add increment if so
 		$existing_ticket_id = $this->get_ticket_id_from_barcode_text( $barcode_string );

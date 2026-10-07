@@ -11,6 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Box Office Email Preview Class
+ *
+ * @class   WC_Box_Office_Email_Preview
+ * @version 1.3.5
  */
 class WC_Box_Office_Email_Preview {
 	/**

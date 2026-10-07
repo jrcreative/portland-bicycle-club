@@ -7,6 +7,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 
+/**
+ * Handles the ticket admin screens.
+ *
+ * @class   WC_Box_Office_Ticket_Admin
+ * @version x.x.x
+ */
 class WC_Box_Office_Ticket_Admin {
 
 	/**
@@ -39,6 +45,8 @@ class WC_Box_Office_Ticket_Admin {
 		// Bulk actions.
 		add_filter( 'bulk_actions-edit-event_ticket', array( $this, 'modify_bulk_actions' ) );
 		add_filter( 'handle_bulk_actions-edit-event_ticket', array( $this, 'handle_bulk_actions' ), 10, 3 );
+		add_action( 'admin_notices', array( $this, 'bulk_action_notice' ) );
+		add_filter( 'removable_query_args', array( $this, 'removable_query_args' ) );
 
 		// Manage admin columns for ticket emails.
 		add_filter( 'manage_event_ticket_email_posts_columns', array( $this, 'manage_ticket_email_columns' ), 11, 1 );
@@ -235,9 +243,7 @@ class WC_Box_Office_Ticket_Admin {
 			'compare' => 'NOT EXISTS',
 		);
 
-		if ( ! empty( $meta_query ) ) {
-			$args['meta_query'] = $meta_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-		}
+		$args['meta_query'] = $meta_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 
 		// Date filter.
 		if ( ! empty( $_GET['m'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -559,7 +565,13 @@ class WC_Box_Office_Ticket_Admin {
 		}
 
 		$updated = 0;
+		$skipped = 0;
 		foreach ( $post_ids as $post_id ) {
+			if ( 'event_ticket' !== get_post_type( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+				++$skipped;
+				continue;
+			}
+
 			$succeed = false;
 			switch ( $doaction ) {
 				case 'mark_attended':
@@ -581,9 +593,64 @@ class WC_Box_Office_Ticket_Admin {
 			}
 		}
 
-		$redirect_to = add_query_arg( 'updated', $updated, $redirect_to );
+		$redirect_to = add_query_arg(
+			array(
+				'updated'      => $updated,
+				'wcbo_skipped' => $skipped,
+			),
+			$redirect_to
+		);
 
 		return esc_url_raw( $redirect_to );
+	}
+
+	/**
+	 * Report selections skipped by a custom ticket bulk action.
+	 *
+	 * @return void
+	 */
+	public function bulk_action_notice() {
+		$screen = get_current_screen();
+		if ( ! $screen || 'edit-event_ticket' !== $screen->id ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only redirect count.
+		$skipped = isset( $_GET['wcbo_skipped'] ) && is_scalar( $_GET['wcbo_skipped'] ) ? absint( wp_unslash( $_GET['wcbo_skipped'] ) ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Remove only this display-only redirect argument.
+		if ( isset( $_GET['wcbo_skipped'], $_SERVER['REQUEST_URI'] ) ) {
+			$_SERVER['REQUEST_URI'] = remove_query_arg( 'wcbo_skipped', esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+		}
+
+		if ( ! $skipped ) {
+			return;
+		}
+
+		wp_admin_notice(
+			esc_html(
+				sprintf(
+					/* translators: %s: number of skipped selections. */
+					_n( '%s selection was skipped because it was not a ticket you can edit.', '%s selections were skipped because they were not tickets you can edit.', $skipped, 'woocommerce-box-office' ),
+					number_format_i18n( $skipped )
+				)
+			),
+			array(
+				'type'        => 'warning',
+				'dismissible' => true,
+				'id'          => 'wcbo-bulk-skipped',
+			)
+		);
+	}
+
+	/**
+	 * Remove the bulk-action result from subsequent admin URLs.
+	 *
+	 * @param array $args Removable query arguments.
+	 * @return array
+	 */
+	public function removable_query_args( $args ) {
+		$args[] = 'wcbo_skipped';
+		return $args;
 	}
 
 	/**
@@ -704,7 +771,7 @@ class WC_Box_Office_Ticket_Admin {
 				'id'         => 'create_ticket',
 				'title'      => esc_html__( 'Create Ticket', 'woocommerce-box-office' ),
 				'capability' => 'manage_woocommerce',
-				'url'        => 'edit.php?post_type=event_ticket&page=create_ticket',
+				'url'        => admin_url( 'edit.php?post_type=event_ticket&page=create_ticket' ),
 				'parent'     => 'woocommerce-box-office',
 				'order'      => 2,
 			)
@@ -715,7 +782,7 @@ class WC_Box_Office_Ticket_Admin {
 				'id'         => 'ticket_tool',
 				'title'      => esc_html__( 'Tools', 'woocommerce-box-office' ),
 				'capability' => 'manage_woocommerce',
-				'url'        => 'edit.php?post_type=event_ticket&page=ticket_tools&tab=export',
+				'url'        => admin_url( 'edit.php?post_type=event_ticket&page=ticket_tools&tab=export' ),
 				'parent'     => 'woocommerce-box-office',
 				'order'      => 3,
 			)

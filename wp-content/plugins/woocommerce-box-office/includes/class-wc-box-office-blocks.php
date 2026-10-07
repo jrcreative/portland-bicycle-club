@@ -16,6 +16,9 @@ if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Package' ) && ! version_comp
 /**
  * Class responsible for dealing with everything related to the adoption of
  * Gutenberg Blocks and WooCommerce.
+ *
+ * @class   WC_Box_Office_Blocks
+ * @version 1.4.0
  */
 class WC_Box_Office_Blocks {
 

@@ -6,7 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Box Office installer and updater.
  *
- * @since 1.1.0
+ * @class   WC_Box_Office_Updater
+ * @since   1.1.0
+ * @version 1.1.1
  */
 class WC_Box_Office_Updater {
 

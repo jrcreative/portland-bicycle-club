@@ -4,7 +4,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Handles tickets in orders.
+ *
+ * @class   WC_Box_Office_Order
+ * @version x.x.x
+ */
 class WC_Box_Office_Order {
+
+	/**
+	 * Ticket IDs captured before WooCommerce removes order items.
+	 *
+	 * @var array
+	 */
+	private $tickets_pending_deletion = array();
+
+	/**
+	 * Orders whose ticket restore records were captured by the WooCommerce trash hook.
+	 *
+	 * @var array
+	 */
+	private $orders_pending_trash = array();
 
 	/**
 	 * Constructor.
@@ -35,16 +55,28 @@ class WC_Box_Office_Order {
 		add_action( 'woocommerce_order_status_on-hold_to_failed', array( $this, 'trash_tickets' ), 10, 1 );
 
 		// Status transitions.
+		// Ticket lookup needs order items before WooCommerce removes them at priority 10.
+		add_action( 'woocommerce_before_delete_order', array( $this, 'remember_tickets_for_order_deletion' ), 5 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'delete_tickets' ) );
+		add_action( 'woocommerce_before_trash_order', array( $this, 'remember_tickets_for_order_restore' ), 5 );
 		add_action( 'woocommerce_before_trash_order', array( $this, 'trash_tickets' ) );
+		add_action(
+			'woocommerce_trash_order',
+			function ( $order_id ) {
+				// HPOS and vetoed WordPress trash operations may not reach our legacy callback.
+				unset( $this->orders_pending_trash[ $order_id ] );
+			}
+		);
 		add_action( 'woocommerce_untrash_order', array( $this, 'untrash_tickets' ) );
+		add_action( 'wp_trash_post', array( $this, 'maybe_trash_legacy_order_tickets' ) );
+		add_action( 'untrashed_post', array( $this, 'maybe_untrash_legacy_order_tickets' ) );
 
 		// Display purchased tickets.
 		add_action( 'woocommerce_order_details_after_order_table', array( $this, 'order_details_ticket_list' ), 10, 1 );
 		add_action( 'woocommerce_email_after_order_table', array( $this, 'order_email_ticket_list' ), 10, 1 );
 
 		// Alter the order again items to include all tickets
-		add_action( 'woocommerce_order_again_cart_item_data', array( $this, 'order_again_add_tickets' ), 10, 3 );
+		add_filter( 'woocommerce_order_again_cart_item_data', array( $this, 'order_again_add_tickets' ), 10, 3 );
 		// Filter order items that will be send to gateway.
 		add_action( 'woocommerce_before_pay_action', array( $this, 'filter_order_items_meta_to_gateway' ) );
 		add_action( 'woocommerce_checkout_order_processed', array( $this, 'filter_order_items_meta_to_gateway' ) );
@@ -68,13 +100,12 @@ class WC_Box_Office_Order {
 	 *
 	 * @see https://github.com/woocommerce/woocommerce-box-office/issues/318
 	 *
-	 * @param array $data       Ticket fields array.
-	 * @param int   $product_id Product ID.
-	 * @param int   $order_id   Order ID.
+	 * @param array    $data       Ticket fields array.
+	 * @param int      $product_id Product ID.
+	 * @param WC_Order $order      Order object.
 	 * @return array $data with possibly autofilled fields.
 	 */
-	private function maybe_autofill_ticket_fields( $data, $product_id, $order_id ) {
-		$order           = wc_get_order( $order_id );
+	private function maybe_autofill_ticket_fields( $data, $product_id, $order ) {
 		$billing_address = $order ? $order->get_address( 'billing' ) : array();
 		$ticket_fields   = wc_box_office_get_product_ticket_fields( absint( $product_id ) );
 
@@ -113,11 +144,75 @@ class WC_Box_Office_Order {
 	}
 
 	/**
+	 * Populates ticket fields from customer detail mappings.
+	 *
+	 * When 'Use customer details for tickets' is enabled on a product,
+	 * this method uses the stored mappings to populate ticket fields
+	 * from the order's billing data.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param array    $data       Ticket fields array.
+	 * @param int      $product_id Product ID.
+	 * @param WC_Order $order      Order object.
+	 * @return array $data with populated fields from mappings.
+	 */
+	private function populate_ticket_fields_from_mappings( $data, $product_id, $order ) {
+		if ( ! wc_box_office_uses_customer_details( $product_id ) ) {
+			return $data;
+		}
+
+		$mappings = get_post_meta( $product_id, '_ticket_customer_detail_mappings', true );
+		if ( ! $mappings || ! is_array( $mappings ) ) {
+			return $data;
+		}
+
+		if ( ! $order ) {
+			return $data;
+		}
+
+		$billing_address = $order->get_address( 'billing' );
+
+		foreach ( $mappings as $field_key => $billing_field ) {
+			if ( ! array_key_exists( $field_key, $data ) ) {
+				continue;
+			}
+
+			// Skip fields that already have a value (e.g. set via woocommerce_cart_item_data_ticket_fields filter).
+			if ( ! empty( $data[ $field_key ] ) ) {
+				continue;
+			}
+
+			$address_part = str_replace( 'billing_', '', $billing_field );
+			if ( isset( $billing_address[ $address_part ] ) ) {
+				$data[ $field_key ] = $billing_address[ $address_part ];
+			} else {
+				// Custom fields added via filter (e.g. 'car_reg') may be stored
+				// as '_{field}' or '_billing_{field}' order meta.
+				$meta_keys = array( '_' . $billing_field );
+				if ( 0 !== strpos( $billing_field, 'billing_' ) ) {
+					$meta_keys[] = '_billing_' . $billing_field;
+				}
+
+				foreach ( $meta_keys as $meta_key ) {
+					$meta_value = $order->get_meta( $meta_key, true );
+					if ( $meta_value ) {
+						$data[ $field_key ] = $meta_value;
+						break;
+					}
+				}
+			}
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Extracts individual ticket information from order item metadata.
 	 *
-	 * @param array $values Item meta.
-	 * @param int   $item_id Item ID.
-	 * @param int   $order_id Order ID.
+	 * @param WC_Order_Item|false $values   Item meta.
+	 * @param int                 $item_id  Item ID.
+	 * @param int                 $order_id Order ID.
 	 * @return array
 	 */
 	private function get_ticket_data_from_order_item( $values, $item_id, $order_id = 0 ) {
@@ -147,6 +242,7 @@ class WC_Box_Office_Order {
 		$ticket_meta_fields = $ticket_meta['fields'];
 		unset( $ticket_meta['fields'] );
 
+		$order  = wc_get_order( $order_id );
 		$result = array();
 		foreach ( $ticket_meta_fields as $index => $fields ) {
 			$result[] = array_merge(
@@ -154,7 +250,11 @@ class WC_Box_Office_Order {
 				array(
 					'uid'           => $ticket_meta['key'] . '_' . $index,
 					'index'         => $index,
-					'fields'        => $this->maybe_autofill_ticket_fields( $fields, (int) $ticket_meta['product_id'], $order_id ),
+					'fields'        => $this->populate_ticket_fields_from_mappings(
+						$this->maybe_autofill_ticket_fields( $fields, (int) $ticket_meta['product_id'], $order ),
+						(int) $ticket_meta['product_id'],
+						$order
+					),
 					'order_item_id' => $item_id,
 				)
 			);
@@ -399,7 +499,30 @@ class WC_Box_Office_Order {
 	 * @param int $order_id ID of order being deleted
 	 */
 	public function delete_tickets( $order_id ) {
+		if ( isset( $this->tickets_pending_deletion[ $order_id ] ) ) {
+			$tickets = $this->tickets_pending_deletion[ $order_id ];
+			unset( $this->tickets_pending_deletion[ $order_id ] );
+			foreach ( $tickets as $ticket_id ) {
+				wp_delete_post( $ticket_id, true );
+			}
+			return;
+		}
 		$this->_apply_func_to_order_tickets( $order_id, 'wp_delete_post', array( true ) );
+	}
+
+	/**
+	 * Capture tickets while their order items still exist, without deleting them.
+	 *
+	 * @param int $order_id Order being deleted.
+	 */
+	public function remember_tickets_for_order_deletion( $order_id ) {
+		$this->tickets_pending_deletion[ $order_id ] = array();
+		$this->_apply_func_to_order_tickets(
+			$order_id,
+			function ( $ticket_id ) use ( $order_id ) {
+				$this->tickets_pending_deletion[ $order_id ][] = $ticket_id;
+			}
+		);
 	}
 
 	/**
@@ -417,7 +540,90 @@ class WC_Box_Office_Order {
 	 * @param int $order_id ID of order being untrashed
 	 */
 	public function untrash_tickets( $order_id ) {
-		$this->_apply_func_to_order_tickets( $order_id, 'wp_untrash_post' );
+		$order = wc_get_order( $order_id );
+		if ( ! $order || ! $order->meta_exists( '_wcbo_order_trashed_ticket_ids' ) ) {
+			// Older orders have no ownership record: retain WordPress's safe draft default.
+			$this->_apply_func_to_order_tickets( $order_id, 'wp_untrash_post' );
+			return;
+		}
+		$ticket_ids    = $order->get_meta( '_wcbo_order_trashed_ticket_ids' );
+		$ticket_ids    = is_array( $ticket_ids ) ? array_filter( array_map( 'absint', array_filter( $ticket_ids, 'is_numeric' ) ) ) : array();
+		$status_filter = static function ( $status, $post_id, $previous_status ) use ( $ticket_ids ) {
+			return in_array( (int) $post_id, $ticket_ids, true ) ? $previous_status : $status;
+		};
+		if ( false === has_filter( 'wp_untrash_post_status', $status_filter ) ) {
+			add_filter( 'wp_untrash_post_status', $status_filter, 10, 3 );
+		}
+		try {
+			foreach ( $ticket_ids as $ticket_id ) {
+				wp_untrash_post( $ticket_id );
+			}
+		} finally {
+			if ( false !== has_filter( 'wp_untrash_post_status', $status_filter ) ) {
+				remove_filter( 'wp_untrash_post_status', $status_filter, 10 );
+			}
+		}
+		$order->delete_meta_data( '_wcbo_order_trashed_ticket_ids' );
+		$order->save_meta_data();
+	}
+
+	/**
+	 * Remember only tickets newly trashed with this order, excluding prior revocations.
+	 *
+	 * @param int $order_id Order being trashed.
+	 */
+	public function remember_tickets_for_order_restore( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order || 'trash' === $order->get_status() ) {
+			return;
+		}
+		$ticket_ids = array();
+		$this->_apply_func_to_order_tickets(
+			$order_id,
+			static function ( $ticket_id ) use ( &$ticket_ids ) {
+				$status = get_post_status( $ticket_id );
+				if ( $status && 'trash' !== $status ) {
+					$ticket_ids[] = (int) $ticket_id;
+				}
+			}
+		);
+		$order->update_meta_data( '_wcbo_order_trashed_ticket_ids', $ticket_ids );
+		$order->save_meta_data();
+		if ( doing_action( 'woocommerce_before_trash_order' ) ) {
+			$this->orders_pending_trash[ $order_id ] = true;
+		}
+	}
+
+	/**
+	 * Trash tickets when the legacy orders screen uses WordPress directly.
+	 *
+	 * @param int $post_id Order post being trashed.
+	 */
+	public function maybe_trash_legacy_order_tickets( $post_id ) {
+		if ( 'shop_order' !== get_post_type( $post_id ) ) {
+			return;
+		}
+		// Only the current CRUD operation can suppress this hook; persisted markers may be stale.
+		if ( isset( $this->orders_pending_trash[ $post_id ] ) ) {
+			unset( $this->orders_pending_trash[ $post_id ] );
+			return;
+		}
+		$order = wc_get_order( $post_id );
+		if ( $order ) {
+			$this->remember_tickets_for_order_restore( $post_id );
+			$this->trash_tickets( $post_id );
+		}
+	}
+
+	/**
+	 * Restore tickets when WordPress restores a legacy order post.
+	 *
+	 * @param int $post_id Restored post ID.
+	 */
+	public function maybe_untrash_legacy_order_tickets( $post_id ) {
+		if ( 'shop_order' === get_post_type( $post_id ) ) {
+			$this->untrash_tickets( $post_id );
+		}
 	}
 
 	/**
@@ -456,24 +662,55 @@ class WC_Box_Office_Order {
 	/**
 	 * Display order tickets list.
 	 *
-	 * @param  object $order Order object
+	 * @param  object|false $order Order object.
 	 * @return void
 	 */
 	public function order_details_ticket_list( $order = false ) {
 		if ( ! $order ) {
 			return;
 		}
+
+		// Hide ticket metadata when all ticket products use customer details.
+		if ( $this->should_hide_ticket_metadata( $order ) ) {
+			return;
+		}
+
 		echo do_shortcode( '[order_tickets order_id="' . esc_attr( $order->get_id() ) . '" fields_format="list"]' );
 	}
 
 	/**
 	 * Display order ticket in order email.
 	 *
-	 * @param  object $order Order object
+	 * @param  object|false $order Order object.
 	 * @return void
 	 */
 	public function order_email_ticket_list( $order = false ) {
 		$this->order_details_ticket_list( $order );
+	}
+
+	/**
+	 * Check if ticket metadata should be hidden for an order.
+	 *
+	 * Returns true only when ALL ticket products in the order
+	 * have 'Use customer details for tickets' enabled.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private function should_hide_ticket_metadata( $order ) {
+		$has_ticket = false;
+		foreach ( $order->get_items() as $item ) {
+			$product_id = $item->get_product_id();
+			if ( wc_box_office_is_product_ticket( $product_id ) ) {
+				$has_ticket = true;
+				if ( ! wc_box_office_uses_customer_details( $product_id ) ) {
+					return false;
+				}
+			}
+		}
+		return $has_ticket;
 	}
 
 	/**
@@ -564,7 +801,7 @@ class WC_Box_Office_Order {
 	 * @see https://github.com/woothemes/woocommerce-box-office/issues/137
 	 * @since 1.1.0
 	 *
-	 * @param int|WC_Order Order ID or order object
+	 * @param int|WC_Order $order Order ID or order object.
 	 */
 	public function filter_order_items_meta_to_gateway( $order ) {
 		if ( ! is_a( $order, 'WC_Order' ) ) {
@@ -592,7 +829,7 @@ class WC_Box_Office_Order {
 	 * Create barcode fields in checkout form.
 	 *
 	 * The fields contain 2 * N fields, where N is number of purchased tickets.
-	 * Each field represent barcode text for a ticket.
+	 * Keep field names for compatibility; barcode values are issued during processing.
 	 *
 	 * @since 1.1.1
 	 */
@@ -609,12 +846,9 @@ class WC_Box_Office_Order {
 
 		foreach ( $fields as $key => $field ) {
 			foreach ( $field as $f ) {
-				$barcode_text = WCBO()->components->ticket_barcode->generate_barcode_text_for_ticket();
-
 				echo sprintf(
-					'<input type="hidden" name="%1$s" value="%2$s" />',
-					esc_attr( $f['text'] ),
-					esc_attr( $barcode_text )
+					'<input type="hidden" name="%s" value="" />',
+					esc_attr( $f['text'] )
 				);
 			}
 		}
@@ -651,30 +885,48 @@ class WC_Box_Office_Order {
 	/**
 	 * Maybe process barcode fields.
 	 *
-	 * This will process barcode text injected in checkout form.
-	 * Barcode data will be saved as ticket meta.
+	 * Generate missing barcodes from the current order's stored ticket mappings.
+	 * Posted barcode fields are not an authority for ticket selection or values.
 	 *
 	 * @since 1.1.1
 	 *
 	 * @param int $order_id Order ID
 	 */
 	public function maybe_process_barcode_fields( $order_id ) {
-		if ( empty( $_POST['ticket_barcodes'] ) ) {
+		if ( ! WCBO()->components->ticket_barcode->is_available() ) {
 			return;
 		}
 
-		global $wpdb;
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
+		}
 
-		foreach ( wc_clean( wp_unslash( $_POST['ticket_barcodes'] ) ) as $key => $tickets ) {
-			foreach ( $tickets as $index => $barcode ) {
-				$meta_key  = sprintf( '_ticket_id_for_%1$s_%2$s', $key, $index );
-				$ticket_id = absint( $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key = %s", $meta_key ) ) );
-
-				if ( ! $ticket_id ) {
+		$ticket_ids = array();
+		foreach ( $order->get_items() as $item_id => $item ) {
+			foreach ( $item->get_meta_data() as $meta ) {
+				if ( ! is_string( $meta->key ) || 0 !== strpos( $meta->key, '_ticket_id_for_' ) ) {
 					continue;
 				}
+				$ticket_id = $meta->value;
+				if ( ( ! is_int( $ticket_id ) && ! is_string( $ticket_id ) ) || ! ctype_digit( (string) $ticket_id ) || 0 === (int) $ticket_id ) {
+					continue;
+				}
+				$ticket_id = (int) $ticket_id;
+				if ( 'event_ticket' !== get_post_type( $ticket_id )
+					|| $order->get_id() !== (int) get_post_meta( $ticket_id, '_order', true )
+					|| (int) get_post_meta( $ticket_id, '_ticket_order_item_id', true ) !== (int) $item_id ) {
+					continue;
+				}
+				$ticket_ids[ $ticket_id ] = true;
+			}
+		}
 
-				update_post_meta( $ticket_id, '_barcode_text', $barcode['text'] );
+		// Stored ownership authorizes each ticket independently of incomplete siblings.
+
+		foreach ( array_keys( $ticket_ids ) as $ticket_id ) {
+			if ( '' === get_post_meta( $ticket_id, '_barcode_text', true ) ) {
+				update_post_meta( $ticket_id, '_barcode_text', WCBO()->components->ticket_barcode->generate_barcode_text_for_ticket() );
 			}
 		}
 	}
@@ -724,17 +976,18 @@ class WC_Box_Office_Order {
 			$total_amount    = $item->get_total();
 			$refunded_amount = -1 * $order->get_total_refunded_for_item( $item_id );
 
-			if ( ( $total_amount + $refunded_amount ) > 0 ) {
-				// Not fully refunded.
+			if ( ( $total_amount + $refunded_amount ) > 0 || ( 0.0 === (float) $total_amount && -1 * $order->get_qty_refunded_for_item( $item_id ) < $item->get_quantity() ) ) {
+				// Free lines are fully refunded only when their full quantity is returned.
 				continue;
 			}
 
 			$tickets = get_posts(
 				array(
-					'post_type'   => 'event_ticket',
-					'post_status' => 'any',
-					'fields'      => 'ids',
-					'meta_query'  => array(
+					'post_type'      => 'event_ticket',
+					'post_status'    => 'any',
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+					'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Match only tickets for this refunded order item.
 						array(
 							'key'   => '_ticket_order_item_id',
 							'value' => $item_id,

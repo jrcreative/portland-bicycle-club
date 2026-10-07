@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Adds Box Office reports.
+ *
+ * @class   WC_Box_Office_Report
+ * @version 1.3.5
+ */
 class WC_Box_Office_Report {
 
 	/**

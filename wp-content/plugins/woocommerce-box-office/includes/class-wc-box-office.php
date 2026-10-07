@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Box Office plugin controller.
+ *
+ * @class   WC_Box_Office
+ * @version 1.3.5
+ */
 class WC_Box_Office {
 
 	/**
@@ -263,7 +269,7 @@ class WC_Box_Office {
 	 * @since 1.0.0
 	 * @static
 	 * @see get_woocommerce_box_office()
-	 * @return Main WooCommerce_Box_Office instance
+	 * @return WC_Box_Office Main WooCommerce_Box_Office instance
 	 */
 	public static function instance( $file = '', $version = '1.0.0' ) {
 		if ( is_null( self::$_instance ) ) {

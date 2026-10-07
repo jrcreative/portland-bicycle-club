@@ -8,6 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Box Office Logger.
  *
  * Can be used to log data to post meta or log debug data via WC_Logger.
+ *
+ * @class   WC_Box_Office_Logger
+ * @version 1.1.0
  */
 class WC_Box_Office_Logger {
 

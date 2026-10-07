@@ -11,6 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Box Office Email
+ *
+ * @class   WC_Box_Office_Email
+ * @version 1.3.4
  */
 class WC_Box_Office_Email extends WC_Email {
 
@@ -86,7 +89,7 @@ class WC_Box_Office_Email extends WC_Email {
 	 * @param string       $subject Email subject.
 	 * @param string       $message Email message.
 	 * @param string       $custom_heading Email heading to override. Default empty string to use site-wide setting.
-	 * @return void
+	 * @return bool|void Whether the email was sent; nothing when disabled or without recipient.
 	 */
 	public function trigger( $to, $subject, $message, $custom_heading = '' ) {
 

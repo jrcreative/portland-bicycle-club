@@ -7,7 +7,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class that handles frontend page query.
  *
- * @since 1.0.2
+ * @class   WC_Box_Office_Ticket_Frontend_Query
+ * @since   1.0.2
+ * @version 1.3.7
  */
 class WC_Box_Office_Ticket_Frontend_Query extends WC_Query {
 
@@ -152,7 +154,7 @@ class WC_Box_Office_Ticket_Frontend_Query extends WC_Query {
 	/**
 	 * Insert the new endpoint into the My Account menu.
 	 *
-	 * @param array $items
+	 * @param array $menu_items Menu items.
 	 * @return array
 	 */
 	public function add_menu_items( $menu_items ) {

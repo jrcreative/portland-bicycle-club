@@ -7,7 +7,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles settings for Box Office.
  *
- * @since 1.1.0
+ * @class   WC_Box_Office_Settings
+ * @since   1.1.0
+ * @version 1.3.8
  */
 class WC_Box_Office_Settings {
 

@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Box_Office_Ticket_Ajax class.
  *
  * Handles ajax requests for ticket scanning.
+ *
+ * @class   WC_Box_Office_Ticket_Ajax
+ * @version x.x.x
  */
 class WC_Box_Office_Ticket_Ajax {
 
@@ -31,6 +34,17 @@ class WC_Box_Office_Ticket_Ajax {
 	 * @return void
 	 */
 	public function scan_ticket() {
+		// Use the scan UI policy before looking up a ticket.
+		/**
+		 * This filter is documented below.
+		 *
+		 * @since 1.0.0
+		 */
+		$can_scan = apply_filters( 'woocommerce_box_office_scan_permission', current_user_can( 'manage_woocommerce' ), 0 );
+		if ( ! $can_scan || is_wp_error( $can_scan ) ) {
+			wp_die( esc_html__( 'Permission denied: You do not have sufficient permissions to scan tickets', 'woocommerce-box-office' ), '', array( 'response' => 403 ) );
+		}
+
 		// Security check.
 		/**
 		 * Filter whether to perform nonce check when scanning tickets.
@@ -39,6 +53,11 @@ class WC_Box_Office_Ticket_Ajax {
 		 * @since 1.0.0
 		 */
 		$do_nonce_check = apply_filters( 'woocommerce_box_office_do_nonce_check', true );
+		if ( ! function_exists( 'WC_Order_Barcodes' ) ) {
+			// The scanner displays notices from HTTP 200 responses.
+			wp_die( esc_html__( 'Ticket scanning is unavailable. Please activate WooCommerce Order Barcodes.', 'woocommerce-box-office' ), '', array( 'response' => 200 ) );
+		}
+
 		if ( $do_nonce_check && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce_box_office_scan_nonce'] ?? '' ) ), 'scan-barcode' ) ) {
 			WC_Order_Barcodes()->display_notice( esc_html__( 'Permission denied: Security check failed', 'woocommerce-box-office' ), 'error' );
 			exit;
@@ -62,7 +81,7 @@ class WC_Box_Office_Ticket_Ajax {
 		 * @since 1.0.0
 		 */
 		$can_scan = apply_filters( 'woocommerce_box_office_scan_permission', current_user_can( 'manage_woocommerce' ), $ticket_id );
-		if ( ! $can_scan ) {
+		if ( ! $can_scan || is_wp_error( $can_scan ) ) {
 			WC_Order_Barcodes()->display_notice( esc_html__( 'Permission denied: You do not have sufficient permissions to scan tickets', 'woocommerce-box-office' ), 'error' );
 			exit;
 		}
@@ -130,7 +149,7 @@ class WC_Box_Office_Ticket_Ajax {
 		$template_vars = array(
 			'ticket_description'   => wc_box_office_get_ticket_description( $ticket_id, 'table' ),
 			'edit_ticket_url'      => wcbo_get_my_ticket_url( $ticket_id ),
-			'print_ticket_enabled' => get_post_meta( $ticket->product_id, '_print_tickets', true ),
+			'print_ticket_enabled' => is_ticket_ready_for_printing( $ticket ),
 			'print_ticket_url'     => wcbo_get_my_ticket_url( $ticket_id, true ),
 		);
 

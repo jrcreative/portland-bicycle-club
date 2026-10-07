@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Registers a custom post type.
+ *
+ * @class   WC_Box_Office_Post_Type
+ * @version 1.5.1
+ */
 class WC_Box_Office_Post_Type {
 
 	/**

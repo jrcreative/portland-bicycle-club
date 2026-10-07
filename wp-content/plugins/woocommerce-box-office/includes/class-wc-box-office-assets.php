@@ -4,6 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Registers and enqueues Box Office scripts and styles.
+ *
+ * @class   WC_Box_Office_Assets
+ * @version x.x.x
+ */
 class WC_Box_Office_Assets {
 
 	/**
@@ -51,8 +57,32 @@ class WC_Box_Office_Assets {
 			wcbo_register_script( 'woocommerce-box-office-frontend', 'frontend' );
 			wp_enqueue_script( 'woocommerce-box-office-frontend' );
 
+			// Scanner nonces belong to the authorized scan form, not the ticket edit page.
+			/**
+			 * This filter is documented in includes/class-wc-box-office-ticket-ajax.php.
+			 *
+			 * @since 1.0.0
+			 */
+			$can_scan = $force ? apply_filters( 'woocommerce_box_office_scan_permission', current_user_can( 'manage_woocommerce' ), 0 ) : false;
+
 			// Pass data to frontend JS
-			wp_localize_script( 'woocommerce-box-office-frontend', 'wc_box_office', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'scan_nonce' => wp_create_nonce( 'scan-barcode' ) ) );
+			wp_localize_script(
+				'woocommerce-box-office-frontend',
+				'wc_box_office',
+				array(
+					'ajaxurl'                    => admin_url( 'admin-ajax.php' ),
+					'scan_nonce'                 => '',
+					'i18n_scan_failed'           => esc_html__( 'Your scan could not be processed. Refresh the page and try again.', 'woocommerce-box-office' ),
+					'i18n_error_summary_heading' => esc_html__( 'Please correct the following errors before continuing:', 'woocommerce-box-office' ),
+					'i18n_select_action'         => esc_html__( 'Please select a scan action.', 'woocommerce-box-office' ),
+					'i18n_enter_barcode'         => esc_html__( 'Ticket barcode is a required field and cannot be empty.', 'woocommerce-box-office' ),
+				)
+			);
+
+			if ( $can_scan && ! is_wp_error( $can_scan ) ) {
+				// Inline scripts run after localization, including later normal asset enqueues.
+				wp_add_inline_script( 'woocommerce-box-office-frontend', 'wc_box_office.scan_nonce = ' . wp_json_encode( wp_create_nonce( 'scan-barcode' ) ) . ';', 'before' );
+			}
 		}
 	}
 
