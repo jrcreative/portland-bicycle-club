@@ -25,6 +25,9 @@
         <i class="fa fa-file-text"></i>
     {% endif %}
 </a>
+{% if topics is defined %}
+    <span class="label primary">{{ post.category.title }}</span>
+{% endif %}
 <h5><a href="{{ post.link }}">{{ post.title }}</a></h5>
 {% if post.post_type == 'newsletter' %}
     <h6>{{ post.date }}</h6>
