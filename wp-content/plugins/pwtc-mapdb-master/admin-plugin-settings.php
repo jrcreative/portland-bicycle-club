@@ -99,6 +99,12 @@ else {
             if (isset($_POST['delete_forum_post_path'])) {
                 update_option('pwtc_mapdb_delete_forum_post_path', trim($_POST['delete_forum_post_path']));
             }
+            if (isset($_POST['validate_log_mileage'])) {
+                update_option('pwtc_mapdb_validate_log_mileage', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_validate_log_mileage', 'no');
+            }
         }
     }
     $max_post_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
@@ -119,6 +125,7 @@ else {
     $edit_forum_post_path = get_option('pwtc_mapdb_edit_forum_post_path', '/');
     $submit_forum_post_path = get_option('pwtc_mapdb_submit_forum_post_path', '/');
     $delete_forum_post_path = get_option('pwtc_mapdb_delete_forum_post_path', '/');
+    $validate_log_mileage = 'yes' === get_option('pwtc_mapdb_validate_log_mileage', 'no');
 
     $next_cache_clear_time = wp_next_scheduled('pwtc_chron_clear_cache');
     if ($next_cache_clear_time) {
@@ -204,6 +211,11 @@ else {
             <p>
                 <label for="delete_forum_post_path">URL pathname of forum post delete page</label>
                 <input type="text" id="delete_forum_post_path" name="delete_forum_post_path" value="<?php echo $delete_forum_post_path; ?>"/>
+            </p>
+            <h3>Ride Calendar</h3>
+            <p>
+                <input type="checkbox" id="validate_log_mileage" name="validate_log_mileage" <?php echo $validate_log_mileage ? 'checked' : ''; ?>/>
+                <label for="validate_log_mileage">Check for blank mileage when logging ride mileage to mileage database</label>
             </p>
             <h3>General</h3>
             <p>

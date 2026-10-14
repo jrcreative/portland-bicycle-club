@@ -69,12 +69,12 @@
     <?php if ($accept_signup) { ?>
         <div class="callout">
             <p>
-            Hello <?php echo $rider_name; ?>, to sign up for the ride "<?php echo $ride_title; ?>," please accept the Club's <a href="/terms-and-conditions" target="_blank">terms and conditions</a>, enter your emergency contact information<?php if ($set_mileage) { ?>, enter the mileage that you intend to ride<?php } ?> and press the accept button.
+            Hello <?php echo $rider_name; ?>, to sign up for the ride "<?php echo $ride_title; ?>" (<?php echo $mileage_msg; ?>) please accept the Club's <a href="/terms-and-conditions" target="_blank">terms and conditions</a>, enter your emergency contact information<?php if ($set_mileage) { ?>, enter the mileage that you intend to ride<?php } ?> and press the accept button.
         <?php if ( $ride_signup_limit > 0) { ?>
             This ride is limited to <?php echo $ride_signup_limit; ?> riders, there are <?php echo ($ride_signup_limit - $ride_signup_count); ?> spaces left.
         <?php } ?>                
         <?php if ($set_mileage) { ?> 
-            <em>If you don't want your mileage logged, leave the mileage field blank.</em>
+            <em>If you don't want your mileage logged in the mileage database, set the mileage field to zero.</em>
         <?php } ?>
             </p>
             <form method="POST" novalidate>
@@ -119,13 +119,13 @@
         </div>
     <?php } else { ?>
         <div class="callout">
-            <p>Hello <?php echo $rider_name; ?>, you are currently signed up for the ride "<?php echo $ride_title; ?>."
+            <p>Hello <?php echo $rider_name; ?>, you are currently signed up for the ride "<?php echo $ride_title; ?>" (<?php echo $mileage_msg; ?>).
         <?php if ( $ride_signup_limit > 0) { ?>
             This ride is limited to <?php echo $ride_signup_limit; ?> riders, there are <?php echo ($ride_signup_limit - $ride_signup_count); ?> spaces left.
         <?php } ?>
             </p>
         <?php if ($set_mileage) { ?>
-            <p>To update your mileage, enter the new value below and press the update button.</p>
+            <p>To update your mileage, enter the new value below and press the update button. <em>If you don't want your mileage logged in the mileage database, set the mileage field to zero.</em></p>
             <form method="POST" class="mileage-frm" novalidate>
                 <?php wp_nonce_field('signup-member-form', 'nonce_field'); ?>
                 <div class="row">
