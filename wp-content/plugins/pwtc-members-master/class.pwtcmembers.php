@@ -85,6 +85,9 @@ class PwtcMembers {
 		add_filter( 'wc_memberships_update_member_user_role', 
 			array('PwtcMembers', 'update_member_user_role_callback'));
 
+		add_action( 'wc_memberships_member_user_role_updated', 
+			array('PwtcMembers', 'member_user_role_updated_callback'), 10, 3);
+
 		add_filter( 'wc_memberships_active_member_default_user_role', 
 			array('PwtcMembers', 'active_member_default_user_role_callback'));
 
@@ -394,6 +397,19 @@ class PwtcMembers {
 	// Disable the check that doesn't allow role changes for admin and shop managers.
 	public static function update_member_user_role_callback() {
 		return true;
+	}
+
+	public static function member_user_role_updated_callback($user, $to_role, $from_role) {
+		$memberships = wc_memberships_get_user_memberships($user);
+		$multi_members = count($memberships) > 1;
+		foreach ( $memberships as $membership ) {
+			if ($multi_members) {
+				$membership->add_note('PWTC Members plugin detected role change, "' . $from_role . '" to "' . $to_role . '". This user has multiple memberships.');
+			}
+			else {
+				$membership->add_note('PWTC Members plugin detected role change, "' . $from_role . '" to "' . $to_role . '".');
+			}
+		}
 	}
 
 	// Make current_member the default role for an active membership.
