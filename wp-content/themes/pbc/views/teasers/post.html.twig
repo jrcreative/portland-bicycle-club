@@ -37,7 +37,15 @@
     <h6>{{ post.date }}</h6>
 {% endif %}
 <p>{{ post.preview }}
-{% if user and post.comments and post.comments|length > 0 %} 
-	<span> <i class="fa fa-comments"></i> {{ post.comments|length }}</span>
+{% if user and post.comments %} 
+    {% set count = 0 %}
+    {% for cmt in post.comments %}
+		{% if cmt.comment_approved %}
+            {% set count = count + 1 %}
+		{% endif %}
+    {% endfor %}
+    {% if count > 0 %}
+	    <span> <i class="fa fa-comments"></i> {{ count }}</span>
+    {% endif %}
 {% endif %}
 </p>
