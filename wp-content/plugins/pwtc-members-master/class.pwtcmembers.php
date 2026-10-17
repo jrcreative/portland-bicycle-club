@@ -1432,6 +1432,7 @@ class PwtcMembers {
 
 	// Generates the [pwtc_member_accept_release] shortcode.
 	public static function shortcode_member_accept_release($atts) {
+		$a = shortcode_atts(array('killmargin' => 'no'), $atts);
 		$current_user = wp_get_current_user();
 		if ( 0 == $current_user->ID ) {
 			return '';
@@ -1440,12 +1441,19 @@ class PwtcMembers {
 		if (isset($_POST['pwtc_membership_accept_release'])) {
 			update_field('release_accepted', true, 'user_'.$userid);
 		}
+		$user_info = get_userdata($userid);
+		$is_active_member = in_array('current_member', $user_info->roles);
+		if (!$is_active_member) {
+			return '';
+		}
 		if (get_field('release_accepted', 'user_'.$userid)) {
 			return '';
 		}
+
+		$a['killmargin'] == 'yes' ? $style = 'style="margin: 0 0 0 0"' : $style = '';
 		ob_start();
 		?>
-		<div class="callout warning"><p>Please read and accept the Club's <a href="/terms-and-conditions" target="_blank">terms and conditions</a>.<form method="POST"><button class="button" type="submit" name="pwtc_membership_accept_release">I Accept</button></form></p></div>		
+		<div <?php echo $style; ?> class="callout warning"><p>Please read and accept the Club's <a href="/terms-and-conditions" target="_blank">terms and conditions</a>.<form method="POST"><button class="button" type="submit" name="pwtc_membership_accept_release">I Accept</button></form></p></div>		
 		<?php
 		return ob_get_clean();
 	}
