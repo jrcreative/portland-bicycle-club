@@ -52,6 +52,12 @@ else {
             else {
                 update_option('pwtc_mapdb_send_post_submit_email', 'no');
             }
+            if (isset($_POST['send_comment_approved_email'])) {
+                update_option('pwtc_mapdb_send_comment_approved_email', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_send_comment_approved_email', 'no');
+            }
             if (isset($_POST['post_moderator_email'])) {
                 if (!empty(trim($_POST['post_moderator_email']))) {
                     update_option('pwtc_mapdb_post_moderator_email', trim($_POST['post_moderator_email']));
@@ -116,6 +122,7 @@ else {
     $post_moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
     $radiobtn_category_select = 'yes' === get_option('pwtc_mapdb_radiobtn_category_select', 'no');
     $send_post_submit_email = 'yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no');
+    $send_comment_approved_email = 'yes' === get_option('pwtc_mapdb_send_comment_approved_email', 'no');
     $force_comment_moderation = 'yes' === get_option('pwtc_mapdb_force_comment_moderation', 'no');
     $enable_post_copy = 'yes' === get_option('pwtc_mapdb_enable_post_copy', 'no');
     $modified_time_update = 'yes' === get_option('pwtc_mapdb_modified_time_update', 'no');
@@ -174,6 +181,10 @@ else {
             <p>
                 <input type="checkbox" id="send_post_submit_email" name="send_post_submit_email" <?php echo $send_post_submit_email ? 'checked' : ''; ?>/>
                 <label for="send_post_submit_email">Send notification email to moderator when a post or comment is submitted</label>
+            </p>
+            <p>
+                <input type="checkbox" id="send_comment_approved_email" name="send_comment_approved_email" <?php echo $send_comment_approved_email ? 'checked' : ''; ?>/>
+                <label for="send_comment_approved_email">Send notification email to author when a comment is added to their post</label>
             </p>
             <p>
                 <label for="post_moderator_email">Email address of the post moderator</label>

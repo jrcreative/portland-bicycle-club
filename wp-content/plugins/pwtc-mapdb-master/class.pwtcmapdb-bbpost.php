@@ -21,6 +21,10 @@ class PwtcMapdb_BBPost {
 		if ('yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no')) {
 			add_action('comment_post', array('PwtcMapdb_BBPost', 'comment_send_submission_email_callback'), 10, 2);
 		}
+		if ('yes' === get_option('pwtc_mapdb_send_comment_approved_email', 'no')) {
+			add_action('comment_post', array('PwtcMapdb_BBPost', 'comment_send_approved_email_callback1'), 10, 2);
+			add_action('transition_comment_status', array('PwtcMapdb_BBPost', 'comment_send_approved_email_callback2'), 10, 3);
+		}
 		if ('yes' === get_option('pwtc_mapdb_restrict_feed_output', 'no')) {
 			add_action('pre_get_posts', array('PwtcMapdb_BBPost', 'pre_get_feed_posts_callback'));
 			add_action('do_feed_rdf', array('PwtcMapdb_BBPost', 'protect_comments_feed_callback'), 0);
@@ -47,6 +51,7 @@ class PwtcMapdb_BBPost {
 		add_shortcode('pwtc_mapdb_delete_bbpost', array( 'PwtcMapdb_BBPost', 'shortcode_delete_bbpost'));
 		add_shortcode('pwtc_mapdb_new_bbpost_link', array('PwtcMapdb_BBPost', 'shortcode_new_bbpost_link'));
 		add_shortcode('pwtc_mapdb_manage_bbposts', array('PwtcMapdb_BBPost', 'shortcode_manage_bbposts'));
+		add_shortcode('pwtc_mapdb_your_recent_bbposts', array('PwtcMapdb_BBPost', 'shortcode_your_recent_bbposts'));
     }
 
 	public static function load_javascripts() {
@@ -262,6 +267,29 @@ class PwtcMapdb_BBPost {
 		*/
 		$moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
 		self::comment_submitted_email($post_id, $author_id, $moderator_email);
+	}
+
+	public static function comment_send_approved_email_callback1($comment_id, $comment_approved) {
+		if ( !$comment_approved ) {
+			return;
+		}
+		$comment = get_comment( $comment_id );
+		$post_id = $comment->comment_post_ID;
+		if ($post_id === 0) {
+			return;
+		}
+		self::comment_approved_email($post_id);
+	}
+
+	public static function comment_send_approved_email_callback2($new_status, $old_status, $comment) {
+		if ( $new_status !== 'approved' ) {
+			return;
+		}
+		$post_id = $comment->comment_post_ID;
+		if ($post_id === 0) {
+			return;
+		}
+		self::comment_approved_email($post_id);
 	}
 
 	public static function force_comment_moderation_callback($approved) {
@@ -766,6 +794,53 @@ class PwtcMapdb_BBPost {
 		return ob_get_clean();
 	}	
 
+	// Generates the [pwtc_mapdb_your_recent_bbposts] shortcode.
+	public static function shortcode_your_recent_bbposts($atts) {
+		$a = shortcode_atts(array('killmargin' => 'no'), $atts);
+		$current_user = wp_get_current_user();
+
+		if ( 0 == $current_user->ID ) {
+			return '';
+		}
+
+		$user_info = get_userdata($current_user->ID);
+		
+		$is_active_member = in_array('current_member', $user_info->roles);
+
+		if (!$is_active_member) {
+			return '';
+		}
+
+		$a['killmargin'] == 'yes' ? $style = 'style="margin: 0 0 0 0"' : $style = '';
+
+		$after = get_option('pwtc_mapdb_recent_post_time_cutoff', '1 day ago');
+		$query_args = [
+            'posts_per_page' => -1,
+			'author' => $current_user->ID,
+            'date_query' => [				
+				[
+                    'column' => 'post_modified_gmt',
+                    'after' => $after,
+				],
+            ],
+        ];
+		$output = '';
+		$query = new WP_Query($query_args);
+		if ($query->have_posts()) {
+			$output .= '<div ' . $style . ' class="callout warning">The following posts authored by you have been modified since ' . $after . ':<br>';
+			while ($query->have_posts()) {
+				$query->the_post();
+        		$postid = get_the_ID();
+        		$title = esc_html(get_the_title());
+				$view_link = esc_url(get_the_permalink());
+				$output .= ' <a href="' . $view_link . '">' . $title . '</a>,';
+			}
+			wp_reset_postdata();
+			$output .= '</div>';
+		}
+		return $output;
+	}
+
 	public static function get_topic_choices($parent_category_name) {
 		$categories = [];
 		$topics_id = get_cat_ID($parent_category_name);
@@ -898,6 +973,24 @@ Do not reply to this email!
 EOT;
 		$headers = ['Content-type: text/html'];
 		return wp_mail($moderator_email, $subject , $message, $headers);
+	}
+
+	public static function comment_approved_email($postid) {
+		$post_title = esc_html(get_the_title($postid));
+		$author_id = get_post_field('post_author', $postid);
+		$author_email = get_the_author_meta('user_email', $author_id);
+		$author_name = get_the_author_meta('first_name', $author_id) . ' ' . get_the_author_meta('last_name', $author_id);
+		$post_url = get_permalink($postid);
+		$post_link = '<a href="' . esc_url($post_url) . '">' . $post_title . '</a>';
+		$subject = 'Comment Added to Your PBC Post';
+		$message = <<<EOT
+$author_name, a comment has been added to your Portland Bicycling Club post $post_link.
+To view this comment, use a browser to log in to your club account and open the post by clicking its link. 
+Once the post opens, scroll down to the <em>Comments</em> section; here you can view the comment.
+Do not reply to this email!
+EOT;
+		$headers = ['Content-type: text/html'];
+		return wp_mail($author_email, $subject , $message, $headers);
 	}
 	
 	public static function bbpost_unsubmitted_email($postid, $moderator_email) {
