@@ -115,8 +115,27 @@ jobs:
           PROD_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
         run: |
           BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S).tar.gz"
-          ssh -p 2222 ${PROD_USER}@${PROD_HOST} "cd ${PROD_PATH} && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc wp-content/plugins --exclude='node_modules' --exclude='*.log' || mkdir -p ../backups && tar -czf ../backups/${BACKUP_NAME} wp-content/themes/pbc"
-          echo "Backup created: ${BACKUP_NAME}"
+          ssh -p 2222 ${PROD_USER}@${PROD_HOST} bash -s <<EOF
+          set -e
+          cd "${PROD_PATH}"
+
+          # Pick a usable backup directory. Prefer ../backups, but if a
+          # non-directory (e.g. a stray file) is sitting at that path, fall
+          # back to wp-content/backups (which rsync is configured to preserve).
+          BACKUP_DIR="../backups"
+          if [ -e "\$BACKUP_DIR" ] && [ ! -d "\$BACKUP_DIR" ]; then
+            echo "⚠️  '\$BACKUP_DIR' exists but is not a directory; using wp-content/backups instead"
+            BACKUP_DIR="wp-content/backups"
+          fi
+          mkdir -p "\$BACKUP_DIR"
+
+          tar -czf "\$BACKUP_DIR/${BACKUP_NAME}" \
+            --exclude='node_modules' \
+            --exclude='*.log' \
+            wp-content/themes/pbc wp-content/plugins
+
+          echo "Backup created: \$BACKUP_DIR/${BACKUP_NAME}"
+          EOF
 
       - name: Verify plugin vendor directories before deploy
         run: |
