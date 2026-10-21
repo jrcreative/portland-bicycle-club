@@ -278,7 +278,7 @@ class PwtcMapdb_BBPost {
 		if ($post_id === 0) {
 			return;
 		}
-		self::comment_approved_email($post_id);
+		self::comment_approved_email($post_id, $comment);
 	}
 
 	public static function comment_send_approved_email_callback2($new_status, $old_status, $comment) {
@@ -289,7 +289,7 @@ class PwtcMapdb_BBPost {
 		if ($post_id === 0) {
 			return;
 		}
-		self::comment_approved_email($post_id);
+		self::comment_approved_email($post_id, $comment);
 	}
 
 	public static function force_comment_moderation_callback($approved) {
@@ -975,9 +975,13 @@ EOT;
 		return wp_mail($moderator_email, $subject , $message, $headers);
 	}
 
-	public static function comment_approved_email($postid) {
-		$post_title = esc_html(get_the_title($postid));
+	public static function comment_approved_email($postid, $comment) {
 		$author_id = get_post_field('post_author', $postid);
+		// If the post author and comment author are the same, don't send the email.
+		if ($author_id === $comment->user_id) {
+			return false;
+		}
+		$post_title = esc_html(get_the_title($postid));
 		$author_email = get_the_author_meta('user_email', $author_id);
 		$author_name = get_the_author_meta('first_name', $author_id) . ' ' . get_the_author_meta('last_name', $author_id);
 		$post_url = get_permalink($postid);
