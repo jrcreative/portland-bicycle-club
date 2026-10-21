@@ -400,7 +400,7 @@ if( function_exists('acf_add_local_field_group') ):
                                 'label' => 'Attributes',
                                 'name' => 'attributes',
                                 'type' => 'text',
-                                'instructions' => 'Uses the [pwtc_member_renew_nag] shortcode to display membership status, enter any attributes to pass to it.',
+                                'instructions' => 'Enter a shortcode name and any attributes to pass to it.',
                                 'required' => 0,
                                 'conditional_logic' => 0,
                                 'wrapper' => array (
@@ -421,7 +421,7 @@ if( function_exists('acf_add_local_field_group') ):
                                 'label' => 'Style',
                                 'name' => 'style',
                                 'type' => 'select',
-                                'instructions' => 'Choose the membership status area background color.',
+                                'instructions' => 'Choose the status area background color.',
                                 'required' => 1,
                                 'conditional_logic' => 0,
                                 'wrapper' => array (

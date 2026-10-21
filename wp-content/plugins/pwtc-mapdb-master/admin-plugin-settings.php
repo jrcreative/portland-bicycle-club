@@ -52,6 +52,12 @@ else {
             else {
                 update_option('pwtc_mapdb_send_post_submit_email', 'no');
             }
+            if (isset($_POST['send_comment_approved_email'])) {
+                update_option('pwtc_mapdb_send_comment_approved_email', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_send_comment_approved_email', 'no');
+            }
             if (isset($_POST['post_moderator_email'])) {
                 if (!empty(trim($_POST['post_moderator_email']))) {
                     update_option('pwtc_mapdb_post_moderator_email', trim($_POST['post_moderator_email']));
@@ -99,6 +105,12 @@ else {
             if (isset($_POST['delete_forum_post_path'])) {
                 update_option('pwtc_mapdb_delete_forum_post_path', trim($_POST['delete_forum_post_path']));
             }
+            if (isset($_POST['validate_log_mileage'])) {
+                update_option('pwtc_mapdb_validate_log_mileage', 'yes');
+            }
+            else {
+                update_option('pwtc_mapdb_validate_log_mileage', 'no');
+            }
         }
     }
     $max_post_title_len = get_option('pwtc_mapdb_post_title_max_len', 0);
@@ -110,6 +122,7 @@ else {
     $post_moderator_email = get_option('pwtc_mapdb_post_moderator_email', 'webmaster@portlandbicyclingclub.com');
     $radiobtn_category_select = 'yes' === get_option('pwtc_mapdb_radiobtn_category_select', 'no');
     $send_post_submit_email = 'yes' === get_option('pwtc_mapdb_send_post_submit_email', 'no');
+    $send_comment_approved_email = 'yes' === get_option('pwtc_mapdb_send_comment_approved_email', 'no');
     $force_comment_moderation = 'yes' === get_option('pwtc_mapdb_force_comment_moderation', 'no');
     $enable_post_copy = 'yes' === get_option('pwtc_mapdb_enable_post_copy', 'no');
     $modified_time_update = 'yes' === get_option('pwtc_mapdb_modified_time_update', 'no');
@@ -119,6 +132,7 @@ else {
     $edit_forum_post_path = get_option('pwtc_mapdb_edit_forum_post_path', '/');
     $submit_forum_post_path = get_option('pwtc_mapdb_submit_forum_post_path', '/');
     $delete_forum_post_path = get_option('pwtc_mapdb_delete_forum_post_path', '/');
+    $validate_log_mileage = 'yes' === get_option('pwtc_mapdb_validate_log_mileage', 'no');
 
     $next_cache_clear_time = wp_next_scheduled('pwtc_chron_clear_cache');
     if ($next_cache_clear_time) {
@@ -169,6 +183,10 @@ else {
                 <label for="send_post_submit_email">Send notification email to moderator when a post or comment is submitted</label>
             </p>
             <p>
+                <input type="checkbox" id="send_comment_approved_email" name="send_comment_approved_email" <?php echo $send_comment_approved_email ? 'checked' : ''; ?>/>
+                <label for="send_comment_approved_email">Send notification email to author when a comment is added to their post</label>
+            </p>
+            <p>
                 <label for="post_moderator_email">Email address of the post moderator</label>
                 <input type="text" id="post_moderator_email" name="post_moderator_email" value="<?php echo $post_moderator_email; ?>"/>
                 <?php echo $email_error_msg; ?>
@@ -204,6 +222,11 @@ else {
             <p>
                 <label for="delete_forum_post_path">URL pathname of forum post delete page</label>
                 <input type="text" id="delete_forum_post_path" name="delete_forum_post_path" value="<?php echo $delete_forum_post_path; ?>"/>
+            </p>
+            <h3>Ride Calendar</h3>
+            <p>
+                <input type="checkbox" id="validate_log_mileage" name="validate_log_mileage" <?php echo $validate_log_mileage ? 'checked' : ''; ?>/>
+                <label for="validate_log_mileage">Check for blank mileage when logging ride mileage to mileage database</label>
             </p>
             <h3>General</h3>
             <p>

@@ -85,6 +85,9 @@ class PwtcMembers {
 		add_filter( 'wc_memberships_update_member_user_role', 
 			array('PwtcMembers', 'update_member_user_role_callback'));
 
+		add_action( 'wc_memberships_member_user_role_updated', 
+			array('PwtcMembers', 'member_user_role_updated_callback'), 10, 3);
+
 		add_filter( 'wc_memberships_active_member_default_user_role', 
 			array('PwtcMembers', 'active_member_default_user_role_callback'));
 
@@ -394,6 +397,19 @@ class PwtcMembers {
 	// Disable the check that doesn't allow role changes for admin and shop managers.
 	public static function update_member_user_role_callback() {
 		return true;
+	}
+
+	public static function member_user_role_updated_callback($user, $to_role, $from_role) {
+		$memberships = wc_memberships_get_user_memberships($user);
+		$multi_members = count($memberships) > 1;
+		foreach ( $memberships as $membership ) {
+			if ($multi_members) {
+				$membership->add_note('PWTC Members plugin detected role change, "' . $from_role . '" to "' . $to_role . '". This user has multiple memberships.');
+			}
+			else {
+				$membership->add_note('PWTC Members plugin detected role change, "' . $from_role . '" to "' . $to_role . '".');
+			}
+		}
 	}
 
 	// Make current_member the default role for an active membership.
@@ -1416,6 +1432,7 @@ class PwtcMembers {
 
 	// Generates the [pwtc_member_accept_release] shortcode.
 	public static function shortcode_member_accept_release($atts) {
+		$a = shortcode_atts(array('killmargin' => 'no'), $atts);
 		$current_user = wp_get_current_user();
 		if ( 0 == $current_user->ID ) {
 			return '';
@@ -1424,12 +1441,19 @@ class PwtcMembers {
 		if (isset($_POST['pwtc_membership_accept_release'])) {
 			update_field('release_accepted', true, 'user_'.$userid);
 		}
+		$user_info = get_userdata($userid);
+		$is_active_member = in_array('current_member', $user_info->roles);
+		if (!$is_active_member) {
+			return '';
+		}
 		if (get_field('release_accepted', 'user_'.$userid)) {
 			return '';
 		}
+
+		$a['killmargin'] == 'yes' ? $style = 'style="margin: 0 0 0 0"' : $style = '';
 		ob_start();
 		?>
-		<div class="callout warning"><p>Please read and accept the Club's <a href="/terms-and-conditions" target="_blank">terms and conditions</a>.<form method="POST"><button class="button" type="submit" name="pwtc_membership_accept_release">I Accept</button></form></p></div>		
+		<div <?php echo $style; ?> class="callout warning"><p>Please read and accept the Club's <a href="/terms-and-conditions" target="_blank">terms and conditions</a>.<form method="POST"><button class="button" type="submit" name="pwtc_membership_accept_release">I Accept</button></form></p></div>		
 		<?php
 		return ob_get_clean();
 	}
