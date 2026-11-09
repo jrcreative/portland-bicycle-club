@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 11.1.2
+Stable tag: 11.2.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,23 +170,21 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.2.0 2026-10-07 =
+= 11.2.2 2026-11-04 =
 
 **WooCommerce**
 
-* Fix - Fixed a fatal error in persistent product status counters during background revision save in the admin when a null value was dispatched instead of a post object. [#69234](https://github.com/woocommerce/woocommerce/pull/69234)
-* Fix - Keep enforcing a coupon's minimum spend when its saved maximum spend is lower, as earlier versions did. [#69242](https://github.com/woocommerce/woocommerce/pull/69242)
-* Fix - Keep price separators as plain text in the Store API and block settings. [#69244](https://github.com/woocommerce/woocommerce/pull/69244)
-* Fix - Show each KOMOJU payment method's own name and description on the Payments settings page, instead of identical rows. [#69175](https://github.com/woocommerce/woocommerce/pull/69175)
-* Fix - Update the classic checkout totals after an address change when an extension hides a required address field. [#69333](https://github.com/woocommerce/woocommerce/pull/69333)
-* Fix - Ensure fulfillments REST API item requests operate on the fulfillment identified in the request URL. [#69534](https://github.com/woocommerce/woocommerce/pull/69534)
-* Fix - Prevent Cc/Bcc recipients from being configured for emails that carry a password reset key or a one-time verification link. [#69537](https://github.com/woocommerce/woocommerce/pull/69537)
-* Fix - Prevent fatal errors in the batch processing controller when another plugin loads an Action Scheduler older than 3.3.0, by falling back to `as_next_scheduled_action()` when `as_has_scheduled_action()` is missing. [#69415](https://github.com/woocommerce/woocommerce/pull/69415)
-* Fix - Prevent shop managers from editing users who have additional roles that cannot be edited by shop managers. [#69533](https://github.com/woocommerce/woocommerce/pull/69533)
-* Fix - Remove non-allowlisted query parameters and fragments from analytics document location and referrer properties. [#69536](https://github.com/woocommerce/woocommerce/pull/69536)
-* Fix - Require network super admin rights to import Blueprints on multisite. [#69529](https://github.com/woocommerce/woocommerce/pull/69529)
-* Fix - Revert recent changes to how conditional checkout field rules handle missing values. [#69530](https://github.com/woocommerce/woocommerce/pull/69530)
-* Fix - Update REST API key nonce handling. [#69532](https://github.com/woocommerce/woocommerce/pull/69532)
+* Fix - Ensure PayPal Standard shipping updates correctly update shipping and tax amounts [#70653](https://github.com/woocommerce/woocommerce/pull/70653)
+* Fix - Improve handling of unexpected payment settings profile data. [#70642](https://github.com/woocommerce/woocommerce/pull/70642)
+* Fix - Improve validation of the column mapping used by the product CSV importer. [#70646](https://github.com/woocommerce/woocommerce/pull/70646)
+* Fix - Keep custom default attribute values intact when a global attribute term slug is renamed. [#70641](https://github.com/woocommerce/woocommerce/pull/70641)
+* Fix - Require a logged-in admin browser session for the Jetpack connection endpoints used during onboarding. [#70656](https://github.com/woocommerce/woocommerce/pull/70656)
+* Fix - Restrict REST API key authentication to REST API requests. [#70649](https://github.com/woocommerce/woocommerce/pull/70649)
+* Fix - Start each Store API checkout request with its own order and payment data. [#70637](https://github.com/woocommerce/woocommerce/pull/70637)
+* Fix - Stop checkout from continuing to payment when the order could not be saved, and reject phone numbers over 100 characters. [#70639](https://github.com/woocommerce/woocommerce/pull/70639)
+* Fix - Use a chosen shipping method only when its rate was calculated for the cart. [#70648](https://github.com/woocommerce/woocommerce/pull/70648)
+* Fix - Validate the quantity when updating a cart item via the Store API. [#70657](https://github.com/woocommerce/woocommerce/pull/70657)
+* Fix - When a shopper adds a product to the cart, ignore attributes that the product does not use. [#70651](https://github.com/woocommerce/woocommerce/pull/70651)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
