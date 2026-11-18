@@ -312,6 +312,9 @@ class PwtcMapdb_Map {
 							wp_die('Route map file upload failed.', 403);
 						}
 						$filetype = wp_check_filetype($_FILES['map_file_upload']['name']);
+						if (strtolower($filetype['ext']) !== 'pdf') {
+							wp_die('Only a pdf file can be uploaded as a route map file attachment.', 403);
+						}
 						$tmpname = $_FILES['map_file_upload']['tmp_name'];
 						if ($map_file_id > 0) {
 							$status = wp_delete_attachment($map_file_id, true);

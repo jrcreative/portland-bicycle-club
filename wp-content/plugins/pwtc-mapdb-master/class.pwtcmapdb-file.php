@@ -27,9 +27,10 @@ class PwtcMapdb_File {
 
     	// Generates the [pwtc_mapdb_upload_file] shortcode.
 	public static function shortcode_upload_file($atts, $content) {
-		$a = shortcode_atts(array('use_return' => 'no', 'accept' => ''), $atts);
-        	$use_return = $a['use_return'] == 'yes';
-		$accept_str = $a['accept'];
+		$a = shortcode_atts(array('use_return' => 'no'), $atts);
+        $use_return = $a['use_return'] == 'yes';
+		$accept_str = '.pdf,.txt,.docx';
+		$check_filetypes = ['pdf', 'txt', 'docx'];
 
 		$is_road_captain = false;
 		$is_ride_leader = false;
@@ -62,6 +63,9 @@ class PwtcMapdb_File {
                     			wp_die('File upload failed.', 403);
                 		}
                 		$filetype = wp_check_filetype($_FILES['file_upload']['name']);
+						if (!in_array(strtolower($filetype['ext']), $check_filetypes)) {
+							wp_die('Invalid file type cannot be uploaded.', 403);
+						}
                 		$tmpname = $_FILES['file_upload']['tmp_name'];
                 		if ($attach_id > 0) {
                     			$status = wp_delete_attachment($attach_id, true);
