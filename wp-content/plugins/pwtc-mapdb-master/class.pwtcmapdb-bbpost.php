@@ -337,7 +337,26 @@ class PwtcMapdb_BBPost {
 			}
 
 			$postid = intval($_POST['postid']);
-			
+
+			$type = get_post_type($postid);
+			if ($type != 'post') {
+				wp_die('This post is not a forum post.', 403);
+			}
+
+			$status = get_post_status($postid);
+			if ($status != 'draft') {
+				wp_die('This forum post is not a draft.', 403);
+			}
+
+			$author_id = get_post_field('post_author', $postid);
+			if ($author_id != $current_user->ID) {
+				wp_die('You are not the author of this forum post.', 403);
+			}
+
+			if (!$is_active_member) {
+				wp_die('You are not an active member.', 403);
+			}
+
 			$post_status = '';
 			if (isset($_POST['post_status'])) {
 				$post_status = $_POST['post_status'];
@@ -375,6 +394,25 @@ class PwtcMapdb_BBPost {
 						
 			$postid = intval($_POST['postid']);
 
+			$type = get_post_type($postid);
+			if ($type != 'post') {
+				wp_die('This post is not a forum post.', 403);
+			}
+
+			$status = get_post_status($postid);
+			if ($status != 'draft') {
+				wp_die('This forum post is not a draft.', 403);
+			}
+
+			$author_id = get_post_field('post_author', $postid);
+			if ($author_id != $current_user->ID) {
+				wp_die('You are not the author of this forum post.', 403);
+			}
+
+			if (!$is_active_member) {
+				wp_die('You are not an active member.', 403);
+			}
+
 			wp_redirect(add_query_arg(array(
 				'post' => $postid,
 				'return' => urlencode($return),
@@ -389,6 +427,25 @@ class PwtcMapdb_BBPost {
 			}
 						
 			$postid = intval($_POST['postid']);
+
+			$type = get_post_type($postid);
+			if ($type != 'post') {
+				wp_die('This post is not a forum post.', 403);
+			}
+
+			$status = get_post_status($postid);
+			if ($status != 'draft') {
+				wp_die('This forum post is not a draft.', 403);
+			}
+
+			$author_id = get_post_field('post_author', $postid);
+			if ($author_id != $current_user->ID) {
+				wp_die('You are not the author of this forum post.', 403);
+			}
+
+			if (!$is_active_member) {
+				wp_die('You are not an active member.', 403);
+			}
 
 			wp_redirect(add_query_arg(array(
 				'post' => $postid,
@@ -411,6 +468,26 @@ class PwtcMapdb_BBPost {
 			}
 
 			if ($postid != 0) {
+
+				$type = get_post_type($postid);
+				if ($type != 'post') {
+					wp_die('This post is not a forum post.', 403);
+				}
+
+				$status = get_post_status($postid);
+				if ($status != 'draft') {
+					wp_die('This forum post is not a draft.', 403);
+				}
+
+				$author_id = get_post_field('post_author', $postid);
+				if ($author_id != $current_user->ID) {
+					wp_die('You are not the author of this forum post.', 403);
+				}
+
+				if (!$is_active_member) {
+					wp_die('You are not an active member.', 403);
+				}
+
 				$my_post = array(
 					'ID' => $postid,
 					'post_title' => $title
@@ -664,6 +741,26 @@ class PwtcMapdb_BBPost {
 			}
 			
 			$postid = intval($_POST['postid']);
+
+			$type = get_post_type($postid);
+			if ($type != 'post') {
+				wp_die('This post is not a forum post.', 403);
+			}
+
+			$status = get_post_status($postid);
+			if ($status != 'draft' and $status != 'trash') {
+				wp_die('This forum post is not a draft or in the trash.', 403);
+			}
+
+			$author_id = get_post_field('post_author', $postid);
+			if ($author_id != $current_user->ID) {
+				wp_die('You are not the author of this forum post.', 403);
+			}
+
+			if (!$is_active_member) {
+				wp_die('You are not an active member.', 403);
+			}
+
 			if (isset($_POST['delete_bbpost'])) {
 				if (wp_trash_post($postid)) {
 					wp_redirect(add_query_arg(array(
@@ -978,7 +1075,7 @@ EOT;
 	public static function comment_approved_email($postid, $comment) {
 		$author_id = get_post_field('post_author', $postid);
 		// If the post author and comment author are the same, don't send the email.
-		if ($author_id === $comment->user_id) {
+		if ($author_id == $comment->user_id) {
 			return false;
 		}
 		$post_title = esc_html(get_the_title($postid));
