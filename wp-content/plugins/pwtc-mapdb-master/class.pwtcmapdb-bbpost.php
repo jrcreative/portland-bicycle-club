@@ -343,11 +343,6 @@ class PwtcMapdb_BBPost {
 				wp_die('This post is not a forum post.', 403);
 			}
 
-			$status = get_post_status($postid);
-			if ($status != 'draft') {
-				wp_die('This forum post is not a draft.', 403);
-			}
-
 			$author_id = get_post_field('post_author', $postid);
 			if ($author_id != $current_user->ID) {
 				wp_die('You are not the author of this forum post.', 403);
@@ -459,6 +454,10 @@ class PwtcMapdb_BBPost {
 				wp_nonce_ays('');
 			}
 
+			if (!$is_active_member) {
+				wp_die('You are not an active member.', 403);
+			}
+
             $operation = '';
 			$postid = intval($_POST['postid']);
 			$title = trim($_POST['title']);
@@ -482,10 +481,6 @@ class PwtcMapdb_BBPost {
 				$author_id = get_post_field('post_author', $postid);
 				if ($author_id != $current_user->ID) {
 					wp_die('You are not the author of this forum post.', 403);
-				}
-
-				if (!$is_active_member) {
-					wp_die('You are not an active member.', 403);
 				}
 
 				$my_post = array(
@@ -755,10 +750,6 @@ class PwtcMapdb_BBPost {
 			$author_id = get_post_field('post_author', $postid);
 			if ($author_id != $current_user->ID) {
 				wp_die('You are not the author of this forum post.', 403);
-			}
-
-			if (!$is_active_member) {
-				wp_die('You are not an active member.', 403);
 			}
 
 			if (isset($_POST['delete_bbpost'])) {
