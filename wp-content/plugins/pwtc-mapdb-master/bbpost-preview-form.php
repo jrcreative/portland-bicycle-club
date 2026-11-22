@@ -35,7 +35,6 @@
         <form method="POST" novalidate>
             <?php wp_nonce_field('bbpost-edit-form', 'nonce_field'); ?>
             <input type="hidden" name="postid" value="<?php echo $postid; ?>"/>
-            <input type="hidden" name="post_status" value="<?php echo $status; ?>"/>
             <div class="row column">
                 <h3><?php echo $title; ?></h3>
             </div>

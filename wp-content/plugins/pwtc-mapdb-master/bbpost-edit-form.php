@@ -268,7 +268,6 @@
                 <label>Post Title
                     <input type="text" name="title" value="<?php echo esc_attr($title); ?>" <?php if ($max_title_len > 0) { ?> maxlength="<?php echo $max_title_len; ?>" <?php } ?> />
                     <input type="hidden" name="postid" value="<?php echo $postid; ?>"/>
-                    <input type="hidden" name="post_status" value="<?php echo $status; ?>"/>
                 </label>
                 <p class="help-text">Please keep your post titles short and concise.<?php if ($max_title_len > 0) { ?> You are limited to <?php echo $max_title_len; ?> characters.<?php } ?></p>
             </div>

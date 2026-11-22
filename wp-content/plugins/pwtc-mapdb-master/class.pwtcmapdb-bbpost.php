@@ -343,6 +343,11 @@ class PwtcMapdb_BBPost {
 				wp_die('This post is not a forum post.', 403);
 			}
 
+			$post_status = get_post_status($postid);
+			if ($post_status != 'pending') {
+				wp_die('This forum post is not pending.', 403);
+			}
+
 			$author_id = get_post_field('post_author', $postid);
 			if ($author_id != $current_user->ID) {
 				wp_die('You are not the author of this forum post.', 403);
@@ -350,11 +355,6 @@ class PwtcMapdb_BBPost {
 
 			if (!$is_active_member) {
 				wp_die('You are not an active member.', 403);
-			}
-
-			$post_status = '';
-			if (isset($_POST['post_status'])) {
-				$post_status = $_POST['post_status'];
 			}
 
 			$my_post = array(
@@ -461,10 +461,6 @@ class PwtcMapdb_BBPost {
             $operation = '';
 			$postid = intval($_POST['postid']);
 			$title = trim($_POST['title']);
-			$post_status = '';
-			if (isset($_POST['post_status'])) {
-				$post_status = $_POST['post_status'];
-			}
 
 			if ($postid != 0) {
 
@@ -473,8 +469,8 @@ class PwtcMapdb_BBPost {
 					wp_die('This post is not a forum post.', 403);
 				}
 
-				$status = get_post_status($postid);
-				if ($status != 'draft') {
+				$post_status = get_post_status($postid);
+				if ($post_status != 'draft' and !$is_moderator) {
 					wp_die('This forum post is not a draft.', 403);
 				}
 
@@ -743,9 +739,6 @@ class PwtcMapdb_BBPost {
 			}
 
 			$status = get_post_status($postid);
-			if ($status != 'draft' and $status != 'trash') {
-				wp_die('This forum post is not a draft or in the trash.', 403);
-			}
 
 			$author_id = get_post_field('post_author', $postid);
 			if ($author_id != $current_user->ID) {
@@ -753,6 +746,9 @@ class PwtcMapdb_BBPost {
 			}
 
 			if (isset($_POST['delete_bbpost'])) {
+				if ($status != 'draft') {
+					wp_die('This forum post is not a draft.', 403);
+				}
 				if (wp_trash_post($postid)) {
 					wp_redirect(add_query_arg(array(
 						'post' => $postid,
@@ -764,6 +760,9 @@ class PwtcMapdb_BBPost {
 				}
 			}
 			else if (isset($_POST['undo_delete'])) {
+				if ($status != 'trash') {
+					wp_die('This forum post is not in the trash.', 403);
+				}
 				if (wp_untrash_post($postid)) {
 					wp_redirect(add_query_arg(array(
 						'post' => $postid,
