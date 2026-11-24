@@ -325,7 +325,6 @@
                 <label>Route Map Title
                     <input type="text" name="title" value="<?php echo esc_attr($title); ?>"/>
                     <input type="hidden" name="postid" value="<?php echo $postid; ?>"/>
-                    <input type="hidden" name="post_status" value="<?php echo $status; ?>"/>
                 </label>
 		<p class="help-text">When naming this map, use a title that is descriptive of the route.</p>
             </div>
