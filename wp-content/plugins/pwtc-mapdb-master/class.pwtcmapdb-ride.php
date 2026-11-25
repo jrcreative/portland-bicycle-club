@@ -151,15 +151,45 @@ class PwtcMapdb_Ride {
 				wp_nonce_ays('');
 			}
 			
-			if (!$is_road_captain and !$is_ride_leader) {
-				wp_die('Authorization failed.', 403);
+			if ($is_template) {
+				if (!$is_road_captain) {
+					wp_die('Authorization failed.', 403);
+				}
+			}
+			else {
+				if (!$is_road_captain and !$is_ride_leader) {
+					wp_die('Authorization failed.', 403);
+				}
 			}
 
 			$postid = intval($_POST['postid']);
-			
-			$post_status = '';
-			if (isset($_POST['post_status'])) {
-				$post_status = $_POST['post_status'];
+
+			$type = get_post_type($postid);
+			if ($is_template) {
+				if ($type != PwtcMapdb::POST_TYPE_TEMPLATE) {
+					wp_die('This post is not a ride template.', 403);
+				}
+			}
+			else {
+				if ($type != PwtcMapdb::POST_TYPE_RIDE) {
+					wp_die('This post is not a scheduled ride.', 403);
+				}
+			}
+
+			$post_status = get_post_status($postid);
+
+			if ($post_status != 'pending' and $post_status != 'publish') {
+				wp_die('This ride is not pending or published.', 403);
+			}
+			else if ($post_status == 'publish' and !$is_road_captain) {
+				wp_die('Only road captains can revert published rides.', 403);
+			}
+
+			if (!$is_road_captain) {
+				$author_id = get_post_field('post_author', $postid);
+				if ($author_id != $current_user->ID) {
+					wp_die('You are not the author of this scheduled ride.', 403);
+				}
 			}
 
 			$my_post = array(
@@ -198,19 +228,47 @@ class PwtcMapdb_Ride {
 				wp_nonce_ays('');
 			}
 			
-			if (!$is_road_captain and !$is_ride_leader) {
-				wp_die('Authorization failed.', 403);
+			if ($is_template) {
+				if (!$is_road_captain) {
+					wp_die('Authorization failed.', 403);
+				}
+			}
+			else {
+				if (!$is_road_captain and !$is_ride_leader) {
+					wp_die('Authorization failed.', 403);
+				}
 			}
 			
 			$operation = '';
 			$postid = intval($_POST['postid']);
 			$title = trim($_POST['title']);
-			$post_status = '';
-			if (isset($_POST['post_status'])) {
-				$post_status = $_POST['post_status'];
-			}
 
 			if ($postid != 0) {
+
+				$type = get_post_type($postid);
+				if ($is_template) {
+					if ($type != PwtcMapdb::POST_TYPE_TEMPLATE) {
+						wp_die('This post is not a ride template.', 403);
+					}
+				}
+				else {
+					if ($type != PwtcMapdb::POST_TYPE_RIDE) {
+						wp_die('This post is not a scheduled ride.', 403);
+					}
+				}
+
+				$post_status = get_post_status($postid);
+				if (!$is_road_captain) {
+					if ($post_status != 'draft') {
+						wp_die('This scheduled ride is not a draft.', 403);
+					}
+
+					$author_id = get_post_field('post_author', $postid);
+					if ($author_id != $current_user->ID) {
+						wp_die('You are not the author of this scheduled ride.', 403);
+					}
+				}
+
 				$my_post = array(
 					'ID' => $postid,
 					'post_title' => $title
@@ -868,7 +926,7 @@ class PwtcMapdb_Ride {
 		if (isset($_POST['postid']) and isset($_POST['title']) and $current_user->ID != 0) {
 			if (!isset($_POST['nonce_field']) or !wp_verify_nonce($_POST['nonce_field'], 'ride-leader-edit-form')) {
 				wp_nonce_ays('');
-			}
+			}				
 			$postid = intval($_POST['postid']);
 			$title = trim($_POST['title']);
 			$my_post = array(
@@ -993,12 +1051,46 @@ class PwtcMapdb_Ride {
 				wp_nonce_ays('');
 			}
 			
-			if (!$is_road_captain and !$is_ride_leader) {
-				wp_die('Authorization failed.', 403);
+			if ($is_template) {
+				if (!$is_road_captain) {
+					wp_die('Authorization failed.', 403);
+				}
 			}
+			else {
+				if (!$is_road_captain and !$is_ride_leader) {
+					wp_die('Authorization failed.', 403);
+				}
+			}	
 			
 			$postid = intval($_POST['postid']);
+
+			$type = get_post_type($postid);
+			if ($is_template) {
+				if ($type != PwtcMapdb::POST_TYPE_TEMPLATE) {
+					wp_die('This post is not a ride template.', 403);
+				}
+			}
+			else {
+				if ($type != PwtcMapdb::POST_TYPE_RIDE) {
+					wp_die('This post is not a scheduled ride.', 403);
+				}
+			}
+
+			$status = get_post_status($postid);
+
+			if (!$is_road_captain) {
+				$author_id = get_post_field('post_author', $postid);
+				if ($author_id != $current_user->ID) {
+					wp_die('You are not the author of this scheduled ride.', 403);
+				}
+			}
+
 			if (isset($_POST['delete_ride'])) {
+				if (!$is_road_captain) {
+					if ($status != 'draft') {
+						wp_die('This scheduled ride is not a draft.', 403);
+					}
+				}
 				if (wp_trash_post($postid)) {
 					wp_redirect(add_query_arg(array(
 						'post' => $postid,
@@ -1010,6 +1102,9 @@ class PwtcMapdb_Ride {
 				}
 			}
 			else if (isset($_POST['undo_delete'])) {
+				if ($status != 'trash') {
+					wp_die('This ride is not in the trash.', 403);
+				}
 				if (wp_untrash_post($postid)) {
 					wp_redirect(add_query_arg(array(
 						'post' => $postid,

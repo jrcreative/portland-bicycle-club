@@ -17,7 +17,6 @@
     <form method="POST">
         <?php wp_nonce_field('ride-edit-form', 'nonce_field'); ?>
         <input type="hidden" name="postid" value="<?php echo $postid; ?>"/>
-        <input type="hidden" name="post_status" value="<?php echo $status; ?>"/>
         <input type="hidden" name="revert" value="draft"/>
     </form> 
 </div>

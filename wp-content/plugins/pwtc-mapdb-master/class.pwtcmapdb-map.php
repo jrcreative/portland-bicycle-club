@@ -659,6 +659,11 @@ class PwtcMapdb_Map {
 
 			$postid = intval($_POST['postid']);
 
+			$type = get_post_type($postid);
+			if ($type != PwtcMapdb::MAP_POST_TYPE) {
+				wp_die('This post is not a route map.', 403);
+			}
+
 			$status = get_post_status($postid);
 
 			if (!$is_road_captain) {
