@@ -1326,23 +1326,42 @@ class PwtcMembers {
 	// Generates the [pwtc_member_delete_membership] shortcode.
 	public static function shortcode_delete_membership($atts) {
 		$current_user = wp_get_current_user();
-		if ( 0 == $current_user->ID ) {
-			return '<div class="callout warning"><p>User not logged in.</p></div>';
-		}
+
 		if (isset($_POST['pwtc_membership_delete_membership']) and isset($_POST['userid']) and $current_user->ID != 0) {
 			if (!isset($_POST['nonce_field']) or !wp_verify_nonce($_POST['nonce_field'], 'delete-membership-form')) {
 				wp_nonce_ays('');
 			}
-			if (intval($_POST['userid']) !== $current_user->ID) {
-				wp_nonce_ays('');
+			$userid = intval($_POST['userid']);
+			if ($userid != $current_user->ID) {
+				wp_die('Authorization failed.', 403);
 			}
 			if (isset($_POST['memberid'])) {
 				$id = intval($_POST['memberid']);
+				$membership = wc_memberships()->get_user_memberships_instance()->get_user_membership($id);
+				if ($membership === null) {
+					wp_die('Membership not found.', 403);
+				}
+				else if ($membership->get_user_id() != $userid) {
+					wp_die('User does not own membership.', 403);
+				}
+				else if ($membership->is_active()) {
+					wp_die('Membership is still active.', 403);
+				}
 				wc_memberships()->get_user_memberships_instance()->delete_related_data($id);
 				wc_memberships()->get_user_memberships_instance()->deleteUserMembership($id);
 			}
 			else if (isset($_POST['teamid'])) {
 				$id = intval($_POST['teamid']);
+				$team = wc_memberships_for_teams()->get_teams_handler_instance()->get_team($id);
+				if ($team === false) {
+					wp_die('Team not found.', 403);
+				}
+				else if (!$team->is_user_owner($userid)) {
+					wp_die('User does not own team.', 403);
+				}
+				else if (!$team->is_membership_expired()) {
+					wp_die('Team is still active.', 403);
+				}
 				wc_memberships_for_teams()->get_teams_handler_instance()->maybe_delete_related_data($id);
 				wc_memberships_for_teams()->get_teams_handler_instance()->deleteTeam($id);
 			}
@@ -1350,6 +1369,11 @@ class PwtcMembers {
 			wp_redirect(get_permalink(), 303);
 			exit;
 		}
+
+		if ( 0 == $current_user->ID ) {
+			return '<div class="callout warning"><p>User not logged in.</p></div>';
+		}
+
 		if (function_exists('wc_memberships_for_teams_get_teams')) {
 			$teams = wc_memberships_for_teams_get_teams($current_user->ID);
 		}
