@@ -647,17 +647,19 @@ class PwtcMembers {
 
 	// Generates the [pwtc_member_directory] shortcode.
 	public static function shortcode_member_directory($atts) {
-		$a = shortcode_atts(array('limit' => 10, 'mode' => 'readonly', 'privacy' => 'off', 'showexpired' => 'off'), $atts);
+		$a = shortcode_atts(array('limit' => 10, 'mode' => 'readonly', 'showexpired' => 'off'), $atts);
 		$current_user = wp_get_current_user();
 		if ( 0 == $current_user->ID ) {
 			return '<div class="callout small warning"><p>Please log in to view the member directory.</p></div>';
 		}
 		else {
+			$user_info = get_userdata($current_user->ID);
+			$is_active_member = in_array('current_member', $user_info->roles);
+			if (!$is_active_member) {
+				return '<div class="callout small warning"><p>You must have an active membership to view the member directory.</p></div>';
+			}
 			$can_view_address = current_user_can(self::ACCESS_CAPABILITY);
 			$can_view_leaders = false;
-			if ($can_view_address) {
-				$a['privacy'] = 'off';
-			}
 			ob_start();
 	?>
 	<script type="text/javascript">
@@ -838,7 +840,6 @@ class PwtcMembers {
                 var action = "<?php echo admin_url('admin-ajax.php'); ?>";
 				var data = {
 					'action': 'pwtc_member_lookup',
-					'privacy': '<?php echo $a['privacy'] ?>',
 					'limit': <?php echo $a['limit'] ?>,
 					'showexpired': '<?php echo $a['showexpired'] ?>'
 				};
@@ -1572,92 +1573,93 @@ class PwtcMembers {
 			);		
 		}
 		else if (isset($_POST['limit']) and isset($_POST['showexpired'])) {
-			$exclude = false;
-			$hide = false;
-			$showexpired = false;
-			if (isset($_POST['privacy'])) {
-				if ($_POST['privacy'] == 'exclude') {
-					$exclude = true;
-				}
-				else if ($_POST['privacy'] == 'hide') {
-					$hide = true;
-				}
-			}
-			if ($_POST['showexpired'] == 'on') {
-				$showexpired = true;
-			}
-			$query_args = self::get_user_query_args($exclude, $showexpired);
-
-			$limit = intval($_POST['limit']);
-			$query_args['number'] = $limit;
-
-			$page_number = 1;
-			if (isset($_POST['page_number'])) {
-				$page_number = intval($_POST['page_number']);
-			}
-			if ($page_number == 1) {
-				$offset = 0;  
+			$user_info = get_userdata($current_user->ID);
+			$is_active_member = in_array('current_member', $user_info->roles);
+			if (!$is_active_member) {
+				$response = array(
+					'error' => 'Member fetch failed - user is not an active member.'
+				);		
 			}
 			else {
-				$offset = ($page_number-1)*$limit;
-			}
-			$query_args['offset'] = $offset;
-
-			$member_names = [];
-			$user_query = new WP_User_Query( $query_args );
-			$members = $user_query->get_results();
-			if ( !empty($members) ) {
-				foreach ( $members as $member ) {
-					$member_info = get_userdata( $member->ID );
-					if ($hide and get_field('directory_excluded', 'user_'.$member->ID)) {
-						$email = '*****';
-						$phone = '*****';
-					}
-					else {
-						if (!empty($member_info->user_email)) {
-							$email = '<a href="mailto:' . $member_info->user_email . '">' . $member_info->user_email . '</a>';
-						}
-						else {
-							$email = '';
-						}
-						if (!empty($member_info->billing_phone)) {
-							$phone = '<a href="tel:' . 
-								pwtc_members_strip_phone_number($member_info->billing_phone) . 
-								'">' . 
-								pwtc_members_format_phone_number($member_info->billing_phone) .
-								'</a>';
-						}
-						else {
-							$phone = '';
-						}
-					}
-					$has_avatar = false;
-					$avatar = get_user_meta($member->ID, 'wp_user_avatar', true);
-					if (!empty($avatar) and str_contains(print_r($avatar, true), 'avatar_url')) {
-						$has_avatar = true;
-					}
-					$member_names[] = [
-						'ID' => $member->ID,
-						'first_name' => $member_info->first_name,
-						'last_name' => $member_info->last_name,
-						'email' => $email,
-						'phone' => $phone,
-						'is_expired' => in_array('expired_member', $member_info->roles),
-						'is_ride_leader' => in_array('ride_leader', $member_info->roles),
-						'has_avatar' => $has_avatar
-					];
+				$exclude = true;
+				$hide = false;
+				$showexpired = false;
+				if ($_POST['showexpired'] == 'on') {
+					$showexpired = true;
 				}
-			}
-			
-			$total_users = $user_query->total_users;
-			$total_pages = ceil($user_query->total_users/$limit);
+				$query_args = self::get_user_query_args($exclude, $showexpired);
 
-			$response = array(
-				'members' => $member_names,
-				'total_pages' => $total_pages,
-				'page_number' => $page_number,
-				'total_users' => $total_users
-			);
+				$limit = intval($_POST['limit']);
+				$query_args['number'] = $limit;
+
+				$page_number = 1;
+				if (isset($_POST['page_number'])) {
+					$page_number = intval($_POST['page_number']);
+				}
+				if ($page_number == 1) {
+					$offset = 0;  
+				}
+				else {
+					$offset = ($page_number-1)*$limit;
+				}
+				$query_args['offset'] = $offset;
+
+				$member_names = [];
+				$user_query = new WP_User_Query( $query_args );
+				$members = $user_query->get_results();
+				if ( !empty($members) ) {
+					foreach ( $members as $member ) {
+						$member_info = get_userdata( $member->ID );
+						if ($hide and get_field('directory_excluded', 'user_'.$member->ID)) {
+							$email = '*****';
+							$phone = '*****';
+						}
+						else {
+							if (!empty($member_info->user_email)) {
+								$email = '<a href="mailto:' . $member_info->user_email . '">' . $member_info->user_email . '</a>';
+							}
+							else {
+								$email = '';
+							}
+							if (!empty($member_info->billing_phone)) {
+								$phone = '<a href="tel:' . 
+									pwtc_members_strip_phone_number($member_info->billing_phone) . 
+									'">' . 
+									pwtc_members_format_phone_number($member_info->billing_phone) .
+									'</a>';
+							}
+							else {
+								$phone = '';
+							}
+						}
+						$has_avatar = false;
+						$avatar = get_user_meta($member->ID, 'wp_user_avatar', true);
+						if (!empty($avatar) and str_contains(print_r($avatar, true), 'avatar_url')) {
+							$has_avatar = true;
+						}
+						$member_names[] = [
+							'ID' => $member->ID,
+							'first_name' => $member_info->first_name,
+							'last_name' => $member_info->last_name,
+							'email' => $email,
+							'phone' => $phone,
+							'is_expired' => in_array('expired_member', $member_info->roles),
+							'is_ride_leader' => in_array('ride_leader', $member_info->roles),
+							'has_avatar' => $has_avatar
+						];
+					}
+				}
+				
+				$total_users = $user_query->total_users;
+				$total_pages = ceil($user_query->total_users/$limit);
+
+				$response = array(
+					'members' => $member_names,
+					'total_pages' => $total_pages,
+					'page_number' => $page_number,
+					'total_users' => $total_users
+				);
+			}
 		}
 		else {
 			$response = array(
@@ -1749,29 +1751,61 @@ class PwtcMembers {
 	}
 
 	public static function member_fetch_avatar_callback() {
-		if (isset($_POST['userid']) and isset($_POST['size'])) {
-			$userid = intval($_POST['userid']);
-			$size = intval($_POST['size']);
-			$member_info = get_userdata($userid);
-			if ($member_info === false) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			$response = array(
+				'error' => 'Avatar fetch failed - user access denied.'
+			);		
+		}
+		else if (isset($_POST['userid']) and isset($_POST['size'])) {
+			$user_info = get_userdata($current_user->ID);
+			$is_active_member = in_array('current_member', $user_info->roles);
+			if (!$is_active_member) {
 				$response = array(
-					'userid' => $userid,
-					'error' => 'Address fetch failed - user ID ' . $userid . ' not valid.'
-				);
+					'error' => 'Avatar fetch failed - user is not an active member.'
+				);		
 			}
 			else {
-				$response = array(
-					'userid' => $userid,
-					'first_name' => $member_info->first_name,
-					'last_name' => $member_info->last_name,
-					'valid_member' => $valid_member
-				);
-				$response['avatar'] = get_avatar($userid, $size);
+				$userid = intval($_POST['userid']);
+				$size = intval($_POST['size']);
+				$member_info = get_userdata($userid);
+				if ($member_info === false) {
+					$response = array(
+						'userid' => $userid,
+						'error' => 'Avatar fetch failed - user ID ' . $userid . ' for member is not valid.'
+					);
+				}
+				else {
+					$is_active_member = in_array('current_member', $member_info->roles);
+					$is_expired_member = in_array('expired_member', $member_info->roles);
+					if ($is_active_member or $is_expired_member) {
+						if (get_field('directory_excluded', 'user_'.$userid)) {
+							$response = array(
+								'userid' => $userid,
+								'error' => 'Avatar fetch failed - member user ID ' . $userid . ' has requested privacy.'
+							);
+						}
+						else {
+							$response = array(
+								'userid' => $userid,
+								'first_name' => $member_info->first_name,
+								'last_name' => $member_info->last_name
+							);
+							$response['avatar'] = get_avatar($userid, $size);
+						}
+					}
+					else {
+						$response = array(
+							'userid' => $userid,
+							'error' => 'Avatar fetch failed - user ID ' . $userid . ' is not a current or expired member.'
+						);
+					}
+				}
 			}
 		}
 		else {
 			$response = array(
-				'error' => 'Address fetch failed - AJAX arguments missing.'
+				'error' => 'Avatar fetch failed - AJAX arguments missing.'
 			);		
 		}
 		echo wp_json_encode($response);
@@ -1794,52 +1828,69 @@ class PwtcMembers {
 				);
 			}
 			else {
-				$family = '';
-				if (function_exists('wc_memberships_for_teams_get_teams')) {
-					$teams = wc_memberships_for_teams_get_teams($userid);
-					if ($teams && !empty($teams)) {
-						foreach ( $teams as $team ) {
-							$family .= ' ' . $team->get_name();
-							if ($team->is_user_owner($userid)) {
-								$family .= ' (owner)';
+				$is_active_member = in_array('current_member', $member_info->roles);
+				$is_expired_member = in_array('expired_member', $member_info->roles);
+				if ($is_active_member or $is_expired_member) {
+					if (get_field('directory_excluded', 'user_'.$userid)) {
+						$response = array(
+							'userid' => $userid,
+							'error' => 'Address fetch failed - member user ID ' . $userid . ' has requested privacy.'
+						);
+					}
+					else {
+						$family = '';
+						if (function_exists('wc_memberships_for_teams_get_teams')) {
+							$teams = wc_memberships_for_teams_get_teams($userid);
+							if ($teams && !empty($teams)) {
+								foreach ( $teams as $team ) {
+									$family .= ' ' . $team->get_name();
+									if ($team->is_user_owner($userid)) {
+										$family .= ' (owner)';
+									}
+								}
 							}
 						}
-					}
-				}
-				$valid_member = false;
-				if (function_exists('wc_memberships_get_user_memberships')) {
-					$memberships = wc_memberships_get_user_memberships($userid);
-					if (!empty($memberships)) {
-						if (function_exists('pwtc_mileage_get_rider_card_info')) {
-							$valid_member = true;
+						$valid_member = false;
+						if (function_exists('wc_memberships_get_user_memberships')) {
+							$memberships = wc_memberships_get_user_memberships($userid);
+							if (!empty($memberships)) {
+								if (function_exists('pwtc_mileage_get_rider_card_info')) {
+									$valid_member = true;
+								}
+							}
+						}		
+						$riderid = get_field('rider_id', 'user_'.$userid);
+						if (!$riderid) {
+							$riderid = '';
 						}
+						$phone = get_user_meta($userid, 'billing_phone', true);
+						if (!empty($phone)) {
+							$phone = pwtc_members_format_phone_number($phone);
+						}
+						$response = array(
+							'userid' => $userid,
+							'first_name' => $member_info->first_name,
+							'last_name' => $member_info->last_name,
+							'email' => $member_info->user_email,
+							'riderid' => $riderid,
+							'street1' => get_user_meta($userid, 'billing_address_1', true),
+							'street2' => get_user_meta($userid, 'billing_address_2', true), 
+							'city' => get_user_meta($userid, 'billing_city', true), 
+							'state' => get_user_meta($userid, 'billing_state', true), 
+							'country' => get_user_meta($userid, 'billing_country', true), 
+							'zipcode' => get_user_meta($userid, 'billing_postcode', true), 
+							'phone' => $phone,
+							'family' => $family,
+							'valid_member' => $valid_member
+						);
 					}
-				}		
-				$riderid = get_field('rider_id', 'user_'.$userid);
-				if (!$riderid) {
-					$riderid = '';
 				}
-				$phone = get_user_meta($userid, 'billing_phone', true);
-				if (!empty($phone)) {
-					$phone = pwtc_members_format_phone_number($phone);
+				else {
+					$response = array(
+						'userid' => $userid,
+						'error' => 'Address fetch failed - user ID ' . $userid . ' is not a current or expired member.'
+					);
 				}
-				$response = array(
-					'userid' => $userid,
-					'first_name' => $member_info->first_name,
-					'last_name' => $member_info->last_name,
-					'email' => $member_info->user_email,
-					'riderid' => $riderid,
-					'street1' => get_user_meta($userid, 'billing_address_1', true),
-					'street2' => get_user_meta($userid, 'billing_address_2', true), 
-					'city' => get_user_meta($userid, 'billing_city', true), 
-					'state' => get_user_meta($userid, 'billing_state', true), 
-					'country' => get_user_meta($userid, 'billing_country', true), 
-					'zipcode' => get_user_meta($userid, 'billing_postcode', true), 
-					'phone' => $phone,
-					'family' => $family,
-					'valid_member' => $valid_member
-				);
-				//$response['avatar'] = get_avatar($userid, 128);
 			}
 		}
 		else {
